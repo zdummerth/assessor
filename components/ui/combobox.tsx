@@ -7,8 +7,8 @@ import {
   ComboboxOptions,
 } from "@headlessui/react";
 import { useState } from "react";
+import { Search as SearchIcon } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { get } from "http";
 
 type Value = {
   id: number;
@@ -79,11 +79,15 @@ export default function ComboboxComponent({
       onChange={handleFilterChange}
       onClose={() => setQuery("")}
     >
-      <ComboboxInput
-        aria-label="Assignees"
-        onChange={(event) => setQuery(event.target.value)}
-        value={query}
-      />
+      <div className="flex items-center">
+        <SearchIcon size="16" strokeWidth={2} />
+        <ComboboxInput
+          aria-label="Assignees"
+          onChange={(event) => setQuery(event.target.value)}
+          value={query}
+          className="bg-gray-200 dark:bg-gray-800"
+        />
+      </div>
       {selectedValues.length > 0 && (
         <ul className="flex flex-wrap gap-2 mt-4 w-[var(--input-width)] overflow-hidden">
           {selectedValues.map((value: Value) => (
@@ -106,7 +110,7 @@ export default function ComboboxComponent({
       )}
       <ComboboxOptions
         anchor="top"
-        className="border empty:invisible w-[var(--input-width)] bg-accent text-foreground"
+        className="border empty:invisible w-[var(--input-width)] max-h-[250px] bg-accent text-foreground"
       >
         {filteredValues.map((value) => (
           <ComboboxOption
@@ -118,7 +122,7 @@ export default function ComboboxComponent({
           </ComboboxOption>
         ))}
       </ComboboxOptions>
-      <button onClick={clearFilters}>Clear Filters</button>
+      {/* <button onClick={clearFilters}>Clear Filters</button> */}
     </Combobox>
   );
 }

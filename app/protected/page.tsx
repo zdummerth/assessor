@@ -1,29 +1,50 @@
-import FetchDataSteps from "@/components/tutorial/fetch-data-steps";
 import { createClient } from "@/utils/supabase/server";
-import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
-import { getAssessmentStats, getCodes } from "@/lib/data";
-import FiltersForm from "@/components/ui/filters";
+import { getCodes, getFilteredStats } from "@/lib/data";
 import ComboboxComponent from "@/components/ui/combobox";
-import Autocomplete from "@/components/ui/autocomplete";
+import AssessedReport from "@/components/ui/assessed-report";
 
-const values = [
-  { id: 1, name: "Durward Reynolds" },
-  { id: 2, name: "Kenton Towne" },
-  { id: 3, name: "Therese Wunsch" },
-  { id: 4, name: "Benedict Kessler" },
-  { id: 5, name: "Katelyn Rohan" },
-];
-
-export default async function ProtectedPage() {
-  // const supabase = createClient();
+export default async function ProtectedPage({
+  searchParams,
+}: {
+  searchParams?: {
+    landuse?: string;
+    cda?: string;
+    tif?: string;
+  };
+}) {
+  const formattedSearchParams = Object.fromEntries(
+    Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [
+      key,
+      value.split("+"),
+    ])
+  );
 
   const landUseCodes = await getCodes("land_use_codes");
+  const cdaCodes = await getCodes("cda_codes");
+  const tifCodes = await getCodes("tif_disticts");
 
   const landUseValues = landUseCodes.map((code) => ({
     id: code.code,
     name: `${code.code} - ${code.name}`,
   }));
+
+  const cdaValues = cdaCodes.map((code) => ({
+    id: code.code,
+    name: `${code.code} - ${code.name}`,
+  }));
+
+  const tifValues = tifCodes.map((code) => ({
+    id: code.code,
+    name: `${code.code} - ${code.name}`,
+  }));
+
+  const stats = await getFilteredStats(formattedSearchParams);
+  if (!stats) {
+    return <div>Failed to fetch data</div>;
+  }
+
+  // const supabase = createClient();
 
   // const {
   //   data: { user },
@@ -33,62 +54,51 @@ export default async function ProtectedPage() {
   //   return redirect("/sign-in");
   // }
 
-  // const [stats] = await getAssessmentStats({
-  //   isabatedproperty: true,
-  //   zip: "63116",
-  // });
-
-  // if (!stats) {
-  //   return <div>Failed to fetch data</div>;
-  // }
-
-  // console.log("stats from server", stats);
-
-  // List of metrics to display
-  // const metrics = [
-  //   { label: "Total Assessed", value: stats.total_asdtotal.toLocaleString() },
-  //   { label: "Max Assessed", value: stats.max_asdtotal.toLocaleString() },
-  //   {
-  //     label: "Average Assessed",
-  //     value: Math.round(stats.avg_asdtotal).toLocaleString(),
-  //   },
-  //   { label: "Median Assessed", value: stats.median_asdtotal.toLocaleString() },
-  //   { label: "Number of Parcels", value: stats.count_asdtotal },
-  // ];
-
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
-      <div className="w-full">
-        <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
-          <InfoIcon size="16" strokeWidth={2} />
-          This is a protected page that you can only see as an authenticated
-          user
-        </div>
-      </div>
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-3 w-full pr-2 border-r border-forground overflow-x-hidden">
-          {/* <FiltersForm /> */}
+      <div className="w-full flex gap-4">
+        <div className="w-[500px] pr-2 border-r border-forground overflow-x-hidden">
           <div className="border-b border-foreground py-8">
-            <h4 className="mb-4">Land Use</h4>
+            <h4 className="mb-4">Occupancy</h4>
             <ComboboxComponent values={landUseValues} urlParam="landuse" />
           </div>
-          {/* <ComboboxComponent values={values} urlParam="user" /> */}
-          {/* <Autocomplete /> */}
-        </div>
-        {/* <div className="col-span-9">
-          <h2 className="font-bold text-2xl mb-4">Statistics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {metrics.map((metric) => (
-              <div
-                key={metric.label}
-                className="p-4 rounded-lg shadow-foreground shadow-sm flex flex-col items-center justify-center"
-              >
-                <h3 className="text-lg font-semibold mb-2">{metric.label}</h3>
-                <p className="text-2xl font-bold">{metric.value ?? "N/A"}</p>
-              </div>
-            ))}
+          <div className="border-b border-foreground py-8">
+            <h4 className="mb-4">CDA Neighborhood</h4>
+            <ComboboxComponent values={cdaValues} urlParam="cda" />
           </div>
-        </div> */}
+          <div className="border-b border-foreground pb-4">
+            <h2 className="font-bold text-2xl mb-4">Filter Instructions</h2>
+            <ul className="list-disc list-inside mt-4">
+              <li>
+                To select a filter, search for the desired value in the search
+                bar.
+              </li>
+              <li>Selected filters will be displayed in blue.</li>
+              <li>To remove a filter, click the blue selected filter.</li>
+              <li>
+                Ex. If 1110 and 1120 are selected for occupancy and Shaw is
+                selected for neighborhood, it will return stats for parcels that
+                are either 1120 or 1130 in Shaw.
+              </li>
+              <li>
+                Ex. If 1110 and 1120 are selected for occupancy and Shaw and
+                Boulevard Heights are selected for neighborhood, it will return
+                stats for parcels that are either 1110 or 1120 in Shaw or
+                Boulevard Heights.
+              </li>
+              <li>If no filters are selected, all parcels will be returned.</li>
+              {/* <li>TIF District</li> */}
+            </ul>
+          </div>
+          {/* <div className="border-b border-foreground py-8">
+            <h4 className="mb-4">TIF District</h4>
+            <ComboboxComponent values={tifValues} urlParam="tif" />
+          </div> */}
+        </div>
+        <div className="w-full">
+          <h2 className="font-bold text-2xl mb-4">Statistics</h2>
+          <AssessedReport stats={stats[0]} />
+        </div>
       </div>
     </div>
   );

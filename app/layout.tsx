@@ -14,7 +14,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Internal Application",
+  title: "Assessor",
   description: "Website to display property data",
 };
 
@@ -42,7 +42,7 @@ export default function RootLayout({
                   {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                 </div>
               </nav>
-              <div className="flex flex-col gap-20 max-w-7xl p-5">
+              <div className="flex flex-col gap-20 w-full max-w-7xl p-5">
                 {children}
               </div>
 

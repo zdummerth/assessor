@@ -101,7 +101,57 @@ export async function getAssessmentStats(filters: Filters = {}) {
   }
 
   // Make the RPC call with the dynamic parameters
+  //   const { data, error } = await supabase.rpc("get_asdtotal_statistics", params);
   const { data, error } = await supabase.rpc("get_asdtotal_statistics", params);
+
+  if (error) {
+    return Promise.reject(error);
+  }
+
+  return data;
+}
+
+type UpdatedFilters = {
+  landuse?: string[];
+  cda?: string[];
+  tif?: string[];
+};
+
+// export async function getFilteredStats(filters: UpdatedFilters = {}) {
+//   const supabase = createClient();
+
+//   // Make the RPC call with the dynamic parameters
+//   const { data, error } = await supabase.rpc(
+//     "get_filtered_stats",
+//     JSON.stringify(filters)
+//   );
+
+//   if (error) {
+//     return Promise.reject(error);
+//   }
+
+//   return data;
+// }
+
+export async function getFilteredStats(filters: UpdatedFilters = {}) {
+  const supabase = createClient();
+
+  let query = supabase
+    .from("parcels")
+    .select("asdtotal.max(), asdtotal.avg(), asdtotal.sum(), asdtotal.count()");
+
+  if (filters.landuse) {
+    query = query.in("asrlanduse1", filters.landuse);
+  }
+  if (filters.cda) {
+    query = query.in("nbrhd", filters.cda);
+  }
+  if (filters.tif) {
+    query = query.in("tifdist", filters.tif);
+  }
+
+  // Make the RPC call with the dynamic parameters
+  const { data, error } = await query;
 
   if (error) {
     return Promise.reject(error);
@@ -121,22 +171,6 @@ export async function getCodes(code: string) {
 
   // Make the RPC call with the dynamic parameters
   const { data, error } = await supabase.from(code).select("*");
-
-  if (error) {
-    return Promise.reject(error);
-  }
-
-  return data;
-}
-
-export async function getDistinctValues(column: string) {
-  const supabase = createClient();
-
-  // Make the RPC call with the dynamic parameters
-  const { data, error } = await supabase.rpc("get_distinct_values", {
-    p_table_name: "parcels",
-    p_column_name: column,
-  });
 
   if (error) {
     return Promise.reject(error);
