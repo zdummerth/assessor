@@ -29,11 +29,7 @@ export default function ComboboxComponent({
 
   function handleFilterChange(values: Value[]) {
     const params = new URLSearchParams(searchParams);
-    console.log("values", values);
     const ids = values.map((value) => value.id);
-    console.log("ids", ids);
-    const joined = ids.join("+");
-    console.log("joined", joined);
 
     if (values.length > 0) {
       params.set(urlParam, ids.join("+")); // Join multiple values with a "+"
@@ -55,7 +51,6 @@ export default function ComboboxComponent({
   }
 
   const selectedValues = getSelectedValues(urlParam);
-  console.log("selectedValues", selectedValues);
 
   const clearFilters = () => {
     const params = new URLSearchParams(searchParams);
@@ -84,11 +79,18 @@ export default function ComboboxComponent({
       onChange={handleFilterChange}
       onClose={() => setQuery("")}
     >
+      <ComboboxInput
+        aria-label="Assignees"
+        onChange={(event) => setQuery(event.target.value)}
+        value={query}
+      />
       {selectedValues.length > 0 && (
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-2 mt-4 w-[var(--input-width)] overflow-hidden">
           {selectedValues.map((value: Value) => (
-            <li className="rounded bg-blue-200 p-2" key={value.id}>
-              <span className="mr-2">{value.name}</span>
+            <li
+              className="rounded-full bg-blue-400 py-[1px] px-2 text-sm truncate hover:overflow-visible hover:whitespace-normal"
+              key={value.id}
+            >
               <button
                 onClick={() => {
                   handleFilterChange(
@@ -96,23 +98,21 @@ export default function ComboboxComponent({
                   );
                 }}
               >
-                X
+                {value.name}
               </button>
             </li>
           ))}
         </ul>
       )}
-      <ComboboxInput
-        aria-label="Assignees"
-        onChange={(event) => setQuery(event.target.value)}
-        value={query}
-      />
-      <ComboboxOptions anchor="bottom" className="border empty:invisible">
+      <ComboboxOptions
+        anchor="top"
+        className="border empty:invisible w-[var(--input-width)] bg-accent text-foreground"
+      >
         {filteredValues.map((value) => (
           <ComboboxOption
             key={value.id}
             value={value}
-            className="data-[focus]:bg-blue-100"
+            className="data-[focus]:bg-blue-500 border-b border-foreground py-2 px-4"
           >
             {value.name}
           </ComboboxOption>

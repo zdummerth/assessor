@@ -2,7 +2,7 @@ import FetchDataSteps from "@/components/tutorial/fetch-data-steps";
 import { createClient } from "@/utils/supabase/server";
 import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
-import { getAssessmentStats } from "@/lib/data";
+import { getAssessmentStats, getCodes } from "@/lib/data";
 import FiltersForm from "@/components/ui/filters";
 import ComboboxComponent from "@/components/ui/combobox";
 import Autocomplete from "@/components/ui/autocomplete";
@@ -17,6 +17,13 @@ const values = [
 
 export default async function ProtectedPage() {
   // const supabase = createClient();
+
+  const landUseCodes = await getCodes("land_use_codes");
+
+  const landUseValues = landUseCodes.map((code) => ({
+    id: code.code,
+    name: `${code.code} - ${code.name}`,
+  }));
 
   // const {
   //   data: { user },
@@ -59,9 +66,13 @@ export default async function ProtectedPage() {
         </div>
       </div>
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-3">
+        <div className="col-span-3 w-full pr-2 border-r border-forground overflow-x-hidden">
           {/* <FiltersForm /> */}
-          <ComboboxComponent values={values} urlParam="person" />
+          <div className="border-b border-foreground py-8">
+            <h4 className="mb-4">Land Use</h4>
+            <ComboboxComponent values={landUseValues} urlParam="landuse" />
+          </div>
+          {/* <ComboboxComponent values={values} urlParam="user" /> */}
           {/* <Autocomplete /> */}
         </div>
         {/* <div className="col-span-9">

@@ -110,6 +110,25 @@ export async function getAssessmentStats(filters: Filters = {}) {
   return data;
 }
 
+export async function getCodes(code: string) {
+  const possibleCodes = ["land_use_codes", "cda_codes", "tif_disticts"];
+
+  if (!possibleCodes.includes(code)) {
+    return Promise.reject("Invalid code");
+  }
+
+  const supabase = createClient();
+
+  // Make the RPC call with the dynamic parameters
+  const { data, error } = await supabase.from(code).select("*");
+
+  if (error) {
+    return Promise.reject(error);
+  }
+
+  return data;
+}
+
 export async function getDistinctValues(column: string) {
   const supabase = createClient();
 
