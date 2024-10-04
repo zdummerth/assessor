@@ -97,7 +97,7 @@ export default async function ProtectedPage({
         </div>
         <div className="w-full">
           <h2 className="font-bold text-2xl mb-4">Statistics</h2>
-          <AssessedReport stats={stats[0]} />
+          {/* <AssessedReport stats={stats[0]} /> */}
         </div>
       </div>
     </div>
