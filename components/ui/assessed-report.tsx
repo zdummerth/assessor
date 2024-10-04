@@ -1,12 +1,4 @@
-import { count } from "console";
-
-type Parcels = {
-  asrparcelid: number;
-  lowaddrnum: number;
-  stname: string;
-  zip: number;
-  asdtotal: number;
-};
+import { getFilteredStats, UpdatedFilters } from "@/lib/data";
 
 type Stats = {
   max: number;
@@ -15,7 +7,19 @@ type Stats = {
   count: number;
 };
 
-export default function AssessedReport({ stats }: { stats: Stats }) {
+export default async function AssessedReport({
+  filters,
+}: {
+  filters: UpdatedFilters;
+}) {
+  const selectString =
+    "asdtotal.max(), asdtotal.avg(), asdtotal.sum(), asdtotal.count()";
+  const statsArray: Stats[] = await getFilteredStats(filters);
+
+  if (!statsArray) {
+    return <div>Failed to fetch data</div>;
+  }
+  const stats = statsArray[0];
   const max = stats.max ? stats.max.toLocaleString() : 0;
   const avg = stats.avg ? Math.round(stats.avg).toLocaleString() : 0;
   const count = stats.count ? stats.count.toLocaleString() : 0;

@@ -73,7 +73,7 @@ export default function ComboboxComponent({
   return (
     <Combobox
       multiple
-      immediate
+      //   immediate
       value={selectedValues}
       // @ts-ignore
       onChange={handleFilterChange}

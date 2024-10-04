@@ -111,7 +111,7 @@ export async function getAssessmentStats(filters: Filters = {}) {
   return data;
 }
 
-type UpdatedFilters = {
+export type UpdatedFilters = {
   landuse?: string[];
   cda?: string[];
   tif?: string[];
@@ -133,7 +133,10 @@ type UpdatedFilters = {
 //   return data;
 // }
 
-export async function getFilteredStats(filters: UpdatedFilters = {}) {
+export async function getFilteredStats(
+  filters: UpdatedFilters = {},
+  selectString?: string
+) {
   const supabase = createClient();
 
   let query = supabase

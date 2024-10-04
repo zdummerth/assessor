@@ -1,6 +1,6 @@
-import { getCodes, getFilteredStats } from "@/lib/data";
-import ComboboxComponent from "@/components/ui/combobox";
 import AssessedReport from "@/components/ui/assessed-report";
+import Filter from "@/components/ui/filter";
+import { Suspense } from "react";
 
 export default async function ProtectedPage({
   searchParams,
@@ -18,41 +18,19 @@ export default async function ProtectedPage({
     ])
   );
 
-  const landUseCodes = await getCodes("land_use_codes");
-  const cdaCodes = await getCodes("cda_codes");
-  const tifCodes = await getCodes("tif_disticts");
-
-  const landUseValues = landUseCodes.map((code) => ({
-    id: code.code,
-    name: `${code.code} - ${code.name}`,
-  }));
-
-  const cdaValues = cdaCodes.map((code) => ({
-    id: code.code,
-    name: `${code.code} - ${code.name}`,
-  }));
-
-  const tifValues = tifCodes.map((code) => ({
-    id: code.code,
-    name: `${code.code} - ${code.name}`,
-  }));
-
-  const stats = await getFilteredStats(formattedSearchParams);
-  if (!stats) {
-    return <div>Failed to fetch data</div>;
-  }
-
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <div className="w-full flex gap-4">
         <div className="w-[500px] pr-2 border-r border-forground overflow-x-hidden">
           <div className="border-b border-foreground py-8">
-            <h4 className="mb-4">Occupancy</h4>
-            <ComboboxComponent values={landUseValues} urlParam="landuse" />
+            <Suspense fallback={<div>loading filter...</div>}>
+              <Filter label="Occupancy" urlParam="landuse" />
+            </Suspense>
           </div>
           <div className="border-b border-foreground py-8">
-            <h4 className="mb-4">CDA Neighborhood</h4>
-            <ComboboxComponent values={cdaValues} urlParam="cda" />
+            <Suspense fallback={<div>loading filter...</div>}>
+              <Filter label="Neighborhood" urlParam="cda" />
+            </Suspense>
           </div>
           <div className="border-b border-foreground pb-4">
             <h2 className="font-bold text-2xl mb-4">Filter Instructions</h2>
@@ -80,7 +58,9 @@ export default async function ProtectedPage({
         </div>
         <div className="w-full">
           <h2 className="font-bold text-2xl mb-4">Statistics</h2>
-          <AssessedReport stats={stats[0]} />
+          <Suspense fallback={<div>loading stats...</div>}>
+            <AssessedReport filters={formattedSearchParams} />
+          </Suspense>
         </div>
       </div>
     </div>
