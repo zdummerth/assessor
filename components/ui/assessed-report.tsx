@@ -12,8 +12,6 @@ export default async function AssessedReport({
 }: {
   filters: UpdatedFilters;
 }) {
-  const selectString =
-    "asdtotal.max(), asdtotal.avg(), asdtotal.sum(), asdtotal.count()";
   const statsArray: Stats[] = await getFilteredStats(filters);
 
   if (!statsArray) {
