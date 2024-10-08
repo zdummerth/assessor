@@ -1,7 +1,6 @@
 import AssessedReport from "@/components/ui/assessed-report";
 import Filter from "@/components/ui/filter";
 import { Suspense } from "react";
-import { CondoReportCard } from "@/components/ui/report-cards";
 
 export default async function ProtectedPage({
   searchParams,
@@ -61,7 +60,6 @@ export default async function ProtectedPage({
           <h2 className="font-bold text-2xl mb-4">Statistics</h2>
           <Suspense fallback={<div>loading stats...</div>}>
             <AssessedReport filters={formattedSearchParams} />
-            <CondoReportCard filters={formattedSearchParams} />
           </Suspense>
         </div>
       </div>
