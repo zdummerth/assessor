@@ -110,14 +110,7 @@ export async function getFilteredStats(filters: UpdatedFilters = {}) {
   return data;
 }
 
-export async function getFilteredData(
-  filters: UpdatedFilters = {},
-  selectString: string
-) {
-  const supabase = createClient();
-
-  let query = supabase.from("parcels").select(selectString);
-
+const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
   if (filters.landuse) {
     query = query.in("asrlanduse1", filters.landuse);
   }
@@ -154,8 +147,19 @@ export async function getFilteredData(
     query = query.or("aprresland.gt.0, aprresimprove.gt.0");
   }
 
+  return query;
+};
+
+export async function getFilteredData(
+  filters: UpdatedFilters = {},
+  selectString: string
+) {
+  const supabase = createClient();
+
+  let query = supabase.from("parcels").select(selectString);
+
   // Make the RPC call with the dynamic parameters
-  const { data, error } = await query;
+  const { data, error } = await applyFiltersToQuery(query, filters);
 
   return { data, error };
 }
