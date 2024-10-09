@@ -1,8 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { getCodes, getFilteredStats } from "@/lib/data";
+import { getCodes } from "@/lib/data";
 import ComboboxComponent from "@/components/ui/combobox";
-import AssessedReport from "@/components/ui/assessed-report";
 
 export default async function ProtectedPage({
   searchParams,
@@ -39,11 +38,6 @@ export default async function ProtectedPage({
     name: `${code.code} - ${code.name}`,
   }));
 
-  const stats = await getFilteredStats(formattedSearchParams);
-  if (!stats) {
-    return <div>Failed to fetch data</div>;
-  }
-
   // const supabase = createClient();
 
   // const {
@@ -60,11 +54,11 @@ export default async function ProtectedPage({
         <div className="w-[500px] pr-2 border-r border-forground overflow-x-hidden">
           <div className="border-b border-foreground py-8">
             <h4 className="mb-4">Occupancy</h4>
-            <ComboboxComponent values={landUseValues} urlParam="landuse" />
+            {/* <ComboboxComponent values={landUseValues} urlParam="landuse" /> */}
           </div>
           <div className="border-b border-foreground py-8">
-            <h4 className="mb-4">CDA Neighborhood</h4>
-            <ComboboxComponent values={cdaValues} urlParam="cda" />
+            {/* <h4 className="mb-4">CDA Neighborhood</h4> */}
+            {/* <ComboboxComponent values={cdaValues} urlParam="cda" /> */}
           </div>
           <div className="border-b border-foreground pb-4">
             <h2 className="font-bold text-2xl mb-4">Filter Instructions</h2>

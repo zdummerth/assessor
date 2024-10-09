@@ -39,6 +39,7 @@ export default function RootLayout({
                   <div className="flex gap-5 items-center font-semibold">
                     <Link href={"/"}>Assessor's Office</Link>
                     <Link href={"/breakdown"}>Breakdowns</Link>
+                    <Link href={"/parcels"}>Parcels</Link>
                   </div>
                   {/* {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />} */}
                 </div>

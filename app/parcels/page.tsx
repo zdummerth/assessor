@@ -1,6 +1,8 @@
-import { ValueCard } from "@/components/ui/report-cards";
 import Filter from "@/components/ui/filter";
 import { Suspense } from "react";
+import ParcelsTable from "@/components/ui/parcels-table";
+import Pagination from "@/components/ui/pagination";
+import { getPagesCount } from "@/lib/data";
 
 export default async function ProtectedPage({
   searchParams,
@@ -9,6 +11,7 @@ export default async function ProtectedPage({
     landuse?: string;
     cda?: string;
     tif?: string;
+    page?: string;
   };
 }) {
   const formattedSearchParams = Object.fromEntries(
@@ -17,6 +20,10 @@ export default async function ProtectedPage({
       value.split("+"),
     ])
   );
+
+  const currentPage = Number(searchParams?.page) || 1;
+
+  const totalPages = await getPagesCount(formattedSearchParams);
 
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
@@ -57,9 +64,16 @@ export default async function ProtectedPage({
           </div>
         </div>
         <div className="w-full">
-          <Suspense fallback={<div>loading stats...</div>}>
-            <ValueCard filters={formattedSearchParams} />
+          <h2 className="font-bold text-2xl mb-4">Parcels</h2>
+          <Suspense fallback={<div>loading parcels...</div>}>
+            <ParcelsTable
+              filters={formattedSearchParams}
+              currentPage={currentPage}
+            />
           </Suspense>
+          <div className="mt-5 flex w-full justify-center">
+            <Pagination totalPages={totalPages} />
+          </div>
         </div>
       </div>
     </div>

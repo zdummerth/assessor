@@ -1,5 +1,67 @@
 import { getFilteredData, UpdatedFilters } from "@/lib/data";
 
+export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
+  const { data, error }: any = await getFilteredData(
+    filters,
+    `count:asrparcelid.count(), 
+    res_land_value:aprresland.sum(), 
+    res_improvement_value:aprresimprove.sum(),
+    com_land_value:aprcomland.sum(),
+    com_improvement_value:aprcomimprove.sum(),
+    total_asd_value:asdtotal.sum()
+    `
+  );
+
+  if (!data) {
+    console.log(error);
+    return <div>Failed to fetch data</div>;
+  }
+  return (
+    <div className="p-4 rounded-lg shadow-foreground shadow-sm">
+      <div className="flex flex-wrap gap-8">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Number of Parcels</h3>
+          <p className="text-2xl font-bold">{data[0].count.toLocaleString()}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Residential Land Value</h3>
+          <p className="text-2xl font-bold">
+            ${data[0].res_land_value.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">
+            Residential Improvement Value
+          </h3>
+          <p className="text-2xl font-bold">
+            ${data[0].res_improvement_value.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Commercial Land Value</h3>
+          <p className="text-2xl font-bold">
+            ${data[0].com_land_value.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">
+            Commercial Improvement Value
+          </h3>
+          <p className="text-2xl font-bold">
+            ${data[0].com_improvement_value.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Total Assessed Value</h3>
+          <p className="text-2xl font-bold">
+            ${data[0].total_asd_value.toLocaleString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export async function CondoReportCard({
   filters,
 }: {
