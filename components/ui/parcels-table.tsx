@@ -9,7 +9,7 @@ export default async function ParcelsTable({
 }) {
   const { data, error } = await getFilteredData(
     filters,
-    "asrparcelid, lowaddrnum, stname, zip",
+    "asrparcelid, lowaddrnum, stname, zip, asdtotal",
     currentPage
   );
 
@@ -40,10 +40,6 @@ export default async function ParcelsTable({
                   <div>
                     <p className="text-xl font-medium">{parcel.zip}</p>
                   </div>
-                  <div className="flex justify-end gap-2">
-                    {/* <UpdateInvoice id={parcel.id} /> */}
-                    {/* <DeleteInvoice id={parcel.id} /> */}
-                  </div>
                 </div>
               </div>
             ))}
@@ -62,6 +58,9 @@ export default async function ParcelsTable({
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Zip
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Assessed
                 </th>
               </tr>
             </thead>
@@ -83,6 +82,9 @@ export default async function ParcelsTable({
                     {parcel.stname}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">{parcel.zip}</td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {parcel.asdtotal}
+                  </td>
                 </tr>
               ))}
             </tbody>

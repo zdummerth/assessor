@@ -69,6 +69,9 @@ export type UpdatedFilters = {
   isCommercial?: boolean;
   isResidential?: boolean;
   isMixedUse?: boolean;
+  isExempt?: boolean;
+  isTif?: string[];
+  isAbated?: string[];
 };
 
 const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
@@ -87,9 +90,6 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
   if (filters.isCondominium) {
     query = query.eq("condominium", filters.isCondominium);
   }
-  if (filters.isAbatedProperty) {
-    query = query.eq("isabatedproperty", filters.isAbatedProperty);
-  }
   if (filters.isVacantLot) {
     query = query.eq("vacantlot", filters.isVacantLot);
   }
@@ -103,15 +103,25 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
     query = query.eq("aprcomland", 0);
     query = query.eq("aprcomimprove", 0);
   }
+  if (filters.isExempt) {
+    query = query.or("aprexemptland.gt.0, aprexemptimprove.gt.0");
+  }
   if (filters.isMixedUse) {
     query = query.or("aprcomland.gt.0, aprcomimprove.gt.0");
     query = query.or("aprresland.gt.0, aprresimprove.gt.0");
+    query = query.or("apragrland.gt.0, apragrimprove.gt.0");
+  }
+  if (filters.isTif ? filters.isTif[0] === "true" : false) {
+    query = query.neq("tifdist", 0);
+  }
+  if (filters.isAbated ? filters.isAbated[0] === "true" : false) {
+    query = query.eq("isabatedproperty", 1);
   }
 
   return query;
 };
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 7;
 export async function getFilteredData(
   filters: UpdatedFilters = {},
   selectString: string,

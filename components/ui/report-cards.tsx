@@ -8,6 +8,8 @@ export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
     res_improvement_value:aprresimprove.sum(),
     com_land_value:aprcomland.sum(),
     com_improvement_value:aprcomimprove.sum(),
+    exempt_land_value:aprexemptland.sum(),
+    exempt_improvement_value:aprexemptimprove.sum(),
     total_asd_value:asdtotal.sum()
     `
   );
@@ -16,6 +18,14 @@ export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
     console.log(error);
     return <div>Failed to fetch data</div>;
   }
+
+  // replace null values with 0
+  for (const key of Object.keys(data[0])) {
+    if (data[0][key] === null) {
+      data[0][key] = 0;
+    }
+  }
+
   return (
     <div className="p-4 rounded-lg shadow-foreground shadow-sm">
       <div className="flex flex-wrap gap-8">
@@ -49,6 +59,20 @@ export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
           </h3>
           <p className="text-2xl font-bold">
             ${data[0].com_improvement_value.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Exempt Land Value</h3>
+          <p className="text-2xl font-bold">
+            ${data[0].exempt_land_value.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">
+            Exempt Improvement Value
+          </h3>
+          <p className="text-2xl font-bold">
+            ${data[0].exempt_improvement_value.toLocaleString()}
           </p>
         </div>
         <div>
@@ -205,6 +229,61 @@ export async function ResidentialReportCard({
   const newFilters = {
     ...filters,
     isResidential: true,
+  };
+
+  const { data, error }: any = await getFilteredData(
+    newFilters,
+    `count:asrparcelid.count(), 
+    res_land_value:aprresland.sum(),
+    res_improvement_value:aprresimprove.sum(),
+    total_asd_value:asdtotal.sum()
+    `
+  );
+
+  if (!data) {
+    console.log(error);
+    return <div>Failed to fetch data</div>;
+  }
+
+  return (
+    <div className="p-4 rounded-lg shadow-foreground shadow-sm">
+      <h4 className="text-3xl">Residential</h4>
+      <div className="flex flex-wrap gap-8">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Number of Parcels</h3>
+          <p className="text-2xl font-bold">{data[0].count.toLocaleString()}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Land Value</h3>
+          <p className="text-2xl font-bold">
+            ${data[0].res_land_value.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Improvement Value</h3>
+          <p className="text-2xl font-bold">
+            ${data[0].res_improvement_value.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Total Assessed Value</h3>
+          <p className="text-2xl font-bold">
+            ${data[0].total_asd_value.toLocaleString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export async function MixedUseReportCard({
+  filters,
+}: {
+  filters: UpdatedFilters;
+}) {
+  const newFilters = {
+    ...filters,
+    isMixedUse: true,
   };
 
   const { data, error }: any = await getFilteredData(

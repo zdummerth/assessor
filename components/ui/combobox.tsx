@@ -79,13 +79,13 @@ export default function ComboboxComponent({
       onChange={handleFilterChange}
       onClose={() => setQuery("")}
     >
-      <div className="flex items-center">
-        <SearchIcon size="16" strokeWidth={2} />
+      <div className="flex items-center relative">
+        <SearchIcon size="16" strokeWidth={2} className="absolute left-2" />
         <ComboboxInput
           aria-label="Assignees"
           onChange={(event) => setQuery(event.target.value)}
           value={query}
-          className="bg-gray-200 dark:bg-gray-800"
+          className="p-2 pl-7 rounded-md border border-foreground w-full bg-inderit text-inherit"
         />
       </div>
       {selectedValues.length > 0 && (

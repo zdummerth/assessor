@@ -1,6 +1,8 @@
 import { ValueCard } from "@/components/ui/report-cards";
 import Filter from "@/components/ui/filter";
+import { BooleanFilter, NonCodedFilter } from "@/components/ui/filter-client";
 import { Suspense } from "react";
+import Link from "next/link";
 
 export default async function ProtectedPage({
   searchParams,
@@ -9,6 +11,8 @@ export default async function ProtectedPage({
     landuse?: string;
     cda?: string;
     tif?: string;
+    isTif?: string;
+    isAbated?: string;
   };
 }) {
   const formattedSearchParams = Object.fromEntries(
@@ -18,10 +22,18 @@ export default async function ProtectedPage({
     ])
   );
 
+  const generateValues = (start: number, end: number) => {
+    const values = [];
+    for (let i = start; i <= end; i++) {
+      values.push({ id: i, name: i.toString() });
+    }
+    return values;
+  };
+
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <div className="w-full flex gap-4">
-        <div className="w-[500px] pr-2 border-r border-forground overflow-x-hidden">
+        <div className="w-[500px] pr-2 border-r border-foreground overflow-x-hidden max-h-[500px] overflow-y-auto">
           <div className="border-b border-foreground py-8">
             <Suspense fallback={<div>loading filter...</div>}>
               <Filter label="Occupancy" urlParam="landuse" />
@@ -32,31 +44,39 @@ export default async function ProtectedPage({
               <Filter label="Neighborhood" urlParam="cda" />
             </Suspense>
           </div>
-          <div className="border-b border-foreground pb-4">
-            <h2 className="font-bold text-2xl mb-4">Filter Instructions</h2>
-            <ul className="list-disc list-inside mt-4">
-              <li>
-                To select a filter, search for the desired value in the search
-                bar.
-              </li>
-              <li>Selected filters will be displayed in blue.</li>
-              <li>To remove a filter, click the blue selected filter.</li>
-              <li>
-                Ex. If 1110 and 1120 are selected for occupancy and Shaw is
-                selected for neighborhood, it will return stats for parcels that
-                are either 1120 or 1130 in Shaw.
-              </li>
-              <li>
-                Ex. If 1110 and 1120 are selected for occupancy and Shaw and
-                Boulevard Heights are selected for neighborhood, it will return
-                stats for parcels that are either 1110 or 1120 in Shaw or
-                Boulevard Heights.
-              </li>
-              <li>If no filters are selected, all parcels will be returned.</li>
-            </ul>
+          <div className="border-b border-foreground py-8">
+            <NonCodedFilter
+              values={generateValues(1, 14)}
+              label="Ward"
+              urlParam="ward"
+            />
+          </div>
+          <div className="border-b border-foreground py-8">
+            <BooleanFilter
+              label="Is in TIF"
+              urlParam="isTif"
+              value={searchParams?.isTif}
+            />
+          </div>
+          <div className="border-b border-foreground py-8">
+            <BooleanFilter
+              label="Is Abated"
+              urlParam="isAbated"
+              value={searchParams?.isAbated}
+            />
           </div>
         </div>
         <div className="w-full">
+          <div>
+            <Link
+              href={{
+                pathname: "/parcels",
+                query: searchParams,
+              }}
+            >
+              {"Parcels >"}
+            </Link>
+          </div>
           <Suspense fallback={<div>loading stats...</div>}>
             <ValueCard filters={formattedSearchParams} />
           </Suspense>
