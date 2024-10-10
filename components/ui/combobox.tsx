@@ -11,16 +11,18 @@ import { Search as SearchIcon } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 type Value = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export default function ComboboxComponent({
   values,
   urlParam,
+  immediate,
 }: {
   values: Value[];
   urlParam: string;
+  immediate?: boolean;
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -73,7 +75,7 @@ export default function ComboboxComponent({
   return (
     <Combobox
       multiple
-      //   immediate
+      immediate={immediate}
       value={selectedValues}
       // @ts-ignore
       onChange={handleFilterChange}

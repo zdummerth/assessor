@@ -1,4 +1,5 @@
 import { ValueCard } from "@/components/ui/report-cards";
+import ParcelsTable from "@/components/ui/parcels-table";
 import Filter from "@/components/ui/filter";
 import { BooleanFilter, NonCodedFilter } from "@/components/ui/filter-client";
 import { Suspense } from "react";
@@ -13,6 +14,7 @@ export default async function ProtectedPage({
     tif?: string;
     isTif?: string;
     isAbated?: string;
+    view?: "parcelTable" | "values";
   };
 }) {
   const formattedSearchParams = Object.fromEntries(
@@ -25,10 +27,12 @@ export default async function ProtectedPage({
   const generateValues = (start: number, end: number) => {
     const values = [];
     for (let i = start; i <= end; i++) {
-      values.push({ id: i, name: i.toString() });
+      values.push({ id: i.toString(), name: i.toString() });
     }
     return values;
   };
+
+  const defaultView = searchParams?.view || "values";
 
   return (
     <div className="flex-1 w-full flex flex-col gap-12">

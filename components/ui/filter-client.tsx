@@ -4,7 +4,7 @@ import ComboboxComponent from "@/components/ui/combobox";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 type Value = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -12,15 +12,21 @@ export function NonCodedFilter({
   urlParam,
   label,
   values,
+  immediate,
 }: {
   urlParam: string;
   label: string;
   values: Value[];
+  immediate?: boolean;
 }) {
   return (
     <>
       <h4 className="mb-4">{label}</h4>
-      <ComboboxComponent values={values} urlParam={urlParam} />
+      <ComboboxComponent
+        values={values}
+        urlParam={urlParam}
+        immediate={immediate}
+      />
     </>
   );
 }

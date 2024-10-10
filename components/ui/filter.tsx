@@ -1,8 +1,8 @@
 import ComboboxComponent from "@/components/ui/combobox";
 import { getCodes } from "@/lib/data";
 
-type ComboboxValue = {
-  id: number;
+export type ComboboxValue = {
+  id: string;
   name: string;
 };
 
@@ -31,23 +31,6 @@ export default async function Filter({
     name: `${code.code} - ${code.name}`,
   }));
 
-  return (
-    <>
-      <h4 className="mb-4">{label}</h4>
-      <ComboboxComponent values={values} urlParam={urlParam} />
-    </>
-  );
-}
-
-export function NonCodedFilter({
-  urlParam,
-  label,
-  values,
-}: {
-  urlParam: string;
-  label: string;
-  values: ComboboxValue[];
-}) {
   return (
     <>
       <h4 className="mb-4">{label}</h4>

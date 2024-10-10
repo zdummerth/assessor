@@ -12,6 +12,7 @@ export default async function ProtectedPage({
     cda?: string;
     tif?: string;
     page?: string;
+    columns?: string;
   };
 }) {
   const formattedSearchParams = Object.fromEntries(
@@ -24,6 +25,29 @@ export default async function ProtectedPage({
   const currentPage = Number(searchParams?.page) || 1;
 
   const totalPages = await getPagesCount(formattedSearchParams);
+
+  const tableToLabelMap: any = {
+    asrlanduse1: "Occupancy",
+    nbrhd: "CDA Neighborhood",
+    asrnbrhd: "Assessor Neighborhood",
+    ward20: "Ward",
+    tifdist: "TIF",
+    isabatedproperty: "Abated",
+    asdtotal: "Total Assessed",
+    aprland: "Appraised Land",
+    aprresimprove: "Appraised Res Improvements",
+    aprcomimprove: "Appraised Com Improvements",
+    aprcomland: "Appraised Com Land",
+    aprresland: "Appraised Res Land",
+    apragrimprove: "Appraised Agr Improvements",
+    apragrland: "Appraised Agr Land",
+    aprexemptimprove: "Appraised Exempt Improvements",
+    aprexemptland: "Appraised Exempt Land",
+  };
+
+  // Default to showing the parcel I
+
+  // console.log(formattedSearchParams.columns);
 
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
@@ -39,29 +63,6 @@ export default async function ProtectedPage({
               <Filter label="Neighborhood" urlParam="cda" />
             </Suspense>
           </div>
-          <div className="border-b border-foreground pb-4">
-            <h2 className="font-bold text-2xl mb-4">Filter Instructions</h2>
-            <ul className="list-disc list-inside mt-4">
-              <li>
-                To select a filter, search for the desired value in the search
-                bar.
-              </li>
-              <li>Selected filters will be displayed in blue.</li>
-              <li>To remove a filter, click the blue selected filter.</li>
-              <li>
-                Ex. If 1110 and 1120 are selected for occupancy and Shaw is
-                selected for neighborhood, it will return stats for parcels that
-                are either 1120 or 1130 in Shaw.
-              </li>
-              <li>
-                Ex. If 1110 and 1120 are selected for occupancy and Shaw and
-                Boulevard Heights are selected for neighborhood, it will return
-                stats for parcels that are either 1110 or 1120 in Shaw or
-                Boulevard Heights.
-              </li>
-              <li>If no filters are selected, all parcels will be returned.</li>
-            </ul>
-          </div>
         </div>
         <div className="w-full">
           <h2 className="font-bold text-2xl mb-4">Parcels</h2>
@@ -69,6 +70,7 @@ export default async function ProtectedPage({
             <ParcelsTable
               filters={formattedSearchParams}
               currentPage={currentPage}
+              columns={formattedSearchParams.columns || []}
             />
           </Suspense>
           <div className="mt-5 flex w-full justify-center">
