@@ -34,11 +34,9 @@ export function NonCodedFilter({
 export function BooleanFilter({
   urlParam,
   label,
-  value,
 }: {
   urlParam: string;
   label: string;
-  value: string | undefined;
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -55,6 +53,7 @@ export function BooleanFilter({
       params.delete(urlParam); // Remove the parameter if false is selected
     }
 
+    params.delete("page"); // Reset the page number when a filter is changed
     replace(`${pathname}?${params.toString()}`);
   }
   return (
@@ -70,4 +69,28 @@ export function BooleanFilter({
       </select>
     </>
   );
+}
+
+export function SetUrlParam({
+  urlParam,
+  value,
+}: {
+  urlParam: string;
+  value: {
+    id: string;
+    label: string;
+  };
+}) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  const handleClick = () => {
+    const params = new URLSearchParams(searchParams);
+    params.set(urlParam, value.id);
+    params.delete("page"); // Reset the page number when a filter is changed
+    replace(`${pathname}?${params.toString()}`);
+  };
+
+  return <button onClick={handleClick}>{value.label}</button>;
 }

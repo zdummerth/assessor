@@ -5,8 +5,10 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
+import { Inter, Source_Code_Pro, Courier_Prime } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -24,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={GeistSans.className} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="bg-background text-foreground">
         <ThemeProvider
           attribute="class"
@@ -34,20 +36,15 @@ export default function RootLayout({
         >
           <main className="min-h-screen flex flex-col items-center">
             <div className="flex-1 w-full flex flex-col gap-2 items-center">
-              <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-                <div className="w-full max-w-7xl flex justify-between items-center p-3 px-5 text-sm">
+              <nav className="w-full flex justify-center border-b border-b-foreground/10 h-[5vh]">
+                <div className="w-full flex justify-between items-center p-3 px-5 text-sm">
                   <div className="flex gap-5 items-center font-semibold">
                     <Link href={"/"}>Assessor's Office</Link>
-                    <Link href={"/breakdown"}>Breakdowns</Link>
-                    <Link href={"/parcels"}>Parcels</Link>
                     <ThemeSwitcher />
                   </div>
-                  {/* {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />} */}
                 </div>
               </nav>
-              <div className="flex flex-col gap-20 w-full max-w-7xl p-5">
-                {children}
-              </div>
+              <div className="flex flex-col gap-20 w-full p-5">{children}</div>
             </div>
           </main>
         </ThemeProvider>

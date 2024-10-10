@@ -22,14 +22,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
 
   return (
     <>
-      <div className="inline-flex">
-        <PaginationArrow
-          direction="left"
-          href={createPageURL(currentPage - 1)}
-          isDisabled={currentPage <= 1}
-          scroll={false}
-        />
-
+      <div className="flex flex-col gap-4 items-center">
         <div className="flex -space-x-px">
           {allPages.map((page, index) => {
             let position: "first" | "last" | "single" | "middle" | undefined;
@@ -51,13 +44,20 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
             );
           })}
         </div>
-
-        <PaginationArrow
-          direction="right"
-          href={createPageURL(currentPage + 1)}
-          isDisabled={currentPage >= totalPages}
-          scroll={false}
-        />
+        <div className="inline-flex">
+          <PaginationArrow
+            direction="left"
+            href={createPageURL(currentPage - 1)}
+            isDisabled={currentPage <= 1}
+            scroll={false}
+          />
+          <PaginationArrow
+            direction="right"
+            href={createPageURL(currentPage + 1)}
+            isDisabled={currentPage >= totalPages}
+            scroll={false}
+          />
+        </div>
       </div>
     </>
   );
@@ -77,7 +77,7 @@ function PaginationNumber({
   scroll?: boolean;
 }) {
   const className = clsx(
-    "flex h-10 w-10 items-center justify-center text-sm border",
+    "flex h-10 w-14 items-center justify-center text-sm border",
     {
       "rounded-l-md": position === "first" || position === "single",
       "rounded-r-md": position === "last" || position === "single",

@@ -63,6 +63,7 @@ export type UpdatedFilters = {
   cda?: string[];
   tif?: string[];
   ward?: string[];
+  specBusDist?: string[];
   isCondominium?: boolean;
   isAbatedProperty?: boolean;
   isVacantLot?: boolean;
@@ -86,6 +87,9 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
   }
   if (filters.ward) {
     query = query.in("ward20", filters.ward);
+  }
+  if (filters.specBusDist) {
+    query = query.in("specbusdist", filters.specBusDist);
   }
   if (filters.isCondominium) {
     query = query.eq("condominium", filters.isCondominium);
@@ -126,19 +130,23 @@ export async function getFilteredData(
   filters: UpdatedFilters = {},
   selectString: string,
   currentPage?: number,
-  sort?: string
+  sortColumn?: string,
+  sortDirection?: string
 ) {
   const supabase = createClient();
 
   let query = supabase.from("parcels").select(selectString);
   let filteredQuery = applyFiltersToQuery(query, filters);
+  const ascending = sortDirection === "asc" ? true : false;
 
   if (currentPage) {
     const offset = (currentPage - 1) * ITEMS_PER_PAGE;
     const endingPage = offset + ITEMS_PER_PAGE - 1;
-    const ascending = sort === "asc" ? true : false;
 
     filteredQuery = filteredQuery.range(offset, endingPage);
+    if (sortColumn) {
+      filteredQuery = filteredQuery.order(sortColumn, { ascending });
+    }
   }
 
   try {
@@ -161,7 +169,10 @@ export const getPagesCount = async (filters: UpdatedFilters = {}) => {
       throw new Error("Failed to fetch pages. Count is null.");
     }
 
-    return Math.ceil(count / ITEMS_PER_PAGE);
+    return {
+      totalPages: Math.ceil(count / ITEMS_PER_PAGE),
+      count,
+    };
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch pages count.");
@@ -169,7 +180,12 @@ export const getPagesCount = async (filters: UpdatedFilters = {}) => {
 };
 
 export async function getCodes(code: string) {
-  const possibleCodes = ["land_use_codes", "cda_codes", "tif_disticts"];
+  const possibleCodes = [
+    "land_use_codes",
+    "cda_codes",
+    "tif_district_codes",
+    "spec_bus_dist_codes",
+  ];
 
   if (!possibleCodes.includes(code)) {
     return Promise.reject("Invalid code");

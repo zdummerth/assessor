@@ -91,6 +91,9 @@ export async function CondoReportCard({
 }: {
   filters: UpdatedFilters;
 }) {
+  if (filters.landuse) {
+    return <div></div>;
+  }
   const newFilters = {
     ...filters,
     landuse: ["1114", "1115"],
@@ -111,6 +114,12 @@ export async function CondoReportCard({
   if (!data) {
     console.log(error);
     return <div>Failed to fetch data</div>;
+  }
+
+  for (const key of Object.keys(data[0])) {
+    if (data[0][key] === null) {
+      data[0][key] = 0;
+    }
   }
 
   return (
@@ -190,6 +199,12 @@ export async function CommercialReportCard({
     return <div>Failed to fetch data</div>;
   }
 
+  for (const key of Object.keys(data[0])) {
+    if (data[0][key] === null) {
+      data[0][key] = 0;
+    }
+  }
+
   return (
     <div className="p-4 rounded-lg shadow-foreground shadow-sm">
       <h4 className="text-3xl">Commercial</h4>
@@ -243,6 +258,12 @@ export async function ResidentialReportCard({
   if (!data) {
     console.log(error);
     return <div>Failed to fetch data</div>;
+  }
+
+  for (const key of Object.keys(data[0])) {
+    if (data[0][key] === null) {
+      data[0][key] = 0;
+    }
   }
 
   return (
@@ -300,6 +321,12 @@ export async function MixedUseReportCard({
     return <div>Failed to fetch data</div>;
   }
 
+  for (const key of Object.keys(data[0])) {
+    if (data[0][key] === null) {
+      data[0][key] = 0;
+    }
+  }
+
   return (
     <div className="p-4 rounded-lg shadow-foreground shadow-sm">
       <h4 className="text-3xl">Residential</h4>
@@ -354,7 +381,13 @@ export async function GroupedReportCard({
     return <div>Failed to fetch data</div>;
   }
 
-  console.log(data[0]);
+  // console.log(data[0]);
+
+  for (const key of Object.keys(data[0])) {
+    if (data[0][key] === null) {
+      data[0][key] = 0;
+    }
+  }
 
   return (
     <div className="p-4 rounded-lg shadow-foreground shadow-sm">

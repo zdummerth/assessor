@@ -40,6 +40,7 @@ export default function ComboboxComponent({
     }
 
     setQuery("");
+    params.delete("page"); // Reset the page number when a filter is changed
     replace(`${pathname}?${params.toString()}`);
   }
 

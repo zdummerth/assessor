@@ -16,7 +16,8 @@ export default async function Filter({
   const map: any = {
     landuse: "land_use_codes",
     cda: "cda_codes",
-    tif: "tif_codes",
+    tif: "tif_district_codes",
+    specBusDist: "spec_bus_dist_codes",
   };
 
   const codeTable = map[urlParam];

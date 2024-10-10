@@ -1,27 +1,28 @@
 import { getFilteredData, UpdatedFilters } from "@/lib/data";
-import { NonCodedFilter } from "@/components/ui/filter-client";
-
-type Column = {
-  label: string;
-  key: string;
-};
+import { NonCodedFilter, SetUrlParam } from "@/components/ui/filter-client";
 
 export default async function ParcelsTable({
   filters,
   currentPage,
   columns,
+  sort = "asrparcelid+asc",
 }: {
   filters: UpdatedFilters;
   currentPage: number;
   columns: string[];
+  sort?: string;
 }) {
   // Extract the keys to pass to the getFilteredData function
   const columnKeys = ["asrparcelid", ...columns].join(", ");
+  const sortColumn = sort.split("+")[0];
+  const sortDirection = sort.split("+")[1];
 
   const { data, error } = await getFilteredData(
     filters,
     columnKeys,
-    currentPage
+    currentPage,
+    sortColumn,
+    sortDirection
   );
 
   if (!data) {
@@ -46,6 +47,7 @@ export default async function ParcelsTable({
     apragrland: "Appraised Agr Land",
     aprexemptimprove: "Appraised Exempt Improvements",
     aprexemptland: "Appraised Exempt Land",
+    specbusdist: "SBD/CID",
   };
 
   const formattedColumns = columns.map((columnName) => ({
@@ -61,20 +63,35 @@ export default async function ParcelsTable({
     ...formattedColumns,
   ];
 
+  // format parcel id to string of 11 characters with leading zeros
+  const formatParcelId = (parcelId: number) => {
+    const formattedParcelId = parcelId.toString().padStart(11, "0");
+    const formattedString = `${formattedParcelId.slice(0, 4)}-${formattedParcelId.slice(4, 5)}-${formattedParcelId.slice(5, 8)}.${formattedParcelId.slice(8)}`;
+
+    return formattedString;
+  };
+  const formattedParcelIdData = data.map((parcel: any) => ({
+    ...parcel,
+    asrparcelid: formatParcelId(parcel.asrparcelid),
+  }));
+
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
-        <NonCodedFilter
-          values={
-            Object.entries(tableToLabelMap).map(([key, value]) => ({
-              id: key,
-              name: value,
-            })) as any
-          }
-          label="Add Column"
-          urlParam="columns"
-          immediate={true}
-        />
+        <div className="flex items-center gap-4 mb-4">
+          <NonCodedFilter
+            values={
+              Object.entries(tableToLabelMap).map(([key, value]) => ({
+                id: key,
+                name: value,
+              })) as any
+            }
+            label="Add Column"
+            urlParam="columns"
+            immediate={true}
+          />
+        </div>
+
         <div className="rounded-lg p-2 md:pt-0">
           {/* Mobile view */}
           <div className="md:hidden">
@@ -104,13 +121,19 @@ export default async function ParcelsTable({
                     scope="col"
                     className="px-4 py-5 font-medium sm:pl-6"
                   >
-                    {column.label}
+                    <SetUrlParam
+                      urlParam="sort"
+                      value={{
+                        id: `${column.key}+${sortDirection === "asc" ? "desc" : "asc"}`,
+                        label: column.label,
+                      }}
+                    />
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {data.map((parcel: any) => (
+              {formattedParcelIdData.map((parcel: any) => (
                 <tr
                   key={parcel.asrparcelid}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
@@ -119,6 +142,7 @@ export default async function ParcelsTable({
                     <td
                       key={column.key}
                       className="whitespace-nowrap px-3 py-3"
+                      //   style={{ fontFamily: "Courier New, Courier, monospace" }}
                     >
                       {/* Check if parcel[column.key] is boolean*/}
                       {typeof parcel[column.key] === "boolean"

@@ -1,12 +1,12 @@
-import { NonCodedFilter } from "@/components/ui/filter-client";
+import ParcelFilters from "@/components/ui/filters-parcels";
+
 import { Suspense } from "react";
-import { getFilteredData } from "@/lib/data";
 import {
   CondoReportCard,
   CommercialReportCard,
   ResidentialReportCard,
-  GroupedReportCard,
 } from "@/components/ui/report-cards";
+import ParcelTabs from "@/components/ui/parcels-tabs";
 
 export default async function Page({
   searchParams,
@@ -25,13 +25,13 @@ export default async function Page({
   );
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-12">
-      <div className="w-full flex gap-4">
-        <div className="w-[500px] pr-2 border-r border-forground overflow-x-hidden">
-          <div className="border-b border-foreground py-8"></div>
-        </div>
-        <div className="w-full">
-          <h2 className="font-bold text-2xl mb-4">Breakdown</h2>
+    <div className="w-full flex gap-4">
+      <div className="w-[500px] pr-2 border-r border-forground overflow-x-hidden">
+        <ParcelFilters />
+      </div>
+      <div className="w-full">
+        <ParcelTabs searchParams={searchParams} />
+        <div className="flex flex-col gap-6">
           <Suspense fallback={<div>loading stats...</div>}>
             <CondoReportCard filters={formattedSearchParams} />
           </Suspense>
@@ -41,12 +41,6 @@ export default async function Page({
           <Suspense fallback={<div>loading stats...</div>}>
             <ResidentialReportCard filters={formattedSearchParams} />
           </Suspense>
-          {/* <Suspense fallback={<div>loading stats...</div>}>
-            <GroupedReportCard
-              filters={formattedSearchParams}
-              groupBy="asrlanduse1"
-            />
-          </Suspense> */}
         </div>
       </div>
     </div>
