@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { table } from "console";
 
 /*
 CREATE TABLE parcels (
@@ -126,16 +127,24 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
 };
 
 const ITEMS_PER_PAGE = 7;
-export async function getFilteredData(
-  filters: UpdatedFilters = {},
-  selectString: string,
-  currentPage?: number,
-  sortColumn?: string,
-  sortDirection?: string
-) {
+export async function getFilteredData({
+  filters,
+  currentPage,
+  sortColumn,
+  sortDirection,
+  selectString,
+  table,
+}: {
+  filters: UpdatedFilters;
+  currentPage?: number;
+  sortColumn?: string;
+  sortDirection?: string;
+  selectString?: string;
+  table?: string;
+}) {
   const supabase = createClient();
 
-  let query = supabase.from("parcels").select(selectString);
+  let query = supabase.from(table || "parcels").select(selectString);
   let filteredQuery = applyFiltersToQuery(query, filters);
   const ascending = sortDirection === "asc" ? true : false;
 
@@ -145,7 +154,9 @@ export async function getFilteredData(
 
     filteredQuery = filteredQuery.range(offset, endingPage);
     if (sortColumn) {
-      filteredQuery = filteredQuery.order(sortColumn, { ascending });
+      filteredQuery = filteredQuery.order(sortColumn, {
+        ascending,
+      });
     }
   }
 
@@ -156,11 +167,14 @@ export async function getFilteredData(
   }
 }
 
-export const getPagesCount = async (filters: UpdatedFilters = {}) => {
+export const getPagesCount = async (
+  filters: UpdatedFilters = {},
+  table?: string
+) => {
   const supabase = createClient();
   let query = supabase
-    .from("parcels")
-    .select("asrparcelid", { count: "exact", head: true });
+    .from(`${table || "parcels"}`)
+    .select(`*`, { count: "exact", head: true });
   let filteredQuery = applyFiltersToQuery(query, filters);
   try {
     const { count, error } = await filteredQuery;

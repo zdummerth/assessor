@@ -17,13 +17,13 @@ export default async function ParcelsTable({
   const sortColumn = sort.split("+")[0];
   const sortDirection = sort.split("+")[1];
 
-  const { data, error } = await getFilteredData(
+  const { data, error } = await getFilteredData({
     filters,
-    columnKeys,
+    selectString: columnKeys,
     currentPage,
     sortColumn,
-    sortDirection
-  );
+    sortDirection,
+  });
 
   if (!data) {
     console.error(error);
@@ -66,10 +66,9 @@ export default async function ParcelsTable({
   // format parcel id to string of 11 characters with leading zeros
   const formatParcelId = (parcelId: number) => {
     const formattedParcelId = parcelId.toString().padStart(11, "0");
-    const formattedString = `${formattedParcelId.slice(0, 4)}-${formattedParcelId.slice(4, 5)}-${formattedParcelId.slice(5, 8)}.${formattedParcelId.slice(8)}`;
-
-    return formattedString;
+    return `${formattedParcelId.slice(0, 4)}-${formattedParcelId.slice(4, 5)}-${formattedParcelId.slice(5, 8)}.${formattedParcelId.slice(8)}`;
   };
+
   const formattedParcelIdData = data.map((parcel: any) => ({
     ...parcel,
     asrparcelid: formatParcelId(parcel.asrparcelid),

@@ -1,9 +1,10 @@
 import { getFilteredData, UpdatedFilters } from "@/lib/data";
 
 export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
-  const { data, error }: any = await getFilteredData(
+  console.log("filters", filters);
+  const { data, error }: any = await getFilteredData({
     filters,
-    `count:asrparcelid.count(), 
+    selectString: `count:asrparcelid.count(), 
     res_land_value:aprresland.sum(), 
     res_improvement_value:aprresimprove.sum(),
     com_land_value:aprcomland.sum(),
@@ -11,8 +12,8 @@ export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
     exempt_land_value:aprexemptland.sum(),
     exempt_improvement_value:aprexemptimprove.sum(),
     total_asd_value:asdtotal.sum()
-    `
-  );
+    `,
+  });
 
   if (!data) {
     console.log(error);
@@ -99,17 +100,17 @@ export async function CondoReportCard({
     landuse: ["1114", "1115"],
   };
 
-  const { data, error }: any = await getFilteredData(
-    newFilters,
-    `count:asrparcelid.count(), 
+  const { data, error }: any = await getFilteredData({
+    filters: newFilters,
+    selectString: `count:asrparcelid.count(), 
     total_units:nbrofunits.sum(), 
     res_land_value:aprresland.sum(), 
     res_improvement_value:aprresimprove.sum(),
     com_land_value:aprcomland.sum(),
     com_improvement_value:aprcomimprove.sum(),
     total_asd_value:asdtotal.sum()
-    `
-  );
+    `,
+  });
 
   if (!data) {
     console.log(error);
@@ -185,14 +186,14 @@ export async function CommercialReportCard({
     isCommercial: true,
   };
 
-  const { data, error }: any = await getFilteredData(
-    newFilters,
-    `count:asrparcelid.count(), 
+  const { data, error }: any = await getFilteredData({
+    filters: newFilters,
+    selectString: `count:asrparcelid.count(), 
     com_land_value:aprcomland.sum(),
     com_improvement_value:aprcomimprove.sum(),
     total_asd_value:asdtotal.sum()
-    `
-  );
+    `,
+  });
 
   if (!data) {
     console.log(error);
@@ -246,14 +247,14 @@ export async function ResidentialReportCard({
     isResidential: true,
   };
 
-  const { data, error }: any = await getFilteredData(
-    newFilters,
-    `count:asrparcelid.count(), 
+  const { data, error }: any = await getFilteredData({
+    filters: newFilters,
+    selectString: `count:asrparcelid.count(), 
     res_land_value:aprresland.sum(),
     res_improvement_value:aprresimprove.sum(),
     total_asd_value:asdtotal.sum()
-    `
-  );
+    `,
+  });
 
   if (!data) {
     console.log(error);
@@ -307,14 +308,14 @@ export async function MixedUseReportCard({
     isMixedUse: true,
   };
 
-  const { data, error }: any = await getFilteredData(
-    newFilters,
-    `count:asrparcelid.count(), 
+  const { data, error }: any = await getFilteredData({
+    filters: newFilters,
+    selectString: `count:asrparcelid.count(), 
     res_land_value:aprresland.sum(),
     res_improvement_value:aprresimprove.sum(),
     total_asd_value:asdtotal.sum()
-    `
-  );
+    `,
+  });
 
   if (!data) {
     console.log(error);
@@ -365,16 +366,16 @@ export async function GroupedReportCard({
   filters: UpdatedFilters;
   groupBy: string;
 }) {
-  const { data, error }: any = await getFilteredData(
+  const { data, error }: any = await getFilteredData({
     filters,
-    `
+    selectString: `
     group:${groupBy},
     count:asrparcelid.count(), 
     res_land_value:aprresland.sum(),
     res_improvement_value:aprresimprove.sum(),
     total_asd_value:asdtotal.sum()
-    `
-  );
+    `,
+  });
 
   if (!data) {
     console.log(error);
