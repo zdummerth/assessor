@@ -1,6 +1,11 @@
 import { getFilteredData, UpdatedFilters } from "@/lib/data";
 import { SetUrlParam } from "@/components/ui/filter-client";
 
+const formatParcelId = (parcelId: number) => {
+  const formattedParcelId = parcelId.toString().padStart(11, "0");
+  return `${formattedParcelId.slice(0, 4)}-${formattedParcelId.slice(4, 5)}-${formattedParcelId.slice(5, 8)}.${formattedParcelId.slice(8)}`;
+};
+
 export default async function SalesTable({
   filters,
   currentPage,
@@ -35,7 +40,6 @@ export default async function SalesTable({
     { key: "net_selling_price", label: "Net Selling Price" },
     { key: "sale_type", label: "Sale Type" },
     { key: "appraiser", label: "Appraiser" },
-    // { key: "parcels", label: "Parcels" },
   ];
 
   return (
@@ -64,6 +68,12 @@ export default async function SalesTable({
           <table className="hidden min-w-full md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
+                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+                  Parcel
+                </th>
+                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+                  Assessed
+                </th>
                 {formattedColumns.map((column) => (
                   <th
                     key={column.key}
@@ -87,6 +97,18 @@ export default async function SalesTable({
                   key={sale.document_number}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {sale.parcels.map((parcel: any) => (
+                      <p key={parcel.asrparcelid}>
+                        {formatParcelId(parcel.asrparcelid)}
+                      </p>
+                    ))}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {sale.parcels.map((parcel: any) => (
+                      <p key={parcel.asrparcelid}>{parcel.asdtotal}</p>
+                    ))}
+                  </td>
                   {formattedColumns.map((column) => (
                     <td
                       key={column.key}
