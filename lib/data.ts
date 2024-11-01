@@ -126,6 +126,19 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
   return query;
 };
 
+export type SalesFilters = {
+  nbrhd?: string[];
+};
+
+const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
+  if (filters.nbrhd) {
+    const formatted = filters.nbrhd.map((nbrhd) => `R${nbrhd}`);
+    query = query.in("neighborhood_code", formatted);
+  }
+  query = query.limit(10);
+  return query;
+};
+
 const ITEMS_PER_PAGE = 7;
 export async function getFilteredData({
   filters,
@@ -135,7 +148,7 @@ export async function getFilteredData({
   selectString,
   table,
 }: {
-  filters: UpdatedFilters;
+  filters: UpdatedFilters | SalesFilters | any;
   currentPage?: number;
   sortColumn?: string;
   sortDirection?: string;
@@ -145,7 +158,11 @@ export async function getFilteredData({
   const supabase = createClient();
 
   let query = supabase.from(table || "parcels").select(selectString);
-  let filteredQuery = applyFiltersToQuery(query, filters);
+  let filteredQuery =
+    table === "unjoined_sales"
+      ? applySalesFiltersToQuery(query, filters)
+      : applyFiltersToQuery(query, filters);
+  // let filteredQuery = applyFiltersToQuery(query, filters);
   const ascending = sortDirection === "asc" ? true : false;
 
   if (currentPage) {
@@ -209,6 +226,21 @@ export async function getCodes(code: string) {
 
   // Make the RPC call with the dynamic parameters
   const { data, error } = await supabase.from(code).select("*");
+
+  if (error) {
+    return Promise.reject(error);
+  }
+
+  return data;
+}
+
+export async function getNeighborhoods() {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("neighborhoods")
+    .select("*")
+    .order("neighborhood");
 
   if (error) {
     return Promise.reject(error);

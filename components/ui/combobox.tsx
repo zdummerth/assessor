@@ -70,7 +70,10 @@ export default function ComboboxComponent({
     query === ""
       ? notSelectedValues
       : notSelectedValues.filter((value) => {
-          return value.name.toLowerCase().includes(query.toLowerCase());
+          return value.name
+            .toString()
+            .toLowerCase()
+            .includes(query.toLowerCase());
         });
 
   return (

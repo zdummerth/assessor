@@ -1,5 +1,5 @@
 import ComboboxComponent from "@/components/ui/combobox";
-import { getCodes } from "@/lib/data";
+import { getCodes, getNeighborhoods } from "@/lib/data";
 
 export type ComboboxValue = {
   id: string;
@@ -18,6 +18,7 @@ export default async function Filter({
     cda: "cda_codes",
     tif: "tif_district_codes",
     specBusDist: "spec_bus_dist_codes",
+    nbrhdcode: "neighborhood_code",
   };
 
   const codeTable = map[urlParam];
@@ -36,6 +37,31 @@ export default async function Filter({
     <>
       <h4 className="mb-4">{label}</h4>
       <ComboboxComponent values={values} urlParam={urlParam} />
+    </>
+  );
+}
+
+export async function NeighborhoodFilter({
+  urlParam,
+  label,
+}: {
+  urlParam: string;
+  label: string;
+}) {
+  const neighborhoods = await getNeighborhoods();
+  const values: ComboboxValue[] = neighborhoods.map((n) => ({
+    id: n.neighborhood,
+    name: n.neighborhood,
+  }));
+
+  return (
+    <>
+      <h4 className="mb-4">{label}</h4>
+      <ComboboxComponent
+        values={values}
+        urlParam={urlParam}
+        immediate={false}
+      />
     </>
   );
 }
