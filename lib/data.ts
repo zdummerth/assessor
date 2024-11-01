@@ -128,6 +128,7 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
 
 export type SalesFilters = {
   nbrhd?: string[];
+  with_coords?: boolean;
 };
 
 const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
@@ -135,7 +136,10 @@ const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
     const formatted = filters.nbrhd.map((nbrhd) => `R${nbrhd}`);
     query = query.in("neighborhood_code", formatted);
   }
-  query = query.limit(10);
+  if (filters.with_coords) {
+    query = query.neq("lat", 0).neq("long", 0);
+  }
+  // query = query.limit(20);
   return query;
 };
 
@@ -170,11 +174,12 @@ export async function getFilteredData({
     const endingPage = offset + ITEMS_PER_PAGE - 1;
 
     filteredQuery = filteredQuery.range(offset, endingPage);
-    if (sortColumn) {
-      filteredQuery = filteredQuery.order(sortColumn, {
-        ascending,
-      });
-    }
+  }
+
+  if (sortColumn) {
+    filteredQuery = filteredQuery.order(sortColumn, {
+      ascending,
+    });
   }
 
   try {

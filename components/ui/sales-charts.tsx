@@ -1,4 +1,5 @@
 import { getFilteredData, SalesFilters } from "@/lib/data";
+import BarChart from "./charts/bar";
 
 export default async function SalesCharts({
   filters,
@@ -8,8 +9,9 @@ export default async function SalesCharts({
   console.log(filters);
   const { data, error } = await getFilteredData({
     filters,
-    selectString: "net_selling_price, date_of_sale, neighborhood_code",
+    selectString: "neighborhood_code, net_selling_price.avg()",
     table: "unjoined_sales",
+    // sortColumn: "price",
   });
 
   if (!data) {
@@ -18,6 +20,21 @@ export default async function SalesCharts({
   }
 
   console.log(data);
+  const chartData = [
+    ["Neighborhood", "Average Net Selling Price"],
+    ...data
+      .map((row: any) => [
+        row.neighborhood_code,
+        parseFloat(row.avg.toFixed(0)),
+      ])
+      .sort((a: any, b: any) => b[1] - a[1]),
+  ];
 
-  return <div className="mt-6 flow-root"></div>;
+  console.log(chartData);
+
+  return (
+    <div className="mt-6 flow-root">
+      <BarChart data={chartData} />
+    </div>
+  );
 }
