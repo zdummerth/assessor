@@ -154,6 +154,8 @@ const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
   if (filters.max_price) {
     query = query.lte("net_selling_price", filters.max_price);
   }
+
+  query.order("date_of_sale", { ascending: false });
   // query = query.limit(20);
   return query;
 };
