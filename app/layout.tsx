@@ -41,6 +41,7 @@ export default function RootLayout({
                   <div className="flex gap-5 items-center font-semibold">
                     <Link href={"/"}>Parcels</Link>
                     <Link href={"/map"}>Map</Link>
+                    <Link href={"/sales/ratios"}>Ratios</Link>
                     <ThemeSwitcher />
                   </div>
                 </div>

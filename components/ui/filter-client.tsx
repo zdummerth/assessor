@@ -101,7 +101,7 @@ export function SetUrlParam({
   return <button onClick={handleClick}>{value.label}</button>;
 }
 
-export function DateRangeMenu() {
+export function DateRangeMenu({ isActive }: { isActive: boolean }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -144,7 +144,9 @@ export function DateRangeMenu() {
 
   return (
     <Disclosure>
-      <DisclosureButton className="flex items-center justify-between w-full p-2 border border-foreground rounded-md relative">
+      <DisclosureButton
+        className={`flex items-center justify-between w-full p-2 rounded-md relative border ${isActive ? "border-blue-500" : "border-foreground"} `}
+      >
         {currentStartDate || currentEndDate ? (
           <span>
             Date Range: {currentStartDate || "∞"} to {currentEndDate || "∞"}
@@ -200,7 +202,7 @@ export function DateRangeMenu() {
   );
 }
 
-export function PriceRangeMenu() {
+export function PriceRangeMenu({ isActive }: { isActive: boolean }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -241,7 +243,9 @@ export function PriceRangeMenu() {
 
   return (
     <Disclosure>
-      <DisclosureButton className="flex items-center justify-between w-full p-2 border border-foreground rounded-md relative">
+      <DisclosureButton
+        className={`flex items-center justify-between w-full p-2 rounded-md relative border ${isActive ? "border-blue-500" : "border-foreground"} `}
+      >
         {currentMinPrice || currentMaxPrice ? (
           <span>
             Price Range: {currentMinPrice || "0"} - {currentMaxPrice || "∞"}
@@ -302,14 +306,23 @@ export function PriceRangeMenu() {
 export function ClientDisclosureWrapper({
   serverComponent,
   label,
+  currentCount,
 }: {
   serverComponent: React.ReactNode;
   label: string;
+  currentCount: number;
 }) {
   return (
     <Disclosure>
-      <DisclosureButton className="flex items-center justify-between w-full p-2 border border-foreground rounded-md relative">
-        {label}
+      <DisclosureButton
+        className={`flex items-center justify-between w-full p-2 rounded-md relative border ${currentCount > 0 ? "border-blue-500" : "border-foreground"} `}
+      >
+        <span>{label}</span>
+        {currentCount > 0 && (
+          <span className="text-sm ml-4 px-2 bg-blue-500 text-white rounded-full">
+            {currentCount}
+          </span>
+        )}
       </DisclosureButton>
       <DisclosurePanel className="p-4 absolute bg-background shadow-sm shadow-foreground">
         {serverComponent}

@@ -7,7 +7,7 @@ const BaseMap = dynamic(() => import("@/components/ui/maps/base"), {
   ssr: false,
 });
 
-export default async function ChartsPage({
+export default async function SalesMapPage({
   searchParams,
 }: {
   searchParams?: {
@@ -46,7 +46,7 @@ export default async function ChartsPage({
   return (
     <div className="w-full">
       {/* <div className="w-[500px] pr-2 border-r border-foreground overflow-x-hidden"> */}
-      <SalesFilters count={data.length} />
+      <SalesFilters count={data.length} currentFilters={filters} />
       <div className="relative z-0 mt-4">
         <BaseMap points={data} />
       </div>
