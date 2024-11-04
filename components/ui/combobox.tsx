@@ -68,13 +68,15 @@ export default function ComboboxComponent({
 
   const filteredValues =
     query === ""
-      ? notSelectedValues
-      : notSelectedValues.filter((value) => {
-          return value.name
-            .toString()
-            .toLowerCase()
-            .includes(query.toLowerCase());
-        });
+      ? notSelectedValues.slice(0, 8)
+      : notSelectedValues
+          .filter((value) => {
+            return value.name
+              .toString()
+              .toLowerCase()
+              .includes(query.toLowerCase());
+          })
+          .slice(0, 8);
 
   return (
     <Combobox
@@ -116,7 +118,7 @@ export default function ComboboxComponent({
       )}
       <ComboboxOptions
         anchor="top"
-        className="border empty:invisible w-[var(--input-width)] max-h-[250px] bg-accent text-foreground"
+        className="border empty:invisible w-[var(--input-width)] max-h-[250px] bg-accent text-foreground relative z-20"
       >
         {filteredValues.map((value) => (
           <ComboboxOption

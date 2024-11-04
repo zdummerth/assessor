@@ -55,13 +55,14 @@ const MapComponent = ({ points }: { points: any }) => {
   }, []);
 
   return (
-    <div className="w-full">
-      <div style={{ marginBottom: "10px" }}>
-        <label htmlFor="tileLayerSelect">Choose Map Style: </label>
+    <div className="w-full relative">
+      <div className="my-2">
+        <label htmlFor="tileLayerSelect">Map Style: </label>
         <select
           id="tileLayerSelect"
           value={tileLayer}
           onChange={(e) => setTileLayer(e.target.value)}
+          className="p-[1px] rounded-md"
         >
           {Object.entries(tileLayers).map(([name, url]) => (
             <option key={name} value={url}>
@@ -72,8 +73,11 @@ const MapComponent = ({ points }: { points: any }) => {
       </div>
       <MapContainer
         center={position}
-        zoom={13}
-        style={{ height: "80vh", width: "100%" }}
+        zoom={11.25}
+        style={{
+          height: "80vh",
+          width: "100%",
+        }}
       >
         <TileLayer
           url={tileLayer}

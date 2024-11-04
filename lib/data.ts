@@ -1,5 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { table } from "console";
 
 /*
 CREATE TABLE parcels (
@@ -129,6 +128,10 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
 export type SalesFilters = {
   nbrhd?: string[];
   with_coords?: boolean;
+  start_date?: string;
+  end_date?: string;
+  min_price?: number;
+  max_price?: number;
 };
 
 const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
@@ -138,6 +141,18 @@ const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
   }
   if (filters.with_coords) {
     query = query.neq("lat", 0).neq("long", 0);
+  }
+  if (filters.start_date) {
+    query = query.gte("date_of_sale", filters.start_date);
+  }
+  if (filters.end_date) {
+    query = query.lte("date_of_sale", filters.end_date);
+  }
+  if (filters.min_price) {
+    query = query.gte("net_selling_price", filters.min_price);
+  }
+  if (filters.max_price) {
+    query = query.lte("net_selling_price", filters.max_price);
   }
   // query = query.limit(20);
   return query;

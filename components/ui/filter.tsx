@@ -55,13 +55,13 @@ export async function NeighborhoodFilter({
   }));
 
   return (
-    <>
+    <div className="relative">
       <h4 className="mb-4">{label}</h4>
       <ComboboxComponent
         values={values}
         urlParam={urlParam}
         immediate={false}
       />
-    </>
+    </div>
   );
 }

@@ -26,6 +26,8 @@ export default async function ChartsPage({
     with_coords: true,
   };
 
+  console.log(filters);
+
   const { data, error } = await getFilteredData({
     filters: filters,
     selectString:
@@ -39,14 +41,15 @@ export default async function ChartsPage({
     return <div>Failed to fetch data</div>;
   }
 
-  console.log(data);
+  // console.log(data);
 
   return (
-    <div className="w-full flex gap-4">
-      <div className="w-[500px] pr-2 border-r border-foreground overflow-x-hidden">
-        <SalesFilters />
+    <div className="w-full">
+      {/* <div className="w-[500px] pr-2 border-r border-foreground overflow-x-hidden"> */}
+      <SalesFilters count={data.length} />
+      <div className="relative z-0 mt-4">
+        <BaseMap points={data} />
       </div>
-      <BaseMap points={data} />
     </div>
   );
 }

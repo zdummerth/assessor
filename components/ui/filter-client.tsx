@@ -1,7 +1,13 @@
 "use client";
 import ComboboxComponent from "@/components/ui/combobox";
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+} from "@headlessui/react";
 
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 type Value = {
   id: string;
@@ -93,4 +99,221 @@ export function SetUrlParam({
   };
 
   return <button onClick={handleClick}>{value.label}</button>;
+}
+
+export function DateRangeMenu() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const [startDate, setStartDate] = useState(
+    searchParams.get("start_date") || ""
+  );
+  const [endDate, setEndDate] = useState(searchParams.get("end_date") || "");
+
+  const currentStartDate = searchParams.get("start_date");
+  const currentEndDate = searchParams.get("end_date");
+
+  function handleFilterChange() {
+    const params = new URLSearchParams(searchParams);
+
+    if (startDate) {
+      params.set("start_date", startDate);
+    } else {
+      params.delete("start_date");
+    }
+
+    if (endDate) {
+      params.set("end_date", endDate);
+    } else {
+      params.delete("end_date");
+    }
+
+    params.delete("page"); // Reset the page number when a filter is changed
+    replace(`${pathname}?${params.toString()}`);
+  }
+
+  function clearFilter() {
+    const params = new URLSearchParams(searchParams);
+    setStartDate("");
+    setEndDate("");
+    params.delete("start_date");
+    params.delete("end_date");
+    params.delete("page"); // Reset the page number when a filter is changed
+    replace(`${pathname}?${params.toString()}`);
+  }
+
+  return (
+    <Disclosure>
+      <DisclosureButton className="flex items-center justify-between w-full p-2 border border-foreground rounded-md relative">
+        {currentStartDate || currentEndDate ? (
+          <span>
+            Date Range: {currentStartDate || "∞"} to {currentEndDate || "∞"}
+          </span>
+        ) : (
+          <span>Date Range</span>
+        )}
+      </DisclosureButton>
+      <DisclosurePanel className="p-4 absolute bg-background shadow-sm shadow-foreground">
+        {({ close }) => (
+          <div>
+            <div className="flex gap-2 items-center">
+              <div>
+                <input
+                  type="date"
+                  className="w-full p-2 border border-foreground rounded-md"
+                  onChange={(e) => setStartDate(e.target.value)}
+                  value={startDate}
+                />
+              </div>
+              -
+              <div>
+                <input
+                  type="date"
+                  className="w-full p-2 border border-foreground rounded-md"
+                  onChange={(e) => setEndDate(e.target.value)}
+                  value={endDate}
+                />
+              </div>
+            </div>
+            <button
+              className="w-full p-2 border border-foreground rounded-md mt-2"
+              onClick={() => {
+                handleFilterChange();
+                close();
+              }}
+            >
+              Apply
+            </button>
+            <button
+              className="w-full p-2 border border-foreground rounded-md mt-2"
+              onClick={() => {
+                clearFilter();
+                close();
+              }}
+            >
+              Clear Filter
+            </button>
+          </div>
+        )}
+      </DisclosurePanel>
+    </Disclosure>
+  );
+}
+
+export function PriceRangeMenu() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const [minPrice, setMinPrice] = useState(searchParams.get("min_price") || "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("max_price") || "");
+
+  const currentMinPrice = searchParams.get("min_price");
+  const currentMaxPrice = searchParams.get("max_price");
+
+  function handleFilterChange() {
+    const params = new URLSearchParams(searchParams);
+
+    if (minPrice) {
+      params.set("min_price", minPrice);
+    } else {
+      params.delete("min_price");
+    }
+
+    if (maxPrice) {
+      params.set("max_price", maxPrice);
+    } else {
+      params.delete("max_price");
+    }
+
+    params.delete("page"); // Reset the page number when a filter is changed
+    replace(`${pathname}?${params.toString()}`);
+  }
+
+  function clearFilter() {
+    const params = new URLSearchParams(searchParams);
+    setMinPrice("");
+    setMaxPrice("");
+    params.delete("min_price");
+    params.delete("max_price");
+    params.delete("page"); // Reset the page number when a filter is changed
+    replace(`${pathname}?${params.toString()}`);
+  }
+
+  return (
+    <Disclosure>
+      <DisclosureButton className="flex items-center justify-between w-full p-2 border border-foreground rounded-md relative">
+        {currentMinPrice || currentMaxPrice ? (
+          <span>
+            Price Range: {currentMinPrice || "0"} - {currentMaxPrice || "∞"}
+          </span>
+        ) : (
+          <span>Price Range</span>
+        )}
+      </DisclosureButton>
+      <DisclosurePanel className="p-4 absolute bg-background shadow-sm shadow-foreground">
+        {({ close }) => (
+          <div>
+            <div className="flex gap-2 items-center">
+              <div>
+                <input
+                  type="number"
+                  className="w-full p-2 border border-foreground rounded-md"
+                  placeholder="Minimum"
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  defaultValue={minPrice}
+                />
+              </div>
+              -
+              <div>
+                <input
+                  type="number"
+                  className="w-full p-2 border border-foreground rounded-md"
+                  placeholder="Maximum"
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  defaultValue={maxPrice}
+                />
+              </div>
+            </div>
+            <button
+              className="w-full p-2 border border-foreground rounded-md mt-2"
+              onClick={() => {
+                handleFilterChange();
+                close();
+              }}
+            >
+              Apply
+            </button>
+            <button
+              className="w-full p-2 border border-foreground rounded-md mt-2"
+              onClick={() => {
+                clearFilter();
+                close();
+              }}
+            >
+              Clear Filter
+            </button>
+          </div>
+        )}
+      </DisclosurePanel>
+    </Disclosure>
+  );
+}
+
+export function ClientDisclosureWrapper({
+  serverComponent,
+  label,
+}: {
+  serverComponent: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <Disclosure>
+      <DisclosureButton className="flex items-center justify-between w-full p-2 border border-foreground rounded-md relative">
+        {label}
+      </DisclosureButton>
+      <DisclosurePanel className="p-4 absolute bg-background shadow-sm shadow-foreground">
+        {serverComponent}
+      </DisclosurePanel>
+    </Disclosure>
+  );
 }
