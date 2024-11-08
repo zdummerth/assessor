@@ -48,8 +48,13 @@ export async function NeighborhoodFilter({
   urlParam: string;
   label: string;
 }) {
-  const neighborhoods = await getNeighborhoods();
-  const values: ComboboxValue[] = neighborhoods.map((n) => ({
+  const { data, error } = await getNeighborhoods({ neighborhoods: [] });
+
+  if (!data) {
+    console.error(error);
+    return <div>Failed to fetch neighborhood data</div>;
+  }
+  const values: ComboboxValue[] = data.map((n) => ({
     id: n.neighborhood,
     name: n.neighborhood,
   }));

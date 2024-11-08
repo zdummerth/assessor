@@ -1,6 +1,7 @@
 "use client";
 
-import polygons from "../../../custom_polygons.json";
+// import polygons from "../../../custom_polygons.json";
+import SalesCharts from "@/components/ui/sales-charts";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -14,6 +15,7 @@ import {
   Tooltip,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { get } from "http";
 
 // Define tile layer options
 const tileLayers = {
@@ -24,18 +26,17 @@ const tileLayers = {
     "https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png",
 };
 
-const getColorForPrice = (price: number): string => {
-  if (price < 100000) return "#4B0082"; // Indigo
-  if (price < 200000) return "#9400D3"; // Dark Violet
-  if (price < 400000) return "#FF00FF"; // Magenta
-  if (price < 600000) return "#FF4500"; // Orange Red
-  if (price < 800000) return "#FF1493"; // Deep Pink
+const getColorForRatio = (ratio: number): string => {
+  if (ratio < 0.5) return "#FF0000"; // Red
+  if (ratio < 0.75) return "#FF4500"; // Orange Red
+  if (ratio < 0.9) return "#FFA500"; // Orange
+  if (ratio < 1.1) return "#32CD32"; // Lime Green
+  if (ratio < 1.25) return "#FFA500"; // Orange
+  if (ratio < 1.5) return "#FF4500"; // Orange Red
   return "#FF0000"; // Red
 };
 
-const test = 100;
-
-const MapComponent = () => {
+const MapComponent = ({ data }: { data: any }) => {
   const position: [number, number] = [38.62651237193593, -90.19960005817383]; // Center of St. Louis
 
   // State for the selected tile layer
@@ -71,17 +72,25 @@ const MapComponent = () => {
           attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
         />
 
-        {/* Render the custom polygons */}
-        {polygons.features.map((feature, index) => (
+        {data.map((n: any) => (
           <Polygon
-            key={index}
+            key={n.neighborhood}
             //@ts-ignore
-            positions={feature.coordinates}
-            color={feature.id[0] <= test ? "red" : "blue"}
+            positions={n.polygon}
+            color="orange"
             weight={1}
-            fillOpacity={feature.id[0] <= test ? 1 : 0.2}
+            fillOpacity={0.4}
+            fillColor={getColorForRatio(n.medianRatio)}
           >
-            <Tooltip>{feature.id}</Tooltip>
+            <Popup>
+              <div>
+                <h2 className="text-2xl text-center">{n.nbrhd}</h2>
+                <p>Median Ratio: {n.medianRatio.toFixed(5)}</p>
+                <p>Mean Ratio: {n.meanRatio.toFixed(5)}</p>
+                <p>Number of Sales: {n.count}</p>
+                {/* <SalesCharts data={n.ratios} width="300px" height="300px" /> */}
+              </div>
+            </Popup>
           </Polygon>
         ))}
       </MapContainer>

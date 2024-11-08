@@ -1,7 +1,15 @@
 "use client";
 import { Chart } from "react-google-charts";
 
-export default function SalesCharts({ data }: { data: any }) {
+export default function SalesCharts({
+  data,
+  width = "100%",
+  height = "400px",
+}: {
+  data: any;
+  width?: string;
+  height?: string;
+}) {
   // console.log(data);
   const chartData = [["Ratio"], ...data.map((row: any) => [row])];
 
@@ -31,8 +39,8 @@ export default function SalesCharts({ data }: { data: any }) {
     <div className="mt-6 flow-root">
       <Chart
         chartType="Histogram"
-        width="100%"
-        height="400px"
+        width={width}
+        height={height}
         data={chartData}
         options={options}
       />

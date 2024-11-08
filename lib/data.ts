@@ -256,17 +256,20 @@ export async function getCodes(code: string) {
   return data;
 }
 
-export async function getNeighborhoods() {
+export async function getNeighborhoods({
+  neighborhoods = [],
+}: {
+  neighborhoods?: number[];
+}) {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from("neighborhoods")
-    .select("*")
-    .order("neighborhood");
+  let query = supabase.from("neighborhoods").select("*");
 
-  if (error) {
-    return Promise.reject(error);
+  if (neighborhoods.length > 0) {
+    query = query.in("neighborhood", neighborhoods);
   }
 
-  return data;
+  query = query.order("neighborhood");
+
+  return await query;
 }
