@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import SalesFilters from "@/components/ui/filters-sales";
 import { getMedian, getMean } from "@/app/sales/lib";
 
-const NbrhdMap = dynamic(() => import("@/components/ui/maps/nbrhds"), {
+const NbrhdMap = dynamic(() => import("@/components/ui/maps/nbrhdstest"), {
   ssr: false,
 });
 
@@ -86,6 +86,12 @@ export default async function SalesMapPage({
         nbrhd,
         medianRatio: getMedian(ratios),
         meanRatio: getMean(ratios),
+        medianSalePrice: getMedian(
+          sales.map((item: any) => item.net_selling_price)
+        ),
+        meanSalePrice: getMean(
+          sales.map((item: any) => item.net_selling_price)
+        ),
         ratios,
         count: sales.length,
       };

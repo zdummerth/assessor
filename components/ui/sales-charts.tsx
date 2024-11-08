@@ -29,9 +29,9 @@ export default function SalesCharts({
     // bar: { gap: 0 },
     histogram: {
       bucketSize: 0.1,
-      maxNumBuckets: 30,
-      minValue: 0,
-      maxValue: 3,
+      // maxNumBuckets: 30,
+      // minValue: 0,
+      // maxValue: 3,
       lastBucketPercentile: 5,
     },
   };
