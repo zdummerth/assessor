@@ -160,6 +160,20 @@ const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
   return query;
 };
 
+const applyAppealFiltersToQuery = (query: any, filters: any) => {
+  if (filters.min_difference) {
+    query = query.gte("total_difference", filters.min_difference);
+  }
+  if (filters.max_difference) {
+    query = query.lte("total_difference", filters.max_difference);
+  }
+  if (filters.appraiser) {
+    query = query.in("appraiser", filters.appraiser);
+  }
+  // query = query.limit(20);
+  return query;
+};
+
 const ITEMS_PER_PAGE = 7;
 export async function getFilteredData({
   filters,
@@ -179,10 +193,20 @@ export async function getFilteredData({
   const supabase = createClient();
 
   let query = supabase.from(table || "parcels").select(selectString);
-  let filteredQuery =
-    table === "unjoined_sales"
-      ? applySalesFiltersToQuery(query, filters)
-      : applyFiltersToQuery(query, filters);
+  let filteredQuery;
+
+  switch (table) {
+    case "unjoined_sales":
+      filteredQuery = applySalesFiltersToQuery(query, filters);
+      break;
+    case "appeals":
+      filteredQuery = applyAppealFiltersToQuery(query, filters);
+      break;
+    default:
+      filteredQuery = applyFiltersToQuery(query, filters);
+      break;
+  }
+
   // let filteredQuery = applyFiltersToQuery(query, filters);
   const ascending = sortDirection === "asc" ? true : false;
 
