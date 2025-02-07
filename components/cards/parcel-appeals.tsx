@@ -19,7 +19,7 @@ export default async function ParcelAppeals({
       throw new Error("Failed to fetch data");
     }
 
-    console.log({ data, error });
+    // console.log({ data, error });
 
     if (Array.isArray(data) && data.length === 0) {
       return <div>No Appeals Found</div>;

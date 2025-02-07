@@ -4,6 +4,67 @@ import ParcelSales from "@/components/cards/parcel-sales";
 import ParcelAppeals from "@/components/cards/parcel-appeals";
 import ParcelPermits from "@/components/cards/parcel-bps";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
+import AppraisedTotalLineChart from "@/components/ui/charts/AppraisedTotalLineChart";
+
+const BaseMap = dynamic(() => import("@/components/ui/maps/single-parcel"), {
+  ssr: false,
+});
+
+// Helper function: Compares two parcel records and returns only the changed fields.
+function getDifferences(oldParcel: any, newParcel: any) {
+  const differences: Record<string, [any, any]> = {};
+  // Ignore these keys when comparing
+  const ignoreKeys = ["id", "year", "parcel_number"];
+  // Compare the union of keys from both records
+  const keys = new Set([...Object.keys(oldParcel), ...Object.keys(newParcel)]);
+  keys.forEach((key) => {
+    if (ignoreKeys.includes(key)) return;
+    if (oldParcel[key] !== newParcel[key]) {
+      differences[key] = [oldParcel[key], newParcel[key]];
+    }
+  });
+  return differences;
+}
+
+// Timeline component: iterates through the parcels (sorted by year ascending)
+// and renders only those years where there are changes compared to the previous year.
+function ParcelTimeline({ parcels }: { parcels: any[] }) {
+  // Sort parcels in chronological order (oldest first)
+  const sortedParcels = [...parcels].sort((a, b) => a.year - b.year);
+
+  const timelineItems = sortedParcels.map((parcel, index) => {
+    if (index === 0) {
+      // No previous record for the first year
+      return null;
+    }
+    const previousParcel = sortedParcels[index - 1];
+    const changes = getDifferences(previousParcel, parcel);
+    if (Object.keys(changes).length === 0) {
+      // No changes to display for this year
+      return null;
+    }
+    return (
+      <div
+        key={parcel.year}
+        className="timeline-item mb-4 p-2 border rounded shadow-sm"
+      >
+        <h3 className="font-semibold">Year: {parcel.year}</h3>
+        <ul className="list-disc list-inside">
+          {Object.entries(changes).map(([field, [oldValue, newValue]]) => (
+            <li key={field}>
+              <span className="font-bold">{field}</span>: {oldValue}{" "}
+              <span className="mx-2">→</span> {newValue}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  });
+
+  // Only render timeline items that have changes
+  return <div>{timelineItems.filter((item) => item !== null)}</div>;
+}
 
 export default async function Page({
   params,
@@ -25,15 +86,65 @@ export default async function Page({
       throw new Error("Failed to fetch data");
     }
 
-    // console.log({ data, error });
-
     if (Array.isArray(data) && data.length === 0) {
       return <div>Parcel not found</div>;
     }
 
+    const maxYear = data.reduce(
+      (max: number, parcel: any) => (parcel.year > max ? parcel.year : max),
+      0
+    );
+
+    const mostRecentParcel = data.find(
+      (parcel: any) => parcel.year === maxYear
+    );
+
+    const { data: address, error: addressError } = await supabase
+      .from("addresses")
+      .select("address, address_line1, postcode, formatted, lat, lon, bbox")
+      .eq("address", mostRecentParcel.site_address_1)
+      .limit(1)
+      .single();
+
     return (
       <div>
-        <h1 className="text-2xl font-semibold">{id}</h1>
+        <div className="flex justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold">{id}</h1>
+            {address && (
+              <div>
+                <div className="flex items-center space-x-2">
+                  <p>
+                    {address.address_line1}, {address.postcode}
+                  </p>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${address.formatted}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 border border-blue-600 rounded-md"
+                  >
+                    View on Google Maps
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Appraised Total Line Chart Section */}
+          <div>
+            {/* 
+            The AppraisedTotalLineChart component expects the data to be an array of parcel objects,
+            each containing a `year` and `appraised_total` property. Ensure your data meets these requirements.
+          */}
+            <AppraisedTotalLineChart data={data} />
+          </div>
+          <div className="w-[350px] h-[350px]">
+            {address?.lat && address?.lon && (
+              <BaseMap lat={address.lat} lon={address.lon} />
+            )}
+          </div>
+        </div>
+
+        {/* Existing Parcel Cards */}
         <div className="flex flex-col space-y-4">
           {data.map((parcel: any) => (
             <ParcelCard
@@ -42,29 +153,40 @@ export default async function Page({
             />
           ))}
         </div>
+
+        {/* Timeline Section */}
+        <div>
+          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
+            Timeline
+          </h2>
+          <ParcelTimeline parcels={data} />
+        </div>
+
+        {/* Sales Section */}
         <div>
           <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
             Sales
           </h2>
-
           <Suspense fallback={<div>loading sales...</div>}>
             <ParcelSales parcel_number={id} />
           </Suspense>
         </div>
+
+        {/* Appeals Section */}
         <div>
           <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
             Appeals
           </h2>
-
           <Suspense fallback={<div>loading appeals...</div>}>
             <ParcelAppeals parcel_number={id} />
           </Suspense>
         </div>
+
+        {/* Permits Section */}
         <div>
           <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
             Permits
           </h2>
-
           <Suspense fallback={<div>loading permits...</div>}>
             <ParcelPermits parcel_number={id} />
           </Suspense>
