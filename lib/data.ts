@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { get } from "http";
 
 /*
 CREATE TABLE parcels (
@@ -126,8 +127,6 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
 };
 
 export type SalesFilters = {
-  nbrhd?: string[];
-  with_coords?: boolean;
   start_date?: string;
   end_date?: string;
   min_price?: number;
@@ -135,13 +134,6 @@ export type SalesFilters = {
 };
 
 const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
-  if (filters.nbrhd) {
-    const formatted = filters.nbrhd.map((nbrhd) => `R${nbrhd}`);
-    query = query.in("neighborhood_code", formatted);
-  }
-  if (filters.with_coords) {
-    query = query.neq("lat", 0).neq("long", 0);
-  }
   if (filters.start_date) {
     query = query.gte("date_of_sale", filters.start_date);
   }
@@ -182,6 +174,7 @@ export async function getFilteredData({
   sortDirection,
   selectString,
   table,
+  get_count,
 }: {
   filters: UpdatedFilters | SalesFilters | any;
   currentPage?: number;
@@ -189,6 +182,7 @@ export async function getFilteredData({
   sortDirection?: string;
   selectString?: string;
   table?: string;
+  get_count?: boolean;
 }) {
   const supabase = createClient();
 
@@ -196,7 +190,10 @@ export async function getFilteredData({
   let filteredQuery;
 
   switch (table) {
-    case "unjoined_sales":
+    case "get_sales_by_parcel_data":
+      query = supabase.rpc("get_sales_by_parcel_data", {
+        occupancy_values: filters.occupancy || null,
+      });
       filteredQuery = applySalesFiltersToQuery(query, filters);
       break;
     case "appeals":

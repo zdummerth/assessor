@@ -7,9 +7,7 @@ export default async function ProtectedPage({
   searchParams,
 }: {
   searchParams?: {
-    landuse?: string;
-    cda?: string;
-    tif?: string;
+    occupnacy?: string;
     page?: string;
     saleColumns?: string;
     sort?: string;
@@ -37,7 +35,7 @@ export default async function ProtectedPage({
           />
         </Suspense>
         <div className="mt-5 flex w-full justify-center">
-          <Pagination totalPages={totalPages} />
+          {/* <Pagination totalPages={totalPages} /> */}
         </div>
       </div>
     </div>
