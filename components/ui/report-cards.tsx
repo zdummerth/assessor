@@ -92,12 +92,12 @@ export async function CondoReportCard({
 }: {
   filters: UpdatedFilters;
 }) {
-  if (filters.landuse) {
+  if (filters.occupancy) {
     return <div></div>;
   }
   const newFilters = {
     ...filters,
-    landuse: ["1114", "1115"],
+    occupancy: ["1114", "1115"],
   };
 
   const { data, error }: any = await getFilteredData({
