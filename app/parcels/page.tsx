@@ -45,7 +45,7 @@ export default async function ProtectedPage({
             filters={formattedSearchParams}
             currentPage={currentPage}
             columns={formattedSearchParams.columns || []}
-            sort={searchParams?.sort || "asrparcelid+asc"}
+            sort={searchParams?.sort || "parcel_number+asc"}
           />
         </Suspense>
         <div className="mt-5 flex w-full justify-center">

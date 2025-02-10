@@ -45,7 +45,7 @@ export default function AppraisedTotalLineChart({
     <Chart
       chartType="LineChart"
       width="100%"
-      height={`300px`}
+      height="100%"
       data={chartData}
       options={lineOptions}
     />

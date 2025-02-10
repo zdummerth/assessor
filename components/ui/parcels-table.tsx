@@ -5,7 +5,7 @@ export default async function ParcelsTable({
   filters,
   currentPage,
   columns,
-  sort = "asrparcelid+asc",
+  sort = "parcel_number+asc",
 }: {
   filters: UpdatedFilters;
   currentPage: number;
@@ -13,7 +13,7 @@ export default async function ParcelsTable({
   sort?: string;
 }) {
   // Extract the keys to pass to the getFilteredData function
-  const columnKeys = ["asrparcelid", ...columns].join(", ");
+  const columnKeys = ["parcel_number", ...columns].join(", ");
   const sortColumn = sort.split("+")[0];
   const sortDirection = sort.split("+")[1];
 
@@ -31,7 +31,8 @@ export default async function ParcelsTable({
   }
 
   const tableToLabelMap: any = {
-    asrlanduse1: "Occupancy",
+    occupancy: "Occupancy",
+    site_address_1: "Address",
     nbrhd: "CDA Neighborhood",
     asrnbrhd: "Assessor Neighborhood",
     ward20: "Ward",
@@ -57,22 +58,11 @@ export default async function ParcelsTable({
 
   const defaultColumns = [
     {
-      key: "asrparcelid",
-      label: "Parcel ID",
+      key: "parcel_number",
+      label: "Parcel",
     },
     ...formattedColumns,
   ];
-
-  // format parcel id to string of 11 characters with leading zeros
-  const formatParcelId = (parcelId: number) => {
-    const formattedParcelId = parcelId.toString().padStart(11, "0");
-    return `${formattedParcelId.slice(0, 4)}-${formattedParcelId.slice(4, 5)}-${formattedParcelId.slice(5, 8)}.${formattedParcelId.slice(8)}`;
-  };
-
-  const formattedParcelIdData = data.map((parcel: any) => ({
-    ...parcel,
-    asrparcelid: formatParcelId(parcel.asrparcelid),
-  }));
 
   return (
     <div className="mt-6 flow-root">
@@ -96,7 +86,7 @@ export default async function ParcelsTable({
           <div className="md:hidden">
             {data?.map((parcel: any) => (
               <div
-                key={parcel.asrparcelid}
+                key={parcel.parcel_number + parcel.year}
                 className="mb-2 w-full rounded-md p-4"
               >
                 <div className="flex items-center justify-between border-b border-foreground pb-4">
@@ -132,7 +122,7 @@ export default async function ParcelsTable({
               </tr>
             </thead>
             <tbody>
-              {formattedParcelIdData.map((parcel: any) => (
+              {data.map((parcel: any) => (
                 <tr
                   key={parcel.asrparcelid}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"

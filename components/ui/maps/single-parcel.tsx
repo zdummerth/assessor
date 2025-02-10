@@ -45,8 +45,8 @@ const MapComponent = ({ lat, lon }: { lat: number; lon: number }) => {
         center={position}
         zoom={11.25}
         style={{
-          height: "300px",
-          width: "300px",
+          height: "400px",
+          width: "100%",
         }}
       >
         <TileLayer

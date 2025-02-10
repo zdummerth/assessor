@@ -6,6 +6,8 @@ import ParcelPermits from "@/components/cards/parcel-bps";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import AppraisedTotalLineChart from "@/components/ui/charts/AppraisedTotalLineChart";
+import CopyToClipboard from "@/components/copy-to-clipboard";
+import { MapPin } from "lucide-react";
 
 const BaseMap = dynamic(() => import("@/components/ui/maps/single-parcel"), {
   ssr: false,
@@ -15,7 +17,19 @@ const BaseMap = dynamic(() => import("@/components/ui/maps/single-parcel"), {
 function getDifferences(oldParcel: any, newParcel: any) {
   const differences: Record<string, [any, any]> = {};
   // Ignore these keys when comparing
-  const ignoreKeys = ["id", "year", "parcel_number"];
+  const ignoreKeys = [
+    "id",
+    "year",
+    "parcel_number",
+    "owner_address_1",
+    "owner_city",
+    "owner_state",
+    "owner_zip",
+    "appraised_res_building",
+    "assessed_res_building",
+    "working_improve_value",
+    "working_total_value",
+  ];
   // Compare the union of keys from both records
   const keys = new Set([...Object.keys(oldParcel), ...Object.keys(newParcel)]);
   keys.forEach((key) => {
@@ -27,10 +41,7 @@ function getDifferences(oldParcel: any, newParcel: any) {
   return differences;
 }
 
-// Timeline component: iterates through the parcels (sorted by year ascending)
-// and renders only those years where there are changes compared to the previous year.
 function ParcelTimeline({ parcels }: { parcels: any[] }) {
-  // Sort parcels in chronological order (oldest first)
   const sortedParcels = [...parcels].sort((a, b) => a.year - b.year);
 
   const timelineItems = sortedParcels.map((parcel, index) => {
@@ -49,7 +60,7 @@ function ParcelTimeline({ parcels }: { parcels: any[] }) {
         key={parcel.year}
         className="timeline-item mb-4 p-2 border rounded shadow-sm"
       >
-        <h3 className="font-semibold">Year: {parcel.year}</h3>
+        <h3 className="font-semibold">{parcel.year}</h3>
         <ul className="list-disc list-inside">
           {Object.entries(changes).map(([field, [oldValue, newValue]]) => (
             <li key={field}>
@@ -106,38 +117,38 @@ export default async function Page({
       .limit(1)
       .single();
 
+    const displayAddress = address
+      ? `${address.address_line1} ${address.postcode}`
+      : `${mostRecentParcel.site_address_1} ${mostRecentParcel.zip || ""}`;
+
     return (
       <div>
-        <div className="flex justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">{id}</h1>
-            {address && (
-              <div>
-                <div className="flex items-center space-x-2">
-                  <p>
-                    {address.address_line1}, {address.postcode}
-                  </p>
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${address.formatted}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2 border border-blue-600 rounded-md"
-                  >
-                    View on Google Maps
-                  </a>
-                </div>
+        <div className="grid w-full gap-4 grid-cols-1 lg:grid-cols-3 lg:h-[400px]">
+          <div className=" rounded-lg shadow overflow-hidden">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-2xl font-semibold">{id}</h1>
+              <CopyToClipboard text={id} />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <p>{displayAddress}</p>
+                <CopyToClipboard text={displayAddress} />
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <MapPin size={16} className="hover:text-blue-500" />
+                </a>
               </div>
-            )}
+            </div>
           </div>
-          {/* Appraised Total Line Chart Section */}
-          <div>
-            {/* 
-            The AppraisedTotalLineChart component expects the data to be an array of parcel objects,
-            each containing a `year` and `appraised_total` property. Ensure your data meets these requirements.
-          */}
+
+          <div className="border rounded-lg shadow overflow-hidden">
             <AppraisedTotalLineChart data={data} />
           </div>
-          <div className="w-[350px] h-[350px]">
+
+          <div className="rounded-lg shadow flex flex-col items-center overflow-hidden">
             {address?.lat && address?.lon && (
               <BaseMap lat={address.lat} lon={address.lon} />
             )}

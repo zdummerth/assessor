@@ -59,7 +59,7 @@ CREATE TABLE parcels (
 */
 
 export type UpdatedFilters = {
-  landuse?: string[];
+  occupancy?: string[];
   cda?: string[];
   tif?: string[];
   ward?: string[];
@@ -76,8 +76,8 @@ export type UpdatedFilters = {
 };
 
 const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
-  if (filters.landuse) {
-    query = query.in("asrlanduse1", filters.landuse);
+  if (filters.occupancy) {
+    query = query.in("occupancy", filters.occupancy);
   }
   if (filters.cda) {
     query = query.in("nbrhd", filters.cda);
