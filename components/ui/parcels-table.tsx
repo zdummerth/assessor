@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getFilteredData, UpdatedFilters } from "@/lib/data";
 import { NonCodedFilter, SetUrlParam } from "@/components/ui/filter-client";
 
@@ -82,20 +83,41 @@ export default async function ParcelsTable({
         </div>
 
         <div className="rounded-lg p-2 md:pt-0">
-          {/* Mobile view */}
-          <div className="md:hidden">
+          {/* Mobile view - Cards */}
+          <div className="md:hidden grid grid-cols-1 gap-4">
             {data?.map((parcel: any) => (
               <div
-                key={parcel.parcel_number + parcel.year}
-                className="mb-2 w-full rounded-md p-4"
+                key={`${parcel.parcel_number}-${parcel.year}`}
+                className="border rounded-md p-4"
               >
-                <div className="flex items-center justify-between border-b border-foreground pb-4">
-                  {defaultColumns.map((column) => (
-                    <div key={column.key} className="mb-2">
-                      <p>{parcel[column.key]}</p>
+                {/* Parcel number as header/link */}
+                <div className="mb-2">
+                  <h3 className="text-lg font-bold">
+                    <Link
+                      href={`/parcels/${parcel.parcel_number}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {parcel.parcel_number}
+                    </Link>
+                  </h3>
+                </div>
+                {/* Render remaining columns */}
+                {defaultColumns
+                  .filter((column) => column.key !== "parcel_number")
+                  .map((column, index) => (
+                    <div key={`${column.key}-${index}`} className="mb-2">
+                      <span className="font-semibold">{column.label}: </span>
+                      <span>
+                        {typeof parcel[column.key] === "boolean"
+                          ? parcel[column.key]
+                            ? "Yes"
+                            : "No"
+                          : parcel[column.key] === null
+                            ? "N/A"
+                            : parcel[column.key]}
+                      </span>
                     </div>
                   ))}
-                </div>
               </div>
             ))}
           </div>
@@ -104,16 +126,18 @@ export default async function ParcelsTable({
           <table className="hidden min-w-full md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
-                {defaultColumns.map((column) => (
+                {defaultColumns.map((column, index) => (
                   <th
-                    key={column.key}
+                    key={`${column.key}-${index}`}
                     scope="col"
                     className="px-4 py-5 font-medium sm:pl-6"
                   >
                     <SetUrlParam
                       urlParam="sort"
                       value={{
-                        id: `${column.key}+${sortDirection === "asc" ? "desc" : "asc"}`,
+                        id: `${column.key}+${
+                          sortDirection === "asc" ? "desc" : "asc"
+                        }`,
                         label: column.label,
                       }}
                     />
@@ -124,23 +148,32 @@ export default async function ParcelsTable({
             <tbody>
               {data.map((parcel: any) => (
                 <tr
-                  key={parcel.asrparcelid}
+                  key={`${parcel.parcel_number}-${parcel.year}`}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
-                  {defaultColumns.map((column) => (
+                  {defaultColumns.map((column, index) => (
                     <td
-                      key={column.key}
+                      key={`${parcel.parcel_number}-${parcel.year}-${column.key}-${index}`}
                       className="whitespace-nowrap px-3 py-3"
-                      //   style={{ fontFamily: "Courier New, Courier, monospace" }}
                     >
-                      {/* Check if parcel[column.key] is boolean*/}
-                      {typeof parcel[column.key] === "boolean"
-                        ? parcel[column.key]
-                          ? "Yes"
-                          : "No"
-                        : parcel[column.key] === null
-                          ? "N/A"
-                          : parcel[column.key]}
+                      {column.key === "parcel_number" ? (
+                        <Link
+                          href={`/parcels/${parcel.parcel_number}`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          {parcel[column.key]}
+                        </Link>
+                      ) : typeof parcel[column.key] === "boolean" ? (
+                        parcel[column.key] ? (
+                          "Yes"
+                        ) : (
+                          "No"
+                        )
+                      ) : parcel[column.key] === null ? (
+                        "N/A"
+                      ) : (
+                        parcel[column.key]
+                      )}
                     </td>
                   ))}
                 </tr>

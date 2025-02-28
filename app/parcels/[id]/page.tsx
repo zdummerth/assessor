@@ -8,6 +8,24 @@ import dynamic from "next/dynamic";
 import AppraisedTotalLineChart from "@/components/ui/charts/AppraisedTotalLineChart";
 import CopyToClipboard from "@/components/copy-to-clipboard";
 import { MapPin } from "lucide-react";
+import type { Metadata, ResolvingMetadata } from "next";
+
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  // read route params
+  const id = (await params).id;
+
+  return {
+    title: id,
+  };
+}
 
 const BaseMap = dynamic(() => import("@/components/ui/maps/single-parcel"), {
   ssr: false,
@@ -121,30 +139,81 @@ export default async function Page({
       ? `${address.address_line1} ${address.postcode}`
       : `${mostRecentParcel.site_address_1} ${mostRecentParcel.zip || ""}`;
 
+    console.log(mostRecentParcel);
     return (
       <div>
-        <div className="grid w-full gap-4 grid-cols-1 lg:grid-cols-3 lg:h-[400px]">
-          <div className=" rounded-lg shadow overflow-hidden">
-            <div className="flex items-center space-x-2">
+        <div className="grid w-full gap-4 grid-cols-1 lg:grid-cols-3 lg:h-[450px]">
+          <div className="rounded-lg shadow-lg p-2 md:p-4">
+            {/* ID Section */}
+            <div className="flex items-center space-x-3 border-b pb-3">
               <h1 className="text-2xl font-semibold">{id}</h1>
               <CopyToClipboard text={id} />
             </div>
-            <div>
+
+            {/* Address Section */}
+            <div className="mt-2 flex items-center justify-between border-b pb-3">
               <div className="flex items-center space-x-2">
-                <p>{displayAddress}</p>
+                <p className="">{displayAddress}</p>
                 <CopyToClipboard text={displayAddress} />
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <MapPin size={16} className="hover:text-blue-500" />
-                </a>
               </div>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <MapPin
+                  size={18}
+                  className="text-gray-500 hover:text-blue-500 transition-colors"
+                />
+              </a>
+            </div>
+
+            {/* Owner Info */}
+            <div className="mt-2 border-b pb-3">
+              <p className="font-medium">{mostRecentParcel.owner_name}</p>
+              <p className="">{mostRecentParcel.owner_address_1}</p>
+            </div>
+
+            {/* Neighborhood */}
+            <div className="mt-2 border-b pb-3">
+              <p className="">
+                <span className="font-semibold">Neighborhood:</span>{" "}
+                {mostRecentParcel.neighborhood}
+              </p>
+            </div>
+
+            {/* Occupancy */}
+            <div className="mt-2 border-b pb-3 flex items-center space-x-2">
+              <span className="font-semibold">
+                {mostRecentParcel.occupancy}
+              </span>
+              <span className="">-</span>
+              <span className="">{mostRecentParcel.occupancy_description}</span>
+            </div>
+
+            {/* Appraiser */}
+            <div className="mt-2 border-b pb-3">
+              <p className="">
+                <span className="font-semibold">Appraiser:</span>{" "}
+                {mostRecentParcel.appraiser}
+              </p>
+            </div>
+
+            {/* Appraised Total */}
+            <div className="mt-2 border-b pb-3">
+              <p className="">
+                <span className="font-semibold">Appraised Total:</span>{" "}
+                {mostRecentParcel.appraised_total}
+              </p>
+            </div>
+
+            {/* Property Class */}
+            <div className="mt-2">
+              <p className="font-medium">{mostRecentParcel.property_class}</p>
             </div>
           </div>
 
-          <div className="border rounded-lg shadow overflow-hidden">
+          <div className="border rounded-lg h-[400px] shadow overflow-hidden">
             <AppraisedTotalLineChart data={data} />
           </div>
 

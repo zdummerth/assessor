@@ -74,11 +74,22 @@ export type UpdatedFilters = {
   isExempt?: boolean;
   isTif?: string[];
   isAbated?: string[];
+  year?: string;
+  query?: string;
 };
 
 const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
+  if (filters.query) {
+    console.log("query", filters.query[0].replace(/ /g, "+"));
+    query = query.textSearch("site_address_1", `626 ko:*`, {
+      type: "websearch",
+    });
+  }
   if (filters.occupancy) {
     query = query.in("occupancy", filters.occupancy);
+  }
+  if (filters.year) {
+    query = query.eq("year", filters.year);
   }
   if (filters.cda) {
     query = query.in("nbrhd", filters.cda);
@@ -166,7 +177,7 @@ const applyAppealFiltersToQuery = (query: any, filters: any) => {
   return query;
 };
 
-const ITEMS_PER_PAGE = 7;
+export const ITEMS_PER_PAGE = 7;
 export async function getFilteredData({
   filters,
   currentPage,
@@ -186,14 +197,21 @@ export async function getFilteredData({
 }) {
   const supabase = createClient();
 
-  let query = supabase.from(table || "parcels").select(selectString);
+  let query = supabase
+    .from(table || "parcels")
+    .select(selectString, get_count ? { count: "exact" } : {});
   let filteredQuery;
 
   switch (table) {
     case "get_sales_by_parcel_data":
-      query = supabase.rpc("get_sales_by_parcel_data", {
-        occupancy_values: filters.occupancy || null,
-      });
+      query = supabase.rpc(
+        "get_sales_by_parcel_data",
+        {
+          occupancy_values: filters.occupancy || undefined,
+        },
+        get_count ? { count: "exact", head: true } : {}
+      );
+      // return await query;
       filteredQuery = applySalesFiltersToQuery(query, filters);
       break;
     case "appeals":

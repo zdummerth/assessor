@@ -1,13 +1,14 @@
 import { Suspense } from "react";
 import Pagination from "@/components/ui/pagination";
-import { getPagesCount } from "@/lib/data";
+import { getFilteredData, ITEMS_PER_PAGE } from "@/lib/data";
 import SalesTable from "@/components/ui/sales-table";
+import ParcelFilters from "@/components/ui/filters-parcels";
 
 export default async function ProtectedPage({
   searchParams,
 }: {
   searchParams?: {
-    occupnacy?: string;
+    occupancy?: string;
     page?: string;
     saleColumns?: string;
     sort?: string;
@@ -22,11 +23,31 @@ export default async function ProtectedPage({
 
   const currentPage = Number(searchParams?.page) || 1;
 
-  const { totalPages } = await getPagesCount(formattedSearchParams, "sales");
+  const res = await getFilteredData({
+    filters: formattedSearchParams,
+    table: "get_sales_by_parcel_data",
+    get_count: true,
+  });
+
+  console.log({ res });
+  const { data, error, count } = res;
+
+  // console.log({ data, error, count });
+
+  if (!count) {
+    console.error(error);
+    return <div>Failed to fetch in sales page</div>;
+  }
+
+  const totalPagesCount = Math.ceil(count / ITEMS_PER_PAGE);
 
   return (
     <div className="w-full flex gap-4">
+      <div className="w-1/4">
+        <ParcelFilters />
+      </div>
       <div className="w-full">
+        <p className="text-sm text-foreground">{count} sales match filters</p>
         <Suspense fallback={<div>loading parcels...</div>}>
           <SalesTable
             filters={formattedSearchParams}
@@ -35,7 +56,7 @@ export default async function ProtectedPage({
           />
         </Suspense>
         <div className="mt-5 flex w-full justify-center">
-          {/* <Pagination totalPages={totalPages} /> */}
+          <Pagination totalPages={totalPagesCount} />
         </div>
       </div>
     </div>

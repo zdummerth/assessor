@@ -19,6 +19,7 @@ export default async function Filter({
     tif: "tif_district_codes",
     specBusDist: "spec_bus_dist_codes",
     nbrhdcode: "neighborhood_code",
+    occupancy: "land_use_codes",
   };
 
   const codeTable = map[urlParam];

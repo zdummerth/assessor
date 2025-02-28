@@ -15,7 +15,7 @@ export default async function ParcelFilters() {
     <div className="h-[95vh] overflow-y-auto">
       <div className="border-b border-foreground py-8">
         <Suspense fallback={<div>loading filter...</div>}>
-          <Filter label="Occupancy" urlParam="landuse" />
+          <Filter label="Occupancy" urlParam="occupancy" />
         </Suspense>
       </div>
       <div className="border-b border-foreground py-8">
@@ -23,7 +23,7 @@ export default async function ParcelFilters() {
           <Filter label="Neighborhood" urlParam="cda" />
         </Suspense>
       </div>
-      <div className="border-b border-foreground py-8">
+      {/* <div className="border-b border-foreground py-8">
         <Suspense fallback={<div>loading filter...</div>}>
           <Filter label="SBD/CID District" urlParam="specBusDist" />
         </Suspense>
@@ -45,7 +45,7 @@ export default async function ParcelFilters() {
       </div>
       <div className="border-b border-foreground py-8">
         <BooleanFilter label="Is Abated" urlParam="isAbated" />
-      </div>
+      </div> */}
     </div>
   );
 }
