@@ -112,7 +112,7 @@ export function SelectFilter({
     <>
       {label && <h4 className="mb-4">{label}</h4>}
       <select
-        className="w-full p-2 border border-foreground rounded-md"
+        className="w-full p-2 border border-foreground bg-background rounded-md"
         onChange={(e) => handleFilterChange(e.target.value)}
         defaultValue={defaultValue?.value}
       >

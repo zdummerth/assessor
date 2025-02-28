@@ -1,34 +1,34 @@
 import { getFilteredData } from "@/lib/data";
 import Link from "next/link";
+import { SearchX } from "lucide-react";
 
 const ParcelCard = ({ parcel }: { parcel: any }) => {
   return (
     <div>
       <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4">{parcel.parcel_number}</h2>
-        <p className="text-gray-200 mb-2">
-          <span className="font-semibold">Year:</span> {parcel.year}
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-bold">{parcel.parcel_number}</h2>
+          <span className="text-sm">{parcel.year}</span>
+        </div>
+        <p className="">
+          {parcel.site_address_1}, {parcel.site_zip}
         </p>
-        <p className="text-gray-200 mb-2">
-          <span className="font-semibold">Owner:</span> {parcel.owner_name}
+        <p className="">
+          {parcel.occupancy} ({parcel.occupancy_description})
         </p>
-        <p className="text-gray-200 mb-2">
-          <span className="font-semibold">Owner Address:</span>{" "}
+        <p className="">{parcel.neighborhood}</p>
+        <div className="mt-4">
+          <h3 className="font-semibold">Owner</h3>
+        </div>
+        <p className="mb-2">{parcel.owner_name}</p>
+        <p className="mb-2">
           {parcel.owner_address_1}, {parcel.owner_city}, {parcel.owner_state}{" "}
           {parcel.owner_zip}
         </p>
-        <p className="text-gray-200 mb-2">
-          <span className="font-semibold">Site Address:</span>{" "}
-          {parcel.site_address_1}, {parcel.site_zip}
-        </p>
-
-        <p className="text-gray-200 mb-2">
-          <span className="font-semibold">Occupancy:</span> {parcel.occupancy} (
-          {parcel.occupancy_description})
-        </p>
-        <p className="text-gray-200">
-          <span className="font-semibold">Appraiser:</span> {parcel.appraiser}
-        </p>
+        <div>
+          <h3 className="font-semibold">Appraiser</h3>
+          <p>{parcel.appraiser}</p>
+        </div>
       </div>
     </div>
   );
@@ -44,7 +44,7 @@ export default async function ParcelSearchResults({
   const { data, error } = await getFilteredData({
     filters: { year },
     currentPage: 1,
-    table: "search_parcel_year",
+    table: "search_site_addresses",
     searchString: query,
   });
 
@@ -54,12 +54,20 @@ export default async function ParcelSearchResults({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+      {data.length === 0 && (
+        <div className="w-full flex flex-col items-center justify-center mt-16">
+          <SearchX className="w-16 h-16 text-gray-400 mx-auto" />
+          <p className="text-center">
+            No parcels found for search term: <strong>{query}</strong>
+          </p>
+        </div>
+      )}
       {data.map((parcel: any) => (
         <Link
           href={`/parcels/${parcel.parcel_number}`}
           key={parcel.id}
-          className="border border-gray-200 rounded-lg"
+          className="border border-gray-200 rounded-lg shadow-sm shadow-foreground"
         >
           <ParcelCard parcel={parcel} />
         </Link>

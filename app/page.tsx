@@ -1,6 +1,10 @@
 import Search from "@/components/ui/search";
 import { SelectFilter } from "@/components/ui/filter-client";
 import ParcelSearchResults from "@/components/ui/parcel-search-results";
+import {
+  ParcelSearchResultsSkeleton,
+  BinocularsSkeleton,
+} from "@/components/ui/parcel-search-results-skeleton";
 import { Suspense } from "react";
 
 export default async function ProtectedPage({
@@ -17,7 +21,7 @@ export default async function ProtectedPage({
   return (
     <div className="">
       <div className="flex gap-4">
-        <div className="w-[100px]">
+        <div className="w-[85px]">
           <SelectFilter
             values={[
               { value: "2020", label: "2020" },
@@ -32,12 +36,12 @@ export default async function ProtectedPage({
           />
         </div>
 
-        <div className="md:w-[300px]">
-          <Search placeholder="Search parcel number or site address" />
+        <div className=" w-full md:w-[300px]">
+          <Search placeholder="parcel number or site address" />
         </div>
       </div>
       {query && (
-        <Suspense fallback={<div>loading parcels...</div>}>
+        <Suspense fallback={<BinocularsSkeleton />} key={`${query}-${year}`}>
           <ParcelSearchResults query={query} year={year} />
         </Suspense>
       )}

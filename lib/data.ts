@@ -171,7 +171,7 @@ const applyAppealFiltersToQuery = (query: any, filters: any) => {
   return query;
 };
 
-export const ITEMS_PER_PAGE = 7;
+export const ITEMS_PER_PAGE = 9;
 export async function getFilteredData({
   filters,
   currentPage,
@@ -210,9 +210,9 @@ export async function getFilteredData({
       // return await query;
       filteredQuery = applySalesFiltersToQuery(query, filters);
       break;
-    case "search_parcel_year":
+    case "search_site_addresses":
       query = supabase.rpc(
-        "search_parcel_year",
+        "search_site_addresses",
         {
           search_text: searchString || undefined,
         },
