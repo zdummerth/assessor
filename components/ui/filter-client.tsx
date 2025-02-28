@@ -77,6 +77,55 @@ export function BooleanFilter({
   );
 }
 
+type SelectValue = {
+  value: string;
+  label: string;
+  selected?: boolean;
+};
+
+export function SelectFilter({
+  urlParam,
+  label,
+  values,
+  defaultValue,
+}: {
+  urlParam: string;
+  label?: string;
+  values: SelectValue[];
+  defaultValue?: SelectValue;
+}) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  function handleFilterChange(value: string) {
+    const params = new URLSearchParams(searchParams);
+    if (value !== "") {
+      params.set(urlParam, value);
+    } else {
+      params.delete(urlParam); // Remove the parameter if no value is selected
+    }
+    replace(`${pathname}?${params.toString()}`);
+  }
+
+  return (
+    <>
+      {label && <h4 className="mb-4">{label}</h4>}
+      <select
+        className="w-full p-2 border border-foreground rounded-md"
+        onChange={(e) => handleFilterChange(e.target.value)}
+        defaultValue={defaultValue?.value}
+      >
+        {values.map((value) => (
+          <option key={value.value} value={value.value}>
+            {value.label}
+          </option>
+        ))}
+      </select>
+    </>
+  );
+}
+
 export function SetUrlParam({
   urlParam,
   value,

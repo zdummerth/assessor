@@ -79,12 +79,6 @@ export type UpdatedFilters = {
 };
 
 const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
-  if (filters.query) {
-    console.log("query", filters.query[0].replace(/ /g, "+"));
-    query = query.textSearch("site_address_1", `626 ko:*`, {
-      type: "websearch",
-    });
-  }
   if (filters.occupancy) {
     query = query.in("occupancy", filters.occupancy);
   }
@@ -186,6 +180,7 @@ export async function getFilteredData({
   selectString,
   table,
   get_count,
+  searchString,
 }: {
   filters: UpdatedFilters | SalesFilters | any;
   currentPage?: number;
@@ -194,6 +189,7 @@ export async function getFilteredData({
   selectString?: string;
   table?: string;
   get_count?: boolean;
+  searchString?: string;
 }) {
   const supabase = createClient();
 
@@ -213,6 +209,17 @@ export async function getFilteredData({
       );
       // return await query;
       filteredQuery = applySalesFiltersToQuery(query, filters);
+      break;
+    case "search_parcel_year":
+      query = supabase.rpc(
+        "search_parcel_year",
+        {
+          search_text: searchString || undefined,
+        },
+        get_count ? { count: "exact", head: true } : {}
+      );
+      // return await query;
+      filteredQuery = applyFiltersToQuery(query, filters);
       break;
     case "appeals":
       filteredQuery = applyAppealFiltersToQuery(query, filters);
