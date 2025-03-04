@@ -60,7 +60,9 @@ CREATE TABLE parcels (
 */
 
 export type UpdatedFilters = {
+  propertyClass?: string[];
   occupancy?: string[];
+  nbhd?: string[];
   cda?: string[];
   tif?: string[];
   ward?: string[];
@@ -83,7 +85,13 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
     query = query.in("occupancy", filters.occupancy);
   }
   if (filters.year) {
-    query = query.eq("year", filters.year);
+    query = query.in("year", filters.year);
+  }
+  if (filters.propertyClass && !filters.propertyClass.includes("all")) {
+    query = query.in("property_class", filters.propertyClass);
+  }
+  if (filters.nbhd) {
+    query = query.in("neighborhood_int", filters.nbhd);
   }
   if (filters.cda) {
     query = query.in("nbrhd", filters.cda);
@@ -181,6 +189,7 @@ export async function getFilteredData({
   table,
   get_count,
   searchString,
+  count,
 }: {
   filters: UpdatedFilters | SalesFilters | any;
   currentPage?: number;
@@ -189,13 +198,14 @@ export async function getFilteredData({
   selectString?: string;
   table?: string;
   get_count?: boolean;
+  count?: { count: "exact" | "planned" | "estimated"; head: boolean };
   searchString?: string;
 }) {
   const supabase = createClient();
 
   let query = supabase
     .from(table || "parcels")
-    .select(selectString, get_count ? { count: "exact" } : {});
+    .select(selectString, count ? count : {});
   let filteredQuery;
 
   switch (table) {
@@ -284,6 +294,7 @@ export async function getCodes(code: string) {
     "cda_codes",
     "tif_district_codes",
     "spec_bus_dist_codes",
+    "neighborhoods",
   ];
 
   if (!possibleCodes.includes(code)) {
@@ -318,4 +329,9 @@ export async function getNeighborhoods({
   query = query.order("neighborhood");
 
   return await query;
+}
+
+export async function getAppraisers() {
+  const supabase = createClient();
+  return supabase.from("appraisers").select("*").order("appraiser");
 }

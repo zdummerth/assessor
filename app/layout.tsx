@@ -22,8 +22,10 @@ export const metadata = {
 
 export default function RootLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: any;
 }) {
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>

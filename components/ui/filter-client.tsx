@@ -7,7 +7,7 @@ import {
 } from "@headlessui/react";
 
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Value = {
   id: string;
@@ -34,6 +34,37 @@ export function NonCodedFilter({
         immediate={immediate}
       />
     </>
+  );
+}
+
+export function ToggleFilter({
+  urlParam,
+  children,
+}: {
+  urlParam: string;
+  children: React.ReactNode;
+}) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  function handleToggle() {
+    const params = new URLSearchParams(searchParams);
+    // Toggle the filter: if it's currently "true", remove it; otherwise, set it to "true"
+    if (searchParams.get(urlParam) === "true") {
+      params.delete(urlParam);
+    } else {
+      params.set(urlParam, "true");
+    }
+    // Reset the page number whenever the filter changes
+    params.delete("page");
+    replace(`${pathname}?${params.toString()}`);
+  }
+
+  return (
+    <button onClick={handleToggle} className="p-2 border rounded-md">
+      {children}
+    </button>
   );
 }
 
@@ -92,11 +123,17 @@ export function SelectFilter({
   urlParam: string;
   label?: string;
   values: SelectValue[];
-  defaultValue?: SelectValue;
+  defaultValue?: string;
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
+
+  const [selectedValue, setSelectedValue] = useState(defaultValue);
+
+  useEffect(() => {
+    setSelectedValue(searchParams.get(urlParam) || defaultValue);
+  }, [searchParams.get(urlParam)]);
 
   function handleFilterChange(value: string) {
     const params = new URLSearchParams(searchParams);
@@ -105,6 +142,8 @@ export function SelectFilter({
     } else {
       params.delete(urlParam); // Remove the parameter if no value is selected
     }
+    params.delete("page");
+    setSelectedValue(value);
     replace(`${pathname}?${params.toString()}`);
   }
 
@@ -112,9 +151,10 @@ export function SelectFilter({
     <>
       {label && <h4 className="mb-4">{label}</h4>}
       <select
-        className="w-full p-2 border border-foreground bg-background rounded-md"
+        className="w-full px-2 py-[2px] border border-foreground bg-background rounded-md"
         onChange={(e) => handleFilterChange(e.target.value)}
-        defaultValue={defaultValue?.value}
+        // defaultValue={defaultValue}
+        value={selectedValue}
       >
         {values.map((value) => (
           <option key={value.value} value={value.value}>
@@ -123,6 +163,23 @@ export function SelectFilter({
         ))}
       </select>
     </>
+  );
+}
+
+export function YearSelectFilter({ defaultValue }: { defaultValue: string }) {
+  return (
+    <SelectFilter
+      values={[
+        { value: "2020", label: "2020" },
+        { value: "2021", label: "2021" },
+        { value: "2022", label: "2022" },
+        { value: "2023", label: "2023" },
+        { value: "2024", label: "2024" },
+        { value: "2025", label: "2025" },
+      ]}
+      urlParam="year"
+      defaultValue={defaultValue}
+    />
   );
 }
 

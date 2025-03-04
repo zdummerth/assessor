@@ -30,6 +30,7 @@ export default function ComboboxComponent({
   const [query, setQuery] = useState("");
 
   function handleFilterChange(values: Value[]) {
+    console.log({ values });
     const params = new URLSearchParams(searchParams);
     const ids = values.map((value) => value.id);
 
@@ -83,17 +84,16 @@ export default function ComboboxComponent({
       multiple
       immediate={immediate}
       value={selectedValues}
-      // @ts-ignore
       onChange={handleFilterChange}
       onClose={() => setQuery("")}
     >
       <div className="flex items-center relative">
-        <SearchIcon size="16" strokeWidth={2} className="absolute left-2" />
+        <SearchIcon size="14" strokeWidth={2} className="absolute left-2" />
         <ComboboxInput
-          aria-label="Assignees"
+          // aria-label="Assignees"
           onChange={(event) => setQuery(event.target.value)}
-          value={query}
-          className="p-2 pl-7 rounded-md border border-foreground w-full bg-inderit text-inherit"
+          displayValue={(value: Value) => value.name}
+          className="p-[1px] pl-7 rounded-md border border-foreground w-full text-inherit"
         />
       </div>
       {selectedValues.length > 0 && (
@@ -118,13 +118,14 @@ export default function ComboboxComponent({
       )}
       <ComboboxOptions
         anchor="top"
-        className="border empty:invisible w-[var(--input-width)] max-h-[250px] bg-accent text-foreground relative z-20"
+        transition
+        className="origin-bottom border transition duration-200 ease-out empty:invisible data-[closed]:scale-95 data-[closed]:opacity-0 border empty:invisible w-[var(--input-width)] max-h-[250px] bg-accent text-foreground relative z-20"
       >
         {filteredValues.map((value) => (
           <ComboboxOption
             key={value.id}
             value={value}
-            className="data-[focus]:bg-blue-500 border-b border-foreground py-2 px-4"
+            className="data-[focus]:bg-blue-500 border-b border-foreground py-2 px-2 text-sm"
           >
             {value.name}
           </ComboboxOption>

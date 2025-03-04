@@ -1,10 +1,7 @@
 import Search from "@/components/ui/search";
-import { SelectFilter } from "@/components/ui/filter-client";
+import { YearSelectFilter } from "@/components/ui/filter-client";
 import ParcelSearchResults from "@/components/ui/parcel-search-results";
-import {
-  ParcelSearchResultsSkeleton,
-  BinocularsSkeleton,
-} from "@/components/ui/parcel-search-results-skeleton";
+import { BinocularsSkeleton } from "@/components/ui/parcel-search-results-skeleton";
 import { Suspense } from "react";
 
 export default async function ProtectedPage({
@@ -12,28 +9,33 @@ export default async function ProtectedPage({
 }: {
   searchParams?: {
     query?: string;
+    years?: string;
     year?: string;
   };
 }) {
+  const formattedSearchParams = Object.fromEntries(
+    Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [
+      key,
+      value.split("+"),
+    ])
+  );
+
+  console.log({ formattedSearchParams });
+
   const query = searchParams?.query;
-  const year = searchParams?.year || new Date().getFullYear().toString();
+
+  const filters = {
+    ...formattedSearchParams,
+    year: formattedSearchParams?.year || [new Date().getFullYear().toString()],
+  };
+
+  // console.log({ filters });
 
   return (
     <div className="">
       <div className="flex gap-4">
-        <div className="w-[85px]">
-          <SelectFilter
-            values={[
-              { value: "2020", label: "2020" },
-              { value: "2021", label: "2021" },
-              { value: "2022", label: "2022" },
-              { value: "2023", label: "2023" },
-              { value: "2024", label: "2024" },
-              { value: "2025", label: "2025" },
-            ]}
-            urlParam="year"
-            defaultValue={{ value: year, label: year }}
-          />
+        <div className="w-[85px] text-sm">
+          <YearSelectFilter defaultValue={filters.year[0]} />
         </div>
 
         <div className=" w-full md:w-[300px]">
@@ -41,8 +43,11 @@ export default async function ProtectedPage({
         </div>
       </div>
       {query && (
-        <Suspense fallback={<BinocularsSkeleton />} key={`${query}-${year}`}>
-          <ParcelSearchResults query={query} year={year} />
+        <Suspense
+          fallback={<BinocularsSkeleton />}
+          key={`${query}-${filters.year[0]}`}
+        >
+          <ParcelSearchResults query={query} filters={filters} />
         </Suspense>
       )}
     </div>

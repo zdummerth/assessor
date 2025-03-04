@@ -33,7 +33,7 @@ export function ParcelSearchResultsSkeleton() {
 export function BinocularsSkeleton() {
   return (
     <div className="flex flex-col items-center justify-center mt-16">
-      <Binoculars className="w-16 h-16 text-gray-400 mx-auto animate-pulse" />
+      <Binoculars className="w-12 h-12 text-gray-400 mx-auto animate-pulse" />
       <p className="text-center">Searching for parcels...</p>
     </div>
   );

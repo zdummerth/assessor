@@ -1,5 +1,5 @@
 import ComboboxComponent from "@/components/ui/combobox";
-import { getCodes, getNeighborhoods } from "@/lib/data";
+import { getCodes, getNeighborhoods, getAppraisers } from "@/lib/data";
 
 export type ComboboxValue = {
   id: string;
@@ -20,6 +20,7 @@ export default async function Filter({
     specBusDist: "spec_bus_dist_codes",
     nbrhdcode: "neighborhood_code",
     occupancy: "land_use_codes",
+    nbhd: "neighborhoods",
   };
 
   const codeTable = map[urlParam];
@@ -68,6 +69,32 @@ export async function NeighborhoodFilter({
         urlParam={urlParam}
         immediate={false}
       />
+    </div>
+  );
+}
+
+export async function AppraiserFilter({
+  urlParam,
+  label,
+}: {
+  urlParam: string;
+  label: string;
+}) {
+  const { data, error } = await getAppraisers();
+
+  if (!data) {
+    console.error(error);
+    return <div>Failed to fetch appraiser data</div>;
+  }
+  const values: ComboboxValue[] = data.map((n) => ({
+    id: n.id,
+    name: n.appraiser,
+  }));
+
+  return (
+    <div className="relative">
+      <h4 className="mb-4">{label}</h4>
+      <ComboboxComponent values={values} urlParam={urlParam} immediate={true} />
     </div>
   );
 }
