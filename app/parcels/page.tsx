@@ -21,7 +21,7 @@ export default async function ParcelsAdvancedSearchPage({
     nbhd?: string;
     sortColumn?: string;
     sortDirection?: string;
-    view?: "grid" | "map";
+    view?: "grid" | "map" | "summary";
   };
 }) {
   const limit = searchParams?.view === "map" ? 100 : ITEMS_PER_PAGE;
@@ -74,7 +74,7 @@ export default async function ParcelsAdvancedSearchPage({
       </div>
 
       <div className="w-full">
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-2 items-center justify-between">
           {/* Mobile Filters */}
           <div className="lg:hidden">
             <Sidebar total={totalNumberOfFilters}>
@@ -86,53 +86,58 @@ export default async function ParcelsAdvancedSearchPage({
               />
             </Sidebar>
           </div>
-          <ArrowButton
-            pageNumber={page - 1}
-            direction="left"
-            isDisabled={page <= 1}
-          />
-          <ArrowButton
-            pageNumber={page + 1}
-            direction="right"
-            isDisabled={false}
-          />
 
           {/* Display current parcel range */}
           <div className="text-sm flex items-center gap-2">
-            <span>
-              {page > 1 ? (page - 1) * limit + 1 : 1}-{page * limit}
-            </span>
-            <span>of</span>
-            <Suspense
-              fallback={
-                <span className="bg-gray-500 rounded h-4 w-12 animate-pulse"></span>
-              }
-              key={
-                year +
-                  occupancyKey +
-                  page +
-                  sortColumnKey +
-                  sortDirectionKey +
-                  neighborhoodKey +
-                  classKey +
-                  appraiserKey +
-                  searchParams?.view || "grid"
-              }
-            >
-              <span>
-                <SearchCount
-                  filters={filters}
-                  table="parcel_year"
-                  returnType="count"
+            {searchParams?.view !== "summary" && (
+              <>
+                <ArrowButton
+                  pageNumber={page - 1}
+                  direction="left"
+                  isDisabled={page <= 1}
                 />
-              </span>
-            </Suspense>
+                <ArrowButton
+                  pageNumber={page + 1}
+                  direction="right"
+                  isDisabled={false}
+                />
+                <span>
+                  {page > 1 ? (page - 1) * limit + 1 : 1}-{page * limit}
+                </span>
+                <span>of</span>
+                <Suspense
+                  fallback={
+                    <span className="bg-gray-500 rounded h-4 w-12 animate-pulse"></span>
+                  }
+                  key={
+                    year +
+                      occupancyKey +
+                      page +
+                      sortColumnKey +
+                      sortDirectionKey +
+                      neighborhoodKey +
+                      classKey +
+                      appraiserKey +
+                      searchParams?.view || "grid"
+                  }
+                >
+                  <span>
+                    <SearchCount
+                      filters={filters}
+                      table="parcel_year"
+                      returnType="count"
+                    />
+                  </span>
+                </Suspense>
+              </>
+            )}
           </div>
           <div>
             <SelectFilter
               values={[
                 { value: "grid", label: "Grid" },
                 { value: "map", label: "Map" },
+                { value: "summary", label: "Summary" },
               ]}
               defaultValue={searchParams?.view || "grid"}
               urlParam="view"

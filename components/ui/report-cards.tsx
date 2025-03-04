@@ -1,18 +1,21 @@
-import { getFilteredData, UpdatedFilters } from "@/lib/data";
+import { getFilteredData, UpdatedFilters, getAggregates } from "@/lib/data";
 
 export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
   console.log("filters", filters);
   const { data, error }: any = await getFilteredData({
     filters,
-    selectString: `count:asrparcelid.count(), 
-    res_land_value:aprresland.sum(), 
-    res_improvement_value:aprresimprove.sum(),
-    com_land_value:aprcomland.sum(),
-    com_improvement_value:aprcomimprove.sum(),
-    exempt_land_value:aprexemptland.sum(),
-    exempt_improvement_value:aprexemptimprove.sum(),
-    total_asd_value:asdtotal.sum()
+    selectString: `count:parcel_number.count(),
+    res_land_value:appraised_res_land.sum(),
+    res_building_value:appraised_res_building.sum(),
+    res_new_construction_value:appraised_res_new_construction.sum(),
+    com_land_value:appraised_com_land.sum(),
+    com_building_value:appraised_com_building.sum(),
+    com_new_construction_value:appraised_com_new_construction.sum(),
+    agr_land_value:appraised_agr_land.sum(),
+    agr_building_value:appraised_agr_building.sum(),
+    agr_new_construction_value:appraised_agr_new_construction.sum()
     `,
+    table: "parcel_year",
   });
 
   if (!data) {
@@ -26,6 +29,8 @@ export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
       data[0][key] = 0;
     }
   }
+
+  console.log(data);
 
   return (
     <div className="p-4 rounded-lg shadow-foreground shadow-sm">
@@ -45,7 +50,7 @@ export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
             Residential Improvement Value
           </h3>
           <p className="text-2xl font-bold">
-            ${data[0].res_improvement_value.toLocaleString()}
+            ${data[0].res_building_value.toLocaleString()}
           </p>
         </div>
         <div>
@@ -59,27 +64,7 @@ export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
             Commercial Improvement Value
           </h3>
           <p className="text-2xl font-bold">
-            ${data[0].com_improvement_value.toLocaleString()}
-          </p>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Exempt Land Value</h3>
-          <p className="text-2xl font-bold">
-            ${data[0].exempt_land_value.toLocaleString()}
-          </p>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-2">
-            Exempt Improvement Value
-          </h3>
-          <p className="text-2xl font-bold">
-            ${data[0].exempt_improvement_value.toLocaleString()}
-          </p>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Total Assessed Value</h3>
-          <p className="text-2xl font-bold">
-            ${data[0].total_asd_value.toLocaleString()}
+            ${data[0].com_building_value.toLocaleString()}
           </p>
         </div>
       </div>

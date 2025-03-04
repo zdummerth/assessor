@@ -338,3 +338,22 @@ export async function getAppraisers() {
   const supabase = createClient();
   return supabase.from("appraisers").select("*").order("appraiser");
 }
+
+export async function getAggregates() {
+  const supabase = createClient();
+  return supabase
+    .from("parcel_year")
+    .select(
+      `parcel_number.count(),
+    res_land_value:appraised_res_land.sum(),
+    res_building_value:appraised_res_building.sum(),
+    res_new_construction_value:appraised_res_new_construction.sum(),
+    com_land_value:appraised_com_land.sum(),
+    com_building_value:appraised_com_building.sum(),
+    com_new_construction_value:appraised_com_new_construction.sum(),
+    agr_land_value:appraised_agr_land.sum(),
+    agr_building_value:appraised_agr_building.sum(),
+    agr_new_construction_value:appraised_agr_new_construction.sum()`
+    )
+    .eq("year", 2025);
+}
