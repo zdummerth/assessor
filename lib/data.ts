@@ -190,6 +190,7 @@ export async function getFilteredData({
   get_count,
   searchString,
   count,
+  limit,
 }: {
   filters: UpdatedFilters | SalesFilters | any;
   currentPage?: number;
@@ -200,7 +201,9 @@ export async function getFilteredData({
   get_count?: boolean;
   count?: { count: "exact" | "planned" | "estimated"; head: boolean };
   searchString?: string;
+  limit?: number;
 }) {
+  const limitNumber = limit || ITEMS_PER_PAGE;
   const supabase = createClient();
 
   let query = supabase
@@ -243,8 +246,8 @@ export async function getFilteredData({
   const ascending = sortDirection === "asc" ? true : false;
 
   if (currentPage) {
-    const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endingPage = offset + ITEMS_PER_PAGE - 1;
+    const offset = (currentPage - 1) * limitNumber;
+    const endingPage = offset + limitNumber - 1;
 
     filteredQuery = filteredQuery.range(offset, endingPage);
   }

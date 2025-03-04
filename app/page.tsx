@@ -47,7 +47,12 @@ export default async function ProtectedPage({
           fallback={<BinocularsSkeleton />}
           key={`${query}-${filters.year[0]}`}
         >
-          <ParcelSearchResults query={query} filters={filters} />
+          <ParcelSearchResults
+            query={query}
+            filters={filters}
+            view="grid"
+            limit={9}
+          />
         </Suspense>
       )}
     </div>

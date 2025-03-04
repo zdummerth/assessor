@@ -6,9 +6,12 @@ import {
   TileLayer,
   Popup,
   CircleMarker,
+  Circle,
   GeoJSON,
+  Polygon,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import Link from "next/link";
 
 // Define tile layer options
 const tileLayers = {
@@ -28,8 +31,20 @@ const getColorForPrice = (price: number): string => {
   return "#FF0000"; // Red
 };
 
-const MapComponent = ({ points }: { points: any }) => {
-  const position: [number, number] = [38.62651237193593, -90.19960005817383]; // Center of St. Louis
+const MapComponent = ({
+  points,
+  neighborhoods,
+}: {
+  points: any;
+  neighborhoods?: {
+    neighborhood: number;
+    polygon: number[];
+    group: number;
+  }[];
+}) => {
+  const startingPosition: [number, number] = points[0]
+    ? [points[0].lat, points[0].long]
+    : [38.62651237193593, -90.19960005817383];
 
   // State for the selected tile layer
   const [tileLayer, setTileLayer] = useState<string>(tileLayers.CartoDB_Dark);
@@ -72,8 +87,8 @@ const MapComponent = ({ points }: { points: any }) => {
         </select>
       </div>
       <MapContainer
-        center={position}
-        zoom={11.25}
+        center={startingPosition}
+        zoom={12}
         style={{
           height: "80vh",
           width: "100%",
@@ -93,29 +108,53 @@ const MapComponent = ({ points }: { points: any }) => {
           />
         )}
 
+        {neighborhoods &&
+          neighborhoods.map((n: any) => (
+            <Polygon
+              key={n.neighborhood}
+              //@ts-ignore
+              positions={n.polygon}
+              color="orange"
+              weight={1}
+              fillOpacity={0.1}
+              // fillColor={getColorForRatio(n.medianRatio)}
+              fillColor="orange"
+            >
+              <Popup>
+                <div>
+                  <h2 className="text-2xl text-center">{n.neighborhood}</h2>
+                  {/* <p>Median Ratio: {n.medianRatio.toFixed(5)}</p>
+                        <p>Mean Ratio: {n.meanRatio.toFixed(5)}</p>
+                        <p>Number of Sales: {n.count}</p> */}
+                  {/* <SalesCharts data={n.ratios} width="300px" height="300px" /> */}
+                </div>
+              </Popup>
+            </Polygon>
+          ))}
+
         {/* Render the points on top of the GeoJSON layer */}
         {points.map((point: any, index: number) => (
-          <CircleMarker
+          <Circle
             key={index}
             center={[point.lat, point.long]}
-            pathOptions={{
-              color: getColorForPrice(point.net_selling_price),
-            }}
-            radius={5}
+            pathOptions={{ color: "orange" }}
+            radius={4}
           >
             <Popup>
               <div>
-                <p>Parcel Number: {point.parcel_number}</p>
-                <p>Neighborhood Code: {point.neighborhood_code}</p>
-                <p>Occupancy: {point.occupancy}</p>
-                <p>Sale Type: {point.sale_type}</p>
-                <p>
-                  Net Selling Price: ${point.net_selling_price.toLocaleString()}
-                </p>
-                <p>Date of Sale: {point.date_of_sale}</p>
+                <Link
+                  href={`/parcels/${point.parcel_number}`}
+                  key={point.parcel_number}
+                  className="border border-gray-200 rounded-lg shadow-sm shadow-foreground"
+                  target="_blank"
+                >
+                  {point.parcel_number}
+                </Link>
+                <p>Address: {point.address}</p>
+                <p>Neighborhood: {point.neighborhood}</p>
               </div>
             </Popup>
-          </CircleMarker>
+          </Circle>
         ))}
       </MapContainer>
     </div>

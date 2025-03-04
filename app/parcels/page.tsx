@@ -1,12 +1,12 @@
 import { Suspense } from "react";
-import ParcelFilters from "@/components/ui/filters-parcels";
 import ParcelSearchResults from "@/components/ui/parcel-search-results";
 import SearchCount from "@/components/ui/search-count";
-import Sidebar from "@/components/ui/sidebar";
-import { YearSelectFilter, SelectFilter } from "@/components/ui/filter-client";
 import { BinocularsSkeleton } from "@/components/ui/parcel-search-results-skeleton";
 import { ArrowButton } from "@/components/ui/pagination-client";
 import { ITEMS_PER_PAGE } from "@/lib/data";
+import ParcelsFilterPanel from "@/components/ui/parcel-filters-panel";
+import { SelectFilter } from "@/components/ui/filter-client";
+import Sidebar from "@/components/ui/sidebar";
 
 export default async function ParcelsAdvancedSearchPage({
   searchParams,
@@ -21,23 +21,22 @@ export default async function ParcelsAdvancedSearchPage({
     nbhd?: string;
     sortColumn?: string;
     sortDirection?: string;
+    view?: "grid" | "map";
   };
 }) {
+  const limit = searchParams?.view === "map" ? 100 : ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
-
   const occupancy = searchParams?.occupancy;
 
   const formattedSearchParams = Object.fromEntries(
-    Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [
+    Object.entries(searchParams || {}).map(([key, value]) => [
       key,
       value.split("+"),
     ])
   );
 
-  // get fomratttedSearchParams without year key
+  // Exclude the year key for the filters count
   const { year: excluded, ...rest } = formattedSearchParams;
-
-  // get sum of array lengths in rest
   const totalNumberOfFilters = Object.values(rest).reduce(
     (acc, curr) => acc + curr.length,
     0
@@ -49,111 +48,42 @@ export default async function ParcelsAdvancedSearchPage({
   };
 
   const year = filters.year[0];
-
-  const yearKey = year ? year : "all";
   const classKey = searchParams?.propertyClass
     ? searchParams.propertyClass
     : "all";
-  const occupancyKey = occupancy ? occupancy : "all";
-  const neighborhoodKey = searchParams?.nbhd ? searchParams.nbhd : "all";
-  const appraiserKey = searchParams?.appraiser ? searchParams.appraiser : "all";
   const sortColumnKey = searchParams?.sortColumn
     ? searchParams.sortColumn
     : "parcel_number";
-
   const sortDirectionKey = searchParams?.sortDirection
     ? searchParams.sortDirection
     : "asc";
-
-  console.log({
-    yearKey,
-    classKey,
-    occupancyKey,
-    sortColumnKey,
-    sortDirectionKey,
-  });
+  const occupancyKey = occupancy ? occupancy : "all";
+  const neighborhoodKey = searchParams?.nbhd ? searchParams.nbhd : "all";
+  const appraiserKey = searchParams?.appraiser ? searchParams.appraiser : "all";
 
   return (
     <div className="w-full flex">
+      {/* Desktop Filters */}
       <div className="hidden lg:block w-[320px] px-2 mr-2 border-r border-gray-200">
-        <div>
-          <div>
-            <div className="text-sm mb-2">Sort by</div>
-            <div className="flex gap-2 text-sm">
-              <SelectFilter
-                values={[
-                  {
-                    value: "parcel_number",
-                    label: "Parcel Number",
-                  },
-                  {
-                    value: "occupancy",
-                    label: "Occupancy",
-                  },
-                ]}
-                defaultValue={sortColumnKey}
-                urlParam="sortColumn"
-              />
-              <div className="w-[120px]">
-                <SelectFilter
-                  values={[
-                    {
-                      value: "asc",
-                      label: "Asc",
-                    },
-                    {
-                      value: "desc",
-                      label: "Desc",
-                    },
-                  ]}
-                  defaultValue={sortDirectionKey}
-                  urlParam="sortDirection"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="text-sm my-2">Year</div>
-          <YearSelectFilter defaultValue={year} />
-        </div>
-        <div>
-          <div className="text-sm my-2">Property Class</div>
-          <SelectFilter
-            values={[
-              {
-                value: "Residential",
-                label: "Residential",
-              },
-              {
-                value: "Commercial",
-                label: "Commercial",
-              },
-              {
-                value: "Exempt",
-                label: "Exempt",
-              },
-              {
-                value: "all",
-                label: "All",
-              },
-            ]}
-            defaultValue={classKey}
-            urlParam="propertyClass"
-          />
-        </div>
-        <ParcelFilters />
+        <ParcelsFilterPanel
+          sortColumnKey={sortColumnKey}
+          sortDirectionKey={sortDirectionKey}
+          year={year}
+          classKey={classKey}
+        />
       </div>
+
       <div className="w-full">
         <div className="flex gap-4 items-center">
+          {/* Mobile Filters */}
           <div className="lg:hidden">
             <Sidebar total={totalNumberOfFilters}>
-              <div>
-                <div className="py-4">
-                  <YearSelectFilter defaultValue={year} />
-                </div>
-                <ParcelFilters />
-              </div>
+              <ParcelsFilterPanel
+                sortColumnKey={sortColumnKey}
+                sortDirectionKey={sortDirectionKey}
+                year={year}
+                classKey={classKey}
+              />
             </Sidebar>
           </div>
           <ArrowButton
@@ -167,11 +97,10 @@ export default async function ParcelsAdvancedSearchPage({
             isDisabled={false}
           />
 
-          {/* display range of current parcels */}
+          {/* Display current parcel range */}
           <div className="text-sm flex items-center gap-2">
             <span>
-              {page > 1 ? (page - 1) * ITEMS_PER_PAGE + 1 : 1}-
-              {page * ITEMS_PER_PAGE}
+              {page > 1 ? (page - 1) * limit + 1 : 1}-{page * limit}
             </span>
             <span>of</span>
             <Suspense
@@ -179,14 +108,15 @@ export default async function ParcelsAdvancedSearchPage({
                 <span className="bg-gray-500 rounded h-4 w-12 animate-pulse"></span>
               }
               key={
-                yearKey +
-                occupancyKey +
-                page +
-                sortColumnKey +
-                sortDirectionKey +
-                neighborhoodKey +
-                classKey +
-                appraiserKey
+                year +
+                  occupancyKey +
+                  page +
+                  sortColumnKey +
+                  sortDirectionKey +
+                  neighborhoodKey +
+                  classKey +
+                  appraiserKey +
+                  searchParams?.view || "grid"
               }
             >
               <span>
@@ -198,24 +128,39 @@ export default async function ParcelsAdvancedSearchPage({
               </span>
             </Suspense>
           </div>
+          <div>
+            <SelectFilter
+              values={[
+                { value: "grid", label: "Grid" },
+                { value: "map", label: "Map" },
+              ]}
+              defaultValue={searchParams?.view || "grid"}
+              urlParam="view"
+            />
+          </div>
         </div>
+
         <Suspense
           fallback={<BinocularsSkeleton />}
           key={
-            yearKey +
-            occupancyKey +
-            page +
-            sortColumnKey +
-            sortDirectionKey +
-            neighborhoodKey +
-            classKey +
-            appraiserKey
+            year +
+              occupancyKey +
+              page +
+              sortColumnKey +
+              sortDirectionKey +
+              neighborhoodKey +
+              classKey +
+              appraiserKey +
+              searchParams?.view || "grid"
           }
         >
           <ParcelSearchResults
             currentPage={page}
             filters={filters}
             table="parcel_year"
+            selectString="*, addresses(lat, lon, bbox)"
+            view={searchParams?.view || "grid"}
+            limit={limit}
           />
         </Suspense>
       </div>

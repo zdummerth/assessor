@@ -8,7 +8,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ children, total }) => {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
@@ -32,7 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children, total }) => {
       </div>
       <div
         className={`fixed top-0 left-0 h-full w-full text-foreground bg-background transition-all duration-300 overflow-scroll ${
-          isCollapsed ? "opacity-[0] -z-10" : "opacity-[1] z-10"
+          isCollapsed ? "opacity-[0] -z-10" : "opacity-[1] z-[999999]"
         }`}
       >
         <div className="flex justify-end p-4">

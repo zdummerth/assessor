@@ -40,6 +40,7 @@ export default async function ParcelsGrid({ parcels }: { parcels: any }) {
           href={`/parcels/${parcel.parcel_number}`}
           key={parcel.id}
           className="border border-gray-200 rounded-lg shadow-sm shadow-foreground"
+          target="_blank"
         >
           <ParcelCard parcel={parcel} />
         </Link>
