@@ -37,7 +37,13 @@ export default async function ParcelSearchResults({
 
   if (error && !data) {
     console.error(error);
-    return <div>Failed to fetch data</div>;
+    return (
+      <div className="w-full flex flex-col items-center justify-center mt-16">
+        <SearchX className="w-16 h-16 text-gray-400 mx-auto" />
+        <p className="text-center">Error fetching parcels</p>
+        <p>{error.message}</p>
+      </div>
+    );
   }
 
   // const uniqueNeighborhoodsArray = Object.values(uniqueNeighborhoods);
