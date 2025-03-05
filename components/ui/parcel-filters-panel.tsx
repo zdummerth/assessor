@@ -24,7 +24,7 @@ const ParcelsFilterPanel: React.FC<ParcelsFilterPanelProps> = ({
           <SelectFilter
             values={[
               { value: "parcel_number", label: "Parcel Number" },
-              { value: "occupancy", label: "Occupancy" },
+              { value: "appraised_total", label: "Appraised Total" },
             ]}
             defaultValue={sortColumnKey}
             urlParam="sortColumn"

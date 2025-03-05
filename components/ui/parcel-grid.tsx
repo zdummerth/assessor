@@ -1,12 +1,24 @@
+import { Span } from "next/dist/trace";
 import Link from "next/link";
 
 const ParcelCard = ({ parcel }: { parcel: any }) => {
   return (
     <div>
-      <div className="p-4">
+      <div className="px-4 pb-4 pt-2">
+        <div className="flex justify-center text-sm mb-2">
+          {parcel.tax_status === "E" && <span>Exempt</span>}
+          {parcel.tax_status === "T" && <span>Taxable</span>}
+          {parcel.tax_status === "S" && <span>State Assessed</span>}
+        </div>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold">{parcel.parcel_number}</h2>
           <span className="text-sm">{parcel.year}</span>
+        </div>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold">
+            ${parcel.appraised_total.toLocaleString()}
+          </h2>
+          <span className="text-sm">{parcel.property_class}</span>
         </div>
         <p className="">
           {parcel.site_address_1}, {parcel.site_zip}

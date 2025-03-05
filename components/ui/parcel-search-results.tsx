@@ -57,7 +57,9 @@ export default async function ParcelSearchResults({
         </div>
       )}
       {view === "grid" && <ParcelsGrid parcels={data} />}
-      {view === "map" && <ParcelSearchResultsMap data={data} />}
+      <div className="relative z-[1]">
+        {view === "map" && <ParcelSearchResultsMap data={data} />}
+      </div>
       {view === "summary" && <ValueCard filters={filters} />}
     </div>
   );
