@@ -20,7 +20,7 @@ export default async function ProtectedPage({
     ])
   );
 
-  console.log({ formattedSearchParams });
+  // console.log({ formattedSearchParams });
 
   const query = searchParams?.query;
 

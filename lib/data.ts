@@ -212,9 +212,9 @@ export async function getFilteredData({
   let filteredQuery;
 
   switch (table) {
-    case "get_sales_by_parcel_data":
+    case "get_sales":
       query = supabase.rpc(
-        "get_sales_by_parcel_data",
+        "get_sales",
         {
           occupancy_values: filters.occupancy || undefined,
         },
@@ -263,6 +263,20 @@ export async function getFilteredData({
   } catch (error) {
     throw new Error("Failed to fetch data.");
   }
+}
+
+export async function getSales(
+  filters: SalesFilters,
+  parcelFilters: UpdatedFilters
+) {
+  const supabase = createClient();
+  let query = supabase.from("sales_master").select("*");
+  return query;
+  // let filteredQuery = applySalesFiltersToQuery(query, filters);
+  // return await getFilteredData({
+  //   filters,
+  //   table: "get_sales_by_parcel_data",
+  // });
 }
 
 export const getPagesCount = async (

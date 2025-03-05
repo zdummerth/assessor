@@ -25,7 +25,7 @@ export default async function ProtectedPage({
 
   const res = await getFilteredData({
     filters: formattedSearchParams,
-    table: "get_sales_by_parcel_data",
+    table: "get_sales",
     get_count: true,
   });
 
@@ -43,7 +43,7 @@ export default async function ProtectedPage({
 
   return (
     <div className="w-full flex gap-4">
-      <div className="w-1/4">
+      {/* <div className="w-1/4">
         <ParcelFilters />
       </div>
       <div className="w-full">
@@ -58,7 +58,7 @@ export default async function ProtectedPage({
         <div className="mt-5 flex w-full justify-center">
           <Pagination totalPages={totalPagesCount} />
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
