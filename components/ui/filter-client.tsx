@@ -145,6 +145,7 @@ export function SelectFilter({
     params.delete("page");
     setSelectedValue(value);
     replace(`${pathname}?${params.toString()}`);
+    // window.history.pushState(null, "", `?${params.toString()}`);
   }
 
   return (
