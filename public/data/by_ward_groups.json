@@ -1,0 +1,1138 @@
+[
+  {
+    "ward": 1,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 603,
+    "average_appraised_value": 288178.8308,
+    "total_appraised_value": 173771835
+  },
+  {
+    "ward": 1,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 598,
+    "average_appraised_value": 285699.01,
+    "total_appraised_value": 170848008
+  },
+  {
+    "ward": 1,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 21,
+    "average_appraised_value": 56755.8571,
+    "total_appraised_value": 1191873
+  },
+  {
+    "ward": 1,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 21,
+    "average_appraised_value": 61863.8095,
+    "total_appraised_value": 1299140
+  },
+  {
+    "ward": 1,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 956,
+    "average_appraised_value": 111229.4906,
+    "total_appraised_value": 106335393
+  },
+  {
+    "ward": 1,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 951,
+    "average_appraised_value": 136795.9243,
+    "total_appraised_value": 130092924
+  },
+  {
+    "ward": 1,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 430,
+    "average_appraised_value": 91223.3581,
+    "total_appraised_value": 39226044
+  },
+  {
+    "ward": 1,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 439,
+    "average_appraised_value": 94846.6811,
+    "total_appraised_value": 41637693
+  },
+  {
+    "ward": 1,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 7592,
+    "average_appraised_value": 118442.703,
+    "total_appraised_value": 899217001
+  },
+  {
+    "ward": 1,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 7594,
+    "average_appraised_value": 142222.3549,
+    "total_appraised_value": 1080036563
+  },
+  {
+    "ward": 2,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 382,
+    "average_appraised_value": 293691.7984,
+    "total_appraised_value": 112190267
+  },
+  {
+    "ward": 2,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 383,
+    "average_appraised_value": 297633.4752,
+    "total_appraised_value": 113993621
+  },
+  {
+    "ward": 2,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 139,
+    "average_appraised_value": 111194.4604,
+    "total_appraised_value": 15456030
+  },
+  {
+    "ward": 2,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 139,
+    "average_appraised_value": 121136.0072,
+    "total_appraised_value": 16837905
+  },
+  {
+    "ward": 2,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 1018,
+    "average_appraised_value": 207880.9116,
+    "total_appraised_value": 211622768
+  },
+  {
+    "ward": 2,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 1014,
+    "average_appraised_value": 252749.3037,
+    "total_appraised_value": 256287794
+  },
+  {
+    "ward": 2,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 183,
+    "average_appraised_value": 320987,
+    "total_appraised_value": 58740621
+  },
+  {
+    "ward": 2,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 185,
+    "average_appraised_value": 318552.6703,
+    "total_appraised_value": 58932244
+  },
+  {
+    "ward": 2,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 7293,
+    "average_appraised_value": 180743.9179,
+    "total_appraised_value": 1318165393
+  },
+  {
+    "ward": 2,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 7315,
+    "average_appraised_value": 207108.5107,
+    "total_appraised_value": 1514998756
+  },
+  {
+    "ward": 3,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 330,
+    "average_appraised_value": 196254.3182,
+    "total_appraised_value": 64763925
+  },
+  {
+    "ward": 3,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 329,
+    "average_appraised_value": 199466.4073,
+    "total_appraised_value": 65624448
+  },
+  {
+    "ward": 3,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 37,
+    "average_appraised_value": 47720.5135,
+    "total_appraised_value": 1765659
+  },
+  {
+    "ward": 3,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 37,
+    "average_appraised_value": 56967.027,
+    "total_appraised_value": 2107780
+  },
+  {
+    "ward": 3,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 1914,
+    "average_appraised_value": 67986.9634,
+    "total_appraised_value": 130127048
+  },
+  {
+    "ward": 3,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 1854,
+    "average_appraised_value": 99924.7384,
+    "total_appraised_value": 185260465
+  },
+  {
+    "ward": 3,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 340,
+    "average_appraised_value": 139476.8529,
+    "total_appraised_value": 47422130
+  },
+  {
+    "ward": 3,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 344,
+    "average_appraised_value": 190603.0872,
+    "total_appraised_value": 65567462
+  },
+  {
+    "ward": 3,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 4369,
+    "average_appraised_value": 66127.6542,
+    "total_appraised_value": 288911721
+  },
+  {
+    "ward": 3,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 4423,
+    "average_appraised_value": 97008.4913,
+    "total_appraised_value": 429068557
+  },
+  {
+    "ward": 4,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 611,
+    "average_appraised_value": 442119.0426,
+    "total_appraised_value": 270134735
+  },
+  {
+    "ward": 4,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 603,
+    "average_appraised_value": 517474.6534,
+    "total_appraised_value": 312037216
+  },
+  {
+    "ward": 4,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 102,
+    "average_appraised_value": 109586.2745,
+    "total_appraised_value": 11177800
+  },
+  {
+    "ward": 4,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 102,
+    "average_appraised_value": 118144.8824,
+    "total_appraised_value": 12050778
+  },
+  {
+    "ward": 4,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 786,
+    "average_appraised_value": 165213.7595,
+    "total_appraised_value": 129858015
+  },
+  {
+    "ward": 4,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 789,
+    "average_appraised_value": 198075.5488,
+    "total_appraised_value": 156281608
+  },
+  {
+    "ward": 4,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 360,
+    "average_appraised_value": 697572.5556,
+    "total_appraised_value": 251126120
+  },
+  {
+    "ward": 4,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 366,
+    "average_appraised_value": 742355.7678,
+    "total_appraised_value": 271702211
+  },
+  {
+    "ward": 4,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 8028,
+    "average_appraised_value": 163807.7498,
+    "total_appraised_value": 1315048615
+  },
+  {
+    "ward": 4,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 8103,
+    "average_appraised_value": 194312.3433,
+    "total_appraised_value": 1574512918
+  },
+  {
+    "ward": 5,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 582,
+    "average_appraised_value": 435320.3986,
+    "total_appraised_value": 253356472
+  },
+  {
+    "ward": 5,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 574,
+    "average_appraised_value": 458448.9808,
+    "total_appraised_value": 263149715
+  },
+  {
+    "ward": 5,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 40,
+    "average_appraised_value": 62335.475,
+    "total_appraised_value": 2493419
+  },
+  {
+    "ward": 5,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 40,
+    "average_appraised_value": 67275.725,
+    "total_appraised_value": 2691029
+  },
+  {
+    "ward": 5,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 1634,
+    "average_appraised_value": 192378.1836,
+    "total_appraised_value": 314345952
+  },
+  {
+    "ward": 5,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 1631,
+    "average_appraised_value": 235937.6738,
+    "total_appraised_value": 384814346
+  },
+  {
+    "ward": 5,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 211,
+    "average_appraised_value": 286392.7346,
+    "total_appraised_value": 60428867
+  },
+  {
+    "ward": 5,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 191,
+    "average_appraised_value": 334388.1361,
+    "total_appraised_value": 63868134
+  },
+  {
+    "ward": 5,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 6687,
+    "average_appraised_value": 186026.882,
+    "total_appraised_value": 1243961760
+  },
+  {
+    "ward": 5,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 6726,
+    "average_appraised_value": 220836.9346,
+    "total_appraised_value": 1485349222
+  },
+  {
+    "ward": 6,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 412,
+    "average_appraised_value": 317175.1117,
+    "total_appraised_value": 130676146
+  },
+  {
+    "ward": 6,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 409,
+    "average_appraised_value": 301478.2714,
+    "total_appraised_value": 123304613
+  },
+  {
+    "ward": 6,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 313,
+    "average_appraised_value": 104991.2396,
+    "total_appraised_value": 32862258
+  },
+  {
+    "ward": 6,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 322,
+    "average_appraised_value": 114359.087,
+    "total_appraised_value": 36823626
+  },
+  {
+    "ward": 6,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 1807,
+    "average_appraised_value": 172803.7825,
+    "total_appraised_value": 312256435
+  },
+  {
+    "ward": 6,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 1796,
+    "average_appraised_value": 211388.9755,
+    "total_appraised_value": 379654600
+  },
+  {
+    "ward": 6,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 270,
+    "average_appraised_value": 265301.3556,
+    "total_appraised_value": 71631366
+  },
+  {
+    "ward": 6,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 269,
+    "average_appraised_value": 274415.9145,
+    "total_appraised_value": 73817881
+  },
+  {
+    "ward": 6,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 4702,
+    "average_appraised_value": 225524.5317,
+    "total_appraised_value": 1060416348
+  },
+  {
+    "ward": 6,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 4740,
+    "average_appraised_value": 261386.9238,
+    "total_appraised_value": 1238974019
+  },
+  {
+    "ward": 7,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 707,
+    "average_appraised_value": 205837.5842,
+    "total_appraised_value": 145527172
+  },
+  {
+    "ward": 7,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 668,
+    "average_appraised_value": 224622.4581,
+    "total_appraised_value": 150047802
+  },
+  {
+    "ward": 7,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 150,
+    "average_appraised_value": 86864.9533,
+    "total_appraised_value": 13029743
+  },
+  {
+    "ward": 7,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 150,
+    "average_appraised_value": 92868.98,
+    "total_appraised_value": 13930347
+  },
+  {
+    "ward": 7,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 2017,
+    "average_appraised_value": 89286.7491,
+    "total_appraised_value": 180091373
+  },
+  {
+    "ward": 7,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 1978,
+    "average_appraised_value": 130459.0637,
+    "total_appraised_value": 258048028
+  },
+  {
+    "ward": 7,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 691,
+    "average_appraised_value": 96058.7742,
+    "total_appraised_value": 66376613
+  },
+  {
+    "ward": 7,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 662,
+    "average_appraised_value": 108975.3066,
+    "total_appraised_value": 72141653
+  },
+  {
+    "ward": 7,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 4097,
+    "average_appraised_value": 144817.6341,
+    "total_appraised_value": 593317847
+  },
+  {
+    "ward": 7,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 4172,
+    "average_appraised_value": 190527.8941,
+    "total_appraised_value": 794882374
+  },
+  {
+    "ward": 8,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 1437,
+    "average_appraised_value": 1213920.2331,
+    "total_appraised_value": 1744403375
+  },
+  {
+    "ward": 8,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 1435,
+    "average_appraised_value": 1299945.3554,
+    "total_appraised_value": 1865421585
+  },
+  {
+    "ward": 8,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 940,
+    "average_appraised_value": 129768.3649,
+    "total_appraised_value": 121982263
+  },
+  {
+    "ward": 8,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 939,
+    "average_appraised_value": 139128.8658,
+    "total_appraised_value": 130642005
+  },
+  {
+    "ward": 8,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 1203,
+    "average_appraised_value": 148389.256,
+    "total_appraised_value": 178512275
+  },
+  {
+    "ward": 8,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 1200,
+    "average_appraised_value": 186692.665,
+    "total_appraised_value": 224031198
+  },
+  {
+    "ward": 8,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 775,
+    "average_appraised_value": 216944.9961,
+    "total_appraised_value": 168132372
+  },
+  {
+    "ward": 8,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 763,
+    "average_appraised_value": 291164.4784,
+    "total_appraised_value": 222158497
+  },
+  {
+    "ward": 8,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 3303,
+    "average_appraised_value": 213722.0521,
+    "total_appraised_value": 705923938
+  },
+  {
+    "ward": 8,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 3301,
+    "average_appraised_value": 252689.2914,
+    "total_appraised_value": 834127351
+  },
+  {
+    "ward": 9,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 848,
+    "average_appraised_value": 939284.2559,
+    "total_appraised_value": 796513049
+  },
+  {
+    "ward": 9,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 843,
+    "average_appraised_value": 1038247.1234,
+    "total_appraised_value": 875242325
+  },
+  {
+    "ward": 9,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 2098,
+    "average_appraised_value": 224617.1239,
+    "total_appraised_value": 471246726
+  },
+  {
+    "ward": 9,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 2099,
+    "average_appraised_value": 240496.8433,
+    "total_appraised_value": 504802874
+  },
+  {
+    "ward": 9,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 475,
+    "average_appraised_value": 128800.8084,
+    "total_appraised_value": 61180384
+  },
+  {
+    "ward": 9,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 464,
+    "average_appraised_value": 167364.0841,
+    "total_appraised_value": 77656935
+  },
+  {
+    "ward": 9,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 536,
+    "average_appraised_value": 954342.6567,
+    "total_appraised_value": 511527664
+  },
+  {
+    "ward": 9,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 525,
+    "average_appraised_value": 1168150.701,
+    "total_appraised_value": 613279118
+  },
+  {
+    "ward": 9,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 1843,
+    "average_appraised_value": 405368.0293,
+    "total_appraised_value": 747093278
+  },
+  {
+    "ward": 9,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 1888,
+    "average_appraised_value": 438067.8347,
+    "total_appraised_value": 827072072
+  },
+  {
+    "ward": 10,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 394,
+    "average_appraised_value": 379948.7234,
+    "total_appraised_value": 149699797
+  },
+  {
+    "ward": 10,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 401,
+    "average_appraised_value": 473867.9152,
+    "total_appraised_value": 190021034
+  },
+  {
+    "ward": 10,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 1319,
+    "average_appraised_value": 143388.4951,
+    "total_appraised_value": 189129425
+  },
+  {
+    "ward": 10,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 1318,
+    "average_appraised_value": 153532.0243,
+    "total_appraised_value": 202355208
+  },
+  {
+    "ward": 10,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 906,
+    "average_appraised_value": 67978.8852,
+    "total_appraised_value": 61588870
+  },
+  {
+    "ward": 10,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 883,
+    "average_appraised_value": 79058.5991,
+    "total_appraised_value": 69808743
+  },
+  {
+    "ward": 10,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 1167,
+    "average_appraised_value": 238698,
+    "total_appraised_value": 278560566
+  },
+  {
+    "ward": 10,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 1140,
+    "average_appraised_value": 302395.7614,
+    "total_appraised_value": 344731168
+  },
+  {
+    "ward": 10,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 3122,
+    "average_appraised_value": 175109.0852,
+    "total_appraised_value": 546690564
+  },
+  {
+    "ward": 10,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 3136,
+    "average_appraised_value": 191084.7003,
+    "total_appraised_value": 599241620
+  },
+  {
+    "ward": 11,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 991,
+    "average_appraised_value": 607964.333,
+    "total_appraised_value": 602492654
+  },
+  {
+    "ward": 11,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 999,
+    "average_appraised_value": 662809.1702,
+    "total_appraised_value": 662146361
+  },
+  {
+    "ward": 11,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 18,
+    "average_appraised_value": 161139.1111,
+    "total_appraised_value": 2900504
+  },
+  {
+    "ward": 11,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 18,
+    "average_appraised_value": 172101.1111,
+    "total_appraised_value": 3097820
+  },
+  {
+    "ward": 11,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 1363,
+    "average_appraised_value": 19350.2685,
+    "total_appraised_value": 26374416
+  },
+  {
+    "ward": 11,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 1362,
+    "average_appraised_value": 19411.5345,
+    "total_appraised_value": 26438510
+  },
+  {
+    "ward": 11,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 1573,
+    "average_appraised_value": 87420.2359,
+    "total_appraised_value": 137512031
+  },
+  {
+    "ward": 11,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 1558,
+    "average_appraised_value": 103244.5873,
+    "total_appraised_value": 160855067
+  },
+  {
+    "ward": 11,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 2426,
+    "average_appraised_value": 22988.026,
+    "total_appraised_value": 55768951
+  },
+  {
+    "ward": 11,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 2437,
+    "average_appraised_value": 24750.7423,
+    "total_appraised_value": 60317559
+  },
+  {
+    "ward": 12,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 877,
+    "average_appraised_value": 176127.4196,
+    "total_appraised_value": 154463747
+  },
+  {
+    "ward": 12,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 882,
+    "average_appraised_value": 176026.059,
+    "total_appraised_value": 155254984
+  },
+  {
+    "ward": 12,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 99,
+    "average_appraised_value": 23178.9899,
+    "total_appraised_value": 2294720
+  },
+  {
+    "ward": 12,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 99,
+    "average_appraised_value": 23443.4545,
+    "total_appraised_value": 2320902
+  },
+  {
+    "ward": 12,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 2247,
+    "average_appraised_value": 19298.749,
+    "total_appraised_value": 43364289
+  },
+  {
+    "ward": 12,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 2252,
+    "average_appraised_value": 19387.2962,
+    "total_appraised_value": 43660191
+  },
+  {
+    "ward": 12,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 1898,
+    "average_appraised_value": 15091.8051,
+    "total_appraised_value": 28644246
+  },
+  {
+    "ward": 12,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 1908,
+    "average_appraised_value": 16328.1441,
+    "total_appraised_value": 31154099
+  },
+  {
+    "ward": 12,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 5663,
+    "average_appraised_value": 19064.5331,
+    "total_appraised_value": 107962451
+  },
+  {
+    "ward": 12,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 5678,
+    "average_appraised_value": 19486.9639,
+    "total_appraised_value": 110646981
+  },
+  {
+    "ward": 13,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 685,
+    "average_appraised_value": 617471.2803,
+    "total_appraised_value": 422967827
+  },
+  {
+    "ward": 13,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 684,
+    "average_appraised_value": 618166.4868,
+    "total_appraised_value": 422825877
+  },
+  {
+    "ward": 13,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 25,
+    "average_appraised_value": 11232.68,
+    "total_appraised_value": 280817
+  },
+  {
+    "ward": 13,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 25,
+    "average_appraised_value": 11951.8,
+    "total_appraised_value": 298795
+  },
+  {
+    "ward": 13,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 1020,
+    "average_appraised_value": 19686.4569,
+    "total_appraised_value": 20080186
+  },
+  {
+    "ward": 13,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 1028,
+    "average_appraised_value": 19923.5525,
+    "total_appraised_value": 20481412
+  },
+  {
+    "ward": 13,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 1373,
+    "average_appraised_value": 19125.1733,
+    "total_appraised_value": 26258863
+  },
+  {
+    "ward": 13,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 1382,
+    "average_appraised_value": 19968.2612,
+    "total_appraised_value": 27596137
+  },
+  {
+    "ward": 13,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 7295,
+    "average_appraised_value": 18693.062,
+    "total_appraised_value": 136365887
+  },
+  {
+    "ward": 13,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 7320,
+    "average_appraised_value": 18796.8667,
+    "total_appraised_value": 137593064
+  },
+  {
+    "ward": 14,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 1930,
+    "average_appraised_value": 375845.4326,
+    "total_appraised_value": 725381685
+  },
+  {
+    "ward": 14,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 1930,
+    "average_appraised_value": 507714.7565,
+    "total_appraised_value": 979889480
+  },
+  {
+    "ward": 14,
+    "property_type": "Condo",
+    "year": 2024,
+    "count": 1965,
+    "average_appraised_value": 140507.1781,
+    "total_appraised_value": 276096605
+  },
+  {
+    "ward": 14,
+    "property_type": "Condo",
+    "year": 2025,
+    "count": 1964,
+    "average_appraised_value": 149470.1741,
+    "total_appraised_value": 293559422
+  },
+  {
+    "ward": 14,
+    "property_type": "Multi Family",
+    "year": 2024,
+    "count": 927,
+    "average_appraised_value": 16739.6731,
+    "total_appraised_value": 15517677
+  },
+  {
+    "ward": 14,
+    "property_type": "Multi Family",
+    "year": 2025,
+    "count": 921,
+    "average_appraised_value": 17046.7644,
+    "total_appraised_value": 15700070
+  },
+  {
+    "ward": 14,
+    "property_type": "Other Residential",
+    "year": 2024,
+    "count": 2724,
+    "average_appraised_value": 70359.8385,
+    "total_appraised_value": 191660200
+  },
+  {
+    "ward": 14,
+    "property_type": "Other Residential",
+    "year": 2025,
+    "count": 2711,
+    "average_appraised_value": 90885.0719,
+    "total_appraised_value": 246389430
+  },
+  {
+    "ward": 14,
+    "property_type": "Single Family",
+    "year": 2024,
+    "count": 1570,
+    "average_appraised_value": 27571.0382,
+    "total_appraised_value": 43286530
+  },
+  {
+    "ward": 14,
+    "property_type": "Single Family",
+    "year": 2025,
+    "count": 1592,
+    "average_appraised_value": 28021.2977,
+    "total_appraised_value": 44609906
+  },
+  {
+    "ward": 99,
+    "property_type": "Commercial",
+    "year": 2024,
+    "count": 3,
+    "average_appraised_value": 1649217.3333,
+    "total_appraised_value": 4947652
+  },
+  {
+    "ward": 99,
+    "property_type": "Commercial",
+    "year": 2025,
+    "count": 3,
+    "average_appraised_value": 1649217.3333,
+    "total_appraised_value": 4947652
+  }
+]

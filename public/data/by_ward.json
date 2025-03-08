@@ -1,0 +1,182 @@
+[
+  {
+    "ward": 1,
+    "year": 2024,
+    "count": 9602,
+    "total_assessed_value": 252608340
+  },
+  {
+    "ward": 1,
+    "year": 2025,
+    "count": 9603,
+    "total_assessed_value": 291159880
+  },
+  {
+    "ward": 2,
+    "year": 2024,
+    "count": 9015,
+    "total_assessed_value": 339509010
+  },
+  {
+    "ward": 2,
+    "year": 2025,
+    "count": 9036,
+    "total_assessed_value": 386212800
+  },
+  {
+    "ward": 3,
+    "year": 2024,
+    "count": 6990,
+    "total_assessed_value": 108025860
+  },
+  {
+    "ward": 3,
+    "year": 2025,
+    "count": 6987,
+    "total_assessed_value": 148922960
+  },
+  {
+    "ward": 4,
+    "year": 2024,
+    "count": 9887,
+    "total_assessed_value": 407489980
+  },
+  {
+    "ward": 4,
+    "year": 2025,
+    "count": 9963,
+    "total_assessed_value": 479223170
+  },
+  {
+    "ward": 5,
+    "year": 2024,
+    "count": 9154,
+    "total_assessed_value": 387780750
+  },
+  {
+    "ward": 5,
+    "year": 2025,
+    "count": 9162,
+    "total_assessed_value": 450728320
+  },
+  {
+    "ward": 6,
+    "year": 2024,
+    "count": 7504,
+    "total_assessed_value": 320997000
+  },
+  {
+    "ward": 6,
+    "year": 2025,
+    "count": 7536,
+    "total_assessed_value": 366341830
+  },
+  {
+    "ward": 7,
+    "year": 2024,
+    "count": 7662,
+    "total_assessed_value": 206416940
+  },
+  {
+    "ward": 7,
+    "year": 2025,
+    "count": 7630,
+    "total_assessed_value": 262183530
+  },
+  {
+    "ward": 8,
+    "year": 2024,
+    "count": 7658,
+    "total_assessed_value": 750680290
+  },
+  {
+    "ward": 8,
+    "year": 2025,
+    "count": 7638,
+    "total_assessed_value": 828797070
+  },
+  {
+    "ward": 9,
+    "year": 2024,
+    "count": 5800,
+    "total_assessed_value": 568827340
+  },
+  {
+    "ward": 9,
+    "year": 2025,
+    "count": 5819,
+    "total_assessed_value": 631312450
+  },
+  {
+    "ward": 10,
+    "year": 2024,
+    "count": 6908,
+    "total_assessed_value": 244346660
+  },
+  {
+    "ward": 10,
+    "year": 2025,
+    "count": 6878,
+    "total_assessed_value": 279591110
+  },
+  {
+    "ward": 11,
+    "year": 2024,
+    "count": 6371,
+    "total_assessed_value": 219126560
+  },
+  {
+    "ward": 11,
+    "year": 2025,
+    "count": 6374,
+    "total_assessed_value": 239704130
+  },
+  {
+    "ward": 12,
+    "year": 2024,
+    "count": 10784,
+    "total_assessed_value": 83654130
+  },
+  {
+    "ward": 12,
+    "year": 2025,
+    "count": 10819,
+    "total_assessed_value": 84969230
+  },
+  {
+    "ward": 13,
+    "year": 2024,
+    "count": 10398,
+    "total_assessed_value": 169935230
+  },
+  {
+    "ward": 13,
+    "year": 2025,
+    "count": 10439,
+    "total_assessed_value": 170463750
+  },
+  {
+    "ward": 14,
+    "year": 2024,
+    "count": 9116,
+    "total_assessed_value": 317625130
+  },
+  {
+    "ward": 14,
+    "year": 2025,
+    "count": 9118,
+    "total_assessed_value": 410767280
+  },
+  {
+    "ward": 99,
+    "year": 2024,
+    "count": 3,
+    "total_assessed_value": 1583200
+  },
+  {
+    "ward": 99,
+    "year": 2025,
+    "count": 3,
+    "total_assessed_value": 1583200
+  }
+]
