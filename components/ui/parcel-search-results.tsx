@@ -49,7 +49,7 @@ export default async function ParcelSearchResults({
   // const uniqueNeighborhoodsArray = Object.values(uniqueNeighborhoods);
 
   if (data.length > 0) {
-    console.log(data[0]);
+    // console.log(data[0]);
   }
 
   return (
