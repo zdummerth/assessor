@@ -1,65 +1,60 @@
 import { createClient } from "@/utils/supabase/server";
-import { get } from "http";
 
-/*
-CREATE TABLE parcels (
-    AsrParcelId BIGINT PRIMARY KEY,
-    LowAddrNum INTEGER,
-    HighAddrNum INTEGER,
-    StPreDir VARCHAR(10),
-    StName VARCHAR(255),
-    StType VARCHAR(50),
-    ZIP VARCHAR(10),
-    OwnerName VARCHAR(255),
-    AsrClassCode INTEGER,
-    PropertyClassCode INTEGER,
-    AsrLandUse1 VARCHAR(50),
-    IsAbatedProperty BOOLEAN,
-    AbatementType VARCHAR(50),
-    AbatementStartYear INTEGER,
-    AbatementEndYear INTEGER,
-    RedevPhase VARCHAR(50),
-    RedevYearEnd INTEGER,
-    RedevPhase2 VARCHAR(50),
-    RedevYearEnd2 INTEGER,
-    VacantLot BOOLEAN,
-    SpecBusDist VARCHAR(50),
-    TIFDist VARCHAR(50),
-    Condominium BOOLEAN,
-    NbrOfUnits INTEGER,
-    NbrOfApts INTEGER,
-    LandArea NUMERIC,
-    AsdTotal NUMERIC,
-    AsdResLand NUMERIC,
-    AsdResImprove NUMERIC,
-    AsdComLand NUMERIC,
-    AsdComImprove NUMERIC,
-    AsdAgrLand NUMERIC,
-    AsdAgrImprove NUMERIC,
-    AprLand NUMERIC,
-    AprResLand NUMERIC,
-    AprResImprove NUMERIC,
-    AprComLand NUMERIC,
-    AprComImprove NUMERIC,
-    AprAgrLand NUMERIC,
-    AprAgrImprove NUMERIC,
-    AprExemptLand NUMERIC,
-    AprExemptImprove NUMERIC,
-    AsmtAppealNum INTEGER,
-    AsmtAppealYear INTEGER,
-    AsmtAppealType VARCHAR(50),
-    CDALandUse1 VARCHAR(50),
-    Zoning VARCHAR(50),
-    NbrOfBldgsRes INTEGER,
-    NbrOfBldgsCom INTEGER,
-    Ward20 INTEGER,
-    Precinct20 INTEGER,
-    Nbrhd INTEGER,
-    AsrNbrhd INTEGER
-);
-*/
+export type SalesFilters = {
+  start_date?: string;
+  end_date?: string;
+  min_price?: number;
+  max_price?: number;
+};
 
-export type UpdatedFilters = {
+const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
+  if (filters.start_date) {
+    query = query.gte("date_of_sale", filters.start_date);
+  }
+  if (filters.end_date) {
+    query = query.lte("date_of_sale", filters.end_date);
+  }
+  if (filters.min_price) {
+    query = query.gte("net_selling_price", filters.min_price);
+  }
+  if (filters.max_price) {
+    query = query.lte("net_selling_price", filters.max_price);
+  }
+
+  query.order("date_of_sale", { ascending: false });
+  // query = query.limit(20);
+  return query;
+};
+
+type IncreaseFilters = {
+  appraiser?: string;
+};
+
+const increaseFilters = (query: any, filters: IncreaseFilters) => {
+  if (filters.appraiser) {
+    // replace %20 with space
+    filters.appraiser = filters.appraiser.replace(/%20/g, " ");
+    console.log("Appraiser:", filters.appraiser);
+    query = query.eq("appraiser", filters.appraiser);
+  }
+  return query;
+};
+
+const applyAppealFiltersToQuery = (query: any, filters: any) => {
+  if (filters.min_difference) {
+    query = query.gte("total_difference", filters.min_difference);
+  }
+  if (filters.max_difference) {
+    query = query.lte("total_difference", filters.max_difference);
+  }
+  if (filters.appraiser) {
+    query = query.in("appraiser", filters.appraiser);
+  }
+  // query = query.limit(20);
+  return query;
+};
+
+export type ParcelYearFilters = {
   propertyClass?: string[];
   occupancy?: string[];
   nbhd?: string[];
@@ -80,15 +75,15 @@ export type UpdatedFilters = {
   query?: string;
 };
 
-const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
+const applyFiltersToQuery = (query: any, filters: ParcelYearFilters) => {
   if (filters.occupancy) {
-    query = query.in("occupancy", filters.occupancy);
+    query = query.in("land_use", filters.occupancy);
   }
   if (filters.year) {
     query = query.in("year", filters.year);
   }
   if (filters.propertyClass && !filters.propertyClass.includes("all")) {
-    query = query.in("property_class", filters.propertyClass);
+    query = query.in("prop_class", filters.propertyClass);
   }
   if (filters.nbhd) {
     query = query.in("neighborhood_int", filters.nbhd);
@@ -139,49 +134,9 @@ const applyFiltersToQuery = (query: any, filters: UpdatedFilters) => {
   return query;
 };
 
-export type SalesFilters = {
-  start_date?: string;
-  end_date?: string;
-  min_price?: number;
-  max_price?: number;
-};
-
-const applySalesFiltersToQuery = (query: any, filters: SalesFilters) => {
-  if (filters.start_date) {
-    query = query.gte("date_of_sale", filters.start_date);
-  }
-  if (filters.end_date) {
-    query = query.lte("date_of_sale", filters.end_date);
-  }
-  if (filters.min_price) {
-    query = query.gte("net_selling_price", filters.min_price);
-  }
-  if (filters.max_price) {
-    query = query.lte("net_selling_price", filters.max_price);
-  }
-
-  query.order("date_of_sale", { ascending: false });
-  // query = query.limit(20);
-  return query;
-};
-
-const applyAppealFiltersToQuery = (query: any, filters: any) => {
-  if (filters.min_difference) {
-    query = query.gte("total_difference", filters.min_difference);
-  }
-  if (filters.max_difference) {
-    query = query.lte("total_difference", filters.max_difference);
-  }
-  if (filters.appraiser) {
-    query = query.in("appraiser", filters.appraiser);
-  }
-  // query = query.limit(20);
-  return query;
-};
-
 export const ITEMS_PER_PAGE = 9;
 export async function getFilteredData({
-  filters,
+  filters = {},
   currentPage,
   sortColumn,
   sortDirection,
@@ -192,7 +147,7 @@ export async function getFilteredData({
   count,
   limit,
 }: {
-  filters: UpdatedFilters | SalesFilters | any;
+  filters?: ParcelYearFilters | SalesFilters | any;
   currentPage?: number;
   sortColumn?: string;
   sortDirection?: string;
@@ -207,7 +162,7 @@ export async function getFilteredData({
   const supabase = createClient();
 
   let query = supabase
-    .from(table || "parcels")
+    .from(table || "parcel_years")
     .select(selectString, count ? count : {});
   let filteredQuery;
 
@@ -236,6 +191,9 @@ export async function getFilteredData({
       break;
     case "appeals":
       filteredQuery = applyAppealFiltersToQuery(query, filters);
+      break;
+    case "parcel_increases":
+      filteredQuery = increaseFilters(query, filters);
       break;
     default:
       filteredQuery = applyFiltersToQuery(query, filters);
@@ -267,7 +225,7 @@ export async function getFilteredData({
 
 export async function getSales(
   filters: SalesFilters,
-  parcelFilters: UpdatedFilters
+  parcelFilters: ParcelYearFilters
 ) {
   const supabase = createClient();
   let query = supabase.from("sales_master").select("*");
@@ -280,7 +238,7 @@ export async function getSales(
 }
 
 export const getPagesCount = async (
-  filters: UpdatedFilters = {},
+  filters: ParcelYearFilters = {},
   table?: string
 ) => {
   const supabase = createClient();
@@ -350,7 +308,7 @@ export async function getNeighborhoods({
 
 export async function getAppraisers() {
   const supabase = createClient();
-  return supabase.from("appraisers").select("*").order("appraiser");
+  return supabase.from("appraisers").select("*").order("name");
 }
 
 export async function getAggregates() {

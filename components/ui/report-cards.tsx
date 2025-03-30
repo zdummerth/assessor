@@ -1,6 +1,6 @@
-import { getFilteredData, UpdatedFilters, getAggregates } from "@/lib/data";
+import { getFilteredData, ParcelYearFilters, getAggregates } from "@/lib/data";
 
-export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
+export async function ValueCard({ filters }: { filters: ParcelYearFilters }) {
   console.log("filters", filters);
   const { data, error }: any = await getFilteredData({
     filters,
@@ -75,7 +75,7 @@ export async function ValueCard({ filters }: { filters: UpdatedFilters }) {
 export async function CondoReportCard({
   filters,
 }: {
-  filters: UpdatedFilters;
+  filters: ParcelYearFilters;
 }) {
   if (filters.occupancy) {
     return <div></div>;
@@ -164,7 +164,7 @@ export async function CondoReportCard({
 export async function CommercialReportCard({
   filters,
 }: {
-  filters: UpdatedFilters;
+  filters: ParcelYearFilters;
 }) {
   const newFilters = {
     ...filters,
@@ -225,7 +225,7 @@ export async function CommercialReportCard({
 export async function ResidentialReportCard({
   filters,
 }: {
-  filters: UpdatedFilters;
+  filters: ParcelYearFilters;
 }) {
   const newFilters = {
     ...filters,
@@ -286,7 +286,7 @@ export async function ResidentialReportCard({
 export async function MixedUseReportCard({
   filters,
 }: {
-  filters: UpdatedFilters;
+  filters: ParcelYearFilters;
 }) {
   const newFilters = {
     ...filters,
@@ -348,7 +348,7 @@ export async function GroupedReportCard({
   filters,
   groupBy,
 }: {
-  filters: UpdatedFilters;
+  filters: ParcelYearFilters;
   groupBy: string;
 }) {
   const { data, error }: any = await getFilteredData({

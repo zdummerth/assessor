@@ -1,4 +1,4 @@
-import { getFilteredData, UpdatedFilters } from "@/lib/data";
+import { getFilteredData, ParcelYearFilters } from "@/lib/data";
 import { SetUrlParam } from "@/components/ui/filter-client";
 
 export default async function SalesTable({
@@ -6,7 +6,7 @@ export default async function SalesTable({
   currentPage,
   sort = "date_of_sale+asc",
 }: {
-  filters: UpdatedFilters;
+  filters: ParcelYearFilters;
   currentPage: number;
   sort?: string;
 }) {

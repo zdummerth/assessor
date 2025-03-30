@@ -187,8 +187,10 @@ export function YearSelectFilter({ defaultValue }: { defaultValue: string }) {
 export function SetUrlParam({
   urlParam,
   value,
+  className = "",
 }: {
   urlParam: string;
+  className?: string;
   value: {
     id: string;
     label: string;
@@ -205,7 +207,11 @@ export function SetUrlParam({
     replace(`${pathname}?${params.toString()}`);
   };
 
-  return <button onClick={handleClick}>{value.label}</button>;
+  return (
+    <button className={className} onClick={handleClick}>
+      {value.label}
+    </button>
+  );
 }
 
 export function DateRangeMenu({ isActive }: { isActive: boolean }) {

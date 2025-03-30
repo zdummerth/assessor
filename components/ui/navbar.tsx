@@ -8,6 +8,7 @@ const Navbar = () => {
   const links = [
     { href: "/", label: "Search" },
     { href: "/parcels", label: "Parcels" },
+    { href: "/appraisers", label: "Appraisers" },
     // { href: "/map", label: "Map" },
     // { href: "/sales/ratios", label: "Ratios" },
   ];

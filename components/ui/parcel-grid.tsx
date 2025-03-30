@@ -1,4 +1,3 @@
-import { Span } from "next/dist/trace";
 import Link from "next/link";
 
 const ParcelCard = ({ parcel }: { parcel: any }) => {
@@ -18,13 +17,13 @@ const ParcelCard = ({ parcel }: { parcel: any }) => {
           <h2 className="text-lg font-semibold">
             ${parcel.appraised_total.toLocaleString()}
           </h2>
-          <span className="text-sm">{parcel.property_class}</span>
+          <span className="text-sm">{parcel.prop_class}</span>
         </div>
         <p className="">
           {parcel.site_address_1}, {parcel.site_zip}
         </p>
         <p className="">
-          {parcel.occupancy} ({parcel.occupancy_description})
+          {parcel.land_use} ({parcel.occupancy})
         </p>
         <p className="">{parcel.neighborhood}</p>
         <div className="mt-4">
@@ -37,7 +36,7 @@ const ParcelCard = ({ parcel }: { parcel: any }) => {
         </p>
         <div>
           <h3 className="font-semibold">Appraiser</h3>
-          <p>{parcel.appraiser}</p>
+          {/* <p>{parcel.appraiser}</p> */}
         </div>
       </div>
     </div>

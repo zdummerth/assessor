@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getFilteredData, UpdatedFilters } from "@/lib/data";
+import { getFilteredData, ParcelYearFilters } from "@/lib/data";
 import { NonCodedFilter, SetUrlParam } from "@/components/ui/filter-client";
 
 export default async function ParcelsTable({
@@ -8,7 +8,7 @@ export default async function ParcelsTable({
   columns,
   sort = "parcel_number+asc",
 }: {
-  filters: UpdatedFilters;
+  filters: ParcelYearFilters;
   currentPage: number;
   columns: string[];
   sort?: string;

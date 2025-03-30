@@ -1,6 +1,3 @@
-import { getFilteredData } from "@/lib/data";
-import { SearchX } from "lucide-react";
-import ParcelsGrid from "./parcel-grid";
 import dynamic from "next/dynamic";
 
 const NeighborhoodMap = dynamic(() => import("@/components/ui/maps/base"), {
