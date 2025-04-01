@@ -41,11 +41,13 @@ export default async function ParcelsAdvancedSearchPage({
     { label: "Fire or 15%", id: "all" },
     { label: "Fire", id: "fire" },
     { label: "15%", id: "percent_change" },
-    // { label: "Appraised != Current", id: "dif" },
     { label: "Abated", id: "abated" },
+    { label: "Open Appeals", id: "appeal_open" },
+    { label: "Scheduled Appeals", id: "appeal_scheduled" },
+    { label: "In Progress Appeals", id: "appeal_in_progress" },
+    { label: "Pending BOE", id: "appeal_pending" },
     // { label: "Has Sales", id: "sales" },
     { label: "Sale Reviews", id: "sale_reviews" },
-    { label: "Appeals", id: "appeals" },
   ];
 
   return (

@@ -2,8 +2,6 @@ import Image from "next/image";
 import stlSeal from "@/public/stl-city-seal.png";
 import { createClient } from "@/utils/supabase/server";
 
-import wardGroups from "@/public/data/by_ward_groups.json";
-
 const WardsList: React.FC = async () => {
   const supabase = createClient();
   const { error, data } = await supabase
@@ -16,40 +14,36 @@ const WardsList: React.FC = async () => {
     return <div>Error loading data</div>;
   }
 
-  console.log("Fetched data:", data);
+  //   console.log("Fetched data:", data);
   return (
     <div className="container mx-auto p-4">
-      {wardGroups.map((ward, index) => {
-        // Filter the data for this ward only
-        return (
-          <div
-            key={index}
-            // className={`mb-8 ${index == wardGroups.length - 1 ? "break-before-page" : ""}`}
-            className="mb-8 break-before-page"
-          >
-            <Image
-              src={stlSeal}
-              alt="St. Louis City Seal"
-              width={100}
-              height={100}
-            />
-            <h1 className="text-3xl font-bold my-4 text-center">
-              Ward {ward.ward}
-            </h1>
-            <WardComparison key={index} ward={ward} />
-          </div>
-        );
-      })}
+      {data.map((ward, index) => (
+        <div
+          key={index}
+          className={`mb-8 ${index == data.length - 1 || "break-after-page"}`}
+        >
+          <Image
+            src={stlSeal}
+            alt="St. Louis City Seal"
+            width={100}
+            height={100}
+          />
+          <h1 className="text-3xl font-bold my-4 text-center">
+            Ward {ward.ward}
+          </h1>
+          <WardComparison key={index} ward={ward} />
+        </div>
+      ))}
     </div>
   );
 };
 
 const propertyTypes = [
-  { key: "commercial", label: "Commercial" },
-  { key: "condo", label: "Condos" },
-  { key: "multi_family", label: "Multi Family" },
-  { key: "other_residential", label: "Other Residential" },
   { key: "single_family", label: "Single Family" },
+  { key: "multi_family", label: "Multi Family" },
+  { key: "condo", label: "Condos" },
+  { key: "commercial", label: "Commercial" },
+  { key: "other", label: "Other" },
 ];
 
 const WardComparison = ({ ward }: any) => {
@@ -59,9 +53,7 @@ const WardComparison = ({ ward }: any) => {
     const total2025 = ward[`total_appraised_value_2025_${pt.key}`];
     const avg2024 = ward[`avg_appraised_value_2024_${pt.key}`];
     const avg2025 = ward[`avg_appraised_value_2025_${pt.key}`];
-    const percentChange = ward[`${pt.key}_percent_change`]
-      ? ward[`${pt.key}_percent_change`] * 100
-      : 0;
+    const percentChange = ward[`${pt.key}_percent_change`] || 0;
 
     return {
       type: pt.label,
@@ -73,11 +65,12 @@ const WardComparison = ({ ward }: any) => {
     };
   });
 
-  // Calculate overall totals for the ward
+  // Calculate overall totals for the ward.
   const overall2024Total = rows.reduce((sum, row) => sum + row.total2024, 0);
   const overall2025Total = rows.reduce((sum, row) => sum + row.total2025, 0);
-  const overallPercentChange =
-    ((overall2025Total - overall2024Total) / overall2024Total) * 100;
+  const overallPercentChange = overall2024Total
+    ? ((overall2025Total - overall2024Total) / overall2024Total) * 100
+    : 0;
 
   return (
     <div className="mb-8 text-center">

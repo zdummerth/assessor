@@ -18,6 +18,10 @@ const config = {
       },
     },
     extend: {
+      screens: {
+        print: { raw: "print" },
+        screen: { raw: "screen" },
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

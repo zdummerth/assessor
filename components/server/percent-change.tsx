@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Grid, Card } from "@/components/ui/grid";
 import CopyToClipboard from "@/components/copy-to-clipboard";
 import { MapPin, ArrowUp, ArrowDown, Flame } from "lucide-react";
+import ModalForm from "../form-modal";
 // import MultipolygonMapWrapper from "../ui/maps/wrapper";
 
 const applyFiltersToQuery = (query: any, filter: string) => {
@@ -23,6 +24,21 @@ const applyFiltersToQuery = (query: any, filter: string) => {
     case "abated":
       query.gte("parcel_review_abatements.year_expires", 2025);
       break;
+    case "appeal_scheduled":
+      query.eq("parcel_review_appeals.status", "Hearing Scheduled");
+      break;
+    case "appeal_in_progress":
+      query.eq("parcel_review_appeals.status", "In Progress");
+      break;
+    case "appeal_open":
+      query.eq("parcel_review_appeals.status", "Open Complaint");
+      break;
+    case "appeal_pending":
+      query.eq("parcel_review_appeals.status", "Pending BOE");
+      break;
+    case "appeal_deleted":
+      query.eq("parcel_review_appeals.status", "Deleted Complaint");
+      break;
     case "sales":
       query.gte("parcel_review_sales.sale_year", 2021);
       break;
@@ -32,7 +48,7 @@ const applyFiltersToQuery = (query: any, filter: string) => {
         .is("parcel_review_sales.sale_type", null);
       break;
     case "appeals":
-      query.gte("parcel_review_appeals.case_year", 2020);
+      query.gte("parcel_review_appeals.year", 2020);
       break;
     case "all":
       query.or("fire_time.not.is.null,percent_change.gte.15");
@@ -49,7 +65,46 @@ const filterSelects = {
   sales: "*, parcel_review_sales!inner(*)",
   appeals:
     "*, parcel_review_appeals!inner(*), parcel_review_sales(sale_type, date_of_sale, net_selling_price)",
+  appeal_open:
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
+  appeal_scheduled:
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
+  appeal_in_progress:
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
+  appeal_pending:
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
+  appeal_deleted:
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
   abated: "*, parcel_review_abatements!inner(*)",
+};
+
+const FormattedDate = ({
+  date,
+  className = "",
+  showTime,
+}: {
+  date: string;
+  className?: string;
+  showTime?: boolean;
+}) => {
+  const localDate = new Date(date);
+  const formattedDate = localDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const formattedTime = localDate
+    .toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+    })
+    .toLowerCase();
+  return (
+    <p className={className}>
+      {formattedDate} {formattedTime && showTime ? formattedTime : ""}
+    </p>
+  );
 };
 
 export default async function AppraiserPercentChange({
@@ -88,6 +143,8 @@ export default async function AppraiserPercentChange({
     );
   }
 
+  // console.log(data[0].parcel_review_appeals);
+
   return (
     <div className="w-full flex">
       <Grid>
@@ -124,33 +181,17 @@ export default async function AppraiserPercentChange({
                 </div>
                 <p className="text-sm">{parcel.prop_class}</p>
               </div>
+
               <div className="text-center">
-                <p className="mb-2">Appraised Values</p>
-                <div className="flex justify-between flex-wrap">
-                  <div className="flex flex-col items-center border rounded-lg p-2">
-                    <span className="text-xs">2024</span>
-                    <span>${parcel.appraised_total_2024.toLocaleString()}</span>
-                  </div>
-                  <div className="flex flex-col items-center border rounded-lg p-2">
-                    <span className="text-xs">2025</span>
-                    <span>${parcel.appraised_total_2025.toLocaleString()}</span>
-                    <div className="flex gap-1 items-center justify-center text-sm mt-1">
-                      {parcel.percent_change > 0 ? (
-                        <ArrowUp size={12} className="text-green-500" />
-                      ) : (
-                        <ArrowDown size={12} className="text-red-500" />
-                      )}
-                      <p>
-                        {parcel.percent_change.toFixed(2).toLocaleString()}%
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-center border rounded-lg p-2">
-                    <span className="text-xs">Total Value</span>
+                <p className="my-2">Appraised Values</p>
+
+                <div className="flex flex-col gap-2 mb-8">
+                  <div className="grid grid-cols-3 items-center justify-center gap-8 border rounded-md p-2">
+                    <span className="text-xs justify-self-start">Current</span>
                     <span>
                       ${parcel.working_appraised_total_2025.toLocaleString()}
                     </span>
-                    <div className="flex gap-1 items-center justify-center text-sm mt-1">
+                    <div className="justify-self-end flex gap-1 items-center justify-center text-sm mt-1">
                       {parcel.working_percent_change > 0 ? (
                         <ArrowUp size={12} className="text-green-500" />
                       ) : (
@@ -164,30 +205,36 @@ export default async function AppraiserPercentChange({
                       </p>
                     </div>
                   </div>
+                  <div className="grid grid-cols-3 items-center justify-center gap-8 border rounded-md p-2">
+                    <span className="text-xs justify-self-start">2025</span>
+                    <span>${parcel.appraised_total_2025.toLocaleString()}</span>
+                    <div className="justify-self-end flex gap-1 items-center justify-center text-sm mt-1">
+                      {parcel.percent_change > 0 ? (
+                        <ArrowUp size={12} className="text-green-500" />
+                      ) : (
+                        <ArrowDown size={12} className="text-red-500" />
+                      )}
+                      <p>
+                        {parcel.percent_change.toFixed(2).toLocaleString()}%
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center justify-between border rounded-md p-2">
+                    <span className="text-xs justify-self-start">2024</span>
+                    <span>${parcel.appraised_total_2024.toLocaleString()}</span>
+                  </div>
                 </div>
                 {parcel.fire_time && (
-                  <div className="flex flex-col items-center justify-center border-t pt-2 mt-2">
+                  <div className="flex items-center justify-between border rounded-md p-2">
                     <div className="flex gap-2 items-center">
-                      <Flame size={18} className="text-red-500" />
+                      <Flame size={16} className="text-red-500" />
                       <p>Fire</p>
                     </div>
-                    <p>
-                      {(() => {
-                        const date = new Date(parcel.fire_time);
-                        const formattedDate = date.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        });
-                        const formattedTime = date
-                          .toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "numeric",
-                          })
-                          .toLowerCase();
-                        return `${formattedDate}, ${formattedTime}`;
-                      })()}
-                    </p>
+
+                    <FormattedDate
+                      date={parcel.fire_time}
+                      className="text-sm"
+                    />
                   </div>
                 )}
                 {parcel.parcel_review_abatements?.length > 0 && (
@@ -215,28 +262,31 @@ export default async function AppraiserPercentChange({
                   </div>
                 )}
                 {parcel.parcel_review_sales?.length > 0 && (
-                  <div className="flex flex-col items-center justify-center border-t pt-2 mt-2">
-                    <p>Sales</p>
-                    <div className="flex flex-wrap justify-between gap-2 items-center pt-2">
-                      {parcel.parcel_review_sales.map((sale: any) => {
-                        return (
-                          <div
-                            key={sale.document_number + parcel.parcel_number}
-                            className="flex flex-col gap-2 items-center border rounded-lg p-2"
-                          >
-                            <span className="text-xs">{sale.date_of_sale}</span>
+                  <div className="flex flex-col gap-2 items-center justify-center mt-2">
+                    <p className="mb-2">Sales</p>
+                    {parcel.parcel_review_sales.map((sale: any) => {
+                      return (
+                        <div
+                          key={sale.document_number + parcel.parcel_number}
+                          className="border rounded-lg p-2 w-full"
+                        >
+                          <div className="flex justify-between items-center gap-2">
                             {sale.sale_type ? (
-                              <span className="text-xs">{sale.sale_type}</span>
+                              <span className="text-sm">{sale.sale_type}</span>
                             ) : (
-                              <span className="text-xs">Pending Sale Type</span>
+                              <span className="text-sm">Pending Sale Type</span>
                             )}
-                            <span>
-                              ${sale.net_selling_price.toLocaleString()}
-                            </span>
+                            <FormattedDate
+                              className="text-sm"
+                              date={sale.date_of_sale}
+                            />
                           </div>
-                        );
-                      })}
-                    </div>
+                          <span>
+                            ${sale.net_selling_price?.toLocaleString()}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
                 {parcel.parcel_review_appeals && (
@@ -249,12 +299,28 @@ export default async function AppraiserPercentChange({
                             key={appeal.appeal_number + parcel.parcel_number}
                             className="flex flex-col gap-2 items-center border rounded-lg p-2"
                           >
-                            <span className="text-xs">{appeal.case_year}</span>
+                            <span className="text-xs">{appeal.year}</span>
+                            <p>Type: {appeal.appeal_type}</p>
+                            <p>Status: {appeal.status}</p>
                             <div className="flex gap-2 items-center">
                               <span>
-                                ${appeal.after_total.toLocaleString()}
+                                Difference: $
+                                {appeal.total_difference.toLocaleString()}
                               </span>
-                              <span>{appeal.status_code}</span>
+                            </div>
+                            {appeal.hearing_ts && (
+                              <div>
+                                Hearing Date:
+                                <FormattedDate date={appeal.hearing_ts} />
+                              </div>
+                            )}
+                            <div className="flex gap-2 items-center">
+                              <div>Appeal # {appeal.appeal_number}</div>
+                              <CopyToClipboard
+                                text={appeal.appeal_number
+                                  .toString()
+                                  .padStart(10, "0")}
+                              />
                             </div>
                           </div>
                         );
@@ -262,6 +328,18 @@ export default async function AppraiserPercentChange({
                     </div>
                   </div>
                 )}
+              </div>
+              <div className="flex flex-col items-center justify-center border-t pt-2 mt-2">
+                <div className="flex gap-2 items-center">
+                  <div>Notes</div>
+                  <ModalForm
+                    header={parcel.parcel_number}
+                    subHeader={displayAddress}
+                    parcelNumber={parcel.parcel_number}
+                    note={parcel.data_collection}
+                  />
+                </div>
+                <p className="text-sm">{parcel.data_collection}</p>
               </div>
             </Card>
           );

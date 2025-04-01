@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -30,7 +31,7 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect(
       "success",
       "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
+      "Thanks for signing up! Please check your email for a verification link."
     );
   }
 };
@@ -71,7 +72,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       "/forgot-password",
-      "Could not reset password",
+      "Could not reset password"
     );
   }
 
@@ -82,7 +83,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Check your email for a link to reset your password.",
+    "Check your email for a link to reset your password."
   );
 };
 
@@ -96,7 +97,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password and confirm password are required",
+      "Password and confirm password are required"
     );
   }
 
@@ -104,7 +105,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Passwords do not match",
+      "Passwords do not match"
     );
   }
 
@@ -116,7 +117,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password update failed",
+      "Password update failed"
     );
   }
 
@@ -127,4 +128,37 @@ export const signOutAction = async () => {
   const supabase = createClient();
   await supabase.auth.signOut();
   return redirect("/sign-in");
+};
+
+export const updateDataCollectionNoteAction = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const note = formData.get("note")?.toString() || null;
+  const parcelNumber = formData.get("parcel_number")?.toString() || null;
+  const supabase = createClient();
+
+  console.log("prevState in action", prevState);
+  console.log("note in action", note);
+  console.log("parcelNumber in action", parcelNumber);
+
+  if (!parcelNumber) {
+    return { error: "Parcel number is required" };
+  }
+  // get current timestamp
+  const currentTimestamp = new Date().toISOString();
+  const { error } = await supabase.from("parcel_reviews_2025").upsert({
+    data_collection: note,
+    field_reviewed: currentTimestamp,
+    parcel_number: parcelNumber,
+  });
+
+  if (error) {
+    return { error };
+  }
+  revalidatePath("/appraisers");
+  return {
+    success: true,
+    message: "Note updated successfully",
+  };
 };

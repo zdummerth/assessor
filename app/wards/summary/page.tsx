@@ -1,6 +1,17 @@
 import wardGroups from "@/public/data/by_ward_groups.json";
+import { createClient } from "@/utils/supabase/server";
 
-const WardSummaryTable = () => {
+const WardSummaryTable = async () => {
+  const supabase = createClient();
+
+  const { error, data } = await supabase.from("wards_summary").select("*");
+
+  if (error) {
+    console.error("Error fetching data:", error);
+    return <div>Error loading data</div>;
+  }
+
+  console.log("Fetched data:", data);
   // Prepare the data rows by computing the values for each ward.
   const rows = wardGroups
     .filter((ward) => ward.ward !== 99)

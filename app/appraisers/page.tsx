@@ -1,8 +1,14 @@
 import Link from "next/link";
 import { getAppraisers } from "@/lib/data";
+import { createClient } from "@/utils/supabase/server";
 
 export default async function ParcelsAdvancedSearchPage() {
-  const { data, error } = await getAppraisers();
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("appraisers")
+    .select("*, appraiser_appeal_stats(count, status)")
+    .order("name");
 
   if (error && !data) {
     console.error(error);
@@ -14,13 +20,27 @@ export default async function ParcelsAdvancedSearchPage() {
     );
   }
 
+  // console.log("Appraisers data:", data[0].appraiser_appeal_stats);
+
   return (
     <div className="w-full grid grid-cols-1 gap-4 p-4 max-w-3xl mx-auto md:grid-cols-2 lg:grid-cols-3">
       {data.map((appraiser) => (
-        <Link key={appraiser.id} href={`/appraisers/${appraiser.id}`}>
-          <div className="text-center border p-4 rounded shadow shadow-foreground shadow-sm hover:shadow-lg cursor-pointer">
+        <Link
+          href={`/appraisers/${appraiser.id}`}
+          key={appraiser.id}
+          className="text-center border p-4 rounded shadow shadow-foreground shadow-sm hover:shadow-lg cursor-pointer"
+        >
+          {/* <Link href={`/appraisers/${appraiser.id}`}> */}
+          <div>
             <h2 className="text-lg font-semibold">{appraiser.name}</h2>
           </div>
+          {appraiser.appraiser_appeal_stats.map((stat: any) => (
+            <div key={stat.status + appraiser.id} className="text-center mt-2">
+              <p className="text-sm">
+                {stat.status}: {stat.count}
+              </p>
+            </div>
+          ))}
         </Link>
       ))}
     </div>
