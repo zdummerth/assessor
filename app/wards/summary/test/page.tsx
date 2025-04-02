@@ -42,7 +42,7 @@ const WardSummaryTable = async () => {
     <div className="text-center break-before-page">
       <h2 className="text-xl font-bold mb-4">Wards Summary</h2>
       <table className="min-w-full shadow-md rounded-lg overflow-hidden text-center">
-        <thead className="bg-gray-300">
+        <thead className="bg-gray-200 dark:bg-gray-700">
           <tr>
             <th className="px-4 py-2">Ward</th>
             {/* <th className="px-4 py-2">2024 Other</th> */}
@@ -56,7 +56,10 @@ const WardSummaryTable = async () => {
         </thead>
         <tbody className="divide-y divide-gray-200 text-sm">
           {data.map((row, index) => (
-            <tr key={index} className="odd:bg-white even:bg-gray-100">
+            <tr
+              key={index}
+              className="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800 dark:even:bg-gray-700"
+            >
               <td className="px-4 py-2 font-medium">{row.ward}</td>
               {/* <td className="px-4 py-2">${row.other_2024.toLocaleString()}</td> */}
               <td className="px-4 py-2">
@@ -73,7 +76,7 @@ const WardSummaryTable = async () => {
               </td>
             </tr>
           ))}
-          <tr className="bg-gray-300 font-semibold">
+          <tr className="bg-gray-200 dark:bg-gray-700 font-semibold">
             <td className="px-4 py-2">Totals</td>
             {/* <td className="px-4 py-2">${totals.other_2024.toLocaleString()}</td> */}
             <td className="px-4 py-2">

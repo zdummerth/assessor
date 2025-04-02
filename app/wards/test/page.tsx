@@ -75,7 +75,7 @@ const WardComparison = ({ ward }: any) => {
   return (
     <div className="mb-8 text-center">
       <table className="min-w-full shadow-md rounded-lg overflow-hidden">
-        <thead className="bg-gray-200">
+        <thead className="bg-gray-200 dark:bg-gray-700">
           <tr>
             <th className="px-4 py-2 font-semibold">Property Type</th>
             <th className="px-4 py-2 font-semibold">2024 Total Value</th>
@@ -100,7 +100,7 @@ const WardComparison = ({ ward }: any) => {
               <td className="px-4 py-2">{row.percentChange.toFixed(2)}%</td>
             </tr>
           ))}
-          <tr className="bg-gray-200 font-semibold">
+          <tr className="bg-gray-200 dark:bg-gray-700 font-semibold">
             <td className="px-4 py-2">Overall Totals</td>
             <td className="px-4 py-2">${overall2024Total.toLocaleString()}</td>
             <td className="px-4 py-2">-</td>

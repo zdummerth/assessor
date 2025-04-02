@@ -1,14 +1,11 @@
 import { createClient } from "@/utils/supabase/server";
-import ParcelCard from "@/components/cards/parcel-year";
-import ParcelSales from "@/components/cards/parcel-sales";
-import ParcelAppeals from "@/components/cards/parcel-appeals";
-import ParcelPermits from "@/components/cards/parcel-bps";
-import { Suspense } from "react";
-import dynamic from "next/dynamic";
-import AppraisedTotalLineChart from "@/components/ui/charts/AppraisedTotalLineChart";
 import CopyToClipboard from "@/components/copy-to-clipboard";
-import { MapPin } from "lucide-react";
+import { MapPin, ArrowUp, ArrowDown, Flame, ArrowRight } from "lucide-react";
+import ModalForm from "@/components/form-modal";
 import type { Metadata, ResolvingMetadata } from "next";
+import { Grid, Card } from "@/components/ui/grid";
+
+// import MultipolygonMapWrapper from "../ui/maps/wrapper";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -27,254 +24,277 @@ export async function generateMetadata(
   };
 }
 
-const BaseMap = dynamic(() => import("@/components/ui/maps/single-parcel"), {
-  ssr: false,
-});
-
-// Helper function: Compares two parcel records and returns only the changed fields.
-function getDifferences(oldParcel: any, newParcel: any) {
-  const differences: Record<string, [any, any]> = {};
-  // Ignore these keys when comparing
-  const ignoreKeys = [
-    "id",
-    "year",
-    "parcel_number",
-    "owner_address_1",
-    "owner_city",
-    "owner_state",
-    "owner_zip",
-    "appraised_res_building",
-    "assessed_res_building",
-    "working_improve_value",
-    "working_total_value",
-  ];
-  // Compare the union of keys from both records
-  const keys = new Set([...Object.keys(oldParcel), ...Object.keys(newParcel)]);
-  keys.forEach((key) => {
-    if (ignoreKeys.includes(key)) return;
-    if (oldParcel[key] !== newParcel[key]) {
-      differences[key] = [oldParcel[key], newParcel[key]];
-    }
+const FormattedDate = ({
+  date,
+  className = "",
+  showTime,
+}: {
+  date: string;
+  className?: string;
+  showTime?: boolean;
+}) => {
+  const localDate = new Date(date);
+  const formattedDate = localDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
   });
-  return differences;
-}
+  const formattedTime = localDate
+    .toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+    })
+    .toLowerCase();
+  return (
+    <p className={className}>
+      {formattedDate} {formattedTime && showTime ? formattedTime : ""}
+    </p>
+  );
+};
 
-function ParcelTimeline({ parcels }: { parcels: any[] }) {
-  const sortedParcels = [...parcels].sort((a, b) => a.year - b.year);
-
-  const timelineItems = sortedParcels.map((parcel, index) => {
-    if (index === 0) {
-      // No previous record for the first year
-      return null;
-    }
-    const previousParcel = sortedParcels[index - 1];
-    const changes = getDifferences(previousParcel, parcel);
-    if (Object.keys(changes).length === 0) {
-      // No changes to display for this year
-      return null;
-    }
-    return (
-      <div
-        key={parcel.year}
-        className="timeline-item mb-4 p-2 border rounded shadow-sm"
-      >
-        <h3 className="font-semibold">{parcel.year}</h3>
-        <ul className="list-disc list-inside">
-          {Object.entries(changes).map(([field, [oldValue, newValue]]) => (
-            <li key={field}>
-              <span className="font-bold">{field}</span>: {oldValue}{" "}
-              <span className="mx-2">→</span> {newValue}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  });
-
-  // Only render timeline items that have changes
-  return <div>{timelineItems.filter((item) => item !== null)}</div>;
-}
-
-export default async function Page({
+export default async function AppraiserPercentChange({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const id = (await params).id;
-
   const supabase = createClient();
 
-  try {
-    const { data, error } = await supabase
-      .from("parcels")
-      .select()
-      .eq("parcel_number", id)
-      .order("year", { ascending: false });
+  const { data, error } = await supabase
+    .from("parcel_reviews_2025")
+    .select(
+      "*, parcel_review_appeals(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)"
+    )
+    .eq("parcel_number", params.id)
+    .single();
 
-    if (error) {
-      throw new Error("Failed to fetch data");
-    }
+  // console.log({ data, error });
 
-    if (Array.isArray(data) && data.length === 0) {
-      return <div>Parcel not found</div>;
-    }
-
-    const maxYear = data.reduce(
-      (max: number, parcel: any) => (parcel.year > max ? parcel.year : max),
-      0
-    );
-
-    const mostRecentParcel = data.find(
-      (parcel: any) => parcel.year === maxYear
-    );
-
-    const { data: address, error: addressError } = await supabase
-      .from("addresses")
-      .select("address, address_line1, postcode, formatted, lat, lon, bbox")
-      .eq("address", mostRecentParcel.site_address_1)
-      .limit(1)
-      .single();
-
-    const displayAddress = address
-      ? `${address.address_line1} ${address.postcode}`
-      : `${mostRecentParcel.site_address_1} ${mostRecentParcel.zip || ""}`;
-
-    console.log(mostRecentParcel);
+  if (error) {
     return (
-      <div>
-        <div className="grid w-full gap-4 grid-cols-1 lg:grid-cols-3 lg:h-[450px]">
-          <div className="rounded-lg shadow-lg p-2 md:p-4">
-            {/* ID Section */}
-            <div className="flex items-center space-x-3 border-b pb-3">
-              <h1 className="text-2xl font-semibold">{id}</h1>
-              <CopyToClipboard text={id} />
-            </div>
-
-            {/* Address Section */}
-            <div className="mt-2 flex items-center justify-between border-b pb-3">
-              <div className="flex items-center space-x-2">
-                <p className="">{displayAddress}</p>
-                <CopyToClipboard text={displayAddress} />
-              </div>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <MapPin
-                  size={18}
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                />
-              </a>
-            </div>
-
-            {/* Owner Info */}
-            <div className="mt-2 border-b pb-3">
-              <p className="font-medium">{mostRecentParcel.owner_name}</p>
-              <p className="">{mostRecentParcel.owner_address_1}</p>
-            </div>
-
-            {/* Neighborhood */}
-            <div className="mt-2 border-b pb-3">
-              <p className="">
-                <span className="font-semibold">Neighborhood:</span>{" "}
-                {mostRecentParcel.neighborhood}
-              </p>
-            </div>
-
-            {/* Occupancy */}
-            <div className="mt-2 border-b pb-3 flex items-center space-x-2">
-              <span className="font-semibold">
-                {mostRecentParcel.occupancy}
-              </span>
-              <span className="">-</span>
-              <span className="">{mostRecentParcel.occupancy_description}</span>
-            </div>
-
-            {/* Appraiser */}
-            <div className="mt-2 border-b pb-3">
-              <p className="">
-                <span className="font-semibold">Appraiser:</span>{" "}
-                {mostRecentParcel.appraiser}
-              </p>
-            </div>
-
-            {/* Appraised Total */}
-            <div className="mt-2 border-b pb-3">
-              <p className="">
-                <span className="font-semibold">Appraised Total:</span>{" "}
-                {mostRecentParcel.appraised_total}
-              </p>
-            </div>
-
-            {/* Property Class */}
-            <div className="mt-2">
-              <p className="font-medium">{mostRecentParcel.property_class}</p>
-            </div>
-          </div>
-
-          <div className="border rounded-lg h-[400px] shadow overflow-hidden">
-            <AppraisedTotalLineChart data={data} />
-          </div>
-
-          <div className="rounded-lg shadow flex flex-col items-center overflow-hidden">
-            {address?.lat && address?.lon && (
-              <BaseMap lat={address.lat} lon={address.lon} />
-            )}
-          </div>
-        </div>
-
-        {/* Existing Parcel Cards */}
-        <div className="flex flex-col space-y-4">
-          {data.map((parcel: any) => (
-            <ParcelCard
-              key={`${parcel.parcel_number}-${parcel.year}`}
-              data={parcel}
-            />
-          ))}
-        </div>
-
-        {/* Timeline Section */}
-        <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-            Timeline
-          </h2>
-          <ParcelTimeline parcels={data} />
-        </div>
-
-        {/* Sales Section */}
-        <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-            Sales
-          </h2>
-          <Suspense fallback={<div>loading sales...</div>}>
-            <ParcelSales parcel_number={id} />
-          </Suspense>
-        </div>
-
-        {/* Appeals Section */}
-        <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-            Appeals
-          </h2>
-          <Suspense fallback={<div>loading appeals...</div>}>
-            <ParcelAppeals parcel_number={id} />
-          </Suspense>
-        </div>
-
-        {/* Permits Section */}
-        <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-            Permits
-          </h2>
-          <Suspense fallback={<div>loading permits...</div>}>
-            <ParcelPermits parcel_number={id} />
-          </Suspense>
-        </div>
+      <div className="w-full flex flex-col items-center justify-center mt-16">
+        <p className="text-center">Error fetching parcels</p>
+        <p>{error.message}</p>
       </div>
     );
-  } catch (error) {
-    console.error(error);
-    return <div>Failed to fetch data</div>;
   }
+
+  // console.log(data[0].current_structures);
+
+  const parcel = data;
+  const displayAddress = `${parcel.site_street_number} ${parcel.prefix_directional || ""} ${parcel.site_street_name} ${parcel.site_zip_code || ""}`;
+  return (
+    <div className="w-full max-w-2xl mx-auto flex flex-col items-center justify-center p-4">
+      <div className="mt-2 flex flex-col items-center border-b pb-3 w-full">
+        <div className="flex items-center justify-between gap-4 w-full">
+          <p className="">{displayAddress}</p>
+          <div className="flex gap-2">
+            <CopyToClipboard text={displayAddress} />
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MapPin
+                size={18}
+                className="hover:text-blue-500 transition-colors"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-b pb-3 w-full">
+        <div className="mt-2 flex items-center justify-between">
+          <span>{parcel.occupancy}</span>
+          <div className="flex gap-2">
+            <span>{parcel.parcel_number}</span>
+            <CopyToClipboard text={parcel.parcel_number} />
+          </div>
+          <span>{parcel.neighborhood}</span>
+        </div>
+        <p className="text-sm">{parcel.prop_class}</p>
+        {parcel.current_structures?.length > 0 && (
+          <div className="flex flex-col gap-2 w-full mt-2">
+            {parcel.current_structures.map((structure: any, index: number) => {
+              return (
+                <div
+                  key={structure.parcel_number + index}
+                  className="grid grid-cols-3 border rounded-md p-2 w-full"
+                >
+                  <div className="justify-self-start">
+                    <div className="text-xs">Total Area</div>
+                    <div>{structure.total_area} sqft</div>
+                  </div>
+                  <div className="justify-self-center text-center">
+                    <div className="text-xs">GLA</div>
+                    <div>{structure.gla} sqft</div>
+                  </div>
+                  <div className="justify-self-end text-right">
+                    <div className="text-xs">CDU</div>
+                    <div>{structure.cdu || "NA"}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="text-center w-full">
+        <p className="my-2">Appraised Values</p>
+
+        <div className="flex flex-col gap-2 mb-8">
+          <div className="grid grid-cols-3 items-center justify-center gap-8 border rounded-md p-2">
+            <span className="text-xs justify-self-start">Current</span>
+            <span>${parcel.working_appraised_total_2025.toLocaleString()}</span>
+            <div className="justify-self-end flex gap-1 items-center justify-center text-sm mt-1">
+              {parcel.working_percent_change > 0 ? (
+                <ArrowUp size={12} className="text-green-500" />
+              ) : (
+                <ArrowDown size={12} className="text-red-500" />
+              )}
+              <p>
+                {parcel.working_percent_change.toFixed(2).toLocaleString()}%
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 items-center justify-center gap-8 border rounded-md p-2">
+            <span className="text-xs justify-self-start">2025</span>
+            <span>${parcel.appraised_total_2025.toLocaleString()}</span>
+            <div className="justify-self-end flex gap-1 items-center justify-center text-sm mt-1">
+              {parcel.percent_change > 0 ? (
+                <ArrowUp size={12} className="text-green-500" />
+              ) : (
+                <ArrowDown size={12} className="text-red-500" />
+              )}
+              <p>{parcel.percent_change.toFixed(2).toLocaleString()}%</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 items-center justify-between border rounded-md p-2">
+            <span className="text-xs justify-self-start">2024</span>
+            <span>${parcel.appraised_total_2024.toLocaleString()}</span>
+          </div>
+        </div>
+        {parcel.fire_time && (
+          <div className="flex items-center justify-between border rounded-md p-2">
+            <div className="flex gap-2 items-center">
+              <Flame size={16} className="text-red-500" />
+              <p>Fire</p>
+            </div>
+
+            <FormattedDate date={parcel.fire_time} className="text-sm" />
+          </div>
+        )}
+        {parcel.parcel_review_abatements?.length > 0 && (
+          <div className="flex flex-col items-center justify-center border-t pt-2 mt-2">
+            <p>Abatements</p>
+            <div className="flex flex-wrap justify-between gap-2 items-center pt-2">
+              {parcel.parcel_review_abatements.map((abate: any) => {
+                return (
+                  <div
+                    key={abate.name + parcel.parcel_number}
+                    className="flex flex-col gap-2 items-center border rounded-lg p-2"
+                  >
+                    <span className="text-xs">Program: {abate.name}</span>
+                    <div>
+                      <span>{abate.year_created}</span>
+                      <span>-</span>
+                      <span>{abate.year_expires}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {parcel.parcel_review_sales?.length > 0 && (
+          <div className="flex flex-col gap-2 items-center justify-center mt-2">
+            <p className="mb-2">Sales</p>
+            {parcel.parcel_review_sales.map((sale: any) => {
+              return (
+                <div
+                  key={sale.document_number + parcel.parcel_number}
+                  className="border rounded-lg p-2 w-full"
+                >
+                  <div className="flex justify-between items-center gap-2">
+                    {sale.sale_type ? (
+                      <span className="text-sm">{sale.sale_type}</span>
+                    ) : (
+                      <span className="text-sm">Pending Sale Type</span>
+                    )}
+                    <FormattedDate
+                      className="text-sm"
+                      date={sale.date_of_sale}
+                    />
+                  </div>
+                  <span>${sale.net_selling_price?.toLocaleString()}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {parcel.parcel_review_appeals?.length > 0 && (
+          <div className="flex flex-col items-center justify-center border-t pt-2 mt-2 w-full">
+            <p>Appeals</p>
+            <div className="flex flex-col gap-2 items-center pt-2 w-full">
+              {parcel.parcel_review_appeals.map((appeal: any) => {
+                return (
+                  <div
+                    key={appeal.appeal_number + parcel.parcel_number}
+                    className="flex flex-col gap-2 items-center border rounded-lg p-2 w-full"
+                  >
+                    <div className="flex justify-between items-center w-full">
+                      <span className="text-xs">{appeal.year}</span>
+                      <div className="flex gap-2 items-center">
+                        <div>{appeal.appeal_number}</div>
+                        <CopyToClipboard
+                          text={appeal.appeal_number
+                            .toString()
+                            .padStart(10, "0")}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-around gap-4 items-center w-full">
+                      <div className="flex flex-col gap-1">
+                        {/* <p className="text-xs">Type</p> */}
+                        <p>{appeal.appeal_type}</p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {/* <p className="text-xs">Status</p> */}
+                        <p>{appeal.status}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <span>${appeal.before_total.toLocaleString()}</span>
+                      <ArrowRight size={12} className="text-gray-500" />
+                      <span>${appeal.after_total.toLocaleString()}</span>
+                    </div>
+                    {appeal.hearing_ts && (
+                      <div>
+                        <span className="text-xs">Hearing</span>
+                        <FormattedDate date={appeal.hearing_ts} showTime />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col items-center justify-center mt-8">
+        <div className="flex gap-2 items-center">
+          <div>Notes</div>
+          <ModalForm
+            header={parcel.parcel_number}
+            subHeader={displayAddress}
+            parcelNumber={parcel.parcel_number}
+            note={parcel.data_collection}
+          />
+        </div>
+        <p className="text-sm">{parcel.data_collection}</p>
+      </div>
+    </div>
+  );
 }

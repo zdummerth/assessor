@@ -1,6 +1,7 @@
 import Search from "@/components/ui/search";
 import { YearSelectFilter } from "@/components/ui/filter-client";
 import ParcelSearchResults from "@/components/ui/parcel-search-results";
+import SearchResults from "@/components/server/search-results";
 import { BinocularsSkeleton } from "@/components/ui/parcel-search-results-skeleton";
 import { Suspense } from "react";
 
@@ -9,8 +10,6 @@ export default async function ProtectedPage({
 }: {
   searchParams?: {
     query?: string;
-    years?: string;
-    year?: string;
   };
 }) {
   const formattedSearchParams = Object.fromEntries(
@@ -34,12 +33,15 @@ export default async function ProtectedPage({
   return (
     <div className="">
       <div className="flex gap-4">
-        <div className="w-[85px] text-sm">
+        {/* <div className="w-[85px] text-sm">
           <YearSelectFilter defaultValue={filters.year[0]} />
-        </div>
+        </div> */}
 
         <div className=" w-full md:w-[300px]">
-          <Search placeholder="parcel number or site address" />
+          <p className="text-sm mb-4">
+            Search parcel number, situs, owner name, or owner address
+          </p>
+          <Search placeholder="search..." />
         </div>
       </div>
       {query && (
@@ -47,12 +49,7 @@ export default async function ProtectedPage({
           fallback={<BinocularsSkeleton />}
           key={`${query}-${filters.year[0]}`}
         >
-          <ParcelSearchResults
-            query={query}
-            filters={filters}
-            view="grid"
-            limit={9}
-          />
+          <SearchResults query={query} />
         </Suspense>
       )}
     </div>

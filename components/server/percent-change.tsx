@@ -2,8 +2,10 @@ import { ITEMS_PER_PAGE } from "@/lib/data";
 import { createClient } from "@/utils/supabase/server";
 import { Grid, Card } from "@/components/ui/grid";
 import CopyToClipboard from "@/components/copy-to-clipboard";
-import { MapPin, ArrowUp, ArrowDown, Flame } from "lucide-react";
+import { MapPin, ArrowUp, ArrowDown, Flame, ArrowRight } from "lucide-react";
 import ModalForm from "../form-modal";
+import Link from "next/link";
+
 // import MultipolygonMapWrapper from "../ui/maps/wrapper";
 
 const applyFiltersToQuery = (query: any, filter: string) => {
@@ -61,21 +63,25 @@ const applyFiltersToQuery = (query: any, filter: string) => {
 };
 
 const filterSelects = {
-  sale_reviews: "*, parcel_review_sales!inner(*)",
-  sales: "*, parcel_review_sales!inner(*)",
+  all: "*, parcel_review_sales(*), current_structures(*)",
+  percent_change: "*, parcel_review_sales(*), current_structures(*)",
+  fire: "*, parcel_review_sales(*), current_structures(*)",
+  fire_percent_change: "*, parcel_review_sales(*), current_structures(*)",
+  sale_reviews: "*, parcel_review_sales!inner(*), current_structures(*)",
+  sales: "*, parcel_review_sales!inner(*), current_structures(*)",
   appeals:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(sale_type, date_of_sale, net_selling_price)",
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(sale_type, date_of_sale, net_selling_price), current_structures(*)",
   appeal_open:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
   appeal_scheduled:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
   appeal_in_progress:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
   appeal_pending:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
   appeal_deleted:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*)",
-  abated: "*, parcel_review_abatements!inner(*)",
+    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
+  abated: "*, parcel_review_abatements!inner(*), current_structures(*)",
 };
 
 const FormattedDate = ({
@@ -143,7 +149,7 @@ export default async function AppraiserPercentChange({
     );
   }
 
-  // console.log(data[0].parcel_review_appeals);
+  // console.log(data[0].current_structures);
 
   return (
     <div className="w-full flex">
@@ -174,12 +180,49 @@ export default async function AppraiserPercentChange({
                 <div className="mt-2 flex items-center justify-between">
                   <span>{parcel.occupancy}</span>
                   <div className="flex gap-2">
-                    <span>{parcel.parcel_number}</span>
+                    <Link
+                      href={`/parcels/${parcel.parcel_number}`}
+                      target="_blank"
+                    >
+                      <span>{parcel.parcel_number}</span>
+                    </Link>
                     <CopyToClipboard text={parcel.parcel_number} />
                   </div>
                   <span>{parcel.neighborhood}</span>
                 </div>
                 <p className="text-sm">{parcel.prop_class}</p>
+                {parcel.current_structures?.length > 0 && (
+                  <div className="flex flex-col gap-2 w-full mt-2">
+                    {parcel.current_structures.map(
+                      (structure: any, index: number) => {
+                        return (
+                          <div
+                            key={structure.parcel_number + index}
+                            className="grid grid-cols-3 border rounded-md p-2 w-full"
+                          >
+                            <div className="justify-self-start">
+                              <div className="text-xs">Total Area</div>
+                              <div>{structure.total_area} sqft</div>
+                            </div>
+                            <div className="justify-self-center text-center">
+                              <div className="text-xs">GLA</div>
+                              <div>{structure.gla} sqft</div>
+                            </div>
+                            <div className="justify-self-end text-right">
+                              <div className="text-xs">CDU</div>
+                              <div>{structure.cdu || "NA"}</div>
+                            </div>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                )}
+                <div>
+                  <span className="text-sm">
+                    {/* Total Area: {parcel.total_area} sqft */}
+                  </span>
+                </div>
               </div>
 
               <div className="text-center">
@@ -290,38 +333,54 @@ export default async function AppraiserPercentChange({
                   </div>
                 )}
                 {parcel.parcel_review_appeals && (
-                  <div className="flex flex-col items-center justify-center border-t pt-2 mt-2">
+                  <div className="flex flex-col items-center justify-center border-t pt-2 mt-2 w-full">
                     <p>Appeals</p>
-                    <div className="flex flex-wrap justify-between gap-2 items-center pt-2">
+                    <div className="flex flex-col gap-2 items-center pt-2 w-full">
                       {parcel.parcel_review_appeals.map((appeal: any) => {
                         return (
                           <div
                             key={appeal.appeal_number + parcel.parcel_number}
-                            className="flex flex-col gap-2 items-center border rounded-lg p-2"
+                            className="flex flex-col gap-2 items-center border rounded-lg p-2 w-full"
                           >
-                            <span className="text-xs">{appeal.year}</span>
-                            <p>Type: {appeal.appeal_type}</p>
-                            <p>Status: {appeal.status}</p>
+                            <div className="flex justify-between items-center w-full">
+                              <span className="text-xs">{appeal.year}</span>
+                              <div className="flex gap-2 items-center">
+                                <div>{appeal.appeal_number}</div>
+                                <CopyToClipboard
+                                  text={appeal.appeal_number
+                                    .toString()
+                                    .padStart(10, "0")}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-around gap-4 items-center w-full">
+                              <div className="flex flex-col gap-1">
+                                {/* <p className="text-xs">Type</p> */}
+                                <p>{appeal.appeal_type}</p>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                {/* <p className="text-xs">Status</p> */}
+                                <p>{appeal.status}</p>
+                              </div>
+                            </div>
                             <div className="flex gap-2 items-center">
                               <span>
-                                Difference: $
-                                {appeal.total_difference.toLocaleString()}
+                                ${appeal.before_total.toLocaleString()}
+                              </span>
+                              <ArrowRight size={12} className="text-gray-500" />
+                              <span>
+                                ${appeal.after_total.toLocaleString()}
                               </span>
                             </div>
                             {appeal.hearing_ts && (
                               <div>
-                                Hearing Date:
-                                <FormattedDate date={appeal.hearing_ts} />
+                                <span className="text-xs">Hearing</span>
+                                <FormattedDate
+                                  date={appeal.hearing_ts}
+                                  showTime
+                                />
                               </div>
                             )}
-                            <div className="flex gap-2 items-center">
-                              <div>Appeal # {appeal.appeal_number}</div>
-                              <CopyToClipboard
-                                text={appeal.appeal_number
-                                  .toString()
-                                  .padStart(10, "0")}
-                              />
-                            </div>
                           </div>
                         );
                       })}
