@@ -128,7 +128,7 @@ export default async function AppraiserPercentChange({
           const displayAddress = `${parcel.site_street_number} ${parcel.prefix_directional || ""} ${parcel.site_street_name} ${parcel.site_zip_code || ""}`;
           return (
             <Card key={parcel.parcel_number}>
-              <div className="mt-2 flex flex-col items-center border-b pb-3">
+              <div className="mt-2 flex flex-col items-center border-b border-foreground pb-3">
                 <div className="flex items-center justify-between gap-4 w-full">
                   <p className="">{displayAddress}</p>
                   <div className="flex gap-2">
@@ -146,7 +146,7 @@ export default async function AppraiserPercentChange({
                   </div>
                 </div>
               </div>
-              <div className="border-b pb-3">
+              <div className="pb-3">
                 <div className="mt-2 flex items-center justify-between">
                   <span>{parcel.occupancy}</span>
                   <div className="flex gap-2">
@@ -161,6 +161,7 @@ export default async function AppraiserPercentChange({
                   <span>{parcel.neighborhood}</span>
                 </div>
                 <p className="text-sm">{parcel.prop_class}</p>
+                <p className="mt-6 text-center">Structures</p>
                 {parcel.current_structures?.length > 0 && (
                   <div className="flex flex-col gap-2 w-full mt-2">
                     {parcel.current_structures.map(
@@ -168,7 +169,7 @@ export default async function AppraiserPercentChange({
                         return (
                           <div
                             key={structure.parcel_number + index}
-                            className="grid grid-cols-3 border rounded-md p-2 w-full"
+                            className="grid grid-cols-3 border border-foreground rounded-md p-2 w-full"
                           >
                             <div className="justify-self-start">
                               <div className="text-xs">Total Area</div>
@@ -188,18 +189,13 @@ export default async function AppraiserPercentChange({
                     )}
                   </div>
                 )}
-                <div>
-                  <span className="text-sm">
-                    {/* Total Area: {parcel.total_area} sqft */}
-                  </span>
-                </div>
               </div>
 
               <div className="text-center">
                 <p className="my-2">Appraised Values</p>
 
-                <div className="flex flex-col gap-2 mb-8">
-                  <div className="grid grid-cols-3 items-center justify-center gap-8 border rounded-md p-2">
+                <div className="flex flex-col gap-2">
+                  <div className="grid grid-cols-3 items-center justify-center gap-8 border border-foreground rounded-md p-2">
                     <span className="text-xs justify-self-start">Current</span>
                     <span>
                       ${parcel.working_appraised_total_2025.toLocaleString()}
@@ -218,7 +214,7 @@ export default async function AppraiserPercentChange({
                       </p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 items-center justify-center gap-8 border rounded-md p-2">
+                  <div className="grid grid-cols-3 items-center justify-center gap-8 border border-foreground rounded-md p-2">
                     <span className="text-xs justify-self-start">2025</span>
                     <span>${parcel.appraised_total_2025.toLocaleString()}</span>
                     <div className="justify-self-end flex gap-1 items-center justify-center text-sm mt-1">
@@ -232,13 +228,13 @@ export default async function AppraiserPercentChange({
                       </p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 items-center justify-between border rounded-md p-2">
+                  <div className="grid grid-cols-3 items-center justify-between border border-foreground rounded-md p-2">
                     <span className="text-xs justify-self-start">2024</span>
                     <span>${parcel.appraised_total_2024.toLocaleString()}</span>
                   </div>
                 </div>
                 {parcel.fire_time && (
-                  <div className="flex items-center justify-between border rounded-md p-2">
+                  <div className="flex items-center justify-between border border-foreground rounded-md p-2 mt-6">
                     <div className="flex gap-2 items-center">
                       <Flame size={16} className="text-red-500" />
                       <p>Fire</p>
@@ -251,7 +247,7 @@ export default async function AppraiserPercentChange({
                   </div>
                 )}
                 {parcel.parcel_review_abatements?.length > 0 && (
-                  <div className="flex flex-col items-center justify-center border-t pt-2 mt-2">
+                  <div className="flex flex-col items-center justify-center pt-2 mt-6">
                     <p>Abatements</p>
                     <div className="flex flex-wrap justify-between gap-2 items-center pt-2">
                       {parcel.parcel_review_abatements.map((abate: any) => {
@@ -275,13 +271,13 @@ export default async function AppraiserPercentChange({
                   </div>
                 )}
                 {parcel.parcel_review_sales?.length > 0 && (
-                  <div className="flex flex-col gap-2 items-center justify-center mt-2">
-                    <p className="mb-2">Sales</p>
+                  <div className="flex flex-col gap-2 items-center justify-center mt-6">
+                    <p className="">Sales</p>
                     {parcel.parcel_review_sales.map((sale: any) => {
                       return (
                         <div
                           key={sale.document_number + parcel.parcel_number}
-                          className="border rounded-lg p-2 w-full"
+                          className="border border-foreground rounded-md p-2 w-full"
                         >
                           <div className="flex justify-between items-center gap-2">
                             {sale.sale_type ? (
@@ -302,63 +298,8 @@ export default async function AppraiserPercentChange({
                     })}
                   </div>
                 )}
-                {parcel.parcel_review_appeals && (
-                  <div className="flex flex-col items-center justify-center border-t pt-2 mt-2 w-full">
-                    <p>Appeals</p>
-                    <div className="flex flex-col gap-2 items-center pt-2 w-full">
-                      {parcel.parcel_review_appeals.map((appeal: any) => {
-                        return (
-                          <div
-                            key={appeal.appeal_number + parcel.parcel_number}
-                            className="flex flex-col gap-2 items-center border rounded-lg p-2 w-full"
-                          >
-                            <div className="flex justify-between items-center w-full">
-                              <span className="text-xs">{appeal.year}</span>
-                              <div className="flex gap-2 items-center">
-                                <div>{appeal.appeal_number}</div>
-                                <CopyToClipboard
-                                  text={appeal.appeal_number
-                                    .toString()
-                                    .padStart(10, "0")}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex justify-around gap-4 items-center w-full">
-                              <div className="flex flex-col gap-1">
-                                {/* <p className="text-xs">Type</p> */}
-                                <p>{appeal.appeal_type}</p>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                {/* <p className="text-xs">Status</p> */}
-                                <p>{appeal.status}</p>
-                              </div>
-                            </div>
-                            <div className="flex gap-2 items-center">
-                              <span>
-                                ${appeal.before_total.toLocaleString()}
-                              </span>
-                              <ArrowRight size={12} className="text-gray-500" />
-                              <span>
-                                ${appeal.after_total.toLocaleString()}
-                              </span>
-                            </div>
-                            {appeal.hearing_ts && (
-                              <div>
-                                <span className="text-xs">Hearing</span>
-                                <FormattedDate
-                                  date={appeal.hearing_ts}
-                                  showTime
-                                />
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
-              <div className="flex flex-col items-center justify-center border-t pt-2 mt-2">
+              <div className="flex flex-col items-center justify-center pt-2 mt-8">
                 <div className="flex gap-2 items-center">
                   <div>Notes</div>
                   <ModalForm

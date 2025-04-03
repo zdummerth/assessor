@@ -1,4 +1,3 @@
-import { ITEMS_PER_PAGE } from "@/lib/data";
 import { createClient } from "@/utils/supabase/server";
 import { Grid, Card } from "@/components/ui/grid";
 import CopyToClipboard from "@/components/copy-to-clipboard";
@@ -122,7 +121,7 @@ export default async function Appeals({
           const displayAddress = `${parcel.site_street_number} ${parcel.prefix_directional || ""} ${parcel.site_street_name} ${parcel.site_zip_code || ""}`;
           return (
             <Card key={parcel.parcel_number}>
-              <div className="mt-2 flex flex-col items-center border-b pb-3">
+              <div className="mt-2 flex flex-col items-center border-b border-foreground pb-3">
                 <div className="flex items-center justify-between gap-4 w-full">
                   <p className="">{displayAddress}</p>
                   <div className="flex gap-2">
@@ -140,7 +139,7 @@ export default async function Appeals({
                   </div>
                 </div>
               </div>
-              <div className="border-b pb-3">
+              <div className="pb-3">
                 <div className="mt-2 flex items-center justify-between">
                   <span>{parcel.occupancy}</span>
                   <div className="flex gap-2">
@@ -156,13 +155,14 @@ export default async function Appeals({
                 </div>
                 <p className="text-sm">{parcel.prop_class}</p>
                 {parcel.current_structures?.length > 0 && (
-                  <div className="flex flex-col gap-2 w-full mt-2">
+                  <div className="flex flex-col items-center gap-2 w-full mt-6">
+                    <p>Structures</p>
                     {parcel.current_structures.map(
                       (structure: any, index: number) => {
                         return (
                           <div
                             key={structure.parcel_number + index}
-                            className="grid grid-cols-3 border rounded-md p-2 w-full"
+                            className="grid grid-cols-3 border border-foreground rounded-md p-2 w-full"
                           >
                             <div className="justify-self-start">
                               <div className="text-xs">Total Area</div>
@@ -188,14 +188,14 @@ export default async function Appeals({
 
               <div className="text-center">
                 {parcel.parcel_review_appeals && (
-                  <div className="flex flex-col items-center justify-center border-t pt-2 mt-2 w-full">
+                  <div className="flex flex-col items-center justify-center pt-2 mt-6 w-full">
                     <p>Appeals</p>
                     <div className="flex flex-col gap-2 items-center pt-2 w-full">
                       {parcel.parcel_review_appeals.map((appeal: any) => {
                         return (
                           <div
                             key={appeal.appeal_number + parcel.parcel_number}
-                            className="flex flex-col gap-2 items-center border rounded-lg p-2 w-full"
+                            className="flex flex-col gap-2 items-center border border-foreground rounded-lg p-2 w-full"
                           >
                             <div className="flex justify-between items-center w-full">
                               <span className="text-xs">{appeal.year}</span>
@@ -242,10 +242,10 @@ export default async function Appeals({
                     </div>
                   </div>
                 )}
-                <p className="my-2">Appraised Values</p>
 
+                <p className="mt-10 mb-2">Appraised Values</p>
                 <div className="flex flex-col gap-2 mb-8">
-                  <div className="grid grid-cols-3 items-center justify-center gap-8 border rounded-md p-2">
+                  <div className="grid grid-cols-3 items-center justify-center gap-8 border border-foreground rounded-md p-2">
                     <span className="text-xs justify-self-start">Current</span>
                     <span>
                       ${parcel.working_appraised_total_2025.toLocaleString()}
@@ -264,7 +264,7 @@ export default async function Appeals({
                       </p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 items-center justify-center gap-8 border rounded-md p-2">
+                  <div className="grid grid-cols-3 items-center justify-center gap-8 border border-foreground rounded-md p-2">
                     <span className="text-xs justify-self-start">2025</span>
                     <span>${parcel.appraised_total_2025.toLocaleString()}</span>
                     <div className="justify-self-end flex gap-1 items-center justify-center text-sm mt-1">
@@ -278,7 +278,7 @@ export default async function Appeals({
                       </p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 items-center justify-between border rounded-md p-2">
+                  <div className="grid grid-cols-3 items-center justify-between border border-foreground rounded-md p-2">
                     <span className="text-xs justify-self-start">2024</span>
                     <span>${parcel.appraised_total_2024.toLocaleString()}</span>
                   </div>

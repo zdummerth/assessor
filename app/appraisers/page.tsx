@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { getAppraisers } from "@/lib/data";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function ParcelsAdvancedSearchPage() {
