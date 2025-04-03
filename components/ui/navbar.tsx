@@ -8,6 +8,7 @@ const Navbar = () => {
   const links = [
     { href: "/", label: "Search" },
     // { href: "/sales", label: "Sales" },
+    { href: "/appeals/stats", label: "Appeals" },
     { href: "/appraisers", label: "Appraisers" },
     { href: "/wards/summary/test", label: "Ward Summary" },
     { href: "/wards/test", label: "Ward Detail" },

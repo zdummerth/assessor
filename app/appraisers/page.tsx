@@ -7,8 +7,10 @@ export default async function ParcelsAdvancedSearchPage() {
 
   const { data, error } = await supabase
     .from("appraisers")
-    .select("*, appraiser_appeal_stats(count, status)")
-    .order("name");
+    .select("*")
+    .order("name")
+    .neq("name", "DAVID DONALD")
+    .neq("name", "CLASSIE BAINES");
 
   if (error && !data) {
     console.error(error);
@@ -34,13 +36,6 @@ export default async function ParcelsAdvancedSearchPage() {
           <div>
             <h2 className="text-lg font-semibold">{appraiser.name}</h2>
           </div>
-          {appraiser.appraiser_appeal_stats.map((stat: any) => (
-            <div key={stat.status + appraiser.id} className="text-center mt-2">
-              <p className="text-sm">
-                {stat.status}: {stat.count}
-              </p>
-            </div>
-          ))}
         </Link>
       ))}
     </div>

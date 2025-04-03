@@ -26,21 +26,6 @@ const applyFiltersToQuery = (query: any, filter: string) => {
     case "abated":
       query.gte("parcel_review_abatements.year_expires", 2025);
       break;
-    case "appeal_scheduled":
-      query.eq("parcel_review_appeals.status", "Hearing Scheduled");
-      break;
-    case "appeal_in_progress":
-      query.eq("parcel_review_appeals.status", "In Progress");
-      break;
-    case "appeal_open":
-      query.eq("parcel_review_appeals.status", "Open Complaint");
-      break;
-    case "appeal_pending":
-      query.eq("parcel_review_appeals.status", "Pending BOE");
-      break;
-    case "appeal_deleted":
-      query.eq("parcel_review_appeals.status", "Deleted Complaint");
-      break;
     case "sales":
       query.gte("parcel_review_sales.sale_year", 2021);
       break;
@@ -48,9 +33,6 @@ const applyFiltersToQuery = (query: any, filter: string) => {
       query
         .gte("parcel_review_sales.sale_year", 2021)
         .is("parcel_review_sales.sale_type", null);
-      break;
-    case "appeals":
-      query.gte("parcel_review_appeals.year", 2020);
       break;
     case "all":
       query.or("fire_time.not.is.null,percent_change.gte.15");
@@ -69,18 +51,6 @@ const filterSelects = {
   fire_percent_change: "*, parcel_review_sales(*), current_structures(*)",
   sale_reviews: "*, parcel_review_sales!inner(*), current_structures(*)",
   sales: "*, parcel_review_sales!inner(*), current_structures(*)",
-  appeals:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(sale_type, date_of_sale, net_selling_price), current_structures(*)",
-  appeal_open:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
-  appeal_scheduled:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
-  appeal_in_progress:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
-  appeal_pending:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
-  appeal_deleted:
-    "*, parcel_review_appeals!inner(*), parcel_review_sales(*), parcel_review_abatements(*), current_structures(*)",
   abated: "*, parcel_review_abatements!inner(*), current_structures(*)",
 };
 
