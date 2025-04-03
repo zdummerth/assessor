@@ -3,7 +3,7 @@ import stlSeal from "@/public/stl-city-seal.png";
 import { createClient } from "@/utils/supabase/server";
 
 const WardsList: React.FC = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error, data } = await supabase
     .from("wards_detail")
     .select("*")

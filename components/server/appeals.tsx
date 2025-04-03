@@ -85,7 +85,7 @@ export default async function Appeals({
   const offset = (page - 1) * limit;
   const endingPage = offset + limit - 1;
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .from("parcel_reviews_2025")
@@ -305,7 +305,7 @@ export async function Count({
   complaintType: string;
   year: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .from("parcel_reviews_2025")

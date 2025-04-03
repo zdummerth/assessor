@@ -9,7 +9,7 @@ export default async function SearchResults({
 }: {
   query?: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .rpc("search_current_parcels", {

@@ -5,7 +5,7 @@ export default async function ParcelSales({
 }: {
   parcel_number: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   try {
     const { data, error } = await supabase

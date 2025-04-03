@@ -6,7 +6,7 @@ export default async function ParcelAppeals({
 }: {
   parcel_number: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   try {
     const { data, error } = await supabase

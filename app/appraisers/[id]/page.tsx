@@ -29,7 +29,7 @@ export default async function ParcelsAdvancedSearchPage({
   const filter = searchParams?.filter || "all";
   const limit = ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = await supabase
     .from("appraisers")

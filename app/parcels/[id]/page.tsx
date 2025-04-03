@@ -58,7 +58,7 @@ export default async function AppraiserPercentChange({
 }: {
   params: { id: string };
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("parcel_reviews_2025")

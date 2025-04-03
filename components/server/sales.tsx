@@ -47,7 +47,7 @@ export default async function SalesGrid({
   const offset = (page - 1) * limit;
   const endingPage = offset + limit - 1;
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .from("parcel_reviews_2025")
@@ -185,7 +185,7 @@ export async function AppraiserPercentChangeCount({
   appraiserId: number;
   filter: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .from("parcel_reviews_2025")

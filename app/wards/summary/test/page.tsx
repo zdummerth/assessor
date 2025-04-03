@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 
 const WardSummaryTable = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error, data } = await supabase
     .from("wards_summary")

@@ -102,7 +102,7 @@ export default async function Page({
 }) {
   const id = (await params).id;
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   try {
     const { data, error } = await supabase

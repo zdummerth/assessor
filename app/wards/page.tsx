@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import wardGroups from "@/public/data/by_ward_groups.json";
 
 const WardsList: React.FC = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error, data } = await supabase
     .from("wards_detail")
     .select("*")

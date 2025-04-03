@@ -2,7 +2,7 @@ import wardGroups from "@/public/data/by_ward_groups.json";
 import { createClient } from "@/utils/supabase/server";
 
 const WardSummaryTable = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error, data } = await supabase.from("wards_summary").select("*");
 

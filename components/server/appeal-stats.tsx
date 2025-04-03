@@ -19,7 +19,7 @@ export default async function AppealStats({
   };
 }) {
   const year = searchParams?.year || "Any";
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const query = supabase
     .from("parcel_review_appeals")

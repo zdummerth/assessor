@@ -7,7 +7,7 @@ import ParcelTabs from "@/components/ui/parcels-tabs";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function ProtectedPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .rpc("get_sales_by_occupancy", {

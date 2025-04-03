@@ -22,7 +22,7 @@ export default async function Page({
 }) {
   const limit = ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const complaint_types = supabase.from("appeal_complaint_types").select("*");
   const appraisers = supabase.from("appeal_re_appraisers").select("*");

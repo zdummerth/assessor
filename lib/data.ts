@@ -159,7 +159,7 @@ export async function getFilteredData({
   limit?: number;
 }) {
   const limitNumber = limit || ITEMS_PER_PAGE;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .from(table || "parcel_years")
@@ -227,7 +227,7 @@ export async function getSales(
   filters: SalesFilters,
   parcelFilters: ParcelYearFilters
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
   let query = supabase.from("sales_master").select("*");
   return query;
   // let filteredQuery = applySalesFiltersToQuery(query, filters);
@@ -241,7 +241,7 @@ export const getPagesCount = async (
   filters: ParcelYearFilters = {},
   table?: string
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   let query = supabase
     .from(`${table || "parcels"}`)
     .select(`*`, { count: "exact", head: true });
@@ -276,7 +276,7 @@ export async function getCodes(code: string) {
     return Promise.reject("Invalid code");
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Make the RPC call with the dynamic parameters
   const { data, error } = await supabase.from(code).select("*");
@@ -293,7 +293,7 @@ export async function getNeighborhoods({
 }: {
   neighborhoods?: number[];
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase.from("neighborhoods").select("*");
 
@@ -307,12 +307,12 @@ export async function getNeighborhoods({
 }
 
 export async function getAppraisers() {
-  const supabase = createClient();
+  const supabase = await createClient();
   return supabase.from("appraisers").select("*").order("name");
 }
 
 export async function getAggregates() {
-  const supabase = createClient();
+  const supabase = await createClient();
   return supabase
     .from("parcel_year")
     .select(
