@@ -4,40 +4,39 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import Image from "next/image";
+import stlSeal from "@/public/stl-city-seal.png";
 
 export default function Login({ searchParams }: { searchParams: Message }) {
   return (
-    <form className="flex-1 flex flex-col min-w-64">
-      <h1 className="text-2xl font-medium">Sign in</h1>
-      {/* <p className="text-sm text-foreground">
-        Don't have an account?{" "}
-        <Link className="text-foreground font-medium underline" href="/sign-up">
-          Sign up
-        </Link>
-      </p> */}
-      <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-        <Label htmlFor="email">Email</Label>
-        <Input name="email" placeholder="you@example.com" required />
-        <div className="flex justify-between items-center">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            className="text-xs text-foreground underline"
-            href="/forgot-password"
-          >
-            Forgot Password?
-          </Link>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 w-full">
+      <Image src={stlSeal} alt="St. Louis City Seal" width={100} height={100} />
+      <h1 className="text-3xl font-bold my-4 text-center">Assessor's Office</h1>
+      <form className="flex-1 flex flex-col min-w-64 mx-auto">
+        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
+          <Label htmlFor="email">Email</Label>
+          <Input name="email" className="p-2 border-foreground" required />
+          <div className="flex justify-between items-center">
+            <Label htmlFor="password">Password</Label>
+            {/* <Link
+              className="text-xs text-foreground underline"
+              href="/forgot-password"
+            >
+              Forgot Password?
+            </Link> */}
+          </div>
+          <Input
+            type="password"
+            name="password"
+            className="p-2 border-foreground"
+            required
+          />
+          <SubmitButton pendingText="Logging In..." formAction={signInAction}>
+            Login
+          </SubmitButton>
+          <FormMessage message={searchParams} />
         </div>
-        <Input
-          type="password"
-          name="password"
-          placeholder="Your password"
-          required
-        />
-        <SubmitButton pendingText="Signing In..." formAction={signInAction}>
-          Sign in
-        </SubmitButton>
-        <FormMessage message={searchParams} />
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }

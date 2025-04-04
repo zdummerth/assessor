@@ -20,7 +20,6 @@ const WardsList: React.FC = async () => {
   return (
     <div className="container mx-auto p-4">
       {wardGroups.map((ward, index) => {
-        // Filter the data for this ward only
         return (
           <div
             key={index}
