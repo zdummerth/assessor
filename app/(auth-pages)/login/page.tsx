@@ -9,10 +9,10 @@ import stlSeal from "@/public/stl-city-seal.png";
 
 export default function Login({ searchParams }: { searchParams: Message }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 w-full">
+    <div className="flex flex-col items-center min-h-screen p-4 w-full">
       <Image src={stlSeal} alt="St. Louis City Seal" width={100} height={100} />
       <h1 className="text-3xl font-bold my-4 text-center">Assessor's Office</h1>
-      <form className="flex-1 flex flex-col min-w-64 mx-auto">
+      <form className="flex flex-col min-w-64">
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
           <Label htmlFor="email">Email</Label>
           <Input name="email" className="p-2 border-foreground" required />
