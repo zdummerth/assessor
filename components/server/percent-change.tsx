@@ -1,10 +1,14 @@
-import { ITEMS_PER_PAGE } from "@/lib/data";
 import { createClient } from "@/utils/supabase/server";
 import { Grid, Card } from "@/components/ui/grid";
-import CopyToClipboard from "@/components/copy-to-clipboard";
-import { MapPin, ArrowUp, ArrowDown, Flame, ArrowRight } from "lucide-react";
+import { Flame, CircleOff } from "lucide-react";
 import ModalForm from "../form-modal";
-import Link from "next/link";
+import FormattedDate from "../ui/formatted-date";
+import StructureModal from "../ui/structure-modal";
+import BuildingPermitModal from "../ui/building-permit-modal";
+import AppraisedValueModal from "../ui/appraised-value-modal";
+import SalesModal from "../ui/sales-modal";
+import Address from "../ui/address";
+import ParcelNumber from "../ui/parcel-number";
 
 // import MultipolygonMapWrapper from "../ui/maps/wrapper";
 
@@ -46,41 +50,14 @@ const applyFiltersToQuery = (query: any, filter: string) => {
 
 const filterSelects = {
   all: "*, parcel_review_sales(*), current_structures(*)",
-  percent_change: "*, parcel_review_sales(*), current_structures(*)",
-  fire: "*, parcel_review_sales(*), current_structures(*)",
-  fire_percent_change: "*, parcel_review_sales(*), current_structures(*)",
-  sale_reviews: "*, parcel_review_sales!inner(*), current_structures(*)",
-  sales: "*, parcel_review_sales!inner(*), current_structures(*)",
-  abated: "*, parcel_review_abatements!inner(*), current_structures(*)",
-};
-
-const FormattedDate = ({
-  date,
-  className = "",
-  showTime,
-}: {
-  date: string;
-  className?: string;
-  showTime?: boolean;
-}) => {
-  const localDate = new Date(date);
-  const formattedDate = localDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-  const formattedTime = localDate
-    .toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-    })
-    .toLowerCase();
-  return (
-    <p className={className}>
-      {formattedDate} {formattedTime && showTime ? formattedTime : ""}
-    </p>
-  );
+  percent_change: "*, parcel_review_sales(*), current_structures(*), bps(*)",
+  fire: "*, parcel_review_sales(*), current_structures(*), bps(*)",
+  fire_percent_change:
+    "*, parcel_review_sales(*), current_structures(*), bps(*)",
+  sale_reviews:
+    "*, parcel_review_sales!inner(*), current_structures(*), bps(*)",
+  sales: "*, parcel_review_sales!inner(*), current_structures(*), bps(*)",
+  abated: "*, parcel_review_abatements!inner(*), current_structures(*), bps(*)",
 };
 
 export default async function AppraiserPercentChange({
@@ -119,7 +96,7 @@ export default async function AppraiserPercentChange({
     );
   }
 
-  // console.log(data[0].current_structures);
+  console.log(data[0]);
 
   return (
     <div className="w-full flex">
@@ -128,113 +105,36 @@ export default async function AppraiserPercentChange({
           const displayAddress = `${parcel.site_street_number} ${parcel.prefix_directional || ""} ${parcel.site_street_name} ${parcel.site_zip_code || ""}`;
           return (
             <Card key={parcel.parcel_number}>
-              <div className="mt-2 flex flex-col items-center border-b border-foreground pb-3">
-                <div className="flex items-center justify-between gap-4 w-full">
-                  <p className="">{displayAddress}</p>
-                  <div className="flex gap-2">
-                    <CopyToClipboard text={displayAddress} />
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <MapPin
-                        size={18}
-                        className="hover:text-blue-500 transition-colors"
-                      />
-                    </a>
-                  </div>
-                </div>
+              <div className="mt-2 border-b border-foreground pb-3">
+                <Address address={displayAddress} />
               </div>
-              <div className="pb-3">
-                <div className="mt-2 flex items-center justify-between">
-                  <span>{parcel.occupancy}</span>
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/parcels/${parcel.parcel_number}`}
-                      target="_blank"
-                    >
-                      <span>{parcel.parcel_number}</span>
-                    </Link>
-                    <CopyToClipboard text={parcel.parcel_number} />
-                  </div>
-                  <span>{parcel.neighborhood}</span>
-                </div>
-                <p className="text-sm">{parcel.prop_class}</p>
-                <p className="mt-6 text-center">Structures</p>
-                {parcel.current_structures?.length > 0 && (
-                  <div className="flex flex-col gap-2 w-full mt-2">
-                    {parcel.current_structures.map(
-                      (structure: any, index: number) => {
-                        return (
-                          <div
-                            key={structure.parcel_number + index}
-                            className="grid grid-cols-3 border border-foreground rounded-md p-2 w-full"
-                          >
-                            <div className="justify-self-start">
-                              <div className="text-xs">Total Area</div>
-                              <div>{structure.total_area} sqft</div>
-                            </div>
-                            <div className="justify-self-center text-center">
-                              <div className="text-xs">GLA</div>
-                              <div>{structure.gla} sqft</div>
-                            </div>
-                            <div className="justify-self-end text-right">
-                              <div className="text-xs">CDU</div>
-                              <div>{structure.cdu || "NA"}</div>
-                            </div>
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                )}
+              <div className="mt-2 flex items-center justify-between">
+                <span>{parcel.occupancy}</span>
+                <ParcelNumber parcelNumber={parcel.parcel_number} />
+                <span>{parcel.neighborhood}</span>
+              </div>
+              <p className="text-sm">{parcel.prop_class}</p>
+              <div className="mt-6">
+                <AppraisedValueModal parcel={parcel} address={displayAddress} />
+              </div>
+              <div className="mt-2">
+                <StructureModal
+                  structures={parcel.current_structures}
+                  address={displayAddress}
+                  parcelNumber={parcel.parcel_number}
+                />
+              </div>
+              <div className="mt-2">
+                <SalesModal
+                  sales={parcel.parcel_review_sales}
+                  address={displayAddress}
+                  parcelNumber={parcel.parcel_number}
+                />
               </div>
 
-              <div className="text-center">
-                <p className="my-2">Appraised Values</p>
-
-                <div className="flex flex-col gap-2">
-                  <div className="grid grid-cols-3 items-center justify-center gap-8 border border-foreground rounded-md p-2">
-                    <span className="text-xs justify-self-start">Current</span>
-                    <span>
-                      ${parcel.working_appraised_total_2025.toLocaleString()}
-                    </span>
-                    <div className="justify-self-end flex gap-1 items-center justify-center text-sm mt-1">
-                      {parcel.working_percent_change > 0 ? (
-                        <ArrowUp size={12} className="text-green-500" />
-                      ) : (
-                        <ArrowDown size={12} className="text-red-500" />
-                      )}
-                      <p>
-                        {parcel.working_percent_change
-                          .toFixed(2)
-                          .toLocaleString()}
-                        %
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 items-center justify-center gap-8 border border-foreground rounded-md p-2">
-                    <span className="text-xs justify-self-start">2025</span>
-                    <span>${parcel.appraised_total_2025.toLocaleString()}</span>
-                    <div className="justify-self-end flex gap-1 items-center justify-center text-sm mt-1">
-                      {parcel.percent_change > 0 ? (
-                        <ArrowUp size={12} className="text-green-500" />
-                      ) : (
-                        <ArrowDown size={12} className="text-red-500" />
-                      )}
-                      <p>
-                        {parcel.percent_change.toFixed(2).toLocaleString()}%
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 items-center justify-between border border-foreground rounded-md p-2">
-                    <span className="text-xs justify-self-start">2024</span>
-                    <span>${parcel.appraised_total_2024.toLocaleString()}</span>
-                  </div>
-                </div>
-                {parcel.fire_time && (
-                  <div className="flex items-center justify-between border border-foreground rounded-md p-2 mt-6">
+              <div className="mt-2">
+                {parcel.fire_time ? (
+                  <div className="flex items-center justify-between px-4 py-2 bg-zinc-700 text-white w-full hover:bg-zinc-600 rounded-md border border-red-500">
                     <div className="flex gap-2 items-center">
                       <Flame size={16} className="text-red-500" />
                       <p>Fire</p>
@@ -245,60 +145,35 @@ export default async function AppraiserPercentChange({
                       className="text-sm"
                     />
                   </div>
-                )}
-                {parcel.parcel_review_abatements?.length > 0 && (
-                  <div className="flex flex-col items-center justify-center pt-2 mt-6">
-                    <p>Abatements</p>
-                    <div className="flex flex-wrap justify-between gap-2 items-center pt-2">
-                      {parcel.parcel_review_abatements.map((abate: any) => {
-                        return (
-                          <div
-                            key={abate.name + parcel.parcel_number}
-                            className="flex flex-col gap-2 items-center border rounded-lg p-2"
-                          >
-                            <span className="text-xs">
-                              Program: {abate.name}
-                            </span>
-                            <div>
-                              <span>{abate.year_created}</span>
-                              <span>-</span>
-                              <span>{abate.year_expires}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-700 text-white w-full hover:bg-zinc-600 rounded-md">
+                    <CircleOff size={16} className="text-green-500" />
+                    <span className="text-sm">No Fires</span>
                   </div>
                 )}
-                {parcel.parcel_review_sales?.length > 0 && (
-                  <div className="flex flex-col gap-2 items-center justify-center mt-6">
-                    <p className="">Sales</p>
-                    {parcel.parcel_review_sales.map((sale: any) => {
+              </div>
+              {parcel.parcel_review_abatements?.length > 0 && (
+                <div className="flex flex-col items-center justify-center pt-2 mt-6">
+                  <p>Abatements</p>
+                  <div className="flex flex-wrap justify-between gap-2 items-center pt-2">
+                    {parcel.parcel_review_abatements.map((abate: any) => {
                       return (
                         <div
-                          key={sale.document_number + parcel.parcel_number}
-                          className="border border-foreground rounded-md p-2 w-full"
+                          key={abate.name + parcel.parcel_number}
+                          className="flex flex-col gap-2 items-center border rounded-lg p-2"
                         >
-                          <div className="flex justify-between items-center gap-2">
-                            {sale.sale_type ? (
-                              <span className="text-sm">{sale.sale_type}</span>
-                            ) : (
-                              <span className="text-sm">Pending Sale Type</span>
-                            )}
-                            <FormattedDate
-                              className="text-sm"
-                              date={sale.date_of_sale}
-                            />
+                          <span className="text-xs">Program: {abate.name}</span>
+                          <div>
+                            <span>{abate.year_created}</span>
+                            <span>-</span>
+                            <span>{abate.year_expires}</span>
                           </div>
-                          <span>
-                            ${sale.net_selling_price?.toLocaleString()}
-                          </span>
                         </div>
                       );
                     })}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
               <div className="flex flex-col items-center justify-center pt-2 mt-8">
                 <div className="flex gap-2 items-center">
                   <div>Notes</div>
