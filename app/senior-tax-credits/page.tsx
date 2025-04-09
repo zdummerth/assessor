@@ -25,7 +25,7 @@ const Template = ({
       <div className="flex flex-col items-center justify-center">
         <Image src={stlSeal} alt="St. Louis City Seal" width={75} height={75} />
       </div>
-      <div className="grid grid-cols-3 mt-4">
+      <div className="grid grid-cols-3 mt-2 text-sm">
         <div className="text-center justify-self-start">
           <p className="font-bold">Cara Spencer</p>
           <p>Mayor Elect</p>
@@ -39,7 +39,7 @@ const Template = ({
           <p>Interim Assessor</p>
         </div>
       </div>
-      <div className="text-center my-4">
+      <div className="text-center text-sm my-2">
         <p>114 - 120 City Hall</p>
         <p>St. Louis, MO 63103</p>
       </div>
@@ -50,7 +50,7 @@ const Template = ({
         </div>
         <p>{currentDate}</p>
       </div>
-      <div className="mt-4 flex justify-between">
+      <div className="mt-8 flex justify-between">
         <div>
           <p className="text-left">Parcel Number</p>
           <p className="">{parcel}</p>
