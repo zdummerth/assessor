@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { Grid, Card } from "@/components/ui/grid";
-import StructureModal from "../ui/structure-modal";
+import StructureModal from "@/components/ui/structures/modal";
 import BuildingPermitModal from "../ui/building-permit-modal";
 import AppraisedValueModal from "../ui/appraised-value-modal";
 import Address from "../ui/address";

@@ -31,7 +31,7 @@ export default async function ProtectedPage({
   // console.log({ filters });
 
   return (
-    <div className="">
+    <div className="p-4">
       <div className="flex gap-4">
         {/* <div className="w-[85px] text-sm">
           <YearSelectFilter defaultValue={filters.year[0]} />

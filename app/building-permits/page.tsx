@@ -57,7 +57,7 @@ export default async function Page({
   const suspenseKey = `${page.toString()}_${searchParams?.type}_${searchParams?.status}_${searchParams?.year}`;
 
   return (
-    <div className="w-full flex">
+    <div className="w-full flex p-4">
       <div className="w-full">
         <h2 className="text-center text-xl my-4">Building Permits</h2>
         <div>

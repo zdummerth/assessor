@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import Modal from "@/components/ui/modal";
-import Address from "./address";
+import Address from "@/components/ui/address";
+import StructureDetail from "@/components/ui/structures/detail";
 
 const StructureModal = ({
   structures,
@@ -61,23 +62,10 @@ const StructureModal = ({
             <p>Structures</p>
             {structures.map((structure: any, index: number) => {
               return (
-                <div
+                <StructureDetail
                   key={structure.parcel_number + index}
-                  className="grid grid-cols-3 border border-foreground rounded-md p-2 w-full"
-                >
-                  <div className="justify-self-start">
-                    <div className="text-xs">Total Area</div>
-                    <div>{structure.total_area.toLocaleString()} sqft</div>
-                  </div>
-                  <div className="justify-self-center text-center">
-                    <div className="text-xs">GLA</div>
-                    <div>{structure.gla.toLocaleString()} sqft</div>
-                  </div>
-                  <div className="justify-self-end text-right">
-                    <div className="text-xs">CDU</div>
-                    <div>{structure.cdu || "NA"}</div>
-                  </div>
-                </div>
+                  structure={structure}
+                />
               );
             })}
           </div>

@@ -106,12 +106,13 @@ export default async function Page({
 
   try {
     const { data, error } = await supabase
-      .from("parcels")
+      .from("parcel_years")
       .select()
       .eq("parcel_number", id)
-      .order("year", { ascending: false });
+      .order("assessor_year", { ascending: false });
 
     if (error) {
+      console.error(error);
       throw new Error("Failed to fetch data");
     }
 

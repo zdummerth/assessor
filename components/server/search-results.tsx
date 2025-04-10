@@ -3,6 +3,7 @@ import { SearchX } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { Grid, Card } from "@/components/ui/grid";
 import Link from "next/link";
+import ParcelNumber from "@/components/ui/parcel-number";
 
 export default async function SearchResults({
   query = "",
@@ -49,29 +50,21 @@ export default async function SearchResults({
         <div className="w-full flex flex-col items-center justify-center mt-8">
           <Grid>
             {data.map((item: any) => (
-              <Card>
-                <Link
-                  href={`/parcels/${item.parcel_number}`}
-                  key={item.parcel_number}
-                  target="_blank"
-                >
-                  <div className="flex flex-col">
-                    <h3 className="text-lg font-semibold">
-                      {item.site_street_number} {item.site_street_name}{" "}
-                      {item.site_zip_code}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      Parcel Number: {item.parcel_number}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Owner: {item.owner_name}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Owner Address: {item.owner_address2} {item.owner_city}{" "}
-                      {item.owner_city}, {item.owner_state} {item.owner_zip}
-                    </p>
-                  </div>
-                </Link>
+              <Card key={item.parcel_number}>
+                <div className="flex flex-col">
+                  <h3 className="text-lg font-semibold">
+                    {item.site_street_number} {item.site_street_name}{" "}
+                    {item.site_zip_code}
+                  </h3>
+                  <p className="my-2">
+                    <ParcelNumber parcelNumber={item.parcel_number} />
+                  </p>
+                  <p className="text-sm">Owner: {item.owner_name}</p>
+                  <p className="text-sm">
+                    Owner Address: {item.owner_address2} {item.owner_city}{" "}
+                    {item.owner_city}, {item.owner_state} {item.owner_zip}
+                  </p>
+                </div>
               </Card>
             ))}
           </Grid>

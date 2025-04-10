@@ -54,12 +54,12 @@ export default async function Page({
     );
   }
   //   console.log({ data, error });
-  console.log(types_data.data);
+  // console.log(types_data.data);
 
   const suspenseKey = `${page.toString()}_${searchParams?.appraiser}_${searchParams?.status}_${searchParams?.type}_${searchParams?.complaintType}_${searchParams?.year}`;
 
   return (
-    <div className="w-full flex">
+    <div className="w-full flex p-4">
       <div className="w-full">
         <h2 className="text-center text-lg my-4">Appeals</h2>
         <div>

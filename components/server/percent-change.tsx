@@ -3,7 +3,7 @@ import { Grid, Card } from "@/components/ui/grid";
 import { Flame, CircleOff } from "lucide-react";
 import ModalForm from "../form-modal";
 import FormattedDate from "../ui/formatted-date";
-import StructureModal from "../ui/structure-modal";
+import StructureModal from "@/components/ui/structures/modal";
 import BuildingPermitModal from "../ui/building-permit-modal";
 import AppraisedValueModal from "../ui/appraised-value-modal";
 import SalesModal from "../ui/sales-modal";

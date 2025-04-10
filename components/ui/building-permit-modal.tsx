@@ -2,35 +2,7 @@
 import React, { useState } from "react";
 import Modal from "@/components/ui/modal";
 import Address from "./address";
-
-const FormattedDate = ({
-  date,
-  className = "",
-  showTime,
-}: {
-  date: string;
-  className?: string;
-  showTime?: boolean;
-}) => {
-  const localDate = new Date(date);
-  const formattedDate = localDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-  const formattedTime = localDate
-    .toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-    })
-    .toLowerCase();
-  return (
-    <p className={className}>
-      {formattedDate} {formattedTime && showTime ? formattedTime : ""}
-    </p>
-  );
-};
+import FormattedDate from "./formatted-date";
 
 const BuildingPermitModal = ({
   permits,
@@ -64,7 +36,7 @@ const BuildingPermitModal = ({
         onClick={() => setModalOpen(true)}
         className="px-4 py-2 bg-zinc-700 text-white rounded w-full hover:bg-zinc-600 rounded-md"
       >
-        <span className="text-sm text-gray-200 ml-2">
+        <span className="text-gray-200">
           {permits.length} Permit{permits.length == 1 ? "" : "s"}
         </span>
       </button>
