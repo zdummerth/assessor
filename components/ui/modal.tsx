@@ -52,13 +52,13 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children }) => {
       ></div>
 
       {/* Modal Content */}
-      <div className="relative bg-background p-6 rounded-lg shadow-lg z-10 max-w-xl w-full h-[90%] m-8">
+      <div className="relative flex flex-col bg-background p-6 rounded-lg shadow-lg z-10 max-w-xl w-full h-[90%] m-8">
         {title && <h2 className="text-xl font-bold mb-4">{title}</h2>}
-        <div className="h-3/4 overflow-y-auto">{children}</div>
+        <div className="flex-1 overflow-hidden">{children}</div>
         <div className="mt-4 text-right">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="flex items-center justify-center bg-blue-500 text-white rounded hover:bg-blue-600 h-8 w-16"
           >
             Close
           </button>

@@ -2,7 +2,9 @@ interface StructureDetailProps {
   structure: any;
 }
 
-const StructureDetail: React.FC<StructureDetailProps> = ({ structure }) => {
+const BuildingPermitDetail: React.FC<StructureDetailProps> = ({
+  structure,
+}) => {
   return (
     <div className="flex flex-col gap-4 border border-foreground rounded-lg p-4 w-full">
       {structure.parcel_number && (
@@ -27,4 +29,4 @@ const StructureDetail: React.FC<StructureDetailProps> = ({ structure }) => {
   );
 };
 
-export default StructureDetail;
+export default BuildingPermitDetail;

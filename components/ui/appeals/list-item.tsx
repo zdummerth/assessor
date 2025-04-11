@@ -9,7 +9,7 @@ interface AppealListItemProps {
 
 const AppealListItem: React.FC<AppealListItemProps> = ({ appeal }) => {
   return (
-    <div className="flex flex-col gap-2 items-center border border-foreground rounded-lg p-2 w-full">
+    <div className="flex flex-col gap-2 items-center border-b border-foreground rounded-lg p-2 w-full">
       <div className="flex justify-between items-center w-full">
         <span className="text-xs">{appeal.year}</span>
         <div className="flex gap-2 items-center">

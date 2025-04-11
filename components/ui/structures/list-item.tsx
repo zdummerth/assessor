@@ -4,7 +4,7 @@ interface StructureListItemProps {
 
 const StructureListItem: React.FC<StructureListItemProps> = ({ structure }) => {
   return (
-    <div className="grid grid-cols-3 border border-foreground rounded-md p-2 w-full">
+    <div className="grid grid-cols-3 border-b border-foreground rounded-md p-2 w-full">
       <div className="justify-self-start">
         <div className="text-xs">Total Area</div>
         <div>{structure.total_area.toLocaleString()} sqft</div>

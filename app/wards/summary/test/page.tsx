@@ -17,11 +17,11 @@ const WardSummaryTable = async () => {
   const totals = data.reduce(
     (acc, row) => ({
       //   other_2024: acc.other_2024 + row.other_2024,
-      residential_2024: acc.residential_2024 + row.residential_2024,
-      total_2024: acc.total_2024 + row.total_2024,
+      residential_2024: acc.residential_2024 + (row.residential_2024 || 0),
+      total_2024: acc.total_2024 + (row.total_2024 || 0),
       //   other_2025: acc.other_2025 + row.other_2025,
-      residential_2025: acc.residential_2025 + row.residential_2025,
-      total_2025: acc.total_2025 + row.total_2025,
+      residential_2025: acc.residential_2025 + (row.residential_2025 || 0),
+      total_2025: acc.total_2025 + (row.total_2025 || 0),
     }),
     {
       //   other_2024: 0,
@@ -63,16 +63,16 @@ const WardSummaryTable = async () => {
               <td className="px-4 py-2 font-medium">{row.ward}</td>
               {/* <td className="px-4 py-2">${row.other_2024.toLocaleString()}</td> */}
               <td className="px-4 py-2">
-                ${row.residential_2024.toLocaleString()}
+                ${row.residential_2024?.toLocaleString()}
               </td>
-              <td className="px-4 py-2">${row.total_2024.toLocaleString()}</td>
+              <td className="px-4 py-2">${row.total_2024?.toLocaleString()}</td>
               {/* <td className="px-4 py-2">${row.other_2025.toLocaleString()}</td> */}
               <td className="px-4 py-2">
-                ${row.residential_2025.toLocaleString()}
+                ${row.residential_2025?.toLocaleString()}
               </td>
-              <td className="px-4 py-2">${row.total_2025.toLocaleString()}</td>
+              <td className="px-4 py-2">${row.total_2025?.toLocaleString()}</td>
               <td className="px-4 py-2">
-                {row.total_percent_change.toFixed(2)}%
+                {row.total_percent_change?.toFixed(2)}%
               </td>
             </tr>
           ))}

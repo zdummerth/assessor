@@ -50,7 +50,9 @@ export default async function AppealStats({
     };
   }
 
+  //@ts-ignore
   const groupedData: GroupedData = data.reduce(
+    //@ts-ignore
     (acc: GroupedData, curr: DataItem) => {
       const appraiser = curr.appeal_appraiser || "Unassigned";
       if (!acc[appraiser]) {

@@ -31,7 +31,9 @@ export default async function Filter({
 
   const codes = await getCodes(codeTable);
   const values: ComboboxValue[] = codes.map((code) => ({
+    //@ts-ignore
     id: code.code,
+    //@ts-ignore
     name: `${code.code} - ${code.name}`,
   }));
 
@@ -56,6 +58,7 @@ export async function NeighborhoodFilter({
     console.error(error);
     return <div>Failed to fetch neighborhood data</div>;
   }
+  //@ts-ignore
   const values: ComboboxValue[] = data.map((n) => ({
     id: n.neighborhood,
     name: n.neighborhood,
@@ -86,8 +89,10 @@ export async function AppraiserFilter({
     console.error(error);
     return <div>Failed to fetch appraiser data</div>;
   }
+  //@ts-ignore
   const values: ComboboxValue[] = data.map((n) => ({
     id: n.id,
+    //@ts-ignore
     name: n.appraiser,
   }));
 

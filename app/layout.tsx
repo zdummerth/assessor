@@ -9,11 +9,11 @@ const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
-export const metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "Assessor",
-  description: "Website to display property data",
-};
+// export const metadata = {
+//   metadataBase: new URL(defaultUrl),
+//   title: "Assessor",
+//   description: "Website to display property data",
+// };
 
 export default function RootLayout({
   children,

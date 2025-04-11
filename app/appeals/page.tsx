@@ -61,7 +61,9 @@ export default async function Page({
   return (
     <div className="w-full flex p-4">
       <div className="w-full">
-        <h2 className="text-center text-lg my-4">Appeals</h2>
+        <h2 className="hidden lg:block text-center text-xl font-bold my-4">
+          Appeals
+        </h2>
         <div>
           <div className="flex gap-4 flex-wrap my-4">
             <div className="">

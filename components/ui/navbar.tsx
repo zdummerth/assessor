@@ -1,13 +1,22 @@
 import NavClient from "./navclient";
 import AuthButton from "../header-auth";
+import Link from "next/link";
+import { Search } from "lucide-react";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const NavBar = async () => {
   return (
-    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-[50px] print:hidden">
-      <NavClient />
-      <div className="flex-1 flex justify-end items-center pr-4">
-        <AuthButton />
+    <nav className="w-full border-b border-b-foreground/10 print:hidden px-2 lg:flex">
+      <div className="w-full flex items-center justify-bewteen lg:order-2">
+        <Link href={"/"} className={` hover:text-blue-500`}>
+          <Search />
+        </Link>
+        <div className="flex-1 flex justify-end items-center">
+          <ThemeSwitcher />
+          <AuthButton />
+        </div>
       </div>
+      <NavClient />
     </nav>
   );
 };

@@ -1,14 +1,14 @@
 "use client";
 import Link from "next/link";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { usePathname } from "next/navigation";
 
 const NavClient = () => {
   const pathname = usePathname();
   const links = [
-    { href: "/", label: "Search" },
-    { href: "/appeals/stats", label: "Appeals" },
+    { href: "/appeals", label: "Appeals" },
+    { href: "/sales", label: "Sales" },
     { href: "/appraisers", label: "Appraisers" },
+    { href: "/building-permits", label: "Permits" },
     { href: "/wards/summary/test", label: "Ward Summary" },
     { href: "/wards/test", label: "Ward Detail" },
   ];
@@ -18,22 +18,17 @@ const NavClient = () => {
   }
 
   return (
-    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-[50px] print:hidden">
-      <div className="w-full flex justify-between items-center p-3 px-5 text-sm">
-        <div className="flex gap-5 items-center font-semibold w-full overflow-x-auto">
-          {links.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`transition-all ${pathname === href ? "text-blue-500" : ""} ${label === "Ward Detail" || label === "Ward Summary" ? "hidden lg:block" : ""} hover:text-blue-500`}
-            >
-              {label}
-            </Link>
-          ))}
-          <ThemeSwitcher />
-        </div>
-      </div>
-    </nav>
+    <div className="text-sm mt-4 mb-1 lg:m-0 flex gap-5 items-center font-semibold w-full overflow-x-auto">
+      {links.map(({ href, label }) => (
+        <Link
+          key={href}
+          href={href}
+          className={`transition-all ${pathname === href ? "text-blue-500" : ""} ${label === "Ward Detail" || label === "Ward Summary" ? "hidden lg:block" : ""} hover:text-blue-500 whitespace-nowrap`}
+        >
+          {label}
+        </Link>
+      ))}
+    </div>
   );
 };
 

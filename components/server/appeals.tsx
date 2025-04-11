@@ -1,11 +1,12 @@
 import { createClient } from "@/utils/supabase/server";
 import { Grid, Card } from "@/components/ui/grid";
 import StructureModal from "@/components/ui/structures/modal";
-import BuildingPermitModal from "@/components/ui/building-permit-modal";
+import BuildingPermitModal from "@/components/ui/building-permits/modal";
 import AppraisedValueModal from "@/components/ui/appraised-value-modal";
 import Address from "@/components/ui/address";
 import ParcelNumber from "@/components/ui/parcel-number";
 import AppealModal from "@/components/ui/appeals/modal";
+import SaleModal from "@/components/ui/sales/modal";
 
 // import MultipolygonMapWrapper from "../ui/maps/wrapper";
 
@@ -39,35 +40,6 @@ const applyFiltersToQuery = (
   return query;
 };
 
-const FormattedDate = ({
-  date,
-  className = "",
-  showTime,
-}: {
-  date: string;
-  className?: string;
-  showTime?: boolean;
-}) => {
-  const localDate = new Date(date);
-  const formattedDate = localDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-  const formattedTime = localDate
-    .toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-    })
-    .toLowerCase();
-  return (
-    <p className={className}>
-      {formattedDate} {formattedTime && showTime ? formattedTime : ""}
-    </p>
-  );
-};
-
 export default async function Appeals({
   page = 1,
   appraiser = "Any",
@@ -92,7 +64,9 @@ export default async function Appeals({
 
   let query = supabase
     .from("parcel_reviews_2025")
-    .select("*, parcel_review_appeals!inner(*), current_structures(*)");
+    .select(
+      "*, parcel_review_appeals!inner(*), current_structures(*), bps(*), parcel_review_sales(*)"
+    );
 
   query = applyFiltersToQuery(
     query,
@@ -140,6 +114,13 @@ export default async function Appeals({
               <div className="mt-2">
                 <StructureModal
                   structures={parcel.current_structures}
+                  address={displayAddress}
+                  parcelNumber={parcel.parcel_number}
+                />
+              </div>
+              <div className="mt-2">
+                <SaleModal
+                  sales={parcel.parcel_review_sales}
                   address={displayAddress}
                   parcelNumber={parcel.parcel_number}
                 />

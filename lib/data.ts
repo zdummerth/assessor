@@ -162,12 +162,14 @@ export async function getFilteredData({
   const supabase = await createClient();
 
   let query = supabase
+    //@ts-ignore
     .from(table || "parcel_years")
     .select(selectString, count ? count : {});
   let filteredQuery;
 
   switch (table) {
     case "get_sales":
+      //@ts-ignore
       query = supabase.rpc(
         "get_sales",
         {
@@ -179,7 +181,9 @@ export async function getFilteredData({
       filteredQuery = applySalesFiltersToQuery(query, filters);
       break;
     case "search_site_addresses":
+      //@ts-ignore
       query = supabase.rpc(
+        //@ts-ignore
         "search_site_addresses",
         {
           search_text: searchString || undefined,
@@ -243,6 +247,7 @@ export const getPagesCount = async (
 ) => {
   const supabase = await createClient();
   let query = supabase
+    //@ts-ignore
     .from(`${table || "parcels"}`)
     .select(`*`, { count: "exact", head: true });
   let filteredQuery = applyFiltersToQuery(query, filters);
@@ -279,6 +284,7 @@ export async function getCodes(code: string) {
   const supabase = await createClient();
 
   // Make the RPC call with the dynamic parameters
+  //@ts-ignore
   const { data, error } = await supabase.from(code).select("*");
 
   if (error) {
@@ -313,10 +319,13 @@ export async function getAppraisers() {
 
 export async function getAggregates() {
   const supabase = await createClient();
-  return supabase
-    .from("parcel_year")
-    .select(
-      `parcel_number.count(),
+  return (
+    supabase
+      //@ts-ignore
+
+      .from("parcel_year")
+      .select(
+        `parcel_number.count(),
     res_land_value:appraised_res_land.sum(),
     res_building_value:appraised_res_building.sum(),
     res_new_construction_value:appraised_res_new_construction.sum(),
@@ -326,6 +335,7 @@ export async function getAggregates() {
     agr_land_value:appraised_agr_land.sum(),
     agr_building_value:appraised_agr_building.sum(),
     agr_new_construction_value:appraised_agr_new_construction.sum()`
-    )
-    .eq("year", 2025);
+      )
+      .eq("year", 2025)
+  );
 }

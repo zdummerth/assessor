@@ -42,19 +42,21 @@ const AppealModal = ({
       </button>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <div className="flex flex-col items-center gap-2 w-full mt-6">
+        <div className="flex flex-col items-center gap-2 w-full h-full">
           <Address address={address} />
           <p className="text-sm mt-2 mb-4">
             <ParcelNumber parcelNumber={parcelNumber} />
           </p>
-          {appeals.map((appeal: any, index: number) => {
-            return (
-              <AppealDetail
-                key={appeal.appeal_number + parcelNumber}
-                appeal={appeal}
-              />
-            );
-          })}
+          <div className="flex-1 flex flex-col items-center gap-2 overflow-y-auto">
+            {appeals.map((appeal: any, index: number) => {
+              return (
+                <AppealDetail
+                  key={appeal.appeal_number + parcelNumber}
+                  appeal={appeal}
+                />
+              );
+            })}
+          </div>
         </div>
       </Modal>
     </div>
