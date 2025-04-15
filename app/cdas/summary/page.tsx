@@ -4,7 +4,10 @@ import Nav from "@/app/cdas/nav";
 const WardSummaryTable = async () => {
   const supabase = await createClient();
 
-  const { error, data } = await supabase.from("cda_summary").select("*");
+  const { error, data } = await supabase
+    .from("cda_summary")
+    .select("*")
+    .order("cda");
 
   if (error) {
     console.error("Error fetching data:", error);

@@ -6,7 +6,10 @@ import Nav from "@/app/cdas/nav";
 const WardsList: React.FC = async () => {
   const supabase = await createClient();
   //@ts-ignore
-  const { error, data } = await supabase.from("cda_detail").select("*");
+  const { error, data } = await supabase
+    .from("cda_detail")
+    .select("*")
+    .order("cda");
 
   if (error) {
     console.error("Error fetching data:", error);
