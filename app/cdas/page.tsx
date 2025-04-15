@@ -1,14 +1,12 @@
 import Image from "next/image";
 import stlSeal from "@/public/stl-city-seal.png";
 import { createClient } from "@/utils/supabase/server";
-import Nav from "@/app/wards/nav";
+import Nav from "@/app/cdas/nav";
 
 const WardsList: React.FC = async () => {
   const supabase = await createClient();
-  const { error, data } = await supabase
-    .from("wards_detail")
-    .select("*")
-    .neq("ward", 99);
+  //@ts-ignore
+  const { error, data } = await supabase.from("cda_detail").select("*");
 
   if (error) {
     console.error("Error fetching data:", error);
@@ -20,7 +18,7 @@ const WardsList: React.FC = async () => {
     <>
       <Nav />
       <div className="container mx-auto p-4">
-        {data.map((ward, index) => (
+        {data.map((cda, index) => (
           <div
             key={index}
             className={`mb-8 ${index == data.length - 1 || "break-after-page"}`}
@@ -31,10 +29,8 @@ const WardsList: React.FC = async () => {
               width={100}
               height={100}
             />
-            <h1 className="text-3xl font-bold my-4 text-center">
-              Ward {ward.ward}
-            </h1>
-            <WardComparison key={index} ward={ward} />
+            <h1 className="text-3xl font-bold my-4 text-center">{cda.cda}</h1>
+            <WardComparison key={index} ward={cda} />
           </div>
         ))}
       </div>

@@ -106,6 +106,7 @@ export default async function Page({
 
   try {
     const { data, error } = await supabase
+      //@ts-ignore
       .from("parcel_years")
       .select()
       .eq("parcel_number", id)

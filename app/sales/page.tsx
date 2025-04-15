@@ -112,7 +112,10 @@ export default async function SalesPage({
                 values={[
                   { value: "Any", label: "Any" },
                   { value: "status_pending", label: "Status Pending" },
-                  { value: "improved", label: "Improved, Open Market" },
+                  {
+                    value: "Improved, open market, arms length",
+                    label: "Improved, open market, arms length",
+                  },
                   { value: "foreclosure", label: "Foreclosure" },
                   {
                     value: "after_foreclosure",

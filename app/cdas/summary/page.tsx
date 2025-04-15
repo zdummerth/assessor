@@ -1,13 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
-import Nav from "@/app/wards/nav";
+import Nav from "@/app/cdas/nav";
 
 const WardSummaryTable = async () => {
   const supabase = await createClient();
 
-  const { error, data } = await supabase
-    .from("wards_summary")
-    .select("*")
-    .neq("ward", 99);
+  const { error, data } = await supabase.from("cda_summary").select("*");
 
   if (error) {
     console.error("Error fetching data:", error);
@@ -42,11 +39,11 @@ const WardSummaryTable = async () => {
   return (
     <div className="text-center break-before-page">
       <Nav />
-      <h2 className="text-xl font-bold mb-4">Wards Summary</h2>
+      <h2 className="text-xl font-bold mb-4">Neighborhood Summary</h2>
       <table className="min-w-full shadow-md rounded-lg overflow-hidden text-center">
-        <thead className="bg-gray-200 dark:bg-gray-700">
+        <thead className="text-sm bg-gray-200 dark:bg-gray-700">
           <tr>
-            <th className="px-4 py-2">Ward</th>
+            <th className="px-4 py-2">Neighborhood</th>
             {/* <th className="px-4 py-2">2024 Other</th> */}
             <th className="px-4 py-2">2024 Residential</th>
             <th className="px-4 py-2">2024 Total</th>
@@ -62,7 +59,7 @@ const WardSummaryTable = async () => {
               key={index}
               className="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800 dark:even:bg-gray-700"
             >
-              <td className="px-4 py-2 font-medium">{row.ward}</td>
+              <td className="px-4 py-2 font-medium">{row.cda}</td>
               {/* <td className="px-4 py-2">${row.other_2024.toLocaleString()}</td> */}
               <td className="px-4 py-2">
                 ${row.residential_2024?.toLocaleString()}

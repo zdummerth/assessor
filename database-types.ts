@@ -76,13 +76,6 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "abatement_parcel_year_parcel_number_year_fkey";
-            columns: ["parcel_number", "year"];
-            isOneToOne: false;
-            referencedRelation: "parcel_years";
-            referencedColumns: ["parcel_number", "assessor_year"];
-          },
-          {
             foreignKeyName: "abatement_parcel_year_program_id_fkey";
             columns: ["program_id"];
             isOneToOne: false;
@@ -545,6 +538,156 @@ export type Database = {
         };
         Relationships: [];
       };
+      cda_detail: {
+        Row: {
+          avg_appraised_value_2024_commercial: number | null;
+          avg_appraised_value_2024_condo: number | null;
+          avg_appraised_value_2024_multi_family: number | null;
+          avg_appraised_value_2024_other: number | null;
+          avg_appraised_value_2024_single_family: number | null;
+          avg_appraised_value_2025_commercial: number | null;
+          avg_appraised_value_2025_condo: number | null;
+          avg_appraised_value_2025_multi_family: number | null;
+          avg_appraised_value_2025_other: number | null;
+          avg_appraised_value_2025_single_family: number | null;
+          cda: string;
+          commercial_percent_change: number | null;
+          condo_percent_change: number | null;
+          count_2024_commercial: number | null;
+          count_2024_condo: number | null;
+          count_2024_multi_family: number | null;
+          count_2024_other: number | null;
+          count_2024_single_family: number | null;
+          count_2025_commercial: number | null;
+          count_2025_condo: number | null;
+          count_2025_multi_family: number | null;
+          count_2025_other: number | null;
+          count_2025_single_family: number | null;
+          multi_family_percent_change: number | null;
+          other_percent_change: number | null;
+          single_family_percent_change: number | null;
+          total_appraised_value_2024_commercial: number | null;
+          total_appraised_value_2024_condo: number | null;
+          total_appraised_value_2024_multi_family: number | null;
+          total_appraised_value_2024_other: number | null;
+          total_appraised_value_2024_single_family: number | null;
+          total_appraised_value_2025_commercial: number | null;
+          total_appraised_value_2025_condo: number | null;
+          total_appraised_value_2025_multi_family: number | null;
+          total_appraised_value_2025_other: number | null;
+          total_appraised_value_2025_single_family: number | null;
+        };
+        Insert: {
+          avg_appraised_value_2024_commercial?: number | null;
+          avg_appraised_value_2024_condo?: number | null;
+          avg_appraised_value_2024_multi_family?: number | null;
+          avg_appraised_value_2024_other?: number | null;
+          avg_appraised_value_2024_single_family?: number | null;
+          avg_appraised_value_2025_commercial?: number | null;
+          avg_appraised_value_2025_condo?: number | null;
+          avg_appraised_value_2025_multi_family?: number | null;
+          avg_appraised_value_2025_other?: number | null;
+          avg_appraised_value_2025_single_family?: number | null;
+          cda: string;
+          commercial_percent_change?: number | null;
+          condo_percent_change?: number | null;
+          count_2024_commercial?: number | null;
+          count_2024_condo?: number | null;
+          count_2024_multi_family?: number | null;
+          count_2024_other?: number | null;
+          count_2024_single_family?: number | null;
+          count_2025_commercial?: number | null;
+          count_2025_condo?: number | null;
+          count_2025_multi_family?: number | null;
+          count_2025_other?: number | null;
+          count_2025_single_family?: number | null;
+          multi_family_percent_change?: number | null;
+          other_percent_change?: number | null;
+          single_family_percent_change?: number | null;
+          total_appraised_value_2024_commercial?: number | null;
+          total_appraised_value_2024_condo?: number | null;
+          total_appraised_value_2024_multi_family?: number | null;
+          total_appraised_value_2024_other?: number | null;
+          total_appraised_value_2024_single_family?: number | null;
+          total_appraised_value_2025_commercial?: number | null;
+          total_appraised_value_2025_condo?: number | null;
+          total_appraised_value_2025_multi_family?: number | null;
+          total_appraised_value_2025_other?: number | null;
+          total_appraised_value_2025_single_family?: number | null;
+        };
+        Update: {
+          avg_appraised_value_2024_commercial?: number | null;
+          avg_appraised_value_2024_condo?: number | null;
+          avg_appraised_value_2024_multi_family?: number | null;
+          avg_appraised_value_2024_other?: number | null;
+          avg_appraised_value_2024_single_family?: number | null;
+          avg_appraised_value_2025_commercial?: number | null;
+          avg_appraised_value_2025_condo?: number | null;
+          avg_appraised_value_2025_multi_family?: number | null;
+          avg_appraised_value_2025_other?: number | null;
+          avg_appraised_value_2025_single_family?: number | null;
+          cda?: string;
+          commercial_percent_change?: number | null;
+          condo_percent_change?: number | null;
+          count_2024_commercial?: number | null;
+          count_2024_condo?: number | null;
+          count_2024_multi_family?: number | null;
+          count_2024_other?: number | null;
+          count_2024_single_family?: number | null;
+          count_2025_commercial?: number | null;
+          count_2025_condo?: number | null;
+          count_2025_multi_family?: number | null;
+          count_2025_other?: number | null;
+          count_2025_single_family?: number | null;
+          multi_family_percent_change?: number | null;
+          other_percent_change?: number | null;
+          single_family_percent_change?: number | null;
+          total_appraised_value_2024_commercial?: number | null;
+          total_appraised_value_2024_condo?: number | null;
+          total_appraised_value_2024_multi_family?: number | null;
+          total_appraised_value_2024_other?: number | null;
+          total_appraised_value_2024_single_family?: number | null;
+          total_appraised_value_2025_commercial?: number | null;
+          total_appraised_value_2025_condo?: number | null;
+          total_appraised_value_2025_multi_family?: number | null;
+          total_appraised_value_2025_other?: number | null;
+          total_appraised_value_2025_single_family?: number | null;
+        };
+        Relationships: [];
+      };
+      cda_summary: {
+        Row: {
+          cda: string;
+          other_2024: number | null;
+          other_2025: number | null;
+          residential_2024: number | null;
+          residential_2025: number | null;
+          total_2024: number | null;
+          total_2025: number | null;
+          total_percent_change: number | null;
+        };
+        Insert: {
+          cda: string;
+          other_2024?: number | null;
+          other_2025?: number | null;
+          residential_2024?: number | null;
+          residential_2025?: number | null;
+          total_2024?: number | null;
+          total_2025?: number | null;
+          total_percent_change?: number | null;
+        };
+        Update: {
+          cda?: string;
+          other_2024?: number | null;
+          other_2025?: number | null;
+          residential_2024?: number | null;
+          residential_2025?: number | null;
+          total_2024?: number | null;
+          total_2025?: number | null;
+          total_percent_change?: number | null;
+        };
+        Relationships: [];
+      };
       compare_appraised_total_results: {
         Row: {
           appraiser_id: number | null;
@@ -759,6 +902,59 @@ export type Database = {
         };
         Relationships: [];
       };
+      owner_address: {
+        Row: {
+          address_1: string | null;
+          address_2: string | null;
+          city: string | null;
+          id: string;
+          name_id: string;
+          state: string | null;
+          zip: string | null;
+        };
+        Insert: {
+          address_1?: string | null;
+          address_2?: string | null;
+          city?: string | null;
+          id: string;
+          name_id: string;
+          state?: string | null;
+          zip?: string | null;
+        };
+        Update: {
+          address_1?: string | null;
+          address_2?: string | null;
+          city?: string | null;
+          id?: string;
+          name_id?: string;
+          state?: string | null;
+          zip?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "owner_address_name_id_fkey";
+            columns: ["name_id"];
+            isOneToOne: false;
+            referencedRelation: "owner_name";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      owner_name: {
+        Row: {
+          id: string;
+          name: string | null;
+        };
+        Insert: {
+          id: string;
+          name?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string | null;
+        };
+        Relationships: [];
+      };
       parcel_geometries: {
         Row: {
           geometry: Json | null;
@@ -774,57 +970,6 @@ export type Database = {
           geometry?: Json | null;
           handle?: string;
           parcel?: string | null;
-        };
-        Relationships: [];
-      };
-      parcel_increases: {
-        Row: {
-          address: string | null;
-          appraiser: string | null;
-          created_at: string;
-          data_entered_to_devnet: boolean | null;
-          difference: number | null;
-          field_reviewed: boolean | null;
-          id: number;
-          neighborhood: string | null;
-          occupancy: string | null;
-          parcel: string | null;
-          percent_change: number | null;
-          prop_class: string | null;
-          total_assessed_2024: number | null;
-          total_assessed_2025: number | null;
-        };
-        Insert: {
-          address?: string | null;
-          appraiser?: string | null;
-          created_at?: string;
-          data_entered_to_devnet?: boolean | null;
-          difference?: number | null;
-          field_reviewed?: boolean | null;
-          id?: number;
-          neighborhood?: string | null;
-          occupancy?: string | null;
-          parcel?: string | null;
-          percent_change?: number | null;
-          prop_class?: string | null;
-          total_assessed_2024?: number | null;
-          total_assessed_2025?: number | null;
-        };
-        Update: {
-          address?: string | null;
-          appraiser?: string | null;
-          created_at?: string;
-          data_entered_to_devnet?: boolean | null;
-          difference?: number | null;
-          field_reviewed?: boolean | null;
-          id?: number;
-          neighborhood?: string | null;
-          occupancy?: string | null;
-          parcel?: string | null;
-          percent_change?: number | null;
-          prop_class?: string | null;
-          total_assessed_2024?: number | null;
-          total_assessed_2025?: number | null;
         };
         Relationships: [];
       };
@@ -1112,7 +1257,15 @@ export type Database = {
           working_difference?: number | null;
           working_percent_change?: number | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "parcel_reviews_2025_appraiser_id_fkey";
+            columns: ["appraiser_id"];
+            isOneToOne: false;
+            referencedRelation: "appraisers";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       parcel_sales: {
         Row: {
@@ -1137,7 +1290,7 @@ export type Database = {
           },
         ];
       };
-      parcel_years: {
+      parcel_year: {
         Row: {
           agr_bldg: number | null;
           agr_bldg_assess: number | null;
@@ -1149,42 +1302,23 @@ export type Database = {
           appraiser_id: number | null;
           area: number | null;
           assessed_total: number | null;
-          assessor_year: number;
-          calc_acres: string | null;
           com_bldg: number | null;
           com_bldg_assess: number | null;
           com_land: number | null;
           com_land_assess: number | null;
           com_new_const: number | null;
           com_new_const_assess: number | null;
-          deed_book: string | null;
-          deed_date: string | null;
-          deed_document: string | null;
-          deed_page: string | null;
           dist_city: string | null;
           dist_college: string | null;
           dist_school: string | null;
           dist_tif: string | null;
           land_use: string | null;
-          legal_desc: string | null;
-          legal_id: string | null;
           neighborhood: string | null;
-          neighborhood_int: number | null;
           occupancy: string | null;
-          owner_address1: string | null;
-          owner_address2: string | null;
-          owner_city: string | null;
-          owner_name: string | null;
-          owner_name_id: string | null;
-          owner_state: string | null;
-          owner_zip: string | null;
-          parcel_number: string;
-          plat_book: string | null;
-          post_directional: string | null;
-          prefix_directional: string | null;
+          parcel_number: string | null;
           prop_class: string | null;
-          report_date: string | null;
-          res_acres: string | null;
+          report_timestamp: string | null;
+          res_acres: number | null;
           res_bldg: number | null;
           res_bldg_assess: number | null;
           res_land: number | null;
@@ -1192,16 +1326,13 @@ export type Database = {
           res_new_const: number | null;
           res_new_const_assess: number | null;
           section: string | null;
-          site_id: string | null;
-          site_street_name: string | null;
-          site_street_number: string | null;
-          site_zip_code: string | null;
           tax_status: string | null;
           taxcode: string | null;
           use_code: string | null;
           working_improve_value: number | null;
           working_land_value: number | null;
           working_total_value: number | null;
+          year: number | null;
         };
         Insert: {
           agr_bldg?: number | null;
@@ -1214,42 +1345,23 @@ export type Database = {
           appraiser_id?: number | null;
           area?: number | null;
           assessed_total?: number | null;
-          assessor_year: number;
-          calc_acres?: string | null;
           com_bldg?: number | null;
           com_bldg_assess?: number | null;
           com_land?: number | null;
           com_land_assess?: number | null;
           com_new_const?: number | null;
           com_new_const_assess?: number | null;
-          deed_book?: string | null;
-          deed_date?: string | null;
-          deed_document?: string | null;
-          deed_page?: string | null;
           dist_city?: string | null;
           dist_college?: string | null;
           dist_school?: string | null;
           dist_tif?: string | null;
           land_use?: string | null;
-          legal_desc?: string | null;
-          legal_id?: string | null;
           neighborhood?: string | null;
-          neighborhood_int?: number | null;
           occupancy?: string | null;
-          owner_address1?: string | null;
-          owner_address2?: string | null;
-          owner_city?: string | null;
-          owner_name?: string | null;
-          owner_name_id?: string | null;
-          owner_state?: string | null;
-          owner_zip?: string | null;
-          parcel_number: string;
-          plat_book?: string | null;
-          post_directional?: string | null;
-          prefix_directional?: string | null;
+          parcel_number?: string | null;
           prop_class?: string | null;
-          report_date?: string | null;
-          res_acres?: string | null;
+          report_timestamp?: string | null;
+          res_acres?: number | null;
           res_bldg?: number | null;
           res_bldg_assess?: number | null;
           res_land?: number | null;
@@ -1257,16 +1369,13 @@ export type Database = {
           res_new_const?: number | null;
           res_new_const_assess?: number | null;
           section?: string | null;
-          site_id?: string | null;
-          site_street_name?: string | null;
-          site_street_number?: string | null;
-          site_zip_code?: string | null;
           tax_status?: string | null;
           taxcode?: string | null;
           use_code?: string | null;
           working_improve_value?: number | null;
           working_land_value?: number | null;
           working_total_value?: number | null;
+          year?: number | null;
         };
         Update: {
           agr_bldg?: number | null;
@@ -1279,42 +1388,23 @@ export type Database = {
           appraiser_id?: number | null;
           area?: number | null;
           assessed_total?: number | null;
-          assessor_year?: number;
-          calc_acres?: string | null;
           com_bldg?: number | null;
           com_bldg_assess?: number | null;
           com_land?: number | null;
           com_land_assess?: number | null;
           com_new_const?: number | null;
           com_new_const_assess?: number | null;
-          deed_book?: string | null;
-          deed_date?: string | null;
-          deed_document?: string | null;
-          deed_page?: string | null;
           dist_city?: string | null;
           dist_college?: string | null;
           dist_school?: string | null;
           dist_tif?: string | null;
           land_use?: string | null;
-          legal_desc?: string | null;
-          legal_id?: string | null;
           neighborhood?: string | null;
-          neighborhood_int?: number | null;
           occupancy?: string | null;
-          owner_address1?: string | null;
-          owner_address2?: string | null;
-          owner_city?: string | null;
-          owner_name?: string | null;
-          owner_name_id?: string | null;
-          owner_state?: string | null;
-          owner_zip?: string | null;
-          parcel_number?: string;
-          plat_book?: string | null;
-          post_directional?: string | null;
-          prefix_directional?: string | null;
+          parcel_number?: string | null;
           prop_class?: string | null;
-          report_date?: string | null;
-          res_acres?: string | null;
+          report_timestamp?: string | null;
+          res_acres?: number | null;
           res_bldg?: number | null;
           res_bldg_assess?: number | null;
           res_land?: number | null;
@@ -1322,26 +1412,15 @@ export type Database = {
           res_new_const?: number | null;
           res_new_const_assess?: number | null;
           section?: string | null;
-          site_id?: string | null;
-          site_street_name?: string | null;
-          site_street_number?: string | null;
-          site_zip_code?: string | null;
           tax_status?: string | null;
           taxcode?: string | null;
           use_code?: string | null;
           working_improve_value?: number | null;
           working_land_value?: number | null;
           working_total_value?: number | null;
+          year?: number | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "parcel_years_appraiser_id_fkey";
-            columns: ["appraiser_id"];
-            isOneToOne: false;
-            referencedRelation: "appraisers";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       prcl: {
         Row: {
@@ -1754,6 +1833,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      search_table_2: {
+        Row: {
+          address_id: string | null;
+          house_number: string | null;
+          id: number;
+          name: string | null;
+          parcel_number: string | null;
+          search_text: string | null;
+          street_name: string | null;
+          street_suffix: string | null;
+          zip_code: string | null;
+        };
+        Insert: {
+          address_id?: string | null;
+          house_number?: string | null;
+          id?: number;
+          name?: string | null;
+          parcel_number?: string | null;
+          search_text?: string | null;
+          street_name?: string | null;
+          street_suffix?: string | null;
+          zip_code?: string | null;
+        };
+        Update: {
+          address_id?: string | null;
+          house_number?: string | null;
+          id?: number;
+          name?: string | null;
+          parcel_number?: string | null;
+          search_text?: string | null;
+          street_name?: string | null;
+          street_suffix?: string | null;
+          zip_code?: string | null;
+        };
+        Relationships: [];
+      };
       senior_tax_credits: {
         Row: {
           approval_letter_printed_timestamp: string | null;
@@ -1785,6 +1900,54 @@ export type Database = {
             referencedColumns: ["parcel_number"];
           },
         ];
+      };
+      site_address_master: {
+        Row: {
+          house_number: string | null;
+          id: string;
+          street_name: string | null;
+          street_suffix: string | null;
+          zip_code: string | null;
+        };
+        Insert: {
+          house_number?: string | null;
+          id: string;
+          street_name?: string | null;
+          street_suffix?: string | null;
+          zip_code?: string | null;
+        };
+        Update: {
+          house_number?: string | null;
+          id?: string;
+          street_name?: string | null;
+          street_suffix?: string | null;
+          zip_code?: string | null;
+        };
+        Relationships: [];
+      };
+      site_address_parcel_year: {
+        Row: {
+          address_id: string;
+          is_primary: boolean | null;
+          location: string | null;
+          parcel_number: string;
+          year: number;
+        };
+        Insert: {
+          address_id: string;
+          is_primary?: boolean | null;
+          location?: string | null;
+          parcel_number: string;
+          year: number;
+        };
+        Update: {
+          address_id?: string;
+          is_primary?: boolean | null;
+          location?: string | null;
+          parcel_number?: string;
+          year?: number;
+        };
+        Relationships: [];
       };
       site_addresses: {
         Row: {
@@ -2138,6 +2301,20 @@ export type Database = {
           net_selling_price: number;
           sale_year: number;
           parcels: Json;
+        }[];
+      };
+      search_all_parcels: {
+        Args: { search_term: string };
+        Returns: {
+          address_id: string | null;
+          house_number: string | null;
+          id: number;
+          name: string | null;
+          parcel_number: string | null;
+          search_text: string | null;
+          street_name: string | null;
+          street_suffix: string | null;
+          zip_code: string | null;
         }[];
       };
       search_current_parcels: {

@@ -1,7 +1,8 @@
 import Search from "@/components/ui/search";
 import { YearSelectFilter } from "@/components/ui/filter-client";
 import ParcelSearchResults from "@/components/ui/parcel-search-results";
-import SearchResults from "@/components/server/search-results";
+// import SearchResults from "@/components/server/search-results";
+import SearchResultsAll from "@/components/server/search-results-all";
 import { BinocularsSkeleton } from "@/components/ui/parcel-search-results-skeleton";
 import { Suspense } from "react";
 
@@ -39,7 +40,7 @@ export default async function ProtectedPage({
 
         <div className=" w-full md:w-[300px]">
           <p className="text-sm mb-4">
-            Search parcel number, situs, owner name, or owner address
+            Search parcel number, situs, or owner name
           </p>
           <Search placeholder="search..." />
         </div>
@@ -49,7 +50,8 @@ export default async function ProtectedPage({
           fallback={<BinocularsSkeleton />}
           key={`${query}-${filters.year[0]}`}
         >
-          <SearchResults query={query} />
+          {/* <SearchResults query={query} /> */}
+          <SearchResultsAll query={query} />
         </Suspense>
       )}
     </div>

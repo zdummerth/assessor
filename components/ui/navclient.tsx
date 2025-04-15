@@ -9,8 +9,8 @@ const NavClient = () => {
     { href: "/sales", label: "Sales" },
     { href: "/appraisers", label: "Appraisers" },
     { href: "/building-permits", label: "Permits" },
-    { href: "/wards/summary/test", label: "Ward Summary" },
-    { href: "/wards/test", label: "Ward Detail" },
+    { href: "/wards/summary/test", label: "Wards" },
+    { href: "/cdas/summary", label: "CDAs" },
   ];
 
   if (pathname === "/login") {
@@ -23,7 +23,7 @@ const NavClient = () => {
         <Link
           key={href}
           href={href}
-          className={`transition-all ${pathname === href ? "text-blue-500" : ""} ${label === "Ward Detail" || label === "Ward Summary" ? "hidden lg:block" : ""} hover:text-blue-500 whitespace-nowrap`}
+          className={`transition-all ${pathname === href ? "text-blue-500" : ""} ${label === "Wards" || label === "CDAs" ? "hidden lg:block" : ""} hover:text-blue-500 whitespace-nowrap`}
         >
           {label}
         </Link>
