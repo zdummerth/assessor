@@ -842,6 +842,62 @@ export type Database = {
         };
         Relationships: [];
       };
+      invoice_line_item: {
+        Row: {
+          amount: number | null;
+          description: string | null;
+          id: number;
+          invoice_id: number;
+          qty: number | null;
+          unit: string | null;
+        };
+        Insert: {
+          amount?: number | null;
+          description?: string | null;
+          id?: number;
+          invoice_id: number;
+          qty?: number | null;
+          unit?: string | null;
+        };
+        Update: {
+          amount?: number | null;
+          description?: string | null;
+          id?: number;
+          invoice_id?: number;
+          qty?: number | null;
+          unit?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoice_line_item_invoice_id_fkey";
+            columns: ["invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "invoices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      invoices: {
+        Row: {
+          created_at: string;
+          customer_name: string | null;
+          id: number;
+          paid_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          customer_name?: string | null;
+          id?: number;
+          paid_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          customer_name?: string | null;
+          id?: number;
+          paid_at?: string | null;
+        };
+        Relationships: [];
+      };
       land_use_codes: {
         Row: {
           code: number;

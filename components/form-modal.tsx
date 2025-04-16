@@ -33,7 +33,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   //@ts-ignore
   const [state, action] = useFormState(updateDataCollectionNoteAction, false);
-  const { pending } = useFormStatus();
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
