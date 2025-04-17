@@ -23,18 +23,60 @@ export const signInAction = async (formData: FormData) => {
   return redirect("/");
 };
 
-export const create = async (formData: FormData) => {
+export const create = async () => {
   const supabase = await createClient();
   const { error, data } = await supabase.from("invoices").insert({}).select();
 
   if (error) {
     console.error(error);
-    return { error };
+    return "Error creating invoice";
   }
 
-  console.log("Created invoice", data);
   revalidatePath("/invoices");
   return redirect("/invoices/" + data[0].id);
+};
+
+export const createLineItem = async (prevState: any, formData: FormData) => {
+  const id = formData.get("id") as string;
+  const idInt = parseInt(id);
+  const supabase = await createClient();
+  const { error } = await supabase.from("invoice_line_item").insert({
+    invoice_id: idInt,
+  });
+
+  if (error) {
+    return { error, message: "error occcured", success: false };
+  }
+
+  revalidatePath("/invoices");
+  return {
+    success: true,
+    message: "Invoice updated successfully",
+    error: null,
+  };
+};
+
+export const update = async (prevState: any, formData: FormData) => {
+  const id = formData.get("id") as string;
+  const customer_name = formData.get("customer_name") as string;
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("invoices")
+    .update({
+      customer_name,
+    })
+    .eq("id", id);
+
+  if (error) {
+    return { error, message: "error occcured", success: false };
+  }
+
+  revalidatePath("/invoices");
+  return {
+    success: true,
+    message: "Invoice updated successfully",
+    error: null,
+  };
 };
 
 export const togglePaid = async (prevState: any, formData: FormData) => {
@@ -49,12 +91,14 @@ export const togglePaid = async (prevState: any, formData: FormData) => {
     .eq("id", id);
 
   if (error) {
-    return { error };
+    return { error, message: "error occcured", success: false };
   }
+
   revalidatePath("/invoices");
   return {
     success: true,
     message: "Invoice updated successfully",
+    error: null,
   };
 };
 
@@ -69,5 +113,18 @@ export const deleteInvoice = async (id: string) => {
   return {
     success: true,
     message: "Invoice deleted successfully",
+  };
+};
+
+export const testAction = async (prevState: any, formData: FormData) => {
+  const name = formData.get("name") as string;
+  console.log("name", name);
+  await new Promise((resolve) => {
+    setTimeout(resolve, 2000);
+  });
+  return {
+    success: true,
+    message: "Invoice updated successfully",
+    error: null,
   };
 };

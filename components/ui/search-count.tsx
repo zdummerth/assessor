@@ -11,7 +11,6 @@ export default async function SearchCount({
   returnType: "count" | "totalPages" | "countAndTotalPages";
   countType?: "exact" | "estimated" | "planned";
 }) {
-  "use cache";
   const { count, error } = await getFilteredData({
     filters,
     count: { count: countType, head: true },

@@ -11,7 +11,7 @@ const NavBar = async () => {
         <Link href={"/"} className={` hover:text-blue-500`}>
           <Search />
         </Link>
-        <div className="flex-1 flex justify-end items-center">
+        <div className="flex-1 flex gap-2 justify-end items-center">
           <ThemeSwitcher />
           <AuthButton />
         </div>

@@ -46,9 +46,9 @@ export default async function Invoices({ page = 1 }: { page: number }) {
                     Invoice Number: {item.id}
                   </h3>
                 </Link>
-                <p className="my-2">
+                <span className="my-2">
                   Created: <FormattedDate date={item.created_at} />
-                </p>
+                </span>
                 <p className="text-sm">Customer: {item.customer_name}</p>
                 <div className="flex gap-6 mt-2">
                   <p className="text-sm">Total: ${total.toFixed(2)}</p>

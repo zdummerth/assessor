@@ -3,6 +3,8 @@ import stlSeal from "@/public/stl-city-seal.png";
 import { createClient } from "@/utils/supabase/server";
 import PrintButton from "@/components/ui/print-button";
 
+import type { JSX } from "react";
+
 const Template = ({
   name,
   address,

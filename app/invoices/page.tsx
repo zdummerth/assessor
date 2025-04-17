@@ -3,13 +3,14 @@ import { BinocularsSkeleton } from "@/components/ui/parcel-search-results-skelet
 import Invoices from "@/components/server/invoices";
 import CreateInvoice from "@/components/ui/invoices/create";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: {
-    page?: string;
-  };
-}) {
+export default async function Page(
+  props: {
+    searchParams?: Promise<{
+      page?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
 
   const suspenseKey = `${page.toString()}`;

@@ -1,19 +1,18 @@
 // import BaseMap from "@/components/ui/maps/base";
 import { getFilteredData } from "@/lib/data";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 import SalesFilters from "@/components/ui/filters-sales";
 
-const BaseMap = dynamic(() => import("@/components/ui/maps/appeals"), {
-  ssr: false,
-});
+// const BaseMap = dynamic(() => import("@/components/ui/maps/appeals"), {
+//   ssr: false,
+// });
 
-export default async function AppealsMapPage({
-  searchParams,
-}: {
-  searchParams?: {
+export default async function AppealsMapPage(props: {
+  searchParams?: Promise<{
     nbrhdcode?: string;
-  };
+  }>;
 }) {
+  const searchParams = await props.searchParams;
   const formattedSearchParams = Object.fromEntries(
     Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [
       key,
@@ -47,9 +46,7 @@ export default async function AppealsMapPage({
     <div className="w-full">
       {/* <div className="w-[500px] pr-2 border-r border-foreground overflow-x-hidden"> */}
       <SalesFilters count={data.length} currentFilters={filters} />
-      <div className="relative z-0 mt-4">
-        <BaseMap points={data} />
-      </div>
+      <div className="relative z-0 mt-4">{/* <BaseMap points={data} /> */}</div>
     </div>
   );
 }

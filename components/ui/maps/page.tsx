@@ -8,13 +8,14 @@ const NbrhdMap = dynamic(() => import("@/components/ui/maps/nbrhdstest"), {
   ssr: false,
 });
 
-export default async function SalesMapPage({
-  searchParams,
-}: {
-  searchParams?: {
-    nbrhdcode?: string;
-  };
-}) {
+export default async function SalesMapPage(
+  props: {
+    searchParams?: Promise<{
+      nbrhdcode?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const formattedSearchParams = Object.fromEntries(
     Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [
       key,

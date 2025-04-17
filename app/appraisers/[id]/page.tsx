@@ -10,22 +10,23 @@ import AppraiserPercentChange, {
 } from "@/components/server/percent-change";
 import { SetUrlParam } from "@/components/ui/filter-client";
 
-export default async function ParcelsAdvancedSearchPage({
-  searchParams,
-  params,
-}: {
-  params: { id: string };
-  searchParams?: {
-    filter?: string;
-    page?: string;
-    propertyClass?: string;
-    occupancy?: string;
-    nbhd?: string;
-    sortColumn?: string;
-    sortDirection?: string;
-    view?: "grid" | "map" | "summary";
-  };
-}) {
+export default async function ParcelsAdvancedSearchPage(
+  props: {
+    params: Promise<{ id: string }>;
+    searchParams?: Promise<{
+      filter?: string;
+      page?: string;
+      propertyClass?: string;
+      occupancy?: string;
+      nbhd?: string;
+      sortColumn?: string;
+      sortDirection?: string;
+      view?: "grid" | "map" | "summary";
+    }>;
+  }
+) {
+  const params = await props.params;
+  const searchParams = await props.searchParams;
   const filter = searchParams?.filter || "all";
   const limit = ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;

@@ -21,9 +21,9 @@ const FormattedDate = ({
     })
     .toLowerCase();
   return (
-    <p className={className}>
+    <span className={className}>
       {formattedDate} {formattedTime && showTime ? formattedTime : ""}
-    </p>
+    </span>
   );
 };
 

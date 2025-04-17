@@ -6,20 +6,21 @@ import { createClient } from "@/utils/supabase/server";
 import Appeals, { Count } from "@/components/server/appeals";
 import { SelectFilter } from "@/components/ui/filter-client";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: {
-    page?: string;
-    year?: string;
-    appraiser?: string;
-    status?: string;
-    type?: string;
-    complaintType?: string;
-    sortColumn?: string;
-    sortDirection?: string;
-  };
-}) {
+export default async function Page(
+  props: {
+    searchParams?: Promise<{
+      page?: string;
+      year?: string;
+      appraiser?: string;
+      status?: string;
+      type?: string;
+      complaintType?: string;
+      sortColumn?: string;
+      sortDirection?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const limit = ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
   const supabase = await createClient();

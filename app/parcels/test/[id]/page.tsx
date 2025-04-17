@@ -1,13 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import ParcelCard from "@/components/cards/parcel-year";
-import ParcelSales from "@/components/cards/parcel-sales";
-import ParcelAppeals from "@/components/cards/parcel-appeals";
-import ParcelPermits from "@/components/cards/parcel-bps";
-import { Suspense } from "react";
-import dynamic from "next/dynamic";
-import AppraisedTotalLineChart from "@/components/ui/charts/AppraisedTotalLineChart";
-import CopyToClipboard from "@/components/copy-to-clipboard";
-import { MapPin } from "lucide-react";
 import type { Metadata, ResolvingMetadata } from "next";
 
 type Props = {
@@ -26,10 +17,6 @@ export async function generateMetadata(
     title: id,
   };
 }
-
-const BaseMap = dynamic(() => import("@/components/ui/maps/single-parcel"), {
-  ssr: false,
-});
 
 // Helper function: Compares two parcel records and returns only the changed fields.
 function getDifferences(oldParcel: any, newParcel: any) {

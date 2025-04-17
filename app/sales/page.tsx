@@ -6,25 +6,26 @@ import { createClient } from "@/utils/supabase/server";
 import SalesData, { Count } from "@/components/server/sales";
 import { SelectFilter } from "@/components/ui/filter-client";
 
-export default async function SalesPage({
-  searchParams,
-  params,
-}: {
-  params: { id: string };
-  searchParams?: {
-    filter?: string;
-    page?: string;
-    appraiser?: string;
-    year?: string;
-    status?: string;
-    propertyClass?: string;
-    occupancy?: string;
-    neighborhood?: string;
-    sortColumn?: string;
-    sortDirection?: string;
-    view?: "grid" | "map" | "summary";
-  };
-}) {
+export default async function SalesPage(
+  props: {
+    params: Promise<{ id: string }>;
+    searchParams?: Promise<{
+      filter?: string;
+      page?: string;
+      appraiser?: string;
+      year?: string;
+      status?: string;
+      propertyClass?: string;
+      occupancy?: string;
+      neighborhood?: string;
+      sortColumn?: string;
+      sortDirection?: string;
+      view?: "grid" | "map" | "summary";
+    }>;
+  }
+) {
+  const params = await props.params;
+  const searchParams = await props.searchParams;
   const limit = ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
 

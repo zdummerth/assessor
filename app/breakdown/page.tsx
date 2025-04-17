@@ -8,15 +8,16 @@ import {
 } from "@/components/ui/report-cards";
 import ParcelTabs from "@/components/ui/parcels-tabs";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: {
-    landuse?: string;
-    cda?: string;
-    tif?: string;
-  };
-}) {
+export default async function Page(
+  props: {
+    searchParams?: Promise<{
+      landuse?: string;
+      cda?: string;
+      tif?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const formattedSearchParams = Object.fromEntries(
     Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [
       key,

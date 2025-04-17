@@ -6,13 +6,14 @@ import SearchResultsAll from "@/components/server/search-results-all";
 import { BinocularsSkeleton } from "@/components/ui/parcel-search-results-skeleton";
 import { Suspense } from "react";
 
-export default async function ProtectedPage({
-  searchParams,
-}: {
-  searchParams?: {
-    query?: string;
-  };
-}) {
+export default async function ProtectedPage(
+  props: {
+    searchParams?: Promise<{
+      query?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const formattedSearchParams = Object.fromEntries(
     Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [
       key,

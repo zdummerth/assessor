@@ -8,22 +8,23 @@ import ParcelsFilterPanel from "@/components/ui/parcel-filters-panel";
 import { SelectFilter } from "@/components/ui/filter-client";
 import Sidebar from "@/components/ui/sidebar";
 
-export default async function ParcelsAdvancedSearchPage({
-  searchParams,
-}: {
-  searchParams?: {
-    page?: string;
-    sort?: string;
-    year?: string;
-    appraiser?: string;
-    propertyClass?: string;
-    occupancy?: string;
-    nbhd?: string;
-    sortColumn?: string;
-    sortDirection?: string;
-    view?: "grid" | "map" | "summary";
-  };
-}) {
+export default async function ParcelsAdvancedSearchPage(
+  props: {
+    searchParams?: Promise<{
+      page?: string;
+      sort?: string;
+      year?: string;
+      appraiser?: string;
+      propertyClass?: string;
+      occupancy?: string;
+      nbhd?: string;
+      sortColumn?: string;
+      sortDirection?: string;
+      view?: "grid" | "map" | "summary";
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const limit = searchParams?.view === "map" ? 100 : ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
   const occupancy = searchParams?.occupancy;

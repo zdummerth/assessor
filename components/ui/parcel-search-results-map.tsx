@@ -1,3 +1,4 @@
+"use client";
 import dynamic from "next/dynamic";
 
 const NeighborhoodMap = dynamic(() => import("@/components/ui/maps/base"), {

@@ -27,11 +27,12 @@ export async function generateMetadata(
   };
 }
 
-export default async function AppraiserPercentChange({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function AppraiserPercentChange(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const supabase = await createClient();
 
   const { data, error } = await supabase

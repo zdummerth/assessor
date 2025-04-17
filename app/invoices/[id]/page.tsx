@@ -2,7 +2,8 @@ import { createClient } from "@/utils/supabase/server";
 import { ArrowUp, ArrowDown, Flame } from "lucide-react";
 import ModalForm from "@/components/form-modal";
 import type { Metadata, ResolvingMetadata } from "next";
-import TogglePaid from "@/components/ui/invoices/toggle-paid";
+import TogglePaid, { TestPaid } from "@/components/ui/invoices/toggle-paid";
+import Update from "@/components/ui/invoices/update";
 import FormattedDate from "@/components/ui/formatted-date";
 import Address from "@/components/ui/address";
 import ParcelNumber from "@/components/ui/parcel-number";
@@ -28,7 +29,8 @@ export async function generateMetadata(
   };
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -48,8 +50,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     );
   }
 
-  // console.log(data[0].current_structures);
-
+  // console.log(data);
   return (
     <div className="w-full p-4">
       <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -57,9 +58,11 @@ export default async function Page({ params }: { params: { id: string } }) {
           id="detail"
           className="border p-2 rounded-md shadow-sm shadow-foreground w-full"
         >
-          <p className="text-xs mb-2">Id</p>
-          <div>{data.id}</div>
-          <TogglePaid id={data.id.toString()} paid={!!data.paid_at} />
+          <div className="flex gap-4 items-center mb-6 text-sm">
+            <p className="">Invoice Number:</p>
+            <div>{data.id}</div>
+          </div>
+          <Update item={data} />
         </div>
       </div>
     </div>

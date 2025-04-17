@@ -6,18 +6,19 @@ import { createClient } from "@/utils/supabase/server";
 import BuildingPermits, { Count } from "@/components/server/building-permits";
 import { SelectFilter } from "@/components/ui/filter-client";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: {
-    page?: string;
-    year?: string;
-    status?: string;
-    type?: string;
-    sortColumn?: string;
-    sortDirection?: string;
-  };
-}) {
+export default async function Page(
+  props: {
+    searchParams?: Promise<{
+      page?: string;
+      year?: string;
+      status?: string;
+      type?: string;
+      sortColumn?: string;
+      sortDirection?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const limit = ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
   const supabase = await createClient();

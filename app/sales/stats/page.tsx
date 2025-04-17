@@ -3,15 +3,16 @@ import SaleStats from "@/components/server/sale-stats";
 import { Suspense } from "react";
 import { BinocularsSkeleton } from "@/components/ui/parcel-search-results-skeleton";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: {
-    year?: string;
-    sortColumn?: string;
-    sortDirection?: string;
-  };
-}) {
+export default async function Page(
+  props: {
+    searchParams?: Promise<{
+      year?: string;
+      sortColumn?: string;
+      sortDirection?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const year = searchParams?.year || "Any";
   return (
     <div className="w-full flex">

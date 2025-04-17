@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, useActionState } from "react";
 import { updateDataCollectionNoteAction } from "@/app/actions";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { Pencil } from "lucide-react";
 
 type ModalFormProps = {
@@ -32,7 +32,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   //@ts-ignore
-  const [state, action] = useFormState(updateDataCollectionNoteAction, false);
+  const [state, action] = useActionState(updateDataCollectionNoteAction, false);
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
@@ -46,14 +46,13 @@ const ModalForm: React.FC<ModalFormProps> = ({
   }, [state]);
 
   return (
-    <div>
+    (<div>
       <button onClick={openModal} className="px-4 py-2 rounded">
         <Pencil size={16} className="text-gray-500" />{" "}
       </button>
-
       {isOpen && (
         // Overlay container that covers the entire viewport.
-        <div
+        (<div
           className="fixed inset-0 bg-gray-700 bg-opacity-85 flex justify-center items-center"
           onClick={closeModal} // Close when clicking outside the modal content.
         >
@@ -97,9 +96,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
               </div>
             </form>
           </div>
-        </div>
+        </div>)
       )}
-    </div>
+    </div>)
   );
 };
 
