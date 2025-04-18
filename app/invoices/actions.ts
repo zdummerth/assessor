@@ -45,15 +45,13 @@ export const createLineItem = async (prevState: any, formData: FormData) => {
   });
 
   if (error) {
-    return { error, message: "error occcured", success: false };
+    console.error(error);
+    return "Error creating line item";
   }
 
   revalidatePath("/invoices");
-  return {
-    success: true,
-    message: "Invoice updated successfully",
-    error: null,
-  };
+  return "";
+  // return redirect("/invoices/" + idInt);
 };
 
 export const update = async (prevState: any, formData: FormData) => {
@@ -79,6 +77,53 @@ export const update = async (prevState: any, formData: FormData) => {
   };
 };
 
+export const updateLineItem = async (prevState: any, formData: FormData) => {
+  const id = formData.get("id") as string;
+  const lineItemId = formData.get("line_item_id") as string;
+  const description = formData.get("description") as string;
+  const qty = formData.get("qty") as string;
+  const unit = formData.get("unit") as string;
+  const amount = formData.get("amount") as string;
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("invoice_line_item")
+    .update({
+      description,
+      qty: parseFloat(qty),
+      unit,
+      amount: parseFloat(amount),
+    })
+    .eq("id", lineItemId);
+
+  if (error) {
+    return { error, message: "error occcured", success: false };
+  }
+
+  revalidatePath("/invoices" + "/" + id);
+  return {
+    success: true,
+    message: "Line item updated successfully",
+    error: null,
+  };
+};
+
+export const deleteLineItem = async (prevState: any, formData: FormData) => {
+  const id = formData.get("id") as string;
+  const lineItemId = formData.get("line_item_id") as string;
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("invoice_line_item")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    return "Error deleting line item";
+  }
+
+  revalidatePath("/invoices");
+  return "";
+};
+
 export const togglePaid = async (prevState: any, formData: FormData) => {
   const id = formData.get("id") as string;
   const paid = (formData.get("paid") as string) === "true";
@@ -102,18 +147,18 @@ export const togglePaid = async (prevState: any, formData: FormData) => {
   };
 };
 
-export const deleteInvoice = async (id: string) => {
+export const deleteInvoice = async (prevState: any, formData: FormData) => {
+  const id = formData.get("id") as string;
   const supabase = await createClient();
   const { error } = await supabase.from("invoices").delete().eq("id", id);
 
   if (error) {
-    return { error };
+    return "Error deleting invoice";
   }
+
+  if (error) return "Error deleting invoice";
   revalidatePath("/invoices");
-  return {
-    success: true,
-    message: "Invoice deleted successfully",
-  };
+  return "";
 };
 
 export const testAction = async (prevState: any, formData: FormData) => {
