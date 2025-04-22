@@ -20,6 +20,7 @@ export default async function SearchResults({
       prefix: cleanedQuery,
       active,
     })
+    .order("retired", { nullsFirst: true })
     .order("parcel")
     .limit(9);
 
