@@ -1,14 +1,16 @@
 import { SearchX } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import ParcelNumber from "@/components/ui/parcel-number";
-import FormattedDate from "@/components/ui/formatted-date";
+import { CreateListItem } from "@/components/ui/lists/create";
 
-export default async function SearchResults({
+export default async function SearchResultsAttach({
   query = "",
-  active = false,
+  listId,
+  year = new Date().getFullYear(),
 }: {
   query?: string;
-  active?: boolean;
+  listId: number;
+  year?: number;
 }) {
   // replace spaces with + in the query string
   const cleanedQuery = query.replace(/\s+/g, "+");
@@ -18,7 +20,6 @@ export default async function SearchResults({
     //@ts-ignore
     .rpc("search_parcels", {
       prefix: cleanedQuery,
-      active,
     })
     .order("parcel")
     .limit(9);
@@ -46,26 +47,20 @@ export default async function SearchResults({
           </p>
         </div>
       ) : (
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+        <div className="w-full flex flex-col gap-2 items-center justify-center mt-8">
           {data.map((item: any) => {
             return (
               <div
-                className="flex flex-col w-full border rounded-md p-2 lg:h-[140px] overflow-y-auto"
+                className="flex flex-col w-full border rounded-md p-2"
                 key={item.parcel}
               >
                 <div className="flex justify-between items-center mb-2">
                   <ParcelNumber parcelNumber={item.parcel} />
-                  {item.retired ? (
-                    <div className="text-sm text-red-500 flex gap-1">
-                      <span>Retired:</span>
-                      <FormattedDate date={item.retired} />
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm text-green-500">Active</p>
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    </div>
-                  )}
+                  <CreateListItem
+                    listId={listId}
+                    parcel_number={item.parcel}
+                    year={year}
+                  />
                 </div>
                 <div>
                   {item.addresses.map((address: any) => {

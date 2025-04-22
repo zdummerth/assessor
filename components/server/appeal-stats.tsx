@@ -70,7 +70,7 @@ export default async function AppealStats({
   // console.log(groupedData);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="">
       <Grid>
         {Object.entries(groupedData).map(([appraiser, statuses]) => (
           <Card key={appraiser}>

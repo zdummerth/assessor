@@ -66,14 +66,13 @@ export const update = async (prevState: any, formData: FormData) => {
     .eq("id", id);
 
   if (error) {
-    return { error, message: "error occcured", success: false };
+    return { error: "Error Updating", success: "" };
   }
 
   revalidatePath("/invoices");
   return {
-    success: true,
-    message: "Invoice updated successfully",
-    error: null,
+    success: "Invoice updated successfully",
+    error: "",
   };
 };
 
@@ -96,14 +95,13 @@ export const updateLineItem = async (prevState: any, formData: FormData) => {
     .eq("id", lineItemId);
 
   if (error) {
-    return { error, message: "error occcured", success: false };
+    return { error: "Error Updating", success: "" };
   }
 
   revalidatePath("/invoices" + "/" + id);
   return {
-    success: true,
-    message: "Line item updated successfully",
-    error: null,
+    success: "Invoice updated successfully",
+    error: "",
   };
 };
 

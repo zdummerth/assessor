@@ -5,21 +5,20 @@ import { ITEMS_PER_PAGE } from "@/lib/data";
 import { createClient } from "@/utils/supabase/server";
 import Appeals, { Count } from "@/components/server/appeals";
 import { SelectFilter } from "@/components/ui/filter-client";
+import Nav from "@/app/appeals/nav";
 
-export default async function Page(
-  props: {
-    searchParams?: Promise<{
-      page?: string;
-      year?: string;
-      appraiser?: string;
-      status?: string;
-      type?: string;
-      complaintType?: string;
-      sortColumn?: string;
-      sortDirection?: string;
-    }>;
-  }
-) {
+export default async function Page(props: {
+  searchParams?: Promise<{
+    page?: string;
+    year?: string;
+    appraiser?: string;
+    status?: string;
+    type?: string;
+    complaintType?: string;
+    sortColumn?: string;
+    sortDirection?: string;
+  }>;
+}) {
   const searchParams = await props.searchParams;
   const limit = ITEMS_PER_PAGE;
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
@@ -54,17 +53,13 @@ export default async function Page(
       </div>
     );
   }
-  //   console.log({ data, error });
-  // console.log(types_data.data);
 
   const suspenseKey = `${page.toString()}_${searchParams?.appraiser}_${searchParams?.status}_${searchParams?.type}_${searchParams?.complaintType}_${searchParams?.year}`;
 
   return (
     <div className="w-full flex p-4">
       <div className="w-full">
-        <h2 className="hidden lg:block text-center text-xl font-bold my-4">
-          Appeals
-        </h2>
+        <Nav />
         <div>
           <div className="flex gap-4 flex-wrap my-4">
             <div className="">

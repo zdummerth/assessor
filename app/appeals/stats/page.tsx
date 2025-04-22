@@ -2,23 +2,22 @@ import { SelectFilter } from "@/components/ui/filter-client";
 import AppealStats from "@/components/server/appeal-stats";
 import { Suspense } from "react";
 import { BinocularsSkeleton } from "@/components/ui/parcel-search-results-skeleton";
+import Nav from "@/app/appeals/nav";
 
-export default async function Page(
-  props: {
-    searchParams?: Promise<{
-      year?: string;
-      sortColumn?: string;
-      sortDirection?: string;
-    }>;
-  }
-) {
+export default async function Page(props: {
+  searchParams?: Promise<{
+    year?: string;
+    sortColumn?: string;
+    sortDirection?: string;
+  }>;
+}) {
   const searchParams = await props.searchParams;
   const year = searchParams?.year || "Any";
   return (
-    <div className="w-full flex">
+    <div className="container w-full flex">
       <div className="w-full">
-        <h2 className="text-center text-lg my-4">Appeal Stats</h2>
-        <div className="flex items-center gap-4 my-4 max-w-[200px] mx-auto">
+        <Nav />
+        <div className="flex items-center gap-4 my-4 max-w-[200px]">
           <p className="">Year</p>
           <SelectFilter
             values={[

@@ -1,12 +1,13 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
 import { update, updateLineItem } from "@/app/invoices/actions";
+import Toast from "@/components/ui/toast";
+import { useToast } from "@/components/ui/toast-context";
 import { Tables } from "@/database-types";
 
 const initalState = {
-  error: null,
-  success: false,
-  message: "",
+  error: "",
+  success: "",
 };
 
 const Update = ({ item }: { item: Tables<"invoices"> }) => {
@@ -14,6 +15,24 @@ const Update = ({ item }: { item: Tables<"invoices"> }) => {
   const [formState, setFormState] = useState({
     customer_name: item.customer_name || "",
   });
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (state.error) {
+      showToast({
+        message: state.error,
+        type: "error",
+        timeOpen: 10000,
+      });
+    }
+    if (state.success) {
+      showToast({
+        message: state.success,
+        type: "success",
+        timeOpen: 2000,
+      });
+    }
+  }, [state, showToast]);
 
   const edited = item.customer_name !== formState.customer_name;
   return (
@@ -43,9 +62,6 @@ const Update = ({ item }: { item: Tables<"invoices"> }) => {
       >
         {pending ? <span className="">Loading...</span> : <>Save</>}
       </button>
-      {/* <div className="h-6">
-        {state.error && <p className="text-red-500 text-sm">{state.message}</p>}
-      </div> */}
     </form>
   );
 };
@@ -54,19 +70,40 @@ export const UpdateLineItem = (props: {
   id: string;
   item: Tables<"invoice_line_item">;
 }) => {
-  const [state, action, pending] = useActionState(updateLineItem, initalState);
-  const [formState, setFormState] = useState({
+  const initialFormState = {
     description: props.item.description || "",
     qty: props.item.qty || "0",
     unit: props.item.unit || "",
     amount: props.item.amount || "0.00",
-  });
+  };
+  const [state, action, pending] = useActionState(updateLineItem, initalState);
+  const [formState, setFormState] = useState(initialFormState);
+
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (state.error) {
+      showToast({
+        message: state.error,
+        type: "error",
+        timeOpen: 10000,
+      });
+    }
+    if (state.success) {
+      setFormState(initialFormState);
+      showToast({
+        message: state.success,
+        type: "success",
+        timeOpen: 2000,
+      });
+    }
+  }, [state, showToast]);
 
   const edited =
-    props.item.description !== formState.description ||
-    props.item.qty !== formState.qty ||
-    props.item.unit !== formState.unit ||
-    props.item.amount !== formState.amount;
+    initialFormState.description !== formState.description ||
+    initialFormState.qty !== formState.qty ||
+    initialFormState.unit !== formState.unit ||
+    initialFormState.amount !== formState.amount;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.name === "qty" || e.target.name === "amount") {
@@ -139,7 +176,7 @@ export const UpdateLineItem = (props: {
       <button
         disabled={pending || !edited}
         type="submit"
-        className="bg-green-400 w-24 py-2 rounded disabled:opacity-25"
+        className={`bg-green-400 w-48 py-2 rounded ${edited ? "" : "disabled:opacity-0"}`}
       >
         {pending ? <span className="">Loading...</span> : <>Save</>}
       </button>
