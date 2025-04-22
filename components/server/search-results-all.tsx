@@ -11,14 +11,12 @@ export default async function SearchResults({
   active?: boolean;
 }) {
   // replace spaces with + in the query string
-  const cleanedQuery = query.replace(/\s+/g, "+");
-  // console.log("query", query);
+  // const cleanedQuery = query.replace(/\s+/g, "+");
   const supabase = await createClient();
 
   const { data, error } = await supabase
     //@ts-ignore
     .rpc("search_parcels", {
-      // prefix: cleanedQuery,
       prefix: query,
       active,
     })

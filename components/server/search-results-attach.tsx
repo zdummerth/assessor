@@ -13,13 +13,13 @@ export default async function SearchResultsAttach({
   year?: number;
 }) {
   // replace spaces with + in the query string
-  const cleanedQuery = query.replace(/\s+/g, "+");
+  // const cleanedQuery = query.replace(/\s+/g, "+");
   const supabase = await createClient();
 
   const { data, error } = await supabase
     //@ts-ignore
     .rpc("search_parcels", {
-      prefix: cleanedQuery,
+      prefix: query,
     })
     .order("parcel")
     .limit(9);
