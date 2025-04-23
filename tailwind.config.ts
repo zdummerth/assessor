@@ -18,9 +18,17 @@ const config = {
       },
     },
     extend: {
+      width: {
+        a4: "210mm",
+        letter: "8.5in",
+      },
+      height: {
+        a4: "297mm",
+        letter: "11in",
+      },
       screens: {
         print: { raw: "print" },
-        screen: { raw: "screen" },
+        // screen: { raw: "screen" },
       },
       colors: {
         border: "hsl(var(--border))",

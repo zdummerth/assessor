@@ -60,27 +60,11 @@ export default async function Page(props: {
   // console.log({ data, error });
 
   return (
-    <div className="flex">
-      <div className="p-4 md:w-[300px] print:hidden">
-        <div className="flex gap-4">
-          <div className="w-full">
-            <p className="text-sm mb-4">Search parcel number or site address</p>
-            <Search placeholder="search..." />
-          </div>
-        </div>
-        {query && (
-          <Suspense fallback={<BinocularsSkeleton />} key={`${query}`}>
-            {/* <SearchResults query={query} /> */}
-            {/* <SearchResultsAttach query={query} /> */}
-          </Suspense>
-        )}
-      </div>
-      <div className="w-full flex flex-col gap-2 items-center justify-center m-2">
-        {/* @ts-ignore */}
-        {data.list_parcel_year.map((item: any) => {
-          return <Notice data={item.parcel_year} key={item.parcel_number} />;
-        })}
-      </div>
+    <div className="">
+      {/* @ts-ignore */}
+      {data.list_parcel_year.map((item: any) => {
+        return <Notice data={item.parcel_year} key={item.parcel_number} />;
+      })}
     </div>
   );
 }

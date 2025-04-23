@@ -6,7 +6,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const NavBar = async () => {
   return (
-    <nav className="w-full border-b border-b-foreground/10 print:hidden px-2 lg:flex">
+    <nav className="w-full border-b border-b-foreground/10 print:hidden p-2 lg:flex">
       <div className="w-full flex items-center justify-bewteen lg:order-2">
         <Link href={"/"} className={` hover:text-blue-500`}>
           <Search />
