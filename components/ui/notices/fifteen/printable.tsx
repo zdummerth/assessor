@@ -41,7 +41,7 @@ export default function Notice({ data }: { data: any }) {
       </div>
       <div className="w-full">
         <div id="detail" className="w-full">
-          <div className="flex justify-between my-16">
+          <div className="flex justify-between mt-4 mb-16">
             <div className="">
               <p className="">{owner_name}</p>
               <p className="">{address_1}</p>
