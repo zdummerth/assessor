@@ -25,7 +25,7 @@ export default function Search({
       params.delete(param);
     }
     replace(`${pathname}?${params.toString()}`);
-  }, 300);
+  }, 0);
 
   return (
     <div className="relative flex flex-1 w-full">

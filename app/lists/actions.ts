@@ -7,13 +7,16 @@ import { revalidatePath } from "next/cache";
 
 export const create = async () => {
   const supabase = await createClient();
-  const { error, data } = await supabase.from("invoices").insert({}).select();
+  //@ts-ignore
+  const { error, data } = await supabase.from("list").insert({}).select();
 
   if (error) {
+    console.log(error);
     return { error: "Error Updating", success: "" };
   }
 
   revalidatePath("/lists");
+  //@ts-ignore
   return redirect("/lists/" + data[0].id);
 };
 

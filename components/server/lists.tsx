@@ -41,9 +41,8 @@ export default async function Lists({ page = 1 }: { page: number }) {
             <Card key={item.id}>
               <div className="pb-3">
                 <Link href={`/lists/${item.id}`} className="text-blue-500">
-                  <h3 className="text-lg font-semibold">List Id: {item.id}</h3>
+                  <h3 className="text-lg font-semibold">{item.name}</h3>
                 </Link>
-                <p className="text-sm">Name: {item.name}</p>
               </div>
             </Card>
           );

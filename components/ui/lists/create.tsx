@@ -37,7 +37,7 @@ const CreateList = () => {
             className="bg-green-500 text-white w-48 py-2 rounded"
             disabled={pending}
           >
-            {pending ? "Creating..." : "Create Invoice"}
+            {pending ? "Creating..." : "Create List"}
           </button>
         </div>
       </div>

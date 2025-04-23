@@ -17,7 +17,7 @@ export default async function Page(props: {
     <div className="w-full flex p-4">
       <div className="w-full">
         <h2 className="text-center text-xl my-4">Lists</h2>
-        <CreateList />
+        {/* <CreateList /> */}
         <Suspense fallback={<BinocularsSkeleton />} key={suspenseKey}>
           <Lists page={page} />
         </Suspense>

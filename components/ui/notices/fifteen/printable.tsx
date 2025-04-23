@@ -7,7 +7,8 @@ export default function Notice({ data }: { data: any }) {
   const owner_name = data.owner_parcel_year[0].owner_name.name;
   const { address_1, address_2, city, state, zip } =
     data.owner_parcel_year[0].owner_name.owner_address[0];
-  console.log(address_1);
+  // console.log(address_1);
+  console.log(data.owner_parcel_year[0].owner_name);
   const { house_number, street_name, street_suffix, zip_code } =
     data.site_address_parcel_year[0].site_address_master;
 
@@ -16,7 +17,7 @@ export default function Notice({ data }: { data: any }) {
   });
 
   return (
-    <div className="break-after-page w-full flex flex-col border rounded-md mx-auto p-8 w-[8in] h-[10.5in] print:p-0 print:border-none print:bg-white print:text-black">
+    <div className="break-after-page w-full flex flex-col border rounded-md mx-auto p-8 w-[8.5in] h-[11in] print:p-0 print:border-none print:bg-white print:text-black">
       <div className="flex flex-col items-center justify-center">
         <Image src={stlSeal} alt="St. Louis City Seal" width={80} height={80} />
       </div>

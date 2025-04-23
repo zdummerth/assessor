@@ -38,7 +38,7 @@ export default async function SearchResultsAttach({
   // console.log(data);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       {data.length === 0 ? (
         <div className="w-full flex flex-col items-center justify-center mt-8">
           <SearchX className="w-16 h-16 text-gray-400 mx-auto" />
