@@ -99,7 +99,7 @@ export default function Notice({ data }: { data: any }) {
             <p className="mt-4">
               Please make sure you include your Parcel Number and Address in
               your email. All requests for an interior inspection should be made
-              prior to May 30th.
+              prior to June 10th.
             </p>
             <p className="mt-4">
               <span className="font-bold">
