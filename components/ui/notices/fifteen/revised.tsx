@@ -14,7 +14,7 @@ export default function Notice({ data }: { data: any }) {
   });
 
   return (
-    <div className="w-letter h-letter print:overflow-hidden print:break-after-page flex flex-col border rounded-md mx-auto p-8 print:py-0 print:border-none print:bg-white print:text-black">
+    <div className="w-letter h-letter print:overflow-hidden print:break-after-page flex flex-col border rounded-md mx-auto p-8 print:p-0 print:border-none print:bg-white print:text-black">
       <div className="flex flex-col items-center justify-center">
         <Image src={stlSeal} alt="St. Louis City Seal" width={80} height={80} />
       </div>
@@ -39,7 +39,7 @@ export default function Notice({ data }: { data: any }) {
       <div className="w-full">
         <div id="detail" className="w-full">
           <div className="flex justify-between mt-12 mb-16">
-            <div className="pl-8">
+            <div className="relative left-8">
               <p>{owner_name}</p>
               <p>{address_1}</p>
               {address_2 && <p>{address_2}</p>}
