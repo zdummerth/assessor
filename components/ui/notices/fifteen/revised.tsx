@@ -18,7 +18,7 @@ export default function Notice({ data }: { data: any }) {
       <div className="flex flex-col items-center justify-center">
         <Image src={stlSeal} alt="St. Louis City Seal" width={80} height={80} />
       </div>
-      <div className="grid grid-cols-3 mt-4 text-sm">
+      <div className="grid grid-cols-3 text-sm">
         <div className="text-center justify-self-start">
           <p className="font-bold">Cara Spencer</p>
           <p>Mayor</p>
