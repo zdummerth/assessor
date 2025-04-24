@@ -30,8 +30,8 @@ export default async function Page(props: {
   }
 
   return (
-    <div className="p-4">
-      <div className="max-w-[400px] mb-4 print:hidden">
+    <>
+      <div className="max-w-[400px] mb-4 p-4 print:hidden">
         <p className="mb-2">List</p>
         <SelectFilter
           values={[
@@ -48,6 +48,6 @@ export default async function Page(props: {
       <Suspense fallback={<div>Loading...</div>} key={listId}>
         {listId && <RevisedFifteenNotices listId={parseInt(listId)} />}
       </Suspense>
-    </div>
+    </>
   );
 }
