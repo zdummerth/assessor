@@ -1,4 +1,3 @@
-import { Tables } from "@/database-types";
 import FormattedDate from "@/components/ui/formatted-date";
 import Image from "next/image";
 import stlSeal from "@/public/stl-city-seal.png";
@@ -64,12 +63,11 @@ export default function Notice({ data }: { data: any }) {
             </div>
           </div>
 
-          <div className="text-sm">
-            <p className="text-sm">
-              The preliminary analysis by the City of St. Louis Assessor’s
-              office indicates the value of your property will increase by more
-              than 15% for the 2025 reassessment. The preliminary value we have
-              determined for your property for the 2025 reassessment is:
+          <div className="text-sm space-y-4">
+            <p>
+              We have completed an additional review of your property’s
+              assessment. As a result, the value you were previously notified of
+              has now been updated. The new value for the 2025 reassessment is:
             </p>
             <p className="font-bold text-xl my-4 text-center">
               ${data.appraised_total.toLocaleString()}
@@ -87,7 +85,7 @@ export default function Notice({ data }: { data: any }) {
               specifically requested by the taxpayer. If you do not want us to
               enter your property due to health or other concerns, you can
               submit pictures and other information about the condition of your
-              home by emailing zasr@stlouis-mo.gov.
+              home by emailing zasr@stlouis-mo.gov .
             </p>
             <p className="mt-4">
               Please make sure you include your parcel number and address in

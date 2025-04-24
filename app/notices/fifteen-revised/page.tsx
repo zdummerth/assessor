@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { SearchX } from "lucide-react";
-import FifteenNotices from "@/components/server/notices-fifteen";
+import RevisedFifteenNotices from "@/components/server/notices-fifteen-revised";
 import { SelectFilter } from "@/components/ui/filter-client";
 import { Suspense } from "react";
 
@@ -46,7 +46,7 @@ export default async function Page(props: {
         />
       </div>
       <Suspense fallback={<div>Loading...</div>} key={listId}>
-        {listId && <FifteenNotices listId={parseInt(listId)} />}
+        {listId && <RevisedFifteenNotices listId={parseInt(listId)} />}
       </Suspense>
     </div>
   );

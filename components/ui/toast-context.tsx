@@ -1,4 +1,3 @@
-// ToastContext.tsx
 "use client";
 
 import React, {
@@ -10,32 +9,26 @@ import React, {
 } from "react";
 import Toast from "./toast";
 
-// Define toast types
 export type ToastType = "success" | "error";
 
-// Options passed to showToast
 export interface ShowToastOpts {
   message: string;
-  type?: ToastType; // defaults to "success"
-  timeOpen?: number; // defaults to 5000ms
+  type?: ToastType;
+  timeOpen?: number;
 }
 
-// Internal representation of each toast
 interface ToastData extends Required<ShowToastOpts> {
   id: number;
 }
 
-// Context signature
 interface ToastContextProps {
   showToast: (opts: ShowToastOpts) => void;
 }
 
-// Create context
 const ToastContext = createContext<ToastContextProps>({
   showToast: () => {},
 });
 
-// Provider component
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -72,5 +65,4 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-// Hook to consume context
 export const useToast = () => useContext(ToastContext);

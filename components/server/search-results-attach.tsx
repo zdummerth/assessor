@@ -12,8 +12,6 @@ export default async function SearchResultsAttach({
   listId: number;
   year?: number;
 }) {
-  // replace spaces with + in the query string
-  // const cleanedQuery = query.replace(/\s+/g, "+");
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -34,8 +32,6 @@ export default async function SearchResultsAttach({
       </div>
     );
   }
-
-  // console.log(data);
 
   return (
     <div className="flex flex-col w-full">

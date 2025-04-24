@@ -1,4 +1,3 @@
-// Toast.tsx
 "use client";
 
 import React, { useState, useEffect, Fragment } from "react";
@@ -6,11 +5,8 @@ import { Transition } from "@headlessui/react";
 import { CheckCircle, XCircle, X } from "lucide-react";
 
 interface ToastProps {
-  /** Message to show on success */
   successMessage?: string;
-  /** Message to show on error */
   errorMessage?: string;
-  /** Duration (ms) to show toast before auto-dismiss */
   timeOpen?: number;
 }
 

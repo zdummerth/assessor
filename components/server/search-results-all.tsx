@@ -10,8 +10,6 @@ export default async function SearchResults({
   query?: string;
   active?: boolean;
 }) {
-  // replace spaces with + in the query string
-  // const cleanedQuery = query.replace(/\s+/g, "+");
   const supabase = await createClient();
 
   const { data, error } = await supabase
