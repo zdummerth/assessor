@@ -20,11 +20,11 @@ const config = {
     extend: {
       width: {
         a4: "210mm",
-        letter: "8.5in",
+        letter: "215.9mm",
       },
       height: {
         a4: "297mm",
-        letter: "11in",
+        letter: "279.4mm",
       },
       screens: {
         print: { raw: "print" },

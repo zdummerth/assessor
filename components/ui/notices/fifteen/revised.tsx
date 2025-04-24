@@ -14,7 +14,7 @@ export default function Notice({ data }: { data: any }) {
   });
 
   return (
-    <div className="w-letter h-letter print:overflow-hidden print:break-after-page flex flex-col border rounded-md mx-auto p-8 print:p-0 print:border-none print:bg-white print:text-black">
+    <div className="w-letter h-letter print:overflow-hidden print:break-after-page border p-8 print:p-0 print:pr-[.15in] print:border-none print:bg-white print:text-black">
       <div className="flex flex-col items-center justify-center">
         <Image src={stlSeal} alt="St. Louis City Seal" width={80} height={80} />
       </div>
