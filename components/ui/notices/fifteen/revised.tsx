@@ -43,8 +43,8 @@ export default function Notice({ data }: { data: any }) {
       </div>
       <div className="w-full">
         <div id="detail" className="w-full">
-          <div className="flex justify-between mt-10 mb-16">
-            <div className="relative left-16">
+          <div className="flex justify-between mt-8 mb-16">
+            <div className="relative left-12">
               <p>{owner_name}</p>
               <p>{address_1}</p>
               {address_2 && <p>{address_2}</p>}
