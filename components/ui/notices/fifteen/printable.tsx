@@ -46,7 +46,7 @@ export default function Notice({ data }: { data: any }) {
         <p>St. Louis, MO 63103</p>
       </div>
       <div id="detail" className="w-full">
-        <div className="flex justify-between mt-8 mb-16">
+        <div className="flex justify-between mt-7 mb-16">
           <div className="relative left-12">
             <p>{owner_name}</p>
             <p>{address_1}</p>
