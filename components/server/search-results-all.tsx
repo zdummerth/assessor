@@ -33,7 +33,7 @@ export default async function SearchResults({
     );
   }
 
-  // console.log(data);
+  console.log(data);
 
   return (
     <div className="flex flex-col">
@@ -85,6 +85,16 @@ export default async function SearchResults({
                       </div>
                     );
                   })}
+                </div>
+                <div className="text-sm mt-2">
+                  <div>
+                    <p>{item.appraiser}</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <p>{item.neighborhood}</p>
+                    <p>{item.land_use}</p>
+                    <p>${item.appraised_total.toLocaleString()}</p>
+                  </div>
                 </div>
                 <div className="mt-2">
                   {item.names.map((owner: string, index: number) => {

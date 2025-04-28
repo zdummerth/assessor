@@ -28,6 +28,10 @@ export default async function Data({ listId }: { listId: number }) {
     `
     )
     .eq("id", listId)
+    // .is(
+    //   "list_parcel_year.parcel_year.site_address_parcel_year.is_primary",
+    //   true
+    // )
     .single();
 
   if (error && !data) {

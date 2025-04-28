@@ -6,8 +6,13 @@ export default function Notice({ data }: { data: any }) {
   const owner_name = data.owner_parcel_year[0].owner_name.name;
   const { address_1, address_2, city, state, zip } =
     data.owner_parcel_year[0].owner_name.owner_address[0];
-  const { house_number, street_name, street_suffix, zip_code } =
-    data.site_address_parcel_year[0].site_address_master;
+  const primaryAddress = data.site_address_parcel_year.find(
+    (address: any) => address.is_primary
+  );
+  const address = primaryAddress
+    ? primaryAddress.site_address_master
+    : data.site_address_parcel_year[0].site_address_master;
+  const { house_number, street_name, street_suffix, zip_code } = address;
 
   const currentTimestampString = new Date().toLocaleString("en-US", {
     timeZone: "America/Chicago",
