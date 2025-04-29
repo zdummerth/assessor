@@ -33,7 +33,7 @@ export default async function SearchResults({
     );
   }
 
-  console.log(data);
+  // console.log(data);
 
   return (
     <div className="flex flex-col">
@@ -49,7 +49,7 @@ export default async function SearchResults({
           {data.map((item: any) => {
             return (
               <div
-                className="flex flex-col w-full border rounded-md p-2 lg:h-[140px] overflow-y-auto"
+                className="flex flex-col w-full border rounded-md p-2 lg:h-[200px] overflow-y-auto"
                 key={item.parcel}
               >
                 <div className="flex justify-between items-center mb-2">
@@ -65,6 +65,11 @@ export default async function SearchResults({
                       <div className="w-2 h-2 bg-green-500 rounded-full" />
                     </div>
                   )}
+                </div>
+                <div className="flex gap-4">
+                  <p>{item.neighborhood}</p>
+                  <p>{item.land_use}</p>
+                  <p>${item.appraised_total.toLocaleString()}</p>
                 </div>
                 <div>
                   {item.addresses.map((address: any) => {
@@ -89,11 +94,8 @@ export default async function SearchResults({
                 <div className="text-sm mt-2">
                   <div>
                     <p>{item.appraiser}</p>
-                  </div>
-                  <div className="flex gap-4">
-                    <p>{item.neighborhood}</p>
-                    <p>{item.land_use}</p>
-                    <p>${item.appraised_total.toLocaleString()}</p>
+                    <p>{item.appraiser_email}</p>
+                    <p>{item.appraiser_phone}</p>
                   </div>
                 </div>
                 <div className="mt-2">
