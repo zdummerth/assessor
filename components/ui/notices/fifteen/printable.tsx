@@ -76,9 +76,9 @@ export default function Notice({ data }: { data: any }) {
         <div className="text-sm">
           <p className="text-sm">
             The preliminary analysis by the City of St. Louis Assessor’s office
-            indicates the value of your property will increase by more than 15%
-            for the 2025 reassessment. The preliminary value we have determined
-            for your property for the 2025 reassessment is:
+            indicates the residential value of your property will increase by
+            more than 15% for the 2025 reassessment. The preliminary total value
+            we have determined for your property for the 2025 reassessment is:
           </p>
           <p className="font-bold text-xl my-4 text-center">
             ${data.appraised_total.toLocaleString()}
@@ -101,7 +101,7 @@ export default function Notice({ data }: { data: any }) {
           <p className="mt-4">
             Please make sure you include your parcel number and address in your
             email. All requests for an interior inspection should be made prior
-            to June 10th.
+            to June 15th.
           </p>
           <p className="mt-4">
             <span className="font-bold">
