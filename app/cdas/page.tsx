@@ -34,6 +34,11 @@ const WardsList: React.FC = async () => {
             />
             <h1 className="text-3xl font-bold my-4 text-center">{cda.cda}</h1>
             <WardComparison key={index} ward={cda} />
+            <p className="text-sm mt-8 px-12">
+              * Miscellaneous includes vacant lots, multi-building residential
+              lots, residential mixed-use lots, section 42 housing, agriculture
+              lots, condo garage spaces, etc.
+            </p>
           </div>
         ))}
       </div>
@@ -46,7 +51,7 @@ const propertyTypes = [
   { key: "multi_family", label: "Multi Family" },
   { key: "condo", label: "Condos" },
   { key: "commercial", label: "Commercial" },
-  { key: "other", label: "Other" },
+  { key: "other", label: "Miscellaneous *" },
 ];
 
 const WardComparison = ({ ward }: any) => {
