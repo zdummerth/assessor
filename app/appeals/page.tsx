@@ -14,6 +14,7 @@ export default async function Page(props: {
     appraiser?: string;
     status?: string;
     type?: string;
+    hearing?: string;
     complaintType?: string;
     sortColumn?: string;
     sortDirection?: string;
@@ -54,7 +55,7 @@ export default async function Page(props: {
     );
   }
 
-  const suspenseKey = `${page.toString()}_${searchParams?.appraiser}_${searchParams?.status}_${searchParams?.type}_${searchParams?.complaintType}_${searchParams?.year}`;
+  const suspenseKey = `${page.toString()}_${searchParams?.appraiser}_${searchParams?.status}_${searchParams?.type}_${searchParams?.complaintType}_${searchParams?.year}_${searchParams?.hearing}`;
 
   return (
     <div className="w-full flex p-4">
@@ -135,6 +136,18 @@ export default async function Page(props: {
                 urlParam="complaintType"
               />
             </div>
+            <div>
+              <p className="mb-2">Hearing Scheduled?</p>
+              <SelectFilter
+                values={[
+                  { value: "true", label: "True" },
+                  { value: "false", label: "False" },
+                  { value: "Any", label: "Any" },
+                ]}
+                defaultValue={searchParams?.hearing || "Any"}
+                urlParam="hearing"
+              />
+            </div>
           </div>
           <div className="flex gap-2 items-center justify-between">
             <div className="text-sm flex items-center gap-2">
@@ -166,6 +179,7 @@ export default async function Page(props: {
                       type={searchParams?.type || "Any"}
                       complaintType={searchParams?.complaintType || "Any"}
                       year={searchParams?.year || "Any"}
+                      hearing={searchParams?.hearing || "false"}
                     />
                   </span>
                 </Suspense>
@@ -182,6 +196,7 @@ export default async function Page(props: {
             type={searchParams?.type || "Any"}
             complaintType={searchParams?.complaintType || "Any"}
             year={searchParams?.year || "Any"}
+            hearing={searchParams?.hearing || "false"}
           />
         </Suspense>
       </div>

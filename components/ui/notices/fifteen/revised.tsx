@@ -3,16 +3,18 @@ import Image from "next/image";
 import stlSeal from "@/public/stl-city-seal.png";
 
 export default function Notice({ data }: { data: any }) {
-  const owner_name = data.owner_parcel_year[0].owner_name.name;
-  const { address_1, address_2, city, state, zip } =
-    data.owner_parcel_year[0].owner_name.owner_address[0];
-  const primaryAddress = data.site_address_parcel_year.find(
-    (address: any) => address.is_primary
-  );
-  const address = primaryAddress
-    ? primaryAddress.site_address_master
-    : data.site_address_parcel_year[0].site_address_master;
-  const { house_number, street_name, street_suffix, zip_code } = address;
+  const owner_name = data.owner_name;
+
+  const address_1 = data.owner_address_1;
+  const address_2 = data.owner_address_2;
+  const city = data.owner_city;
+  const state = data.owner_state;
+  const zip = data.owner_zip;
+
+  const site_street_number = data.site_street_number;
+  const prefix_directional = data.prefix_directional;
+  const site_street_name = data.site_street_name;
+  const site_zip_code = data.site_zip_code;
 
   const currentTimestampString = new Date().toLocaleString("en-US", {
     timeZone: "America/Chicago",
@@ -63,7 +65,9 @@ export default function Notice({ data }: { data: any }) {
             <div>
               <p className="text-sm">Property Address</p>
               <div>
-                {house_number} {street_name} {street_suffix} {zip_code}
+                {`
+                ${site_street_number || ""}
+                ${prefix_directional || ""} ${site_street_name || ""} ${site_zip_code || ""}           `}
               </div>
             </div>
           </div>
@@ -95,7 +99,7 @@ export default function Notice({ data }: { data: any }) {
             <p className="mt-4">
               Please make sure you include your parcel number and address in
               your email. All requests for an interior inspection should be made
-              prior to June 10th.
+              prior to June 15th.
             </p>
             <p className="mt-4">
               <span className="font-bold">

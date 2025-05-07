@@ -16,6 +16,16 @@ export default async function Data({ listId }: { listId: number }) {
         appraised_total,
         year,
         parcel_number,
+        owner_name,
+        owner_address_1,
+        owner_address_2,
+        owner_city,
+        owner_state,
+        owner_zip,
+        site_street_number,
+        site_street_name,
+        prefix_directional,
+        site_zip_code,
         owner_parcel_year(
          owner_name(*, owner_address(*))
         ),

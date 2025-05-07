@@ -4,19 +4,20 @@ import Image from "next/image";
 import stlSeal from "@/public/stl-city-seal.png";
 
 export default function Notice({ data }: { data: any }) {
-  const owner_name = data.owner_parcel_year[0].owner_name.name;
-  const { address_1, address_2, city, state, zip } =
-    data.owner_parcel_year[0].owner_name.owner_address[0];
+  const owner_name = data.owner_name;
 
-  // console.log("address", data.site_address_parcel_year[0].site_address_master);
+  const address_1 = data.owner_address_1;
+  const address_2 = data.owner_address_2;
+  const city = data.owner_city;
+  const state = data.owner_state;
+  const zip = data.owner_zip;
 
-  const primaryAddress = data.site_address_parcel_year.find(
-    (address: any) => address.is_primary
-  );
-  const address = primaryAddress
-    ? primaryAddress.site_address_master
-    : data.site_address_parcel_year[0].site_address_master;
-  const { house_number, street_name, street_suffix, zip_code } = address;
+  const site_street_number = data.site_street_number;
+  const prefix_directional = data.prefix_directional;
+  const site_street_name = data.site_street_name;
+  const site_zip_code = data.site_zip_code;
+
+  console.log(data);
 
   const currentTimestampString = new Date().toLocaleString("en-US", {
     timeZone: "America/Chicago",
@@ -46,10 +47,10 @@ export default function Notice({ data }: { data: any }) {
         <p>St. Louis, MO 63103</p>
       </div>
       <div id="detail" className="w-full">
-        <div className="flex justify-between mt-7 mb-16">
+        <div className="flex justify-between mt-7 mb-16 text-sm/4">
           <div className="relative left-12">
             <p>{owner_name}</p>
-            <p>{address_1}</p>
+            {address_1 && <p>{address_1}</p>}
             {address_2 && <p>{address_2}</p>}
             <p>
               {city}, {state} {zip}
@@ -67,8 +68,8 @@ export default function Notice({ data }: { data: any }) {
             <p className="text-sm">Property Address</p>
             <div>
               {`
-                ${house_number} ${street_name} ${street_suffix} ${zip_code || ""}
-              `}
+                ${site_street_number || ""}
+                ${prefix_directional || ""} ${site_street_name || ""} ${site_zip_code || ""}           `}
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import type { Metadata, ResolvingMetadata } from "next";
+import CopyToClipboard from "@/components/copy-to-clipboard";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -94,10 +95,10 @@ export default async function Page({
   try {
     const { data, error } = await supabase
       //@ts-ignore
-      .from("parcel_years")
-      .select()
+      .from("parcel_year")
+      .select("*, appraisers(*)")
       .eq("parcel_number", id)
-      .order("assessor_year", { ascending: false });
+      .order("year", { ascending: false });
 
     if (error) {
       console.error(error);
@@ -128,142 +129,163 @@ export default async function Page({
     //   ? `${address.address_line1} ${address.postcode}`
     //   : `${mostRecentParcel.site_address_1} ${mostRecentParcel.zip || ""}`;
 
-    // console.log(mostRecentParcel);
-    // return (
-    //   <div>
-    //     <div className="grid w-full gap-4 grid-cols-1 lg:grid-cols-3 lg:h-[450px]">
-    //       <div className="rounded-lg shadow-lg p-2 md:p-4">
-    //         {/* ID Section */}
-    //         <div className="flex items-center space-x-3 border-b pb-3">
-    //           <h1 className="text-2xl font-semibold">{id}</h1>
-    //           <CopyToClipboard text={id} />
-    //         </div>
+    console.log(mostRecentParcel);
+    return (
+      <div>
+        <div className="grid w-full gap-4 grid-cols-1 lg:grid-cols-3 lg:h-[500px]">
+          <div className="rounded-lg shadow-lg p-2 md:p-4">
+            {/* ID Section */}
+            <div className="flex items-center space-x-3 border-b pb-3">
+              <h1 className="text-2xl font-semibold">{id}</h1>
+              <CopyToClipboard text={id} />
+            </div>
 
-    //         {/* Address Section */}
-    //         <div className="mt-2 flex items-center justify-between border-b pb-3">
-    //           <div className="flex items-center space-x-2">
-    //             <p className="">{displayAddress}</p>
-    //             <CopyToClipboard text={displayAddress} />
-    //           </div>
-    //           <a
-    //             href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
-    //             target="_blank"
-    //             rel="noreferrer"
-    //           >
-    //             <MapPin
-    //               size={18}
-    //               className="text-gray-500 hover:text-blue-500 transition-colors"
-    //             />
-    //           </a>
-    //         </div>
+            {/* Address Section */}
+            <div className="mt-2 flex items-center justify-between border-b pb-3">
+              <div className="flex items-center space-x-2">
+                {/* <p className="">{displayAddress}</p> */}
+                {/* <CopyToClipboard text={displayAddress} /> */}
+              </div>
+              {/* <a
+                href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <MapPin
+                  size={18}
+                  className="text-gray-500 hover:text-blue-500 transition-colors"
+                />
+              </a> */}
+            </div>
 
-    //         {/* Owner Info */}
-    //         <div className="mt-2 border-b pb-3">
-    //           <p className="font-medium">{mostRecentParcel.owner_name}</p>
-    //           <p className="">{mostRecentParcel.owner_address_1}</p>
-    //         </div>
+            {/* Owner Info */}
+            <div className="mt-2 border-b pb-3">
+              {/* <p className="font-medium">{mostRecentParcel.owner_name}</p> */}
+              {/* <p className="">{mostRecentParcel.owner_address_1}</p> */}
+            </div>
 
-    //         {/* Neighborhood */}
-    //         <div className="mt-2 border-b pb-3">
-    //           <p className="">
-    //             <span className="font-semibold">Neighborhood:</span>{" "}
-    //             {mostRecentParcel.neighborhood}
-    //           </p>
-    //         </div>
+            {/* Neighborhood */}
+            <div className="mt-2 border-b pb-3">
+              <p className="">
+                <span className="font-semibold">Neighborhood:</span>{" "}
+                {mostRecentParcel?.neighborhood}
+              </p>
+            </div>
 
-    //         {/* Occupancy */}
-    //         <div className="mt-2 border-b pb-3 flex items-center space-x-2">
-    //           <span className="font-semibold">
-    //             {mostRecentParcel.occupancy}
-    //           </span>
-    //           <span className="">-</span>
-    //           <span className="">{mostRecentParcel.occupancy_description}</span>
-    //         </div>
+            {/* Occupancy */}
+            <div className="mt-2 border-b pb-3 flex items-center space-x-2">
+              <span className="font-semibold">
+                {mostRecentParcel?.land_use}
+              </span>
+              <span className="">-</span>
+              <span className="">{mostRecentParcel?.occupancy}</span>
+            </div>
 
-    //         {/* Appraiser */}
-    //         <div className="mt-2 border-b pb-3">
-    //           <p className="">
-    //             <span className="font-semibold">Appraiser:</span>{" "}
-    //             {mostRecentParcel.appraiser}
-    //           </p>
-    //         </div>
+            {/* Appraiser */}
+            <div className="mt-2 border-b pb-3">
+              <p className="">
+                <span className="font-semibold">Appraiser:</span>{" "}
+                {/* {mostRecentParcel.appraiser} */}
+                <div className="border-t border-gray-100 pt-3 space-y-1">
+                  <p className="font-medium">
+                    {/* @ts-ignore */}
+                    {mostRecentParcel?.appraisers.name}
+                  </p>
+                  {/* @ts-ignore */}
+                  <p>{mostRecentParcel?.appraisers.email}</p>
+                  {/* @ts-ignore */}
+                  <p>{mostRecentParcel?.appraisers.phone}</p>
+                </div>
+              </p>
+            </div>
 
-    //         {/* Appraised Total */}
-    //         <div className="mt-2 border-b pb-3">
-    //           <p className="">
-    //             <span className="font-semibold">Appraised Total:</span>{" "}
-    //             {mostRecentParcel.appraised_total}
-    //           </p>
-    //         </div>
+            <div className="mt-2 border-b pb-3">
+              <p className="">
+                <span className="font-semibold">Supervisor:</span>{" "}
+                {/* {mostRecentParcel.appraiser} */}
+                <div className="border-t border-gray-100 pt-3 space-y-1">
+                  <p className="font-medium">
+                    {/* @ts-ignore */}
+                    {mostRecentParcel?.appraisers.supervisor}
+                  </p>
+                </div>
+              </p>
+            </div>
 
-    //         {/* Property Class */}
-    //         <div className="mt-2">
-    //           <p className="font-medium">{mostRecentParcel.property_class}</p>
-    //         </div>
-    //       </div>
+            {/* Appraised Total */}
+            <div className="mt-2 border-b pb-3">
+              <p className="">
+                <span className="font-semibold">Current Appraised Total:</span>{" "}
+                ${mostRecentParcel?.appraised_total?.toLocaleString()}
+              </p>
+            </div>
 
-    //       <div className="border rounded-lg h-[400px] shadow overflow-hidden">
-    //         <AppraisedTotalLineChart data={data} />
-    //       </div>
+            {/* Property Class */}
+            <div className="mt-2">
+              <p className="font-medium">{mostRecentParcel?.prop_class}</p>
+            </div>
+          </div>
 
-    //       <div className="rounded-lg shadow flex flex-col items-center overflow-hidden">
-    //         {address?.lat && address?.lon && (
-    //           <BaseMap lat={address.lat} lon={address.lon} />
-    //         )}
-    //       </div>
-    //     </div>
+          <div className="border rounded-lg h-[400px] shadow overflow-hidden">
+            {/* <AppraisedTotalLineChart data={data} /> */}
+          </div>
 
-    //     {/* Existing Parcel Cards */}
-    //     <div className="flex flex-col space-y-4">
-    //       {data.map((parcel: any) => (
-    //         <ParcelCard
-    //           key={`${parcel.parcel_number}-${parcel.year}`}
-    //           data={parcel}
-    //         />
-    //       ))}
-    //     </div>
+          {/* <div className="rounded-lg shadow flex flex-col items-center overflow-hidden">
+            {address?.lat && address?.lon && (
+              <BaseMap lat={address.lat} lon={address.lon} />
+            )}
+          </div> */}
+        </div>
 
-    //     {/* Timeline Section */}
-    //     <div>
-    //       <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-    //         Timeline
-    //       </h2>
-    //       <ParcelTimeline parcels={data} />
-    //     </div>
+        {/* Existing Parcel Cards */}
+        <div className="flex flex-col space-y-4">
+          {/* {data.map((parcel: any) => (
+            <ParcelCard
+              key={`${parcel.parcel_number}-${parcel.year}`}
+              data={parcel}
+            />
+          ))} */}
+        </div>
 
-    //     {/* Sales Section */}
-    //     <div>
-    //       <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-    //         Sales
-    //       </h2>
-    //       <Suspense fallback={<div>loading sales...</div>}>
-    //         <ParcelSales parcel_number={id} />
-    //       </Suspense>
-    //     </div>
+        {/* Timeline Section */}
+        <div>
+          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
+            Timeline
+          </h2>
+          {/* <ParcelTimeline parcels={data} /> */}
+        </div>
 
-    //     {/* Appeals Section */}
-    //     <div>
-    //       <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-    //         Appeals
-    //       </h2>
-    //       <Suspense fallback={<div>loading appeals...</div>}>
-    //         <ParcelAppeals parcel_number={id} />
-    //       </Suspense>
-    //     </div>
+        {/* Sales Section */}
+        <div>
+          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
+            Sales
+          </h2>
+          {/* <Suspense fallback={<div>loading sales...</div>}>
+            <ParcelSales parcel_number={id} />
+          </Suspense> */}
+        </div>
 
-    //     {/* Permits Section */}
-    //     <div>
-    //       <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-    //         Permits
-    //       </h2>
-    //       <Suspense fallback={<div>loading permits...</div>}>
-    //         <ParcelPermits parcel_number={id} />
-    //       </Suspense>
-    //     </div>
-    //   </div>
-    // );
+        {/* Appeals Section */}
+        <div>
+          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
+            Appeals
+          </h2>
+          {/* <Suspense fallback={<div>loading appeals...</div>}>
+            <ParcelAppeals parcel_number={id} />
+          </Suspense> */}
+        </div>
 
-    return <div>Testing</div>;
+        {/* Permits Section */}
+        <div>
+          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
+            Permits
+          </h2>
+          {/* <Suspense fallback={<div>loading permits...</div>}>
+            <ParcelPermits parcel_number={id} />
+          </Suspense> */}
+        </div>
+      </div>
+    );
   } catch (error) {
     console.error(error);
     return <div>Failed to fetch data</div>;

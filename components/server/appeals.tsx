@@ -7,6 +7,8 @@ import Address from "@/components/ui/address";
 import ParcelNumber from "@/components/ui/parcel-number";
 import AppealModal from "@/components/ui/appeals/modal";
 import SaleModal from "@/components/ui/sales/modal";
+import AppealListItem from "../ui/appeals/list-item";
+import AppealsCalendar from "../ui/appeals/appeals-calendar";
 
 // import MultipolygonMapWrapper from "../ui/maps/wrapper";
 
@@ -16,27 +18,34 @@ const applyFiltersToQuery = (
   status: string,
   type: string,
   complaintType: string,
-  year: string
+  year: string,
+  hearing: string
 ) => {
   if (appraiser !== "Any") {
     if (appraiser === "Unassigned") {
-      query = query.is("parcel_review_appeals.appeal_appraiser", null);
+      query = query.is("appeal_appraiser", null);
     } else {
-      query = query.eq("parcel_review_appeals.appeal_appraiser", appraiser);
+      query = query.eq("appeal_appraiser", appraiser);
     }
   }
   if (status !== "Any") {
-    query = query.eq("parcel_review_appeals.status", status);
+    query = query.eq("status", status);
   }
   if (type !== "Any") {
-    query = query.eq("parcel_review_appeals.appeal_type", type);
+    query = query.eq("appeal_type", type);
   }
   if (complaintType !== "Any") {
-    query = query.eq("parcel_review_appeals.complaint_type", complaintType);
+    query = query.eq("complaint_type", complaintType);
   }
   if (year !== "Any") {
-    query = query.eq("parcel_review_appeals.year", year);
+    query = query.eq("year", year);
   }
+  if (hearing === "true") {
+    query = query.not("hearing_ts", "is", null);
+  } else if (hearing === "false") {
+    query = query.is("hearing_ts", null);
+  }
+
   return query;
 };
 
@@ -47,6 +56,7 @@ export default async function Appeals({
   type = "Any",
   complaintType = "Any",
   year = "Any",
+  hearing = "false",
 }: {
   page: number;
   appraiser: string;
@@ -54,6 +64,7 @@ export default async function Appeals({
   type: string;
   complaintType: string;
   year: string;
+  hearing: string;
 }) {
   // const limit = ITEMS_PER_PAGE;
   const limit = 9;
@@ -62,11 +73,15 @@ export default async function Appeals({
 
   const supabase = await createClient();
 
+  // let query = supabase
+  //   .from("parcel_reviews_2025")
+  //   .select(
+  //     "*, parcel_review_appeals!inner(*), current_structures(*), bps(*), parcel_review_sales(*)"
+  //   );
+
   let query = supabase
-    .from("parcel_reviews_2025")
-    .select(
-      "*, parcel_review_appeals!inner(*), current_structures(*), bps(*), parcel_review_sales(*)"
-    );
+    .from("appeals")
+    .select("*, parcel_year(parcel_number, appraised_total, neighborhood))");
 
   query = applyFiltersToQuery(
     query,
@@ -74,10 +89,11 @@ export default async function Appeals({
     status,
     type,
     complaintType,
-    year
+    year,
+    hearing
   );
   const { data, error } = await query
-    .order("parcel_number", { ascending: true })
+    // .order("parcel_number", { ascending: true })
     .range(offset, endingPage);
 
   if (error) {
@@ -89,60 +105,21 @@ export default async function Appeals({
     );
   }
 
-  // console.log(data[0].current_structures);
+  console.log(data[0]);
 
   return (
     <div className="w-full flex">
       <Grid>
-        {data.map((parcel: any) => {
-          const displayAddress = `${parcel.site_street_number} ${parcel.prefix_directional || ""} ${parcel.site_street_name} ${parcel.site_zip_code || ""}`;
+        {data.map((appeal: any) => {
+          // const displayAddress = `${parcel.site_street_number} ${parcel.prefix_directional || ""} ${parcel.site_street_name} ${parcel.site_zip_code || ""}`;
           return (
-            <Card key={parcel.parcel_number}>
-              <div className="mt-2 flex flex-col items-center border-b border-foreground pb-3">
-                <Address address={displayAddress} />
-              </div>
-              <div className="mt-2 flex items-center justify-between">
-                <span>{parcel.occupancy}</span>
-                <ParcelNumber parcelNumber={parcel.parcel_number} />
-                <span>{parcel.neighborhood}</span>
-              </div>
-              <p className="text-sm">{parcel.prop_class}</p>
-              <div className="mt-6">
-                <AppraisedValueModal parcel={parcel} address={displayAddress} />
-              </div>
-
-              <div className="mt-2">
-                <StructureModal
-                  structures={parcel.current_structures}
-                  address={displayAddress}
-                  parcelNumber={parcel.parcel_number}
-                />
-              </div>
-              <div className="mt-2">
-                <SaleModal
-                  sales={parcel.parcel_review_sales}
-                  address={displayAddress}
-                  parcelNumber={parcel.parcel_number}
-                />
-              </div>
-              <div className="mt-2">
-                <BuildingPermitModal
-                  permits={parcel.bps}
-                  address={displayAddress}
-                  parcelNumber={parcel.parcel_number}
-                />
-              </div>
-              <div className="mt-2">
-                <AppealModal
-                  appeals={parcel.parcel_review_appeals}
-                  address={displayAddress}
-                  parcelNumber={parcel.parcel_number}
-                />
-              </div>
-            </Card>
+            <div key={appeal.parcel_number + appeal.appeal_number}>
+              <AppealListItem appeal={appeal} />
+            </div>
           );
         })}
       </Grid>
+      {/* <AppealsCalendar appeals={data} /> */}
     </div>
   );
 }
@@ -153,18 +130,20 @@ export async function Count({
   type = "Any",
   complaintType = "Any",
   year = "Any",
+  hearing = "false",
 }: {
   appraiser: string;
   status: string;
   type: string;
   complaintType: string;
   year: string;
+  hearing: string;
 }) {
   const supabase = await createClient();
 
   let query = supabase
-    .from("parcel_reviews_2025")
-    .select("*, parcel_review_appeals!inner(*)", {
+    .from("appeals")
+    .select("*, parcel_year(parcel_number, appraised_total, neighborhood))", {
       count: "exact",
       head: true,
     });
@@ -175,7 +154,8 @@ export async function Count({
     status,
     type,
     complaintType,
-    year
+    year,
+    hearing
   );
   const { error, count } = await query.limit(1); // I was getting timeout error without setting limit
 
