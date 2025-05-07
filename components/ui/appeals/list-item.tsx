@@ -1,6 +1,8 @@
 import React from "react";
 import CopyToClipboard from "@/components/copy-to-clipboard";
 import FormattedDate from "@/components/ui/formatted-date";
+import Address from "../address";
+import ParcelNumber from "../parcel-number";
 import { ArrowRight } from "lucide-react";
 
 interface AppealListItemProps {
@@ -45,10 +47,23 @@ const AppealListItem: React.FC<AppealListItemProps> = ({ appeal }) => (
     <div className="grid grid-cols-2 gap-4 mb-3 text-sm text-gray-600 dark:text-gray-400">
       <div className="flex flex-col items-center space-x-1">
         <span className="font-medium">Parcel:</span>
-        <span className="font-mono">{appeal.parcel_year.parcel_number}</span>
-        <CopyToClipboard
-          text={appeal.parcel_year.parcel_number.toString().padStart(10, "0")}
-        />
+        <span className="font-mono">
+          <ParcelNumber parcelNumber={appeal.parcel_year.parcel_number} />
+        </span>
+      </div>
+      <div className="flex flex-col items-center space-x-1">
+        <span className="font-medium">Address:</span>
+        <span className="font-mono">
+          <Address
+            address={`
+              
+              ${appeal.parcel_year.site_street_number || ""}
+              ${appeal.parcel_year.prefix_directional || ""}
+              ${appeal.parcel_year.site_street_name || ""}
+              ${appeal.parcel_year.site_zip_code || ""}
+              `}
+          />
+        </span>
       </div>
       <div className="flex flex-col items-center space-x-1">
         <span className="font-medium">Appraised:</span>

@@ -42,7 +42,8 @@ const applyFiltersToQuery = (
   }
   if (hearing === "true") {
     query = query.not("hearing_ts", "is", null);
-  } else if (hearing === "false") {
+  }
+  if (hearing === "false") {
     query = query.is("hearing_ts", null);
   }
 
@@ -56,7 +57,7 @@ export default async function Appeals({
   type = "Any",
   complaintType = "Any",
   year = "Any",
-  hearing = "false",
+  hearing = "Any",
 }: {
   page: number;
   appraiser: string;
@@ -79,9 +80,17 @@ export default async function Appeals({
   //     "*, parcel_review_appeals!inner(*), current_structures(*), bps(*), parcel_review_sales(*)"
   //   );
 
-  let query = supabase
-    .from("appeals")
-    .select("*, parcel_year(parcel_number, appraised_total, neighborhood))");
+  let query = supabase.from("appeals").select(`*, 
+        parcel_year(
+          parcel_number, 
+          appraised_total, 
+          neighborhood,
+          site_street_number,
+          site_street_name,
+          prefix_directional,
+          site_zip_code
+        )
+      )`);
 
   query = applyFiltersToQuery(
     query,

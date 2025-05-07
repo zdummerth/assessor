@@ -179,7 +179,7 @@ export default async function Page(props: {
                       type={searchParams?.type || "Any"}
                       complaintType={searchParams?.complaintType || "Any"}
                       year={searchParams?.year || "Any"}
-                      hearing={searchParams?.hearing || "false"}
+                      hearing={searchParams?.hearing || "Any"}
                     />
                   </span>
                 </Suspense>
@@ -196,7 +196,7 @@ export default async function Page(props: {
             type={searchParams?.type || "Any"}
             complaintType={searchParams?.complaintType || "Any"}
             year={searchParams?.year || "Any"}
-            hearing={searchParams?.hearing || "false"}
+            hearing={searchParams?.hearing || "Any"}
           />
         </Suspense>
       </div>
