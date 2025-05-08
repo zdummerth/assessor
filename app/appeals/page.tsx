@@ -25,10 +25,24 @@ export default async function Page(props: {
   const page = searchParams?.page ? parseInt(searchParams.page) : 1;
   const supabase = await createClient();
 
-  const complaint_types = supabase.from("appeal_complaint_types").select("*");
-  const appraisers = supabase.from("appeal_re_appraisers").select("*");
-  const statuses = supabase.from("appeal_statuses").select("*");
-  const types = supabase.from("appeal_types").select("*");
+  const complaint_types = supabase
+    .from("appeal_complaint_types")
+    .select("*")
+    .order("complaint_type", { ascending: true });
+  const appraisers = supabase
+    .from("appeal_re_appraisers")
+    .select("*")
+    .order("name", {
+      ascending: true,
+    });
+  const statuses = supabase
+    .from("appeal_statuses")
+    .select("*")
+    .order("status", { ascending: true });
+  const types = supabase
+    .from("appeal_types")
+    .select("*")
+    .order("name", { ascending: true });
 
   const [complaint_types_data, appraisers_data, statuses_data, types_data] =
     await Promise.all([complaint_types, appraisers, statuses, types]);
@@ -75,7 +89,7 @@ export default async function Page(props: {
                   { value: "2024", label: "2024" },
                   { value: "2025", label: "2025" },
                 ]}
-                defaultValue={searchParams?.year || "Any"}
+                defaultValue={searchParams?.year || "2025"}
                 urlParam="year"
               />
             </div>
@@ -149,43 +163,6 @@ export default async function Page(props: {
               />
             </div>
           </div>
-          <div className="flex gap-2 items-center justify-between">
-            <div className="text-sm flex items-center gap-2">
-              <>
-                <ArrowButton
-                  pageNumber={page - 1}
-                  direction="left"
-                  isDisabled={page <= 1}
-                />
-                <ArrowButton
-                  pageNumber={page + 1}
-                  direction="right"
-                  isDisabled={false}
-                />
-                <span>
-                  {page > 1 ? (page - 1) * limit + 1 : 1}-{page * limit}
-                </span>
-                <span>of</span>
-                <Suspense
-                  fallback={
-                    <span className="bg-gray-500 rounded h-4 w-12 animate-pulse"></span>
-                  }
-                  key={suspenseKey}
-                >
-                  <span>
-                    <Count
-                      appraiser={searchParams?.appraiser || "Any"}
-                      status={searchParams?.status || "Any"}
-                      type={searchParams?.type || "Any"}
-                      complaintType={searchParams?.complaintType || "Any"}
-                      year={searchParams?.year || "Any"}
-                      hearing={searchParams?.hearing || "Any"}
-                    />
-                  </span>
-                </Suspense>
-              </>
-            </div>
-          </div>
         </div>
 
         <Suspense fallback={<BinocularsSkeleton />} key={suspenseKey}>
@@ -195,7 +172,7 @@ export default async function Page(props: {
             status={searchParams?.status || "Any"}
             type={searchParams?.type || "Any"}
             complaintType={searchParams?.complaintType || "Any"}
-            year={searchParams?.year || "Any"}
+            year={searchParams?.year || "2025"}
             hearing={searchParams?.hearing || "Any"}
           />
         </Suspense>

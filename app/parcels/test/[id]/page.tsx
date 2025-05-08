@@ -1,6 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
 import type { Metadata, ResolvingMetadata } from "next";
 import CopyToClipboard from "@/components/copy-to-clipboard";
+import Comparables from "@/components/server/comparables";
+import { Suspense } from "react";
+import FormattedDate from "@/components/ui/formatted-date";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -8,79 +11,11 @@ type Props = {
 };
 
 export async function generateMetadata(
-  { params, searchParams }: Props,
+  { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  // read route params
   const id = (await params).id;
-
-  return {
-    title: id,
-  };
-}
-
-// Helper function: Compares two parcel records and returns only the changed fields.
-function getDifferences(oldParcel: any, newParcel: any) {
-  const differences: Record<string, [any, any]> = {};
-  // Ignore these keys when comparing
-  const ignoreKeys = [
-    "id",
-    "year",
-    "parcel_number",
-    "owner_address_1",
-    "owner_city",
-    "owner_state",
-    "owner_zip",
-    "appraised_res_building",
-    "assessed_res_building",
-    "working_improve_value",
-    "working_total_value",
-  ];
-  // Compare the union of keys from both records
-  const keys = new Set([...Object.keys(oldParcel), ...Object.keys(newParcel)]);
-  keys.forEach((key) => {
-    if (ignoreKeys.includes(key)) return;
-    if (oldParcel[key] !== newParcel[key]) {
-      differences[key] = [oldParcel[key], newParcel[key]];
-    }
-  });
-  return differences;
-}
-
-function ParcelTimeline({ parcels }: { parcels: any[] }) {
-  const sortedParcels = [...parcels].sort((a, b) => a.year - b.year);
-
-  const timelineItems = sortedParcels.map((parcel, index) => {
-    if (index === 0) {
-      // No previous record for the first year
-      return null;
-    }
-    const previousParcel = sortedParcels[index - 1];
-    const changes = getDifferences(previousParcel, parcel);
-    if (Object.keys(changes).length === 0) {
-      // No changes to display for this year
-      return null;
-    }
-    return (
-      <div
-        key={parcel.year}
-        className="timeline-item mb-4 p-2 border rounded shadow-sm"
-      >
-        <h3 className="font-semibold">{parcel.year}</h3>
-        <ul className="list-disc list-inside">
-          {Object.entries(changes).map(([field, [oldValue, newValue]]) => (
-            <li key={field}>
-              <span className="font-bold">{field}</span>: {oldValue}{" "}
-              <span className="mx-2">→</span> {newValue}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  });
-
-  // Only render timeline items that have changes
-  return <div>{timelineItems.filter((item) => item !== null)}</div>;
+  return { title: id };
 }
 
 export default async function Page({
@@ -89,205 +24,146 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
-
   const supabase = await createClient();
 
-  try {
-    const { data, error } = await supabase
-      //@ts-ignore
-      .from("parcel_year")
-      .select("*, appraisers(*)")
-      .eq("parcel_number", id)
-      .order("year", { ascending: false });
+  const { data, error } = await supabase
+    // @ts-ignore
+    .from("parcel_year")
+    .select("*, appraisers(*)")
+    .eq("parcel_number", id)
+    .order("year", { ascending: false });
 
-    if (error) {
-      console.error(error);
-      throw new Error("Failed to fetch data");
-    }
+  if (error) {
+    console.error(error);
+    return <div className="p-4">Failed to fetch data: {error.message}</div>;
+  }
+  if (!data || data.length === 0) {
+    return <div className="p-4">Parcel not found</div>;
+  }
 
-    if (Array.isArray(data) && data.length === 0) {
-      return <div>Parcel not found</div>;
-    }
+  // grab the most recent record for header
+  const mostRecent = data[0];
 
-    const maxYear = data.reduce(
-      (max: number, parcel: any) => (parcel.year > max ? parcel.year : max),
-      0
-    );
-
-    const mostRecentParcel = data.find(
-      (parcel: any) => parcel.year === maxYear
-    );
-
-    // const { data: address, error: addressError } = await supabase
-    //   .from("addresses")
-    //   .select("address, address_line1, postcode, formatted, lat, lon, bbox")
-    //   .eq("address", mostRecentParcel?.site_address_1 || "")
-    //   .limit(1)
-    //   .single();
-
-    // const displayAddress = address
-    //   ? `${address.address_line1} ${address.postcode}`
-    //   : `${mostRecentParcel.site_address_1} ${mostRecentParcel.zip || ""}`;
-
-    console.log(mostRecentParcel);
-    return (
-      <div>
-        <div className="grid w-full gap-4 grid-cols-1 lg:grid-cols-3 lg:h-[500px]">
-          <div className="rounded-lg shadow-lg p-2 md:p-4">
-            {/* ID Section */}
-            <div className="flex items-center space-x-3 border-b pb-3">
-              <h1 className="text-2xl font-semibold">{id}</h1>
-              <CopyToClipboard text={id} />
-            </div>
-
-            {/* Address Section */}
-            <div className="mt-2 flex items-center justify-between border-b pb-3">
-              <div className="flex items-center space-x-2">
-                {/* <p className="">{displayAddress}</p> */}
-                {/* <CopyToClipboard text={displayAddress} /> */}
-              </div>
-              {/* <a
-                href={`https://www.google.com/maps/search/?api=1&query=${displayAddress}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <MapPin
-                  size={18}
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                />
-              </a> */}
-            </div>
-
-            {/* Owner Info */}
-            <div className="mt-2 border-b pb-3">
-              {/* <p className="font-medium">{mostRecentParcel.owner_name}</p> */}
-              {/* <p className="">{mostRecentParcel.owner_address_1}</p> */}
-            </div>
-
-            {/* Neighborhood */}
-            <div className="mt-2 border-b pb-3">
-              <p className="">
-                <span className="font-semibold">Neighborhood:</span>{" "}
-                {mostRecentParcel?.neighborhood}
-              </p>
-            </div>
-
-            {/* Occupancy */}
-            <div className="mt-2 border-b pb-3 flex items-center space-x-2">
-              <span className="font-semibold">
-                {mostRecentParcel?.land_use}
-              </span>
-              <span className="">-</span>
-              <span className="">{mostRecentParcel?.occupancy}</span>
-            </div>
-
-            {/* Appraiser */}
-            <div className="mt-2 border-b pb-3">
-              <p className="">
-                <span className="font-semibold">Appraiser:</span>{" "}
-                {/* {mostRecentParcel.appraiser} */}
-                <div className="border-t border-gray-100 pt-3 space-y-1">
-                  <p className="font-medium">
-                    {/* @ts-ignore */}
-                    {mostRecentParcel?.appraisers.name}
-                  </p>
-                  {/* @ts-ignore */}
-                  <p>{mostRecentParcel?.appraisers.email}</p>
-                  {/* @ts-ignore */}
-                  <p>{mostRecentParcel?.appraisers.phone}</p>
-                </div>
-              </p>
-            </div>
-
-            <div className="mt-2 border-b pb-3">
-              <p className="">
-                <span className="font-semibold">Supervisor:</span>{" "}
-                {/* {mostRecentParcel.appraiser} */}
-                <div className="border-t border-gray-100 pt-3 space-y-1">
-                  <p className="font-medium">
-                    {/* @ts-ignore */}
-                    {mostRecentParcel?.appraisers.supervisor}
-                  </p>
-                </div>
-              </p>
-            </div>
-
-            {/* Appraised Total */}
-            <div className="mt-2 border-b pb-3">
-              <p className="">
-                <span className="font-semibold">Current Appraised Total:</span>{" "}
-                ${mostRecentParcel?.appraised_total?.toLocaleString()}
-              </p>
-            </div>
-
-            {/* Property Class */}
-            <div className="mt-2">
-              <p className="font-medium">{mostRecentParcel?.prop_class}</p>
-            </div>
-          </div>
-
-          <div className="border rounded-lg h-[400px] shadow overflow-hidden">
-            {/* <AppraisedTotalLineChart data={data} /> */}
-          </div>
-
-          {/* <div className="rounded-lg shadow flex flex-col items-center overflow-hidden">
-            {address?.lat && address?.lon && (
-              <BaseMap lat={address.lat} lon={address.lon} />
-            )}
-          </div> */}
-        </div>
-
-        {/* Existing Parcel Cards */}
-        <div className="flex flex-col space-y-4">
-          {/* {data.map((parcel: any) => (
-            <ParcelCard
-              key={`${parcel.parcel_number}-${parcel.year}`}
-              data={parcel}
-            />
-          ))} */}
-        </div>
-
-        {/* Timeline Section */}
+  return (
+    <div className="p-6 space-y-8">
+      <h1 className="text-3xl font-bold mb-4">{id}</h1>
+      {/* ─── Header Section ─── */}
+      <div className="p-6 rounded shadow shadow-foreground grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {/* Appraiser */}
         <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-            Timeline
-          </h2>
-          {/* <ParcelTimeline parcels={data} /> */}
+          <h2 className="text-lg font-semibold mb-2">Appraiser</h2>
+          {/* @ts-ignore */}
+          <p className="text-sm">{mostRecent.appraisers?.name ?? "—"}</p>
+          {/* @ts-ignore */}
+          {mostRecent.appraisers?.email && (
+            // @ts-ignore
+            <p className="text-sm">{mostRecent.appraisers.email}</p>
+          )}
+          {/* @ts-ignore */}
+          {mostRecent.appraisers?.phone && (
+            // @ts-ignore
+            <p className="text-sm">{mostRecent.appraisers.phone}</p>
+          )}
         </div>
 
-        {/* Sales Section */}
+        {/* Owner */}
         <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-            Sales
-          </h2>
-          {/* <Suspense fallback={<div>loading sales...</div>}>
-            <ParcelSales parcel_number={id} />
-          </Suspense> */}
+          <h2 className="text-lg font-semibold mb-2">Owner</h2>
+          {/* @ts-ignore */}
+          <p className="text-sm">{mostRecent.owner_name}</p>
+          {/* @ts-ignore */}
+          <p className="text-sm">{mostRecent.owner_address_1}</p>
+          {/* @ts-ignore */}
+          {mostRecent.owner_address_2 && (
+            // @ts-ignore
+            <p className="text-sm">{mostRecent.owner_address_2}</p>
+          )}
+          <p className="text-sm">
+            {/* @ts-ignore */}
+            {mostRecent.owner_city}, {mostRecent.owner_state} {/* @ts-ignore */}
+            {mostRecent.owner_zip}
+          </p>
         </div>
 
-        {/* Appeals Section */}
+        {/* Site Address */}
         <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-            Appeals
-          </h2>
-          {/* <Suspense fallback={<div>loading appeals...</div>}>
-            <ParcelAppeals parcel_number={id} />
-          </Suspense> */}
+          <h2 className="text-lg font-semibold mb-2">Site Address</h2>
+          <p className="text-sm">
+            {/* @ts-ignore */}
+            {mostRecent.site_street_number} {mostRecent.prefix_directional}{" "}
+            {/* @ts-ignore */}
+            {mostRecent.site_street_name}
+          </p>
+          {/* @ts-ignore */}
+          <p className="text-sm">{mostRecent.site_zip_code}</p>
         </div>
-
-        {/* Permits Section */}
-        <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4 border-t pt-2">
-            Permits
-          </h2>
-          {/* <Suspense fallback={<div>loading permits...</div>}>
-            <ParcelPermits parcel_number={id} />
-          </Suspense> */}
+        {/* Neighborhood */}
+        <div className="">
+          <h2 className="text-lg font-semibold mb-2">Detail</h2>
+          <p className="text-sm">{mostRecent.neighborhood}</p>
+          <p className="text-sm">{mostRecent.land_use}</p>
+          <p className="text-sm">{mostRecent.prop_class}</p>
         </div>
       </div>
-    );
-  } catch (error) {
-    console.error(error);
-    return <div>Failed to fetch data</div>;
-  }
+
+      {/* ─── Parcel Year Table ─── */}
+      <div className="bg-white p-6 rounded shadow overflow-x-auto">
+        <h2 className="text-xl font-semibold mb-4">Parcel Year History</h2>
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-3 py-2 text-left font-medium">Year</th>
+              <th className="px-3 py-2 text-left font-medium">Tax Status</th>
+              <th className="px-3 py-2 text-left font-medium">Owner</th>
+              <th className="px-3 py-2 text-left font-medium">Land Use</th>
+              <th className="px-3 py-2 text-left font-medium">
+                Property Class
+              </th>
+              <th className="px-3 py-2 text-left font-medium">
+                Appraised Total
+              </th>
+              <th className="px-3 py-2 text-left font-medium">Updated</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((p) => (
+              <tr
+                key={`${p.parcel_number}-${p.year}`}
+                className="hover:bg-gray-50"
+              >
+                <td className="px-3 py-2 whitespace-nowrap">{p.year}</td>
+                <td className="px-3 py-2 whitespace-nowrap">{p.tax_status}</td>
+                {/* @ts-ignore */}
+                <td className="px-3 py-2 whitespace-nowrap">{p.owner_name}</td>
+                <td className="px-3 py-2 whitespace-nowrap">{p.land_use}</td>
+                <td className="px-3 py-2 whitespace-nowrap">{p.prop_class}</td>
+                <td className="px-3 py-2 whitespace-nowrap">
+                  ${p.appraised_total?.toLocaleString() ?? "—"}
+                </td>
+                <td className="px-3 py-2 whitespace-nowrap">
+                  {p.report_timestamp ? (
+                    <FormattedDate date={p.report_timestamp} />
+                  ) : (
+                    "—"
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ─── Comparables ─── */}
+      <div>
+        <h2 className="text-2xl font-semibold border-t pt-4 mb-2">
+          Comparables
+        </h2>
+        <Suspense fallback={<div>Loading comparables…</div>}>
+          <Comparables parcel={id} page={1} />
+        </Suspense>
+      </div>
+
+      {/* Sales, Appeals, Permits sections would follow similarly */}
+    </div>
+  );
 }

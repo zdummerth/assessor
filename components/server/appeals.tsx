@@ -8,7 +8,11 @@ import ParcelNumber from "@/components/ui/parcel-number";
 import AppealModal from "@/components/ui/appeals/modal";
 import SaleModal from "@/components/ui/sales/modal";
 import AppealListItem from "../ui/appeals/list-item";
-import AppealsCalendar from "../ui/appeals/appeals-calendar";
+import { ArrowButton } from "@/components/ui/pagination-client";
+import AppealTable from "../ui/appeals/table";
+import AppealsCalendar from "../ui/appeals/calendar";
+
+// import AppealsCalendar from "../ui/appeals/appeals-calendar";
 
 // import MultipolygonMapWrapper from "../ui/maps/wrapper";
 
@@ -68,29 +72,30 @@ export default async function Appeals({
   hearing: string;
 }) {
   // const limit = ITEMS_PER_PAGE;
-  const limit = 9;
+  const limit = 10;
   const offset = (page - 1) * limit;
   const endingPage = offset + limit - 1;
 
   const supabase = await createClient();
 
-  // let query = supabase
-  //   .from("parcel_reviews_2025")
-  //   .select(
-  //     "*, parcel_review_appeals!inner(*), current_structures(*), bps(*), parcel_review_sales(*)"
-  //   );
-
-  let query = supabase.from("appeals").select(`*, 
+  let query = supabase.from("appeals").select(
+    `*, 
         parcel_year(
           parcel_number, 
           appraised_total, 
+          land_use,
           neighborhood,
           site_street_number,
           site_street_name,
           prefix_directional,
           site_zip_code
         )
-      )`);
+      )`,
+    {
+      count: "exact",
+      head: false,
+    }
+  );
 
   query = applyFiltersToQuery(
     query,
@@ -101,7 +106,7 @@ export default async function Appeals({
     year,
     hearing
   );
-  const { data, error } = await query
+  const { data, error, count } = await query
     // .order("parcel_number", { ascending: true })
     .range(offset, endingPage);
 
@@ -109,16 +114,51 @@ export default async function Appeals({
     return (
       <div className="w-full flex flex-col items-center justify-center mt-16">
         <p className="text-center">Error fetching parcels</p>
-        <p>{error.message}</p>
+        <p>{error?.message}</p>
       </div>
     );
   }
 
-  console.log(data[0]);
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center mt-16">
+        <p className="text-lg text-gray-500">No appeals found</p>
+      </div>
+    );
+  }
+
+  // check if count is null or undefined
+  if (count === null || count === undefined) {
+    console.error("Count is null or undefined");
+    return <div>Failed to fetch count</div>;
+  }
+
+  console.log(count);
+
+  const isLastPage = count <= limit * page;
+  const currentRange = `${offset + 1}-${isLastPage ? count : offset + limit}`;
+  const totalPages = Math.ceil(count / limit);
 
   return (
-    <div className="w-full flex">
-      <Grid>
+    <div className="w-full">
+      <div className="flex items-center gap-4 mb-4">
+        <ArrowButton
+          pageNumber={page - 1}
+          direction="left"
+          isDisabled={page <= 1}
+        />
+        <ArrowButton
+          pageNumber={page + 1}
+          direction="right"
+          isDisabled={isLastPage}
+        />
+        <span className="flex items-center gap-2 text-sm">
+          <span>{currentRange}</span>
+          <span className="text-gray-400">of</span>
+          <span className="">{count}</span>
+        </span>
+      </div>
+      {/* <Grid>
         {data.map((appeal: any) => {
           // const displayAddress = `${parcel.site_street_number} ${parcel.prefix_directional || ""} ${parcel.site_street_name} ${parcel.site_zip_code || ""}`;
           return (
@@ -127,8 +167,11 @@ export default async function Appeals({
             </div>
           );
         })}
-      </Grid>
+      </Grid> */}
       {/* <AppealsCalendar appeals={data} /> */}
+      <div className="">
+        <AppealTable appeals={data} />
+      </div>
     </div>
   );
 }

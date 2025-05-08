@@ -8,7 +8,7 @@ export default function ParcelNumber({
 }) {
   return (
     <div className="flex gap-2">
-      <Link href={`/parcels/${parcelNumber}`} target="_blank">
+      <Link href={`/parcels/test/${parcelNumber}`} target="_blank">
         <span>{parcelNumber}</span>
       </Link>
       <CopyToClipboard text={parcelNumber} />
