@@ -1,8 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
-import FormattedDate from "../ui/formatted-date";
-import Address from "../ui/address";
 import ParcelNumber from "../ui/parcel-number";
-export default async function Comparables({
+
+export default async function StructuresTable({
   page = 1,
   parcel,
 }: {
@@ -16,15 +15,15 @@ export default async function Comparables({
   const supabase = await createClient();
   const { data, error } = await supabase
     // @ts-ignore
-    .from("comparables")
+    .from("structures")
     .select("*")
-    .eq("subject_parcel", parcel)
+    .eq("parcel_number", parcel)
     .range(offset, endingPage);
 
   if (error) {
     return (
       <div className="w-full flex flex-col items-center justify-center mt-16">
-        <p className="text-center">Error fetching comparables</p>
+        <p className="text-center">Error fetching structures</p>
         <p>{error.message}</p>
       </div>
     );
@@ -39,32 +38,31 @@ export default async function Comparables({
               Parcel #
             </th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Address
+              CDU
+            </th>
+            <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
+              Year
+            </th>
+            <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
+              Year Built
             </th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Neighborhood
+              Grade
             </th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Condition
+              Story
+            </th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+              Cost Group
+            </th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+              EA
             </th>
             <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
               GLA
             </th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Construction
-            </th>
-
             <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
-              Sale Price
-            </th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Date of Sale
-            </th>
-            <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
-              Gower Dist
-            </th>
-            <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
-              Touched
+              Total Area
             </th>
           </tr>
         </thead>
@@ -75,32 +73,29 @@ export default async function Comparables({
                 <ParcelNumber parcelNumber={item.parcel_number} />
               </td>
               <td className="px-4 py-2 whitespace-nowrap text-sm">
-                <Address address={item.address} />
+                {item.cdu}
+              </td>
+              <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
+                {item.year}
+              </td>
+              <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
+                {item.year_built}
               </td>
               <td className="px-4 py-2 whitespace-nowrap text-sm">
-                {item.neighborhood}
+                {item.grade}
               </td>
               <td className="px-4 py-2 whitespace-nowrap text-sm">
-                {item.condition}
+                {item.story}
               </td>
+              <td className="px-4 py-2 whitespace-nowrap text-sm">
+                {item.cost_group}
+              </td>
+              <td className="px-4 py-2 whitespace-nowrap text-sm">{item.ea}</td>
               <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
                 {item.gla}
               </td>
-              <td className="px-4 py-2 whitespace-nowrap text-sm">
-                {item.construction_type}
-              </td>
-
               <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
-                ${item.net_selling_price?.toLocaleString()}
-              </td>
-              <td className="px-4 py-2 whitespace-nowrap text-sm">
-                <FormattedDate date={item.date_of_sale} />
-              </td>
-              <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
-                {item.gower_dist?.toFixed(2)}
-              </td>
-              <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
-                {item.touched}
+                {item.total_area}
               </td>
             </tr>
           ))}

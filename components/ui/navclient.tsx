@@ -6,9 +6,9 @@ const NavClient = () => {
   const pathname = usePathname();
   const links = [
     { href: "/appeals", label: "Appeals" },
-    { href: "/sales", label: "Sales" },
-    { href: "/appraisers", label: "Appraisers" },
-    { href: "/building-permits", label: "Permits" },
+    // { href: "/sales", label: "Sales" },
+    // { href: "/appraisers", label: "Appraisers" },
+    // { href: "/building-permits", label: "Permits" },
     { href: "/wards/summary/test", label: "Wards" },
     { href: "/cdas/summary", label: "CDAs" },
   ];

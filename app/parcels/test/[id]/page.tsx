@@ -4,6 +4,8 @@ import CopyToClipboard from "@/components/copy-to-clipboard";
 import Comparables from "@/components/server/comparables";
 import { Suspense } from "react";
 import FormattedDate from "@/components/ui/formatted-date";
+import ParcelSalesTable from "@/components/server/parcel-sales-table";
+import StructuresTable from "@/components/server/structures-table";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -151,6 +153,24 @@ export default async function Page({
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* ─── Structures ─── */}
+      <div>
+        <h2 className="text-2xl font-semibold border-t pt-4 mb-2">
+          Structures
+        </h2>
+        <Suspense fallback={<div>Loading structures…</div>}>
+          <StructuresTable parcel={id} page={1} />
+        </Suspense>
+      </div>
+
+      {/* ─── Sales ─── */}
+      <div>
+        <h2 className="text-2xl font-semibold border-t pt-4 mb-2">Sales</h2>
+        <Suspense fallback={<div>Loading sales…</div>}>
+          <ParcelSalesTable parcel={id} page={1} />
+        </Suspense>
       </div>
 
       {/* ─── Comparables ─── */}
