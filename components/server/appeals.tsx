@@ -1,13 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { Grid, Card } from "@/components/ui/grid";
-import StructureModal from "@/components/ui/structures/modal";
-import BuildingPermitModal from "@/components/ui/building-permits/modal";
-import AppraisedValueModal from "@/components/ui/appraised-value-modal";
-import Address from "@/components/ui/address";
-import ParcelNumber from "@/components/ui/parcel-number";
-import AppealModal from "@/components/ui/appeals/modal";
-import SaleModal from "@/components/ui/sales/modal";
-import AppealListItem from "../ui/appeals/list-item";
 import { ArrowButton } from "@/components/ui/pagination-client";
 import AppealTable from "../ui/appeals/table";
 import AppealsCalendar from "../ui/appeals/calendar";

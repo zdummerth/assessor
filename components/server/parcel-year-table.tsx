@@ -40,8 +40,6 @@ export default async function ParcelYearTable({
             <th className="px-3 py-2 text-left font-medium">Owner</th>
             <th className="px-3 py-2 text-left font-medium">Land Use</th>
             <th className="px-3 py-2 text-left font-medium">Property Class</th>
-
-            <th className="px-3 py-2 text-left font-medium">Updated</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -59,14 +57,6 @@ export default async function ParcelYearTable({
               <td className="px-3 py-2 whitespace-nowrap">{p.owner_name}</td>
               <td className="px-3 py-2 whitespace-nowrap">{p.land_use}</td>
               <td className="px-3 py-2 whitespace-nowrap">{p.prop_class}</td>
-
-              <td className="px-3 py-2 whitespace-nowrap">
-                {p.report_timestamp ? (
-                  <FormattedDate date={p.report_timestamp} />
-                ) : (
-                  "—"
-                )}
-              </td>
             </tr>
           ))}
         </tbody>
