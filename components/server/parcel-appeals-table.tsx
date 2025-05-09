@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
+import FormattedDate from "../ui/formatted-date";
 
-export default async function StructuresTable({
+export default async function ParcelAppealsTable({
   page = 1,
   parcel,
 }: {
@@ -14,7 +15,7 @@ export default async function StructuresTable({
   const supabase = await createClient();
   const { data, error } = await supabase
     // @ts-ignore
-    .from("structures")
+    .from("appeals")
     .select("*")
     .eq("parcel_number", parcel)
     .range(offset, endingPage);
@@ -22,8 +23,16 @@ export default async function StructuresTable({
   if (error) {
     return (
       <div className="w-full flex flex-col items-center justify-center mt-16">
-        <p className="text-center">Error fetching structures</p>
+        <p className="text-center">Error fetching appeals</p>
         <p>{error.message}</p>
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center mt-16">
+        <p className="text-center">No appeals found</p>
       </div>
     );
   }
@@ -37,63 +46,84 @@ export default async function StructuresTable({
               Year
             </th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Condition
+              Appeal
+            </th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+              Type
+            </th>
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+              Status
             </th>
             <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
-              GLA
+              Before Total
             </th>
             <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
-              Total Area
+              After Total
             </th>
-            <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">
-              Year Built
+
+            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+              Complaint Type
             </th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Grade
+              Filed
             </th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Story
+              Hearing
             </th>
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Cost Group
-            </th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-              Eff. Year Built
+              Appraiser
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {data
             // @ts-ignore
-            .sort((a, b) => b.year - a.year)
+            .sort((a, b) =>
+              b.year !== a.year
+                ? // @ts-ignore
+                  b.year - a.year
+                : // @ts-ignore
+                  b.appeal_number - a.appeal_number
+            )
             .map((item: any) => (
-              <tr key={item.id} className="hover:bg-gray-50">
+              <tr
+                key={`${item.parcel_number}-${item.appeal_number}`}
+                className="hover:bg-gray-50"
+              >
                 <td className="px-4 py-2 whitespace-nowrap text-sm">
                   {item.year}
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm">
-                  {item.cdu}
+                  {item.appeal_number}
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                  {item.appeal_type}
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                  {item.status}
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
-                  {item.gla}
+                  ${item.before_total.toLocaleString()}
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
-                  {item.total_area}
+                  ${item.after_total.toLocaleString()}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
-                  {item.year_built}
+
+                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                  {item.complaint_type}
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm">
-                  {item.grade}
+                  <FormattedDate date={item.filed_ts} />
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm">
-                  {item.story}
+                  {item.hearing_ts ? (
+                    <FormattedDate date={item.hearing_ts} showTime />
+                  ) : (
+                    <span className="text-gray-500">N/A</span>
+                  )}
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm">
-                  {item.cost_group}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
-                  {item.ea}
+                  {item.appeal_appraiser}
                 </td>
               </tr>
             ))}

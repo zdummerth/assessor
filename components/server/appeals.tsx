@@ -36,7 +36,11 @@ const applyFiltersToQuery = (
     query = query.eq("status", status);
   }
   if (type !== "Any") {
-    query = query.eq("appeal_type", type);
+    if (type === "none") {
+      query = query.is("appeal_type", null);
+    } else {
+      query = query.eq("appeal_type", type);
+    }
   }
   if (complaintType !== "Any") {
     query = query.eq("complaint_type", complaintType);

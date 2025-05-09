@@ -1,11 +1,12 @@
 import { createClient } from "@/utils/supabase/server";
 import type { Metadata, ResolvingMetadata } from "next";
-import CopyToClipboard from "@/components/copy-to-clipboard";
 import Comparables from "@/components/server/comparables";
 import { Suspense } from "react";
 import FormattedDate from "@/components/ui/formatted-date";
 import ParcelSalesTable from "@/components/server/parcel-sales-table";
 import StructuresTable from "@/components/server/structures-table";
+import ParcelYearTable from "@/components/server/parcel-year-table";
+import ParcelAppealsTable from "@/components/server/parcel-appeals-table";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -33,18 +34,19 @@ export default async function Page({
     .from("parcel_year")
     .select("*, appraisers(*)")
     .eq("parcel_number", id)
-    .order("year", { ascending: false });
+    .eq("year", 2025)
+    .single();
 
   if (error) {
     console.error(error);
     return <div className="p-4">Failed to fetch data: {error.message}</div>;
   }
-  if (!data || data.length === 0) {
+  if (!data) {
     return <div className="p-4">Parcel not found</div>;
   }
 
   // grab the most recent record for header
-  const mostRecent = data[0];
+  const mostRecent = data;
 
   return (
     <div className="p-6 space-y-8">
@@ -108,51 +110,12 @@ export default async function Page({
         </div>
       </div>
 
-      {/* ─── Parcel Year Table ─── */}
-      <div className="bg-white p-6 rounded shadow overflow-x-auto">
-        <h2 className="text-xl font-semibold mb-4">Parcel Year History</h2>
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-3 py-2 text-left font-medium">Year</th>
-              <th className="px-3 py-2 text-left font-medium">Tax Status</th>
-              <th className="px-3 py-2 text-left font-medium">Owner</th>
-              <th className="px-3 py-2 text-left font-medium">Land Use</th>
-              <th className="px-3 py-2 text-left font-medium">
-                Property Class
-              </th>
-              <th className="px-3 py-2 text-left font-medium">
-                Appraised Total
-              </th>
-              <th className="px-3 py-2 text-left font-medium">Updated</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((p) => (
-              <tr
-                key={`${p.parcel_number}-${p.year}`}
-                className="hover:bg-gray-50"
-              >
-                <td className="px-3 py-2 whitespace-nowrap">{p.year}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{p.tax_status}</td>
-                {/* @ts-ignore */}
-                <td className="px-3 py-2 whitespace-nowrap">{p.owner_name}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{p.land_use}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{p.prop_class}</td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  ${p.appraised_total?.toLocaleString() ?? "—"}
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  {p.report_timestamp ? (
-                    <FormattedDate date={p.report_timestamp} />
-                  ) : (
-                    "—"
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* ─── Parcel ─── */}
+      <div>
+        <h2 className="text-2xl font-semibold border-t pt-4 mb-2">Parcel</h2>
+        <Suspense fallback={<div>Loading parcel history…</div>}>
+          <ParcelYearTable parcel={id} page={1} />
+        </Suspense>
       </div>
 
       {/* ─── Structures ─── */}
@@ -170,6 +133,14 @@ export default async function Page({
         <h2 className="text-2xl font-semibold border-t pt-4 mb-2">Sales</h2>
         <Suspense fallback={<div>Loading sales…</div>}>
           <ParcelSalesTable parcel={id} page={1} />
+        </Suspense>
+      </div>
+
+      {/* ─── Appeals ─── */}
+      <div>
+        <h2 className="text-2xl font-semibold border-t pt-4 mb-2">Appeals</h2>
+        <Suspense fallback={<div>Loading appeals…</div>}>
+          <ParcelAppealsTable parcel={id} page={1} />
         </Suspense>
       </div>
 

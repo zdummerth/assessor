@@ -74,7 +74,7 @@ export default async function Page(props: {
   return (
     <div className="w-full flex p-4">
       <div className="w-full">
-        <Nav />
+        {/* <Nav /> */}
         <div>
           <div className="flex gap-4 flex-wrap my-4">
             <div className="">
@@ -109,6 +109,21 @@ export default async function Page(props: {
               />
             </div>
             <div className="">
+              <p className="mb-2">Type</p>
+              <SelectFilter
+                values={[
+                  { value: "Any", label: "Any" },
+                  { value: "none", label: "No Type" },
+                  ...types_data.data.map((item: any) => ({
+                    value: item.name,
+                    label: item.name,
+                  })),
+                ]}
+                defaultValue={searchParams?.type || "Any"}
+                urlParam="type"
+              />
+            </div>
+            <div className="">
               <p className="mb-2">Status</p>
               <SelectFilter
                 values={[
@@ -122,20 +137,7 @@ export default async function Page(props: {
                 urlParam="status"
               />
             </div>
-            <div className="">
-              <p className="mb-2">Type</p>
-              <SelectFilter
-                values={[
-                  { value: "Any", label: "Any" },
-                  ...types_data.data.map((item: any) => ({
-                    value: item.name,
-                    label: item.name,
-                  })),
-                ]}
-                defaultValue={searchParams?.type || "Any"}
-                urlParam="type"
-              />
-            </div>
+
             <div>
               <p className="mb-2">Complaint Type</p>
               <SelectFilter
