@@ -6,6 +6,87 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+export const fileUploadAction = async (_prevState: any, formData: FormData) => {
+  const files = formData.getAll("files") as File[];
+  const bucket = formData.get("bucket")?.toString() || null;
+  const path = formData.get("path")?.toString() || null;
+
+  if (files.length === 0) {
+    return { error: "At least one file is required", success: "" };
+  }
+  if (!bucket) {
+    return { error: "Bucket is required", success: "" };
+  }
+  if (!path) {
+    return { error: "Path is required", success: "" };
+  }
+
+  const supabase = await createClient();
+
+  // kick off all uploads in parallel
+  const uploadPromises = files.map((file) => {
+    const filePath = `${path}/${file.name}`;
+    return supabase.storage.from(bucket).upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+  });
+
+  // wait for every upload to finish
+  const results = await Promise.all(uploadPromises);
+
+  // if any upload errored out, bail
+  const firstError = results.find((r) => r.error);
+  if (firstError?.error) {
+    console.error("Upload error:", firstError.error);
+    return {
+      error: `Error uploading ${firstError.error?.message}`,
+      success: "",
+    };
+  }
+
+  // all good — revalidate and return success
+  revalidatePath("/appeals");
+  return {
+    success: `${files.length} file${files.length > 1 ? "s" : ""} uploaded successfully`,
+    error: "",
+  };
+};
+
+export const deleteFileAction = async (prevState: any, formData: FormData) => {
+  const fileName = formData.get("fileName")?.toString() || null;
+  const bucket = formData.get("bucket")?.toString() || null;
+  const path = formData.get("path")?.toString() || null;
+
+  if (!fileName) {
+    return { error: "File name is required", success: "" };
+  }
+  if (!bucket) {
+    return { error: "Bucket is required", success: "" };
+  }
+  if (!path) {
+    return { error: "Path is required", success: "" };
+  }
+
+  const filePath = `${path}/${fileName}`;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .remove([filePath]);
+
+  if (error) {
+    console.error(error.message);
+    return { error: "Error Deleting File", success: "" };
+  }
+
+  revalidatePath("/appeals");
+  return {
+    success: "File deleted successfully",
+    error: "",
+  };
+};
+
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();

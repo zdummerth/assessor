@@ -6,6 +6,7 @@ import ParcelSalesTable from "@/components/server/parcel-sales-table";
 import AppealFiles from "@/components/server/appeal-files";
 import { Suspense } from "react";
 import FormattedDate from "@/components/ui/formatted-date";
+import UploadFile from "@/components/ui/files/upload";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -110,7 +111,12 @@ export default async function AppealDetailsPage({
 
       {/* Appeal Files */}
       <section>
-        <h2 className="text-2xl font-semibold border-t pt-4 mb-2">Files</h2>
+        <div className="mb-4">
+          <UploadFile
+            bucket="appeals"
+            path={appealRow.appeal_number?.toString() || ""}
+          />
+        </div>
         <Suspense fallback={<div>Loading files…</div>}>
           {/*@ts-ignore */}
           <AppealFiles appeal={appealRow.appeal_number} page={1} />

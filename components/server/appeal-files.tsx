@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import FormattedDate from "../ui/formatted-date";
 import Image from "next/image";
+import DeleteFileModal from "../ui/files/modal-delete";
 
 export default async function AppealFiles({
   page = 1,
@@ -57,7 +58,7 @@ export default async function AppealFiles({
     };
   });
 
-  console.log("Files", files);
+  // console.log("Files", files);
 
   const imageFiles = files.filter((file) => {
     return (
@@ -77,6 +78,8 @@ export default async function AppealFiles({
 
   return (
     <div className="w-full overflow-x-auto">
+      <h2 className="text-2xl my-2">Images</h2>
+
       {imageFiles.length > 0 && (
         <div className="flex flex-wrap gap-4 mb-4">
           {imageFiles.map((file) => {
@@ -100,11 +103,13 @@ export default async function AppealFiles({
           })}
         </div>
       )}
+
+      <h2 className="text-2xl my-2">Other Files</h2>
       {otherFiles.map((file) => {
         return (
           <div
             key={file?.name}
-            className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700"
+            className="flex items-center gap-16 p-2 border-b border-gray-200 dark:border-gray-700"
           >
             <a
               // @ts-ignore
@@ -118,6 +123,13 @@ export default async function AppealFiles({
             <span className="text-sm text-gray-500">
               {/* @ts-ignore */}
               <FormattedDate date={file?.updated_at} />
+            </span>
+            <span>
+              <DeleteFileModal
+                bucket="appeals"
+                path={appeal}
+                fileName={file?.name || ""}
+              />
             </span>
           </div>
         );
