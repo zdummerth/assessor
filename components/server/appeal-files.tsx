@@ -84,21 +84,34 @@ export default async function AppealFiles({
         <div className="flex flex-wrap gap-4 mb-4">
           {imageFiles.map((file) => {
             return (
-              <a
+              <div
                 key={file?.name}
-                href={file?.publicURL.publicUrl}
-                target="_blank"
+                className="relative group rounded-lg shadow-md"
               >
-                <Image
-                  // @ts-ignore
-                  src={file?.publicURL.publicUrl}
-                  // @ts-ignore
-                  alt={file?.name}
-                  width={400}
-                  height={400}
-                  className="object-cover rounded-lg shadow-md"
-                />
-              </a>
+                <a
+                  href={file?.publicURL.publicUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full h-full"
+                >
+                  <Image
+                    src={file?.publicURL.publicUrl || ""}
+                    alt={file?.name || ""}
+                    width={360}
+                    height={360}
+                    // className="object-cover transition-transform group-hover:scale-105"
+                  />
+                </a>
+
+                {/* delete icon appears on hover */}
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <DeleteFileModal
+                    bucket="appeals"
+                    path={appeal}
+                    fileName={file?.name || ""}
+                  />
+                </div>
+              </div>
             );
           })}
         </div>
