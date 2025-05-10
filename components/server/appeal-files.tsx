@@ -81,7 +81,11 @@ export default async function AppealFiles({
         <div className="flex flex-wrap gap-4 mb-4">
           {imageFiles.map((file) => {
             return (
-              <div key={file?.name}>
+              <a
+                key={file?.name}
+                href={file?.publicURL.publicUrl}
+                target="_blank"
+              >
                 <Image
                   // @ts-ignore
                   src={file?.publicURL.publicUrl}
@@ -91,7 +95,7 @@ export default async function AppealFiles({
                   height={400}
                   className="object-cover rounded-lg shadow-md"
                 />
-              </div>
+              </a>
             );
           })}
         </div>
