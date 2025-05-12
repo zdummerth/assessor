@@ -79,23 +79,22 @@ export default async function SaleDetailsPage({
               "—"
             )}
           </p>
-          {/* <p className="text-sm">
-            Reported:{" "}
-            {sale.report_timestamp ? (
-              <FormattedDate date={sale.report_timestamp} showTime />
-            ) : (
-              "—"
-            )}
-          </p> */}
-        </div>
-
-        {/* Derived Year */}
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Sale Year</h2>
-          <p className="text-sm">{sale.sale_year ?? "—"}</p>
         </div>
       </div>
 
+      {/* ─── Parcel Details ─── */}
+      <div className="p-6 rounded shadow">
+        <h2 className="text-lg font-semibold mb-2">Parcels</h2>
+        <div>
+          {sale.sales_parcel?.map((parcel: any) => (
+            <div key={parcel.parcel_number} className="mb-4">
+              <h3 className="text-lg font-semibold mb-2">
+                <ParcelNumber parcelNumber={parcel.parcel_number} />
+              </h3>
+            </div>
+          ))}
+        </div>
+      </div>
       {/*Files */}
       <section>
         <div className="mb-4">
