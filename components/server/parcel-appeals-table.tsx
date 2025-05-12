@@ -1,5 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
 import FormattedDate from "../ui/formatted-date";
+import CopyToClipboard from "@/components/copy-to-clipboard";
+import Link from "next/link";
+import AppealNumber from "../ui/appeal-number";
+import App from "next/app";
 
 export default async function ParcelAppealsTable({
   page = 1,
@@ -94,7 +98,7 @@ export default async function ParcelAppealsTable({
                   {item.year}
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm">
-                  {item.appeal_number}
+                  <AppealNumber appealNumber={item.appeal_number} />
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm">
                   {item.appeal_type}

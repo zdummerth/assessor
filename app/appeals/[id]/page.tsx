@@ -7,6 +7,7 @@ import AppealFiles from "@/components/server/appeal-files";
 import { Suspense } from "react";
 import FormattedDate from "@/components/ui/formatted-date";
 import UploadFile from "@/components/ui/files/upload";
+import ParcelNumber from "@/components/ui/parcel-number";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -47,8 +48,11 @@ export default async function AppealDetailsPage({
   return (
     <div className="p-6 space-y-8">
       <h1 className="text-3xl font-bold mb-4">
-        Appeal {appealRow.appeal_number} — Parcel {appealRow.parcel_number}
+        Appeal {appealRow.appeal_number}
       </h1>
+      <span className="text-2xl font-bold mb-4">
+        <ParcelNumber parcelNumber={appealRow.parcel_number || ""} />
+      </span>
 
       {/* ─── Appeal Details ─── */}
       <div className="p-6 rounded shadow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

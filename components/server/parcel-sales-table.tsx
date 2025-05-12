@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import FormattedDate from "../ui/formatted-date";
 import CopyToClipboard from "../copy-to-clipboard";
+import Link from "next/link";
 
 export default async function ParcelSalesTable({
   page = 1,
@@ -61,7 +62,12 @@ export default async function ParcelSalesTable({
           {data.map((item: any) => (
             <tr key={item.sales_master.id} className="hover:bg-gray-50">
               <td className="px-4 py-2 whitespace-nowrap text- flex items-center gap-2 text-sm">
-                <span>{item.sales_master.document_number}</span>
+                <Link
+                  href={`/sales/${item.sales_master.document_number}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {item.sales_master.document_number}
+                </Link>
                 <CopyToClipboard
                   text={item.sales_master.document_number.toString()}
                 />

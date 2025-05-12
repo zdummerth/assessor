@@ -3,6 +3,7 @@ import CopyToClipboard from "@/components/copy-to-clipboard";
 import FormattedDate from "@/components/ui/formatted-date";
 import Address from "../address";
 import ParcelNumber from "../parcel-number";
+import AppealNumber from "../appeal-number";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -61,17 +62,7 @@ export default function AppealTable({ appeals }: any) {
               </td>
 
               <td className="px-4 py-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/appeals/${a.appeal_number}`}
-                    className="font-mono text-gray-800 dark:text-gray-100"
-                  >
-                    {a.appeal_number}
-                  </Link>
-                  <CopyToClipboard
-                    text={a.appeal_number.toString().padStart(10, "0")}
-                  />
-                </div>
+                <AppealNumber appealNumber={a.appeal_number} />
               </td>
 
               <td className="px-4 py-3 text-sm">
