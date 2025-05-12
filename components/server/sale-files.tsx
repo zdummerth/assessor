@@ -65,14 +65,16 @@ export default async function SaleFiles({
   const imageFiles = files.filter((file) => {
     return (
       file?.metadata?.mimetype === "image/jpeg" ||
-      file?.metadata?.mimetype === "image/png"
+      file?.metadata?.mimetype === "image/png" ||
+      file?.metadata?.mimetype === "image/webp"
     );
   });
 
   const otherFiles = files.filter((file) => {
     return (
       file?.metadata?.mimetype !== "image/jpeg" &&
-      file?.metadata?.mimetype !== "image/png"
+      file?.metadata?.mimetype !== "image/png" &&
+      file?.metadata?.mimetype !== "image/webp"
     );
   });
 

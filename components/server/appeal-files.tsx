@@ -63,14 +63,16 @@ export default async function AppealFiles({
   const imageFiles = files.filter((file) => {
     return (
       file?.metadata?.mimetype === "image/jpeg" ||
-      file?.metadata?.mimetype === "image/png"
+      file?.metadata?.mimetype === "image/png" ||
+      file?.metadata?.mimetype === "image/webp"
     );
   });
 
   const otherFiles = files.filter((file) => {
     return (
       file?.metadata?.mimetype !== "image/jpeg" &&
-      file?.metadata?.mimetype !== "image/png"
+      file?.metadata?.mimetype !== "image/png" &&
+      file?.metadata?.mimetype !== "image/webp"
     );
   });
 
