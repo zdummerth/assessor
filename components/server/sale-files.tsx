@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import FormattedDate from "../ui/formatted-date";
 import Image from "next/image";
 import DeleteFileModal from "../ui/files/modal-delete";
+import ImageGallery from "../image-gallery";
 
 export default async function SaleFiles({
   page = 1,
@@ -83,43 +84,12 @@ export default async function SaleFiles({
   return (
     <div className="w-full overflow-x-auto">
       <h2 className="text-2xl my-2">Images</h2>
-
-      {imageFiles.length > 0 && (
-        <div className="flex flex-wrap gap-4 mb-4">
-          {imageFiles.map((file) => {
-            return (
-              <div
-                key={file?.name}
-                className="relative group rounded-lg shadow-md"
-              >
-                <a
-                  href={file?.publicURL.publicUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full h-full"
-                >
-                  <Image
-                    src={file?.publicURL.publicUrl || ""}
-                    alt={file?.name || ""}
-                    width={360}
-                    height={360}
-                    // className="object-cover transition-transform group-hover:scale-105"
-                  />
-                </a>
-
-                {/* delete icon appears on hover */}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <DeleteFileModal
-                    bucket="sales"
-                    path={document_number}
-                    fileName={file?.name || ""}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <ImageGallery
+        // @ts-ignore
+        images={imageFiles}
+        bucket="sales"
+        path={document_number}
+      />
 
       <h2 className="text-2xl my-2">Other Files</h2>
       {otherFiles.map((file) => {

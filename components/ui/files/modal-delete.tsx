@@ -1,41 +1,50 @@
 "use client";
-import React, { useState } from "react";
+
+import React from "react";
 import Modal from "@/components/ui/modal";
 import DeleteFile from "./delete";
 import { Trash } from "lucide-react";
+import { useModal } from "@/components/ui/modal-context";
 
-const DeleteFileModal = ({
-  bucket,
-  path,
-  fileName,
-}: {
+interface DeleteFileModalProps {
   bucket: string;
   path: string;
   fileName: string;
-}) => {
-  const [modalOpen, setModalOpen] = useState(false);
+}
+
+export default function DeleteFileModal({
+  bucket,
+  path,
+  fileName,
+}: DeleteFileModalProps) {
+  const { currentModalId, openModal, closeModal } = useModal();
+  const modalId = `${path}/${fileName}`;
+  const isOpen = currentModalId === modalId;
 
   return (
     <div className="w-full">
       <button
-        onClick={() => setModalOpen(true)}
-        className="w-8 py-2 bg-red-500 text-white rounded hover:bg-red-700 rounded-md flex justify-center items-center"
+        onClick={() => openModal(modalId)}
+        className={`p-2 bg-red-500 text-white rounded-md hover:bg-red-700 flex justify-center items-center ${currentModalId ? "hidden" : ""}`}
       >
-        <Trash size={16} />
+        <Trash size={12} />
       </button>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <div className="flex flex-col items-center gap-2 w-full h-full">
-          <p>{fileName}</p>
-          <p>Are you sure you want to delete this file?</p>
+      <Modal open={isOpen} onClose={closeModal}>
+        <div className="flex flex-col items-center gap-4 p-6">
+          <p className="font-semibold">Delete "{fileName}"?</p>
           <p>This action cannot be undone.</p>
-          <div>
+          <div className="flex space-x-4">
+            <button
+              onClick={closeModal}
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              Cancel
+            </button>
             <DeleteFile fileName={fileName} bucket={bucket} path={path} />
           </div>
         </div>
       </Modal>
     </div>
   );
-};
-
-export default DeleteFileModal;
+}

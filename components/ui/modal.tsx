@@ -1,5 +1,7 @@
 "use client";
+
 import React, { useEffect, ReactNode } from "react";
+import { X } from "lucide-react";
 
 interface ModalProps {
   open: boolean;
@@ -9,33 +11,16 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ open, onClose, title, children }) => {
-  // Listen for the Escape key to close the modal
+  // Close on Escape
   useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    if (open) {
-      document.addEventListener("keydown", handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-    };
+    const handleKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    if (open) document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
   }, [open, onClose]);
 
+  // Prevent body scroll
   useEffect(() => {
-    if (open) {
-      // Disable scrolling on the main page
-      document.body.style.overflow = "hidden";
-    } else {
-      // Re-enable scrolling when modal is closed
-      document.body.style.overflow = "";
-    }
-
-    // Cleanup: re-enable scrolling if the component unmounts
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -44,28 +29,44 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Background Overlay */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black opacity-90"
+        className="absolute inset-0 bg-black bg-opacity-80 backdrop-blur-sm"
         onClick={onClose}
-      ></div>
+      />
 
-      {/* Modal Content */}
-      <div className="relative flex flex-col bg-background p-6 rounded-lg shadow-lg z-10 max-w-xl w-full h-[90%] m-8">
-        {title && <h2 className="text-xl font-bold mb-4">{title}</h2>}
-        <div className="flex-1 overflow-hidden">{children}</div>
-        <div className="mt-4 text-right">
+      {/* Modal Panel */}
+      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full mx-4 transform transition-transform duration-200 ease-out scale-100 animate-fade-in-up">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {title}
+          </h3>
           <button
             onClick={onClose}
-            className="flex items-center justify-center bg-blue-500 text-white rounded hover:bg-blue-600 h-8 w-16"
+            aria-label="Close modal"
+            className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
-            Close
+            <X size={20} className="text-gray-600 dark:text-gray-300" />
           </button>
         </div>
+
+        {/* Body */}
+        <div className="px-6 py-4 overflow-auto max-h-[70vh]">{children}</div>
       </div>
     </div>
   );
 };
 
 export default Modal;
+
+/**
+ * Tailwind animations (add to your globals.css or tailwind config):
+ *
+ * @keyframes fade-in-up {
+ *   from { opacity: 0; transform: translateY(10px); }
+ *   to   { opacity: 1; transform: translateY(0); }
+ * }
+ * .animate-fade-in-up { animation: fade-in-up 0.2s ease-out; }
+ */

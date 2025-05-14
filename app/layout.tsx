@@ -1,5 +1,6 @@
 import { ThemeProvider } from "next-themes";
 import { ToastProvider } from "@/components/ui/toast-context";
+import { ModalProvider } from "@/components/ui/modal-context";
 import { Inter } from "next/font/google";
 import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -33,12 +34,14 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ToastProvider>
-            <main className="min-h-screen flex flex-col items-center">
-              <Navbar />
-              <div className="flex-1 w-full flex flex-col gap-2 items-center">
-                <div className="flex flex-col gap-20 w-full">{children}</div>
-              </div>
-            </main>
+            <ModalProvider>
+              <main className="min-h-screen flex flex-col items-center">
+                <Navbar />
+                <div className="flex-1 w-full flex flex-col gap-2 items-center">
+                  <div className="flex flex-col gap-20 w-full">{children}</div>
+                </div>
+              </main>
+            </ModalProvider>
           </ToastProvider>
         </ThemeProvider>
         <Analytics />
