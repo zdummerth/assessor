@@ -50,7 +50,7 @@ export default function ImageGallery({
   return (
     <div>
       {/* Grid of thumbnails */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
         {images.map((image, index) => (
           <div key={image.name} className="relative group">
             <div onClick={() => openLightbox(index)} className="cursor-pointer">
@@ -59,7 +59,7 @@ export default function ImageGallery({
                 alt={image.name}
                 width={360}
                 height={360}
-                className="object-cover w-full h-32 md:h-48 rounded"
+                className="object-cover w-full h-32 md:h-64 rounded"
               />
             </div>
             <div className="absolute top-2 right-2 z-10">
@@ -76,7 +76,7 @@ export default function ImageGallery({
       {/* Fullscreen Lightbox Carousel */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-90 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={closeLightbox}
         >
           <div
@@ -90,7 +90,7 @@ export default function ImageGallery({
               height={800}
               className="max-h-[90vh] object-contain"
             />
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center space-x-8 bg-black bg-opacity-90 p-2 rounded-md">
+            <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 flex items-center space-x-8 bg-black bg-opacity-90 p-2 rounded-md">
               <button onClick={showPrev} className="text-white">
                 <ChevronLeft size={24} />
               </button>
