@@ -51,7 +51,7 @@ const propertyTypes = [
   { key: "multi_family", label: "Multi Family" },
   { key: "condo", label: "Condos" },
   { key: "commercial", label: "Commercial" },
-  { key: "other", label: "Miscellaneous *" },
+  { key: "other", label: "Miscellaneous*" },
 ];
 
 const WardComparison = ({ ward }: any) => {
