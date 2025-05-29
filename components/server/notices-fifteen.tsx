@@ -1,4 +1,4 @@
-import Notice from "@/components/ui/notices/fifteen/printable";
+import Notice from "@/components/ui/notices/fifteen/main";
 import { createClient } from "@/utils/supabase/server";
 import { SearchX } from "lucide-react";
 
@@ -48,6 +48,7 @@ export default async function Data({ listId }: { listId: number }) {
     <div className="">
       {/* @ts-ignore */}
       {data.list_parcel_year.map((item: any) => {
+        // return <Notice data={item.parcel_year} key={item.parcel_number} />;
         return <Notice data={item.parcel_year} key={item.parcel_number} />;
       })}
     </div>

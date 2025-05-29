@@ -1,4 +1,3 @@
-import { Tables } from "@/database-types";
 import FormattedDate from "@/components/ui/formatted-date";
 import Image from "next/image";
 import stlSeal from "@/public/stl-city-seal.png";
