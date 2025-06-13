@@ -1,6 +1,5 @@
 "use server";
 
-import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -42,7 +41,6 @@ export const createListItem = async (prevState: any, formData: FormData) => {
     success: "Added to list successfully",
     error: "",
   };
-  // return redirect("/invoices/" + idInt);
 };
 
 export const update = async (prevState: any, formData: FormData) => {

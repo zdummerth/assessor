@@ -228,10 +228,10 @@ export default function Notice({ data }: { data: any }) {
             If you agree with your property's value and do not want an interior
             inspection, then no action is required.
           </span>{" "}
-          This will in no way affect your ability to appeal after you receive
-          your Change of Assessment notice in May 2025. State law requires the
-          Assessor to revalue all real property in the City as of January 1st of
-          every odd-numbered year.
+          This will in no way affect your ability to appeal your value to the
+          Board of Equalization. State law requires the Assessor to revalue all
+          real property in the City as of January 1st of every odd-numbered
+          year.
         </p>
         <p className="mt-4">
           For questions or to schedule an interior inspection, please call
