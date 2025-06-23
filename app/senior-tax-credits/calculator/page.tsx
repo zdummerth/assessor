@@ -168,14 +168,13 @@ export default function TaxFreezeCalculator() {
 
   const cityTax2024 = tax(value2024, cityRateSum2024);
   const cityTax2025WithFreeze = cityTax2024;
-  const cityTax2025Actual = tax(value2025, cityRateSum2025);
+  const cityTax2025 = tax(value2025, cityRateSum2025);
+  const cityTax2025Actual = Math.min(cityTax2025, cityTax2025WithFreeze);
   const nonCityTax2025 = tax(value2025, nonCityRateSum2025);
 
   const totalTax2024 = cityTax2024 + tax(value2024, nonCityRateSum2024);
   const totalTax2025WithFreeze = cityTax2025WithFreeze + nonCityTax2025;
-  const totalTax2025 = cityTax2025Actual + nonCityTax2025;
-  // get minimum of totalTax2025WithFreeze and totalTax2025
-  const totalTax2025Actual = Math.min(totalTax2025WithFreeze, totalTax2025);
+  const totalTax2025Actual = cityTax2025Actual + nonCityTax2025;
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow rounded-lg space-y-8">
