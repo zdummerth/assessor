@@ -167,14 +167,15 @@ export default function TaxFreezeCalculator() {
   const nonCityRateSum2025 = sum(nonCityRates.map((r) => r.rate2025));
 
   const cityTax2024 = tax(value2024, cityRateSum2024);
-  const cityTax2025WithFreeze = cityTax2024;
-  const cityTax2025 = tax(value2025, cityRateSum2025);
-  const cityTax2025Actual = Math.min(cityTax2025, cityTax2025WithFreeze);
+  const cityTax2025Actual = tax(value2025, cityRateSum2025);
+  const cityTax2025WithFreeze = Math.min(cityTax2024, cityTax2025Actual);
   const nonCityTax2025 = tax(value2025, nonCityRateSum2025);
 
   const totalTax2024 = cityTax2024 + tax(value2024, nonCityRateSum2024);
   const totalTax2025WithFreeze = cityTax2025WithFreeze + nonCityTax2025;
   const totalTax2025Actual = cityTax2025Actual + nonCityTax2025;
+
+  const creditAmount = totalTax2025Actual - totalTax2025WithFreeze;
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow rounded-lg space-y-8">
@@ -221,14 +222,14 @@ export default function TaxFreezeCalculator() {
           </h2>
           <ul className="text-sm text-gray-700 space-y-1">
             <li>
-              <strong>City Tax:</strong> ${cityTax2024.toFixed(2)}
+              <strong>City Tax:</strong> ${cityTax2024.toLocaleString()}
             </li>
             <li>
               <strong>Non-City Tax:</strong> $
-              {tax(value2024, nonCityRateSum2025).toFixed(2)}
+              {tax(value2024, nonCityRateSum2025).toLocaleString()}
             </li>
             <li className="font-semibold mt-1">
-              <strong>Total:</strong> ${totalTax2024.toFixed(2)}
+              <strong>Total:</strong> ${totalTax2024.toLocaleString()}
             </li>
           </ul>
         </div>
@@ -240,22 +241,22 @@ export default function TaxFreezeCalculator() {
           <ul className="text-sm text-gray-700 space-y-1">
             <li>
               <strong>City Tax (Frozen):</strong> $
-              {cityTax2025WithFreeze.toFixed(2)}
+              {cityTax2025WithFreeze.toLocaleString()}
             </li>
             <li>
-              <strong>Non-City Tax:</strong> ${nonCityTax2025.toFixed(2)}
+              <strong>Non-City Tax:</strong> ${nonCityTax2025.toLocaleString()}
+            </li>
+
+            <li className="font-semibold text-red-600">
+              <strong>Total (Without Freeze):</strong> $
+              {totalTax2025Actual.toLocaleString()}
             </li>
             <li className="font-semibold">
               <strong>Total (With Freeze):</strong> $
-              {totalTax2025WithFreeze.toFixed(2)}
-            </li>
-            <li className="font-semibold text-red-600">
-              <strong>Total (Without Freeze):</strong> $
-              {totalTax2025Actual.toFixed(2)}
+              {totalTax2025WithFreeze.toLocaleString()}
             </li>
             <li className="font-semibold text-green-600">
-              <strong>Credit Amount:</strong> $
-              {(totalTax2025Actual - totalTax2025WithFreeze).toFixed(2)}
+              <strong>Credit Amount:</strong> ${creditAmount.toLocaleString()}
             </li>
           </ul>
         </div>
@@ -279,21 +280,24 @@ export default function TaxFreezeCalculator() {
                 <th className="px-3 py-2 border text-right">
                   2025 Tax
                   <br />
-                  With Freeze
+                  Without Freeze
                 </th>
                 <th className="px-3 py-2 border text-right">
                   2025 Tax
                   <br />
-                  Without Freeze
+                  With Freeze
                 </th>
               </tr>
             </thead>
             <tbody>
               {taxRates.map((r, idx) => {
                 const tax2024 = tax(value2024, r.rate2024);
-                const tax2025WithFreeze =
-                  r.district === "City" ? tax2024 : tax(value2025, r.rate2025);
+
                 const tax2025Actual = tax(value2025, r.rate2025);
+                const tax2025WithFreeze =
+                  r.district === "City"
+                    ? Math.min(tax2024, tax2025Actual)
+                    : tax2025Actual;
 
                 return (
                   <tr
@@ -311,11 +315,12 @@ export default function TaxFreezeCalculator() {
                     <td className="border px-3 py-1 text-right">
                       ${tax2024.toFixed(2)}
                     </td>
-                    <td className="border px-3 py-1 text-right">
-                      ${tax2025WithFreeze.toFixed(2)}
-                    </td>
+
                     <td className="border px-3 py-1 text-right">
                       ${tax2025Actual.toFixed(2)}
+                    </td>
+                    <td className="border px-3 py-1 text-right">
+                      ${tax2025WithFreeze.toFixed(2)}
                     </td>
                   </tr>
                 );
@@ -331,13 +336,14 @@ export default function TaxFreezeCalculator() {
                   {(cityRateSum2025 + nonCityRateSum2025).toFixed(4)}
                 </td>
                 <td className="px-3 py-2 border text-right">
-                  ${totalTax2024.toFixed(2)}
+                  ${totalTax2024.toLocaleString()}
+                </td>
+
+                <td className="px-3 py-2 border text-right">
+                  ${totalTax2025Actual.toLocaleString()}
                 </td>
                 <td className="px-3 py-2 border text-right">
-                  ${totalTax2025WithFreeze.toFixed(2)}
-                </td>
-                <td className="px-3 py-2 border text-right">
-                  ${totalTax2025Actual.toFixed(2)}
+                  ${totalTax2025WithFreeze.toLocaleString()}
                 </td>
               </tr>
             </tbody>
