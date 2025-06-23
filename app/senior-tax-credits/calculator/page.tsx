@@ -48,7 +48,7 @@ const taxRates: TaxRate[] = [
   },
   {
     subdistrict: "Interest in Public Debt",
-    district: "City",
+    district: "Non-City",
     rate2024: 0.1851,
     rate2025: 0.1108,
   },
