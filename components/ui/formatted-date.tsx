@@ -19,7 +19,8 @@ const FormattedDate = ({
       hour: "numeric",
       minute: "numeric",
     })
-    .toLowerCase();
+    .replace(/\s?(am|pm)$/i, (match) => match.toUpperCase());
+
   return (
     <span className={className}>
       {formattedDate} {formattedTime && showTime ? formattedTime : ""}

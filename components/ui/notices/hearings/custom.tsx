@@ -23,7 +23,7 @@ export default function Notice() {
     appeal_number: "",
     hearing_date: "",
     hearing_time: "",
-    room: "Room 208",
+    room: "Kennedy Hearing Room 208",
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -41,6 +41,17 @@ export default function Notice() {
   ).toLocaleString("en-US", {
     timeZone: "America/Chicago",
   });
+
+  const requiredFieldsEntered =
+    formData.parcel_number &&
+    formData.owner_name &&
+    formData.address_1 &&
+    formData.city &&
+    formData.state &&
+    formData.zip &&
+    formData.site_address &&
+    formData.hearing_date &&
+    formData.hearing_time;
 
   return (
     <div className="w-[90%] mx-auto print:break-after-page border p-8 print:p-0 print:mt-4 print:border-none print:bg-white print:text-black">
@@ -214,51 +225,77 @@ export default function Notice() {
       />
 
       {/* Parcel and address */}
-      <div className="my-8 flex justify-between">
-        <div>
-          <p className="text-sm">Parcel Number</p>
-          <div>{formData.parcel_number}</div>
-        </div>
-        <div>
-          <p className="text-sm">Property Address</p>
-          <div>{formData.site_address}</div>
-        </div>
-      </div>
+      {requiredFieldsEntered ? (
+        <>
+          <div className="my-8 flex justify-between">
+            <div>
+              <p className="text-sm">Parcel Number</p>
+              <div>{formData.parcel_number}</div>
+            </div>
+            <div>
+              <p className="text-sm">Property Address</p>
+              <div>{formData.site_address}</div>
+            </div>
+          </div>
 
-      <div className="text-sm">
-        <p className="text-sm mb-4">
-          The hearing on your appeal regarding the assessment of your property
-          described above will be held before the Board of Equalization of the
-          City of St. Louis at 1200 Market Street, St. Louis, MO 63103 on
-        </p>
-        <p className="text-lg text-center font-semibold mb-4">
-          <FormattedDate date={hearingTimestamp} showTime />
-          <span className="block">{formData.room}.</span>
-        </p>
-        <p className="mb-4">
-          Please sign in at the receptionist's desk upon arrival as all appeals
-          will be heard in the order of appearance.
-        </p>
-        <p className="mb-4">
-          If you cannot appear at the assigned date and time, you must
-          reschedule within 48 hours of receipt of this notice. If you are
-          unable to attend the hearing, the Board will still hear your appeal
-          and render a decision based on the information available.
-        </p>
-        <p className="mb-4">
-          If you plan to park on the City Hall lot, please arrive early to allow
-          time to secure parking space and for security screening.
-        </p>
-        <p className="mb-4">
-          Please be advised that if you bring bring any physical supporting
-          documents, you must present at least 6 copies of each document.
-        </p>
-        <p className="mb-4">
-          Any digital supoorting documents can be emailed to:{" "}
-          <span className="font-semibold">appeal@stlouis-mo.gov</span>
-        </p>
-        <p>BOE Contact: 314-622-4185</p>
-      </div>
+          <div className="text-sm">
+            <p className="text-sm mb-4">
+              The hearing on your appeal regarding the assessment of your
+              property described above will be held before the Board of
+              Equalization of the City of St. Louis at
+            </p>
+            <div className="text-lg text-center font-semibold mb-4">
+              <FormattedDate date={hearingTimestamp} showTime />
+            </div>
+            <div className="text-center mb-4">
+              <div>{formData.room}</div>
+              <div>City Hall, 1200 Market Street</div>
+              <div>St. Louis, MO 63103</div>
+            </div>
+            <div></div>
+            <p className="mb-4">
+              Please sign in at the receptionist's desk upon arrival as all
+              appeals will be heard in the order of appearance.
+            </p>
+            <p className="mb-4">
+              If you cannot appear at the assigned date and time, you must
+              reschedule within 48 hours of receipt of this notice. If you are
+              unable to attend the hearing, the Board will still hear your
+              appeal and render a decision based on the information available.
+            </p>
+            <p className="mb-4">
+              If you plan to park on the City Hall lot, please arrive early to
+              allow time to secure parking space and for security screening.
+            </p>
+            <p className="mb-4">
+              Please be advised that if you bring bring any physical supporting
+              documents, you must present at least 6 copies of each document.
+            </p>
+            <p className="mb-4">
+              Any digital supporting documents can be emailed to:{" "}
+              <span className="font-semibold">appeal@stlouis-mo.gov</span>
+            </p>
+            <p>BOE Contact: 314-622-4185</p>
+          </div>
+        </>
+      ) : (
+        <div className="text-sm text-red-600">
+          <p className="mb-4">
+            Please fill out all required fields to generate the notice.
+          </p>
+          <ul className="list-disc pl-5">
+            <li>Owner Name</li>
+            <li>Address 1</li>
+            <li>City</li>
+            <li>State</li>
+            <li>ZIP Code</li>
+            <li>Parcel Number</li>
+            <li>Site Address</li>
+            <li>Hearing Date</li>
+            <li>Hearing Time</li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
