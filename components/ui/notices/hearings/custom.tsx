@@ -46,9 +46,7 @@ export default function Notice() {
     formData.parcel_number &&
     formData.owner_name &&
     formData.address_1 &&
-    formData.city &&
-    formData.state &&
-    formData.zip &&
+    (formData.address_2 || (formData.city && formData.state && formData.zip)) &&
     formData.site_address &&
     formData.hearing_date &&
     formData.hearing_time;
