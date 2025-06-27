@@ -1,15 +1,17 @@
 const FormattedDate = ({
   date,
   className = "",
+  month = "long",
   showTime,
 }: {
   date: string;
   className?: string;
+  month?: "numeric" | "2-digit" | "long" | "short" | "narrow";
   showTime?: boolean;
 }) => {
   const localDate = new Date(date);
   const formattedDate = localDate.toLocaleDateString("en-US", {
-    month: "short",
+    month,
     day: "numeric",
     year: "numeric",
     timeZone: "UTC",
