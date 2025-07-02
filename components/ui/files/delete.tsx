@@ -8,15 +8,7 @@ const initalState = {
   success: "",
 };
 
-const DeleteFile = ({
-  fileName,
-  bucket,
-  path,
-}: {
-  fileName: string;
-  bucket: string;
-  path: string;
-}) => {
+const DeleteFile = ({ bucket, path }: { bucket: string; path: string }) => {
   const [state, action, pending] = useActionState(
     deleteFileAction,
     initalState
@@ -44,7 +36,6 @@ const DeleteFile = ({
     <form action={action}>
       <div className="flex justify-end space-x-2">
         <div>
-          <input type="hidden" name="fileName" value={fileName} />
           <input type="hidden" name="bucket" value={bucket} />
           <input type="hidden" name="path" value={path} />
           <button

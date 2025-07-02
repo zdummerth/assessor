@@ -6,16 +6,16 @@ import DeleteFileModal from "@/components/ui/files/modal-delete";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface ImageFile {
-  name: string;
-  publicURL: { publicUrl: string };
+  publicURL: string;
   metadata?: { mimetype?: string };
   updated_at?: string;
+  image_url: string;
 }
 
 interface ImageGalleryProps {
   images: ImageFile[];
   bucket: string;
-  path: string;
+  path?: string;
 }
 
 export default function ImageGallery({
@@ -52,11 +52,11 @@ export default function ImageGallery({
       {/* Grid of thumbnails */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
         {images.map((image, index) => (
-          <div key={image.name} className="relative group">
+          <div key={image.image_url} className="relative group">
             <div onClick={() => openLightbox(index)} className="cursor-pointer">
               <Image
-                src={image.publicURL.publicUrl}
-                alt={image.name}
+                src={image.publicURL}
+                alt={image.image_url}
                 width={360}
                 height={360}
                 className="object-cover w-full h-32 md:h-64 rounded"
@@ -65,8 +65,7 @@ export default function ImageGallery({
             <div className="absolute top-2 right-2 z-10">
               <DeleteFileModal
                 bucket={bucket}
-                path={path}
-                fileName={image.name}
+                path={path ? `${path}/${image.image_url}` : image.image_url}
               />
             </div>
           </div>
@@ -84,8 +83,8 @@ export default function ImageGallery({
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={images[currentIndex].publicURL.publicUrl}
-              alt={images[currentIndex].name}
+              src={images[currentIndex].publicURL}
+              alt={images[currentIndex].image_url}
               width={800}
               height={800}
               className="max-h-[90vh] object-contain"

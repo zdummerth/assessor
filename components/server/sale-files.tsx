@@ -114,8 +114,7 @@ export default async function SaleFiles({
             <span>
               <DeleteFileModal
                 bucket="sales"
-                path={document_number}
-                fileName={file?.name || ""}
+                path={`${document_number}/${file?.name}`}
               />
             </span>
           </div>

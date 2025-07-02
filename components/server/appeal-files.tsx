@@ -109,8 +109,7 @@ export default async function AppealFiles({
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <DeleteFileModal
                     bucket="appeals"
-                    path={appeal}
-                    fileName={file?.name || ""}
+                    path={`${appeal}/${file?.name}`}
                   />
                 </div>
               </div>
@@ -142,8 +141,7 @@ export default async function AppealFiles({
             <span>
               <DeleteFileModal
                 bucket="appeals"
-                path={appeal}
-                fileName={file?.name || ""}
+                path={`${appeal}/${file?.name}`}
               />
             </span>
           </div>

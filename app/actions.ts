@@ -5,6 +5,97 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { randomUUID } from "crypto";
+
+export const uploadImages = async (_prevState: any, formData: FormData) => {
+  const files = formData.getAll("files") as File[];
+  const parcel_id = formData.get("parcel_id")?.toString();
+
+  console.log("parcel_id in action:", parcel_id);
+
+  if (files.length === 0) {
+    return { error: "At least one file is required", success: "" };
+  }
+
+  if (!parcel_id) {
+    return { error: "Parcel ID is required", success: "" };
+  }
+
+  const parcel_id_integer: number = parseInt(parcel_id, 10);
+  if (isNaN(parcel_id_integer)) {
+    return { error: "Invalid Parcel ID", success: "" };
+  }
+
+  console.log("Uploading images for parcel ID:", parcel_id_integer);
+
+  const supabase = await createClient();
+
+  try {
+    const uploadedPaths = await Promise.all(
+      files.map(async (file) => {
+        const ext = file.name.split(".").pop();
+        const uniqueName = `${randomUUID()}.${ext}`;
+
+        // Upload to storage
+        const { error: uploadError } = await supabase.storage
+          .from("parcel-images")
+          .upload(uniqueName, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          throw new Error(`Storage upload failed: ${uploadError.message}`);
+        }
+
+        const imageUrl = uniqueName;
+
+        // Insert into test_images
+        const { data: imageRow, error: imageInsertError } = await supabase
+          .from("test_images")
+          .insert({ image_url: imageUrl })
+          .select("id")
+          .single();
+
+        if (imageInsertError || !imageRow) {
+          throw new Error(
+            `Image DB insert failed: ${imageInsertError?.message}`
+          );
+        }
+
+        console.log("Inserted image row:", imageRow);
+        console.log("parcel_id_integer:", parcel_id_integer);
+
+        // Insert into test_parcel_images
+        const { error: linkError } = await supabase
+          .from("test_parcel_images")
+          .insert({
+            parcel_id: parcel_id_integer,
+            image_id: imageRow.id,
+          });
+
+        if (linkError) {
+          throw new Error(`Parcel-image link failed: ${linkError.message}`);
+        }
+
+        return imageUrl;
+      })
+    );
+
+    revalidatePath("/test/parcels");
+
+    return {
+      success: `${uploadedPaths.length} image${uploadedPaths.length > 1 ? "s" : ""} uploaded successfully`,
+      error: "",
+    };
+  } catch (err: any) {
+    console.error("Upload process failed:", err.message);
+    return {
+      success: "",
+      error: `Error uploading: ${err.message}`,
+    };
+  }
+};
 
 export const fileUploadAction = async (_prevState: any, formData: FormData) => {
   const files = formData.getAll("files") as File[];
@@ -54,13 +145,9 @@ export const fileUploadAction = async (_prevState: any, formData: FormData) => {
 };
 
 export const deleteFileAction = async (prevState: any, formData: FormData) => {
-  const fileName = formData.get("fileName")?.toString() || null;
   const bucket = formData.get("bucket")?.toString() || null;
   const path = formData.get("path")?.toString() || null;
 
-  if (!fileName) {
-    return { error: "File name is required", success: "" };
-  }
   if (!bucket) {
     return { error: "Bucket is required", success: "" };
   }
@@ -68,12 +155,8 @@ export const deleteFileAction = async (prevState: any, formData: FormData) => {
     return { error: "Path is required", success: "" };
   }
 
-  const filePath = `${path}/${fileName}`;
-
   const supabase = await createClient();
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .remove([filePath]);
+  const { data, error } = await supabase.storage.from(bucket).remove([path]);
 
   if (error) {
     console.error(error.message);

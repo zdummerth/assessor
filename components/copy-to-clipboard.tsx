@@ -19,7 +19,12 @@ const CopyToClipboard = ({ text }: { text: string }) => {
   return (
     <button onClick={handleCopy} className="flex items-center gap-2">
       {copied ? (
-        <Check size={14} className="text-green-500" />
+        <div className="relative">
+          <Check size={14} className="text-green-500" />
+          <span className="absolute left-6 top-0 text-xs text-gray-500">
+            Copied
+          </span>
+        </div>
       ) : (
         <Clipboard size={14} className="hover:text-blue-500" />
       )}

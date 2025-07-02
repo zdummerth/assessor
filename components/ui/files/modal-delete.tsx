@@ -9,16 +9,14 @@ import { useModal } from "@/components/ui/modal-context";
 interface DeleteFileModalProps {
   bucket: string;
   path: string;
-  fileName: string;
 }
 
 export default function DeleteFileModal({
   bucket,
   path,
-  fileName,
 }: DeleteFileModalProps) {
   const { currentModalId, openModal, closeModal } = useModal();
-  const modalId = `${path}/${fileName}`;
+  const modalId = `delete-file-${bucket}-${path}`;
   const isOpen = currentModalId === modalId;
 
   return (
@@ -32,7 +30,7 @@ export default function DeleteFileModal({
 
       <Modal open={isOpen} onClose={closeModal}>
         <div className="flex flex-col items-center gap-4 p-6">
-          <p className="font-semibold">Delete "{fileName}"?</p>
+          <p className="font-semibold">Delete "{path}"?</p>
           <p>This action cannot be undone.</p>
           <div className="flex space-x-4">
             <button
@@ -41,7 +39,7 @@ export default function DeleteFileModal({
             >
               Cancel
             </button>
-            <DeleteFile fileName={fileName} bucket={bucket} path={path} />
+            <DeleteFile bucket={bucket} path={path} />
           </div>
         </div>
       </Modal>

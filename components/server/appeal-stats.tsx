@@ -22,6 +22,7 @@ export default async function AppealStats({
   const supabase = await createClient();
 
   const query = supabase
+    //@ts-ignore
     .from("parcel_review_appeals")
     .select("appeal_appraiser, status, status.count()");
 
