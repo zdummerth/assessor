@@ -201,12 +201,13 @@ export default function ComparablesTable({ values }: { values: any[] }) {
     <div className="w-full">
       <div className="mb-6 p-4 border rounded bg-yellow-50">
         <div className="flex items-center gap-4">
-          <div className="w-48 h-48 relative">
+          <div className="relative">
             {subjectImageUrl ? (
               <Image
                 src={subjectImageUrl}
                 alt="Subject"
-                fill
+                width={350}
+                height={350}
                 className="object-cover rounded"
               />
             ) : (
