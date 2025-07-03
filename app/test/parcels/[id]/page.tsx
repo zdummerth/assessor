@@ -54,12 +54,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   const parcel = data;
-  console.log("Parcel data:", parcel);
+  // console.log("Parcel data:", parcel);
 
   return (
     <div className="w-full p-4">
-      <div className="flex items-center mb-4 gap-4">
-        <h1 className="text-2xl font-semibold">
+      <div className="flex items-center mb-4 gap-4 print:hidden">
+        <h1 className="text-2xl font-semibold print:hidden">
           <ParcelNumber
             id={parcel.id}
             block={parcel.block}
@@ -68,26 +68,30 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           />
         </h1>
         {parcel.retired_at && (
-          <p className="bg-red-100 text-red-800 p-2 rounded">
+          <p className="bg-red-100 text-red-800 p-2 rounded print:hidden">
             Retired: <FormattedDate date={parcel.retired_at} />
           </p>
         )}
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 print:hidden">
         <div className="w-full h-64 md:w-96 md:h-96 relative mb-4 border rounded">
           <ParcelImagePrimary parcel_id={parcel.id} />
         </div>
         <ParcelImageUploadModal parcelId={parcel.id} />
       </div>
 
-      <h2 className="mt-4 mb-2">Value</h2>
-      <Suspense fallback={<div>Loading parcel values...</div>}>
-        <ParcelValues parcel={parcel} />
-      </Suspense>
+      <h2 className="mt-4 mb-2 print:hidden">Value</h2>
+      <span className="print:hidden">
+        <Suspense fallback={<div>Loading parcel values...</div>}>
+          <ParcelValues parcel={parcel} />
+        </Suspense>
+      </span>
 
-      <Suspense fallback={<div>Loading parcel images...</div>}>
-        <ParcelImages parcel={parcel} />
-      </Suspense>
+      <span className="w-full mt-4 mb-2 print:hidden">
+        <Suspense fallback={<div>Loading parcel images...</div>}>
+          <ParcelImages parcel={parcel} />
+        </Suspense>
+      </span>
 
       <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables parcel={parcel} />

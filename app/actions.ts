@@ -51,31 +51,14 @@ export const uploadImages = async (_prevState: any, formData: FormData) => {
         const imageUrl = uniqueName;
 
         // Insert into test_images
-        const { data: imageRow, error: imageInsertError } = await supabase
-          .from("test_images")
-          .insert({ image_url: imageUrl })
-          .select("id")
-          .single();
+        //@ts-ignore
+        const { data, error } = await supabase.rpc("insert_parcel_image", {
+          p_parcel_id: parcel_id_integer,
+          p_image_url: imageUrl,
+        });
 
-        if (imageInsertError || !imageRow) {
-          throw new Error(
-            `Image DB insert failed: ${imageInsertError?.message}`
-          );
-        }
-
-        console.log("Inserted image row:", imageRow);
-        console.log("parcel_id_integer:", parcel_id_integer);
-
-        // Insert into test_parcel_images
-        const { error: linkError } = await supabase
-          .from("test_parcel_images")
-          .insert({
-            parcel_id: parcel_id_integer,
-            image_id: imageRow.id,
-          });
-
-        if (linkError) {
-          throw new Error(`Parcel-image link failed: ${linkError.message}`);
+        if (error) {
+          throw new Error(`Database insert failed: ${error.message}`);
         }
 
         return imageUrl;
@@ -95,6 +78,47 @@ export const uploadImages = async (_prevState: any, formData: FormData) => {
       error: `Error uploading: ${err.message}`,
     };
   }
+};
+
+export const deleteParcelImagesAction = async (
+  _prevState: any,
+  formData: FormData
+) => {
+  const bucket = formData.get("bucket")?.toString() || null;
+  const paths = formData.getAll("paths") as string[];
+
+  if (!bucket) return { error: "Bucket is required", success: "" };
+  if (paths.length === 0) return { error: "No paths provided", success: "" };
+
+  const supabase = await createClient();
+
+  // 1. Delete from Supabase Storage
+  const { error: storageError } = await supabase.storage
+    .from(bucket)
+    .remove(paths);
+
+  if (storageError) {
+    console.error(storageError.message);
+    return { error: "Error deleting files from storage", success: "" };
+  }
+
+  // 2. Delete DB records
+  //@ts-ignore
+  const { error: dbError } = await supabase.rpc("delete_parcel_images", {
+    p_image_urls: paths,
+  });
+
+  if (dbError) {
+    console.error(dbError.message);
+    return { error: "Error deleting image records", success: "" };
+  }
+
+  revalidatePath("/test/parcels");
+
+  return {
+    success: `${paths.length} image${paths.length > 1 ? "s" : ""} deleted successfully`,
+    error: "",
+  };
 };
 
 export const fileUploadAction = async (_prevState: any, formData: FormData) => {

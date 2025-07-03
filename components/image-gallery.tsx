@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import DeleteFileModal from "@/components/ui/files/modal-delete";
+import DeleteParcelImageModal from "./parcel-images/delete-modal";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface ImageFile {
@@ -63,7 +63,7 @@ export default function ImageGallery({
               />
             </div>
             <div className="absolute top-2 right-2 z-10">
-              <DeleteFileModal
+              <DeleteParcelImageModal
                 bucket={bucket}
                 path={path ? `${path}/${image.image_url}` : image.image_url}
               />

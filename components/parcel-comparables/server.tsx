@@ -1,6 +1,6 @@
 import { SearchX } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
-import ComparablesTable from "./client";
+import ComparablesTable from "./layouts";
 import { Tables } from "@/database-types";
 
 type Parcel = Tables<"test_parcels">;
@@ -14,7 +14,17 @@ export default async function ServerParcelComparables({
 
   const { data, error } = await supabase
     .from("test_comparables")
-    .select("*, subject_parcel(*)")
+    .select(
+      `*, 
+      subject_parcel(*,
+        test_parcel_image_primary(test_images(*)),
+        test_parcel_images(test_images(*))
+      ), 
+      parcel_id(*, 
+      test_parcel_image_primary(test_images(*)), 
+      test_parcel_images(test_images(*))
+      )`
+    )
     .eq("subject_parcel", parcel.id)
     .order("gower_dist", { ascending: true });
 
@@ -28,8 +38,6 @@ export default async function ServerParcelComparables({
       </div>
     );
   }
-
-  console.log("Parcel comparables data:", data);
 
   return <ComparablesTable values={data} />;
 }
