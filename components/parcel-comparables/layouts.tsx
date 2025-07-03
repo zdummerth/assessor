@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { Tables } from "@/database-types";
 import ParcelNumber from "../ui/parcel-number-updated";
+import FormattedDate from "../ui/formatted-date";
 import { House, LayoutList } from "lucide-react";
 import Image from "next/image";
 
@@ -216,9 +217,17 @@ export default function ComparablesTable({ values }: { values: any[] }) {
           </div>
           <div className="flex justiyfy-between w-full">
             <div>
-              <div className="text-lg mb-1">Subject Parcel</div>
+              <div className="text-lg font-semibold mb-1">
+                Current Value: $
+                {subject.subject_appraised_total.toLocaleString()}
+              </div>
               <ParcelNumber {...subject.subject_parcel} />
               <div className="">{subject.subject_address}</div>
+              <div>Age: {subject.subject_adjusted_age}</div>
+              <div>
+                Garage Area: {subject.subject_garage_area?.toLocaleString()} sq
+                ft
+              </div>
               <div className="">
                 {subject.subject_neighborhood_code} –{" "}
                 {subject.subject_neighborhood_group} |{" "}
@@ -275,19 +284,21 @@ export default function ComparablesTable({ values }: { values: any[] }) {
       {layout === "table" ? (
         <div className="overflow-x-auto border rounded-lg">
           <table className="w-full text-sm text-left border-collapse">
-            <thead className="bg-gray-100 text-gray-700 print:hidden">
+            <thead className="bg-gray-100 text-gray-700 text-xs">
               <tr>
-                <th className="px-4 py-2">Select</th>
-                <th className="px-4 py-2">Image</th>
-                <th className="px-4 py-2">Parcel</th>
-                <th className="px-4 py-2">Type</th>
-                <th className="px-4 py-2">Address</th>
-                <th className="px-4 py-2">Neighborhood</th>
-                <th className="px-4 py-2">Land Use</th>
-                <th className="px-4 py-2">Sale Price</th>
-                <th className="px-4 py-2">Adjusted Price</th>
+                <th className="p-2 print:hidden">Select</th>
+                <th className="p-2">Image</th>
+                <th className="p-2">Details</th>
+                <th className="p-2 print:hidden">Gower</th>
+                <th className="p-2">Distance</th>
+                <th className="p-2">Area</th>
+                <th className="p-2">CDU</th>
+                <th className="p-2">Stories</th>
+                <th className="p-2">Age</th>
+                <th className="p-2">Sale</th>
               </tr>
             </thead>
+
             <tbody>
               {comparables.map((comp, i) => {
                 const imageUrl = getImageUrl(comp);
@@ -319,19 +330,51 @@ export default function ComparablesTable({ values }: { values: any[] }) {
                       </div>
                     </td>
                     <td className="px-4 py-2">
-                      <ParcelNumber {...comp.parcel_id} />
+                      <div className="flex flex-col gap-1">
+                        <div>{comp.address?.split(",")[0]}</div>
+                        <div className="text-xs text-gray-600">
+                          <ParcelNumber {...comp.parcel_id} />
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          Sale ID: {comp.sale_id || "—"}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          Neighborhood: {comp.neighborhood_code} –{" "}
+                          {comp.neighborhood_group}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          Land Use: {comp.land_use}
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-4 py-2">{`Comp ${i + 1}`}</td>
-                    <td className="px-4 py-2">{comp.address}</td>
-                    <td className="px-4 py-2">
-                      {comp.neighborhood_code} – {comp.neighborhood_group}
-                    </td>
-                    <td className="px-4 py-2">{comp.land_use}</td>
-                    <td className="px-4 py-2">
-                      ${Number(comp.net_selling_price || 0).toLocaleString()}
+                    <td className="px-4 py-2 print:hidden">
+                      {comp.gower_dist?.toFixed(2)}
                     </td>
                     <td className="px-4 py-2">
-                      ${Number(comp.adjusted_price || 0).toLocaleString()}
+                      {comp.miles_distance?.toFixed(1)} mi
+                    </td>
+                    <td className="px-4 py-2">
+                      <div>
+                        Living: {comp.total_living_area?.toLocaleString()}
+                      </div>
+                      <div>Garage: {comp.garage_area?.toLocaleString()}</div>
+                    </td>
+                    <td className="px-4 py-2">{comp.cdu}</td>
+                    <td className="px-4 py-2">{comp.stories}</td>
+                    <td className="px-4 py-2">{comp.adjusted_age}</td>
+
+                    <td className="px-4 py-2">
+                      <div>
+                        <FormattedDate date={comp.date_of_sale} month="short" />
+                        <div>
+                          $
+                          {Number(comp.net_selling_price || 0).toLocaleString()}
+                        </div>
+                        <div>
+                          Adj: $
+                          {Number(comp.adjusted_price || 0).toLocaleString()}
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 );
