@@ -4,10 +4,9 @@ import { Suspense } from "react";
 import FormattedDate from "@/components/ui/formatted-date";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
 import ParcelValues from "@/components/parcel-values/server";
-import ParcelImageUploadModal from "@/components/parcel-images/upload-modal";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
-import ParcelImages from "@/components/parcel-images/server";
 import ParcelComparables from "@/components/parcel-comparables/server";
+import AppealForm from "@/components/ui/notices/appeal/main";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -73,11 +72,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </p>
         )}
       </div>
-      <div className="flex gap-2 print:hidden">
-        <div className="w-full h-64 md:w-96 md:h-96 relative mb-4 border rounded">
-          <ParcelImagePrimary parcel_id={parcel.id} />
-        </div>
-        <ParcelImageUploadModal parcelId={parcel.id} />
+      <div className="w-full md:w-96 print:hidden">
+        <ParcelImagePrimary parcel_id={parcel.id} />
       </div>
 
       <h2 className="mt-4 mb-2 print:hidden">Value</h2>
@@ -87,15 +83,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         </Suspense>
       </span>
 
-      <span className="w-full mt-4 mb-2 print:hidden">
-        <Suspense fallback={<div>Loading parcel images...</div>}>
-          <ParcelImages parcel={parcel} />
-        </Suspense>
-      </span>
-
       <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables parcel={parcel} />
       </Suspense>
+
+      <AppealForm />
     </div>
   );
 }

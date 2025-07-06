@@ -1,76 +1,91 @@
-import { SearchX, ImageOff } from "lucide-react";
+import { SearchX } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
-// import ClientComponent from "./client";
-import Image from "next/image";
+import ParcelImageGallery from "./client";
+import ParcelImageUploadModal from "@/components/parcel-images/upload-modal";
 
-export default async function ServerComponent({
+export default async function ParcelImageServer({
   parcel_id,
 }: {
   parcel_id: number;
 }) {
   const supabase = await createClient();
-  const primary = supabase
-    .from("test_parcel_image_primary")
-    .select("*")
-    .eq("parcel_id", parcel_id)
-    .order("effective_date", { ascending: false })
-    .limit(1);
 
-  const all = supabase
-    .from("test_parcel_images")
-    .select("*, test_images(*)")
-    .eq("parcel_id", parcel_id)
-    .order("created_at", { ascending: false })
-    .limit(1);
+  const { data, error } = await supabase
+    .from("test_parcels")
+    .select(
+      `
+      id,
+      test_parcel_images (
+        id,
+        image_id,
+        created_at,
+        test_images (
+          image_url
+        )
+      ),
+      test_parcel_image_primary (
+          id,
+          image_id,
+          effective_date,
+          test_images (
+            image_url
+          )
+        )
+    `
+    )
+    .eq("id", parcel_id)
+    .single();
 
-  const [primaryRes, allRes] = await Promise.all([primary, all]);
-
-  const { data, error } = primaryRes;
-  const { data: d, error: e } = allRes;
-
-  if ((error || e) && !data) {
-    console.error(error || e);
+  if (error || !data) {
+    console.error(error);
     return (
       <div className="w-full flex flex-col items-center justify-center">
         <SearchX className="w-4 h-4 text-gray-400 mx-auto" />
-        <p className="text-center">Error</p>
-        <p>{(error || e)?.message}</p>
+        <p className="text-center">Error loading images</p>
+        <p className="text-sm text-red-500">{error?.message}</p>
       </div>
     );
   }
 
-  // If no primary image is found, return first image from all images. If no images are found, return placeholder.
-  const imageUrl =
-    data && data.length > 0
-      ? // @ts-ignore
-        data[0].test_images?.image_url
-      : d && d.length > 0
-        ? d[0].test_images?.image_url
-        : null;
+  const parcel = data;
 
-  if (!imageUrl) {
+  const imageEntries = parcel.test_parcel_images;
+
+  // Flatten and resolve image metadata
+  const images: { url: string; isPrimary: boolean; path: string }[] = [];
+
+  for (const entry of imageEntries) {
+    const imageUrl =
+      //@ts-ignore
+      entry.test_parcel_image_primary?.test_images?.image_url ??
+      entry.test_images?.image_url;
+
+    if (!imageUrl) continue;
+
+    //@ts-ignore
+    const isPrimary = !!entry.test_parcel_image_primary;
+
+    const { data: publicUrlData } = supabase.storage
+      .from("parcel-images")
+      .getPublicUrl(imageUrl);
+
+    if (publicUrlData?.publicUrl) {
+      images.push({
+        url: publicUrlData.publicUrl,
+        path: imageUrl,
+        isPrimary,
+      });
+    }
+  }
+
+  if (images.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center">
-        <ImageOff className="w-4 h-4 text-gray-400" />
+      <div className="w-full h-64 flex flex-col gap-4 items-center justify-center border rounded-lg">
+        <p className="text-gray-500">No images found</p>
+        <ParcelImageUploadModal parcelId={parcel_id} />
       </div>
     );
   }
 
-  const { data: publicUrL } = supabase.storage
-    .from("parcel-images")
-    .getPublicUrl(`${imageUrl}`);
-
-  console.log("Public URL:", publicUrL.publicUrl);
-
-  return (
-    <div className="w-full h-full relative">
-      <Image
-        src={publicUrL.publicUrl}
-        alt="Parcel Primary Image"
-        fill
-        className="object-cover rounded-lg"
-        sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, 33vw"
-      />
-    </div>
-  );
+  return <ParcelImageGallery images={images} parcel_id={parcel_id} />;
 }

@@ -23,9 +23,10 @@ export default function DeleteParcelImageModal({
     <div className="w-full">
       <button
         onClick={() => openModal(modalId)}
-        className={`p-2 bg-red-500 text-white rounded-md hover:bg-red-700 flex justify-center items-center ${currentModalId ? "hidden" : ""}`}
+        className={`${currentModalId ? "hidden" : ""}`}
+        title="Delete Parcel Image"
       >
-        <Trash size={12} />
+        <Trash className="w-4 h-4" />
       </button>
 
       <Modal open={isOpen} onClose={closeModal}>

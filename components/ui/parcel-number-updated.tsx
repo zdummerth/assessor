@@ -6,11 +6,13 @@ export default function ParcelNumber({
   lot,
   ext,
   id,
+  showCopy = true,
 }: {
   block: number;
   lot: number;
   ext: number;
   id: number;
+  showCopy?: boolean;
 }) {
   const formattedBlock = block.toString().padStart(4, "0");
   const formattedLot = lot.toString().padStart(3, "0");
@@ -22,7 +24,8 @@ export default function ParcelNumber({
       <Link href={`/test/parcels/${id}`} target="_blank">
         <span>{parcelNumber}</span>
       </Link>
-      <CopyToClipboard text={parcelNumber} />
+
+      {showCopy && <CopyToClipboard text={parcelNumber} />}
     </div>
   );
 }

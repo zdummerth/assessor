@@ -5,6 +5,7 @@ import { useModal } from "@/components/ui/modal-context";
 import Modal from "@/components/ui/modal";
 import { ImagePlus } from "lucide-react";
 import UploadImages from "./upload";
+import TooltipButton from "../tooltip-button";
 
 export default function ParcelImageUploadModal({
   parcelId,
@@ -20,6 +21,7 @@ export default function ParcelImageUploadModal({
       <button
         onClick={() => openModal(modalId)}
         className="hover:text-blue-700"
+        title="Upload Parcel Images"
       >
         <ImagePlus className="w-4 h-4" />
       </button>

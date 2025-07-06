@@ -17,7 +17,11 @@ const CopyToClipboard = ({ text }: { text: string }) => {
   };
 
   return (
-    <button onClick={handleCopy} className="flex items-center gap-2">
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-2"
+      title="Copy to Clipboard"
+    >
       {copied ? (
         <div className="relative">
           <Check size={14} className="text-green-500" />

@@ -1,3 +1,5 @@
+drop table if exists test_comparables cascade;
+
 CREATE TABLE
     test_comparables (
         parcel_id BIGINT REFERENCES test_parcels (id) ON DELETE CASCADE,
