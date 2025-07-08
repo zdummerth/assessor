@@ -19,7 +19,7 @@ const CopyToClipboard = ({ text }: { text: string }) => {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 print:hidden"
       title="Copy to Clipboard"
     >
       {copied ? (

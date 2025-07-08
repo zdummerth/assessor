@@ -3,13 +3,9 @@ import { createClient } from "@/utils/supabase/server";
 import ComparablesTable from "./simplified";
 import { Tables } from "@/database-types";
 
-type Parcel = Tables<"test_parcels">;
+type Comparable = Tables<"test_comparables">;
 
-export default async function ServerParcelComparables({
-  parcel,
-}: {
-  parcel: Parcel;
-}) {
+export default async function ServerParcelComparables() {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -25,8 +21,7 @@ export default async function ServerParcelComparables({
       test_parcel_images(test_images(*))
       )`
     )
-    .eq("subject_parcel", parcel.id)
-    .order("gower_dist", { ascending: true });
+    .limit(400);
 
   if (error || !data) {
     console.error(error);
@@ -39,5 +34,27 @@ export default async function ServerParcelComparables({
     );
   }
 
-  return <ComparablesTable values={data} />;
+  // Group by subject_parcel_id
+  const grouped = Object.values(
+    data.reduce<Record<string, Comparable[]>>((acc, row) => {
+      //@ts-ignore
+      const key = row.subject_parcel.id?.toString() ?? "unknown";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(row);
+      return acc;
+    }, {})
+  );
+
+  console.log("Grouped comparables:", grouped[0]);
+
+  return (
+    <div className="space-y-10 print:break-after-page">
+      {grouped.map((group, idx) => (
+        //@ts-ignore
+        <div key={group[0]?.subject_parcel.id ?? idx}>
+          <ComparablesTable values={group} />
+        </div>
+      ))}
+    </div>
+  );
 }

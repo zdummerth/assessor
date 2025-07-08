@@ -10,8 +10,6 @@ import Image from "next/image";
 const STORAGE_PREFIX =
   "https://ptaplfitlcnebqhoovrv.supabase.co/storage/v1/object/public/parcel-images/";
 
-type Comparable = Tables<"test_comparables">;
-
 export default function ComparablesTable({ values }: { values: any[] }) {
   const [layout, setLayout] = useState<"table" | "card">("table");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);

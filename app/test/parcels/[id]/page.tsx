@@ -5,7 +5,7 @@ import FormattedDate from "@/components/ui/formatted-date";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
 import ParcelValues from "@/components/parcel-values/server";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
-import ParcelComparables from "@/components/parcel-comparables/server";
+import ParcelComparables from "@/components/parcel-comparables/layouts";
 import AppealForm from "@/components/ui/notices/appeal/main";
 
 type Props = {
@@ -84,10 +84,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       </span>
 
       <Suspense fallback={<div>Loading parcel comparables...</div>}>
-        <ParcelComparables parcel={parcel} />
+        {/* <ParcelComparables parcel={parcel} /> */}
       </Suspense>
 
-      <AppealForm />
+      {/* <AppealForm /> */}
     </div>
   );
 }

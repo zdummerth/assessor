@@ -36,6 +36,53 @@ CREATE TABLE
         miles_distance NUMERIC
     );
 
+drop table if exists test_comparables cascade;
+
+CREATE TABLE
+    test_comparables (
+        parcel_id BIGINT REFERENCES test_parcels (id) ON DELETE CASCADE,
+        land_use TEXT,
+        grade TEXT,
+        gla NUMERIC,
+        story NUMERIC,
+        cdu TEXT,
+        cost_group TEXT,
+        year_built INTEGER,
+        neighborhood NUMERIC,
+        neighborhood_group TEXT,
+        address TEXT,
+        garage_area NUMERIC,
+        lat NUMERIC,
+        lon NUMERIC,
+        sale_id NUMERIC,
+        net_selling_price NUMERIC,
+        date_of_sale TIMESTAMP,
+        subject_parcel BIGINT REFERENCES test_parcels (id) ON DELETE CASCADE,
+        subject_address TEXT,
+        subject_land_use TEXT,
+        subject_cdu TEXT,
+        subject_gla NUMERIC,
+        subject_neighborhood_group TEXT,
+        subject_garage_area NUMERIC,
+        subject_story NUMERIC,
+        subject_year_built INTEGER,
+        subject_cost_group TEXT,
+        subject_lat NUMERIC,
+        subject_lon NUMERIC,
+        subject_appraised_total NUMERIC,
+        gower_dist NUMERIC,
+        cdu_adjustment NUMERIC,
+        neighborhood_group_adjustment NUMERIC,
+        cost_group_adjustment NUMERIC,
+        land_use_adjustment NUMERIC,
+        gla_adjustment NUMERIC,
+        year_built_adjustment NUMERIC,
+        story_adjustment NUMERIC,
+        garage_area_adjustment NUMERIC,
+        adjusted_sale_price NUMERIC,
+        miles_distance NUMERIC
+    );
+
 create table
     test_images (
         id serial primary key,
