@@ -1,6 +1,6 @@
 import { SearchX } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
-import ComparablesTable from "./simplified";
+import ComparablesTable from "./layouts";
 import { Tables } from "@/database-types";
 
 type Parcel = Tables<"test_parcels">;

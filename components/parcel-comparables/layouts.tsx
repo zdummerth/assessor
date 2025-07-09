@@ -1,31 +1,61 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Tables } from "@/database-types";
+import Image from "next/image";
+import { House } from "lucide-react";
 import ParcelNumber from "../ui/parcel-number-updated";
 import FormattedDate from "../ui/formatted-date";
-import { House, LayoutList } from "lucide-react";
-import Image from "next/image";
 
 const STORAGE_PREFIX =
   "https://ptaplfitlcnebqhoovrv.supabase.co/storage/v1/object/public/parcel-images/";
 
-export default function ComparablesTable({ values }: { values: any[] }) {
-  const [layout, setLayout] = useState<"table" | "card">("table");
+export default function ComparablesTableSimplified({
+  values,
+}: {
+  values: any[];
+}) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-  if (values.length === 0) return null;
-
-  const subject = values[0];
-  if (!subject?.subject_parcel) {
+  if (!values || values.length === 0) {
     return (
-      <div className="w-full flex flex-col items-center justify-center mt-16">
-        <p className="text-center">No comparables found</p>
+      <div className="text-center text-gray-500 py-10">
+        No comparables found
       </div>
     );
   }
 
+  const subject = values[0];
   const comparables = values;
+
+  const toggleSelection = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const selectAll = () => {
+    const allIds = comparables.map((c) => c.parcel_id?.id).filter(Boolean);
+    setSelectedIds(allIds);
+  };
+
+  const deselectAll = () => setSelectedIds([]);
+
+  const getImageUrl = (record: any) => {
+    const imageName =
+      record?.parcel_id?.test_parcel_image_primary?.test_images?.image_url ||
+      record?.parcel_id?.test_parcel_images?.[0]?.test_images?.image_url ||
+      null;
+    return imageName ? STORAGE_PREFIX + imageName : null;
+  };
+
+  const subjectImageName =
+    subject.subject_parcel?.test_parcel_image_primary?.test_images?.image_url ||
+    subject.subject_parcel?.test_parcel_images?.[0]?.test_images?.image_url ||
+    null;
+
+  const subjectImageUrl = subjectImageName
+    ? STORAGE_PREFIX + subjectImageName
+    : null;
 
   const selectedComps = useMemo(
     () =>
@@ -35,241 +65,112 @@ export default function ComparablesTable({ values }: { values: any[] }) {
     [comparables, selectedIds]
   );
 
-  const computeStats = (key: "net_selling_price" | "adjusted_price") => {
-    const values = selectedComps
-      .map((comp) => Number(comp[key] || 0))
-      .sort((a, b) => a - b);
-    if (values.length === 0) return { median: 0, average: 0 };
-    const median =
-      values.length % 2 === 1
-        ? values[Math.floor(values.length / 2)]
-        : (values[values.length / 2 - 1] + values[values.length / 2]) / 2;
-    const average = values.reduce((a, b) => a + b, 0) / values.length;
-    return { median, average };
+  const extractPrices = (arr: any[], key: string) =>
+    arr.map((c) => Number(c[key] || 0)).filter((n) => n > 0);
+
+  const median = (arr: number[]) => {
+    const sorted = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 !== 0
+      ? sorted[mid]
+      : (sorted[mid - 1] + sorted[mid]) / 2;
   };
 
-  const saleStats = computeStats("net_selling_price");
-  const adjustedStats = computeStats("adjusted_price");
+  const average = (arr: number[]) =>
+    arr.reduce((a, b) => a + b, 0) / arr.length || 0;
 
-  const getImageUrl = (record: any) => {
-    const imageName =
-      record.parcel_id.test_parcel_image_primary?.test_images?.image_url ||
-      record.parcel_id.test_parcel_images?.[0]?.test_images?.image_url ||
-      null;
-    return imageName ? STORAGE_PREFIX + imageName : null;
-  };
+  const salePrices = extractPrices(selectedComps, "net_selling_price");
+  const adjustedPrices = extractPrices(selectedComps, "adjusted_sale_price");
 
-  const toggleSelection = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
-
-  const selectAll = () => {
-    const allIds = comparables
-      .map((comp) => comp.parcel_id?.id)
-      .filter(Boolean);
-    setSelectedIds(allIds);
-  };
-
-  const deselectAll = () => {
-    setSelectedIds([]);
-  };
-
-  const LayoutToggle = () => (
-    <div className="flex gap-2 mb-4 print:hidden">
-      <button
-        className={`p-2 border rounded ${layout === "table" ? "bg-blue-100" : ""}`}
-        onClick={() => setLayout("table")}
-      >
-        <LayoutList className="w-4 h-4" />
-      </button>
-      <button
-        className={`p-2 border rounded ${layout === "card" ? "bg-blue-100" : ""}`}
-        onClick={() => setLayout("card")}
-      >
-        <span className="text-sm">Card</span>
-      </button>
-      <button
-        className="p-2 border rounded bg-green-100 text-sm"
-        onClick={selectAll}
-      >
-        Select All
-      </button>
-      <button
-        className="p-2 border rounded bg-red-100 text-sm"
-        onClick={deselectAll}
-      >
-        Deselect All
-      </button>
-    </div>
-  );
-
-  const ParcelCard = ({ record, index }: { record: any; index: number }) => {
-    const imageUrl = getImageUrl(record);
-    const id = record.parcel_id?.id;
-
-    return (
-      <div
-        className={`border rounded p-4 break-inside-avoid print:w-full ${
-          selectedIds.includes(id) ? "" : "print:hidden"
-        }`}
-      >
-        <div className="flex gap-6 mb-4">
-          <div className="w-48 h-48 relative">
-            {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt="Parcel"
-                fill
-                className="object-cover rounded"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
-                <House className="w-8 h-8 text-gray-400" />
-              </div>
-            )}
-          </div>
-          <div className="space-y-2">
-            <div className="text-xl font-semibold">{`Comp ${index + 1}`}</div>
-            <ParcelNumber {...record.parcel_id} />
-            <div className="text-base text-gray-800">{record.address}</div>
-            <div className="flex flex-wrap gap-4">
-              <div className="text-sm text-gray-600">
-                <strong>Neighborhood:</strong> {record.neighborhood_code} –{" "}
-                {record.neighborhood_group}
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>Land Use:</strong> {record.land_use}
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>CDU:</strong> {record.cdu} | <strong>GLA:</strong>{" "}
-                {record.total_living_area?.toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>Sale Price:</strong> $
-                {Number(record.net_selling_price || 0).toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>Adjusted Price:</strong> $
-                {Number(record.adjusted_price || 0).toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>Date of Sale:</strong>{" "}
-                {record.date_of_sale
-                  ? new Date(record.date_of_sale).toLocaleDateString()
-                  : "—"}
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>Gower Dist:</strong> {record.gower_dist?.toFixed(4)} |{" "}
-                <strong>Miles:</strong> {record.miles_distance?.toFixed(2)} mi
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>Sale ID:</strong> {record.sale_id}
-              </div>
-            </div>
-          </div>
+  const AdjustmentCell = ({ value }: { value: number }) => {
+    if (value > 0)
+      return (
+        <div className="text-xs text-green-600 mt-1">
+          +${Math.round(value).toLocaleString()}
         </div>
-        <div className="mt-2 print:hidden">
-          <label className="inline-flex items-center">
-            <input
-              type="checkbox"
-              checked={selectedIds.includes(id)}
-              onChange={() => toggleSelection(id)}
-            />
-            <span className="ml-2 text-sm">Select</span>
-          </label>
+      );
+    if (value < 0)
+      return (
+        <div className="text-xs text-red-600 mt-1">
+          -${Math.abs(Math.round(value)).toLocaleString()}
         </div>
-      </div>
-    );
+      );
+    return <div className="text-xs text-gray-500 mt-1">$0</div>;
   };
-
-  const subjectImageName =
-    subject.subject_parcel.test_parcel_image_primary?.test_images?.image_url ||
-    subject.subject_parcel.test_parcel_images?.[0]?.test_images?.image_url ||
-    null;
-
-  const subjectImageUrl = subjectImageName
-    ? STORAGE_PREFIX + subjectImageName
-    : null;
-
-  console.log("Subject Image URL:", subject.subject_parcel);
 
   return (
-    <div className="w-full">
+    <div className="w-full p-1">
+      {/* Subject Header */}
       <div className="mb-6 p-4 border rounded bg-yellow-50">
-        <div className="flex items-center gap-4">
-          <div className="relative">
+        <div className="flex flex-wrap gap-6 items-start justify-between">
+          <div className="w-48 h-48 relative rounded overflow-hidden">
             {subjectImageUrl ? (
               <Image
                 src={subjectImageUrl}
-                alt="Subject"
-                width={350}
-                height={350}
-                className="object-cover rounded"
+                alt="Subject Image"
+                fill
+                className="object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
+              <div className="w-full h-full flex items-center justify-center bg-gray-100">
                 <House className="w-8 h-8 text-gray-400" />
               </div>
             )}
           </div>
-          <div className="flex justiyfy-between w-full">
-            <div>
-              <div className="text-lg font-semibold mb-1">
-                Current Value: $
-                {subject.subject_appraised_total.toLocaleString()}
-              </div>
-              <ParcelNumber {...subject.subject_parcel} />
-              <div className="">{subject.subject_address}</div>
-              <div>Age: {subject.subject_adjusted_age}</div>
+
+          <div className="flex-1 min-w-[300px]">
+            <div className="text-lg font-semibold mb-1">
+              Current Value: $
+              {subject.subject_appraised_total?.toLocaleString()}
+            </div>
+            <ParcelNumber {...subject.subject_parcel} />
+            <div>{subject.subject_address}</div>
+            <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+              <div>Year Built: {subject.subject_year_built}</div>
               <div>
                 Garage Area: {subject.subject_garage_area?.toLocaleString()} sq
                 ft
               </div>
-              <div className="">
-                {subject.subject_neighborhood_code} –{" "}
-                {subject.subject_neighborhood_group} |{" "}
-                {subject.subject_land_use}
-              </div>
-              <div className="">
-                CDU: {subject.subject_cdu} | GLA:{" "}
-                {subject.subject_total_living_area?.toLocaleString()}
+              <div>GLA: {subject.subject_gla?.toLocaleString()} sq ft</div>
+              <div>Stories: {subject.subject_story}</div>
+              <div>CDU: {subject.subject_cdu}</div>
+              <div>Land Use: {subject.subject_land_use}</div>
+              <div>
+                Neighborhood: {subject.subject_neighborhood} –{" "}
+                {subject.subject_neighborhood_group}
               </div>
             </div>
           </div>
-          <div className="mt-4 space-y-2 text-sm text-gray-700">
-            <div>
-              <strong>Selected Comparables:</strong> {selectedComps.length}
-            </div>
 
-            <table className="text-sm text-left text-gray-700 border w-full max-w-md">
+          <div className="mt-4 text-sm">
+            <div className="font-semibold mb-2">Selected Price Summary</div>
+            <table className="text-sm text-left border w-full max-w-sm">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-4 py-2 border">Metric</th>
-                  <th className="px-4 py-2 border">Median</th>
-                  <th className="px-4 py-2 border">Average</th>
+                  <th className="px-2 py-1 border">Type</th>
+                  <th className="px-2 py-1 border">Median</th>
+                  <th className="px-2 py-1 border">Average</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="px-4 py-2 border font-semibold">Sale Price</td>
-                  <td className="px-4 py-2 border">
-                    ${Math.round(saleStats.median || 0).toLocaleString()}
+                  <td className="px-2 py-1 border">Sale Price</td>
+                  <td className="px-2 py-1 border">
+                    ${Math.round(median(salePrices)).toLocaleString()}
                   </td>
-                  <td className="px-4 py-2 border">
-                    ${Math.round(saleStats.average || 0).toLocaleString()}
+                  <td className="px-2 py-1 border">
+                    ${Math.round(average(salePrices)).toLocaleString()}
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2 border font-semibold">
-                    Adjusted Price
+                  <td className="px-2 py-1 border font-semibold">Adj. Price</td>
+                  <td className="px-2 py-1 border text-green-800 font-semibold">
+                    ${Math.round(median(adjustedPrices)).toLocaleString()}{" "}
+                    <br />
+                    <span className="text-xs">Recommended</span>
                   </td>
-                  <td className="px-4 py-2 border">
-                    ${Math.round(adjustedStats.median || 0).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 border">
-                    ${Math.round(adjustedStats.average || 0).toLocaleString()}
+                  <td className="px-2 py-1 border">
+                    ${Math.round(average(adjustedPrices)).toLocaleString()}
                   </td>
                 </tr>
               </tbody>
@@ -278,116 +179,128 @@ export default function ComparablesTable({ values }: { values: any[] }) {
         </div>
       </div>
 
-      <LayoutToggle />
+      {/* Selection Controls */}
+      <div className="mb-4 flex gap-3 print:hidden">
+        <button
+          className="px-3 py-1 text-sm border rounded bg-green-100"
+          onClick={selectAll}
+        >
+          Select All
+        </button>
+        <button
+          className="px-3 py-1 text-sm border rounded bg-red-100"
+          onClick={deselectAll}
+        >
+          Deselect All
+        </button>
+        <span className="text-sm text-gray-600 mt-1">
+          Selected: {selectedComps.length}
+        </span>
+      </div>
 
-      {layout === "table" ? (
-        <div className="overflow-x-auto border rounded-lg">
-          <table className="w-full text-sm text-left border-collapse">
-            <thead className="bg-gray-100 text-gray-700 text-xs">
-              <tr>
-                <th className="p-2 print:hidden">Select</th>
-                <th className="p-2">Image</th>
-                <th className="p-2">Details</th>
-                <th className="p-2 print:hidden">Gower</th>
-                <th className="p-2">Distance</th>
-                <th className="p-2">Area</th>
-                <th className="p-2">CDU</th>
-                <th className="p-2">Stories</th>
-                <th className="p-2">Age</th>
-                <th className="p-2">Sale</th>
-              </tr>
-            </thead>
+      {/* Comparables Table */}
+      <div className="overflow-x-auto border rounded-lg">
+        <table className="w-full text-sm text-left border-collapse">
+          <thead className="bg-gray-100 text-gray-700">
+            <tr>
+              <th className="px-2 py-2 print:hidden">Select</th>
+              <th className="px-2 py-2">Image</th>
+              <th className="px-2 py-2">Details</th>
+              <th className="px-2 py-2">Sale</th>
+              <th className="px-2 py-2">GLA</th>
+              <th className="px-2 py-2">Garage</th>
+              <th className="px-2 py-2">Story</th>
+              <th className="px-2 py-2">CDU</th>
+              <th className="px-2 py-2">Built</th>
+              <th className="px-2 py-2">Use</th>
+              <th className="px-2 py-2">Nbhd</th>
+              <th className="px-2 py-2">Dist</th>
+              <th className="px-2 py-2 print:hidden">Gower</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparables.map((row) => {
+              const id = row.parcel_id?.id;
+              const imageUrl = getImageUrl(row);
+              const isSelected = selectedIds.includes(id);
 
-            <tbody>
-              {comparables.map((comp, i) => {
-                const imageUrl = getImageUrl(comp);
-                const id = comp.parcel_id?.id;
-                const isSelected = selectedIds.includes(id);
-                return (
-                  <tr key={id} className={!isSelected ? "print:hidden" : ""}>
-                    <td className="px-4 py-2 print:hidden">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelection(id)}
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <div className="w-24 h-24 relative rounded overflow-hidden">
-                        {imageUrl ? (
-                          <Image
-                            src={imageUrl}
-                            alt="Placeholder"
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <House className="w-8 h-8 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2">
-                      <div className="flex flex-col gap-1">
-                        <div>{comp.address?.split(",")[0]}</div>
-                        <div className="text-xs text-gray-600">
-                          <ParcelNumber {...comp.parcel_id} />
+              return (
+                <tr key={id} className={!isSelected ? "print:hidden" : ""}>
+                  <td className="px-2 py-2 print:hidden">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelection(id)}
+                    />
+                  </td>
+                  <td className="px-2 py-2">
+                    <div className="w-24 h-24 relative rounded overflow-hidden">
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt="Parcel"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <House className="w-6 h-6 text-gray-400" />
                         </div>
-                        <div className="text-xs text-gray-600">
-                          Sale ID: {comp.sale_id || "—"}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          Neighborhood: {comp.neighborhood_code} –{" "}
-                          {comp.neighborhood_group}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          Land Use: {comp.land_use}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 print:hidden">
-                      {comp.gower_dist?.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-2">
-                      {comp.miles_distance?.toFixed(1)} mi
-                    </td>
-                    <td className="px-4 py-2">
-                      <div>
-                        Living: {comp.total_living_area?.toLocaleString()}
-                      </div>
-                      <div>Garage: {comp.garage_area?.toLocaleString()}</div>
-                    </td>
-                    <td className="px-4 py-2">{comp.cdu}</td>
-                    <td className="px-4 py-2">{comp.stories}</td>
-                    <td className="px-4 py-2">{comp.adjusted_age}</td>
-
-                    <td className="px-4 py-2">
-                      <div>
-                        <FormattedDate date={comp.date_of_sale} month="short" />
-                        <div>
-                          $
-                          {Number(comp.net_selling_price || 0).toLocaleString()}
-                        </div>
-                        <div>
-                          Adj: $
-                          {Number(comp.adjusted_price || 0).toLocaleString()}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="w-full space-y-6 print:columns-1 print:gap-4 print:[&>*:nth-child(3n)]:mb-16">
-          {comparables.map((comp, i) => (
-            <ParcelCard key={comp.parcel_id?.id} record={comp} index={i} />
-          ))}
-        </div>
-      )}
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-2 py-2">
+                    <ParcelNumber {...row.parcel_id} />
+                    <div>{row.address?.split(",")[0]}</div>
+                  </td>
+                  <td className="px-2 py-2">
+                    <FormattedDate date={row.date_of_sale} month="short" />
+                    <div>${Number(row.net_selling_price).toLocaleString()}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Adj: $
+                      {Math.round(row.adjusted_sale_price).toLocaleString()}
+                    </div>
+                  </td>
+                  <td className="px-2 py-2">
+                    <div>{row.gla?.toLocaleString()}</div>
+                    <AdjustmentCell value={row.gla_adjustment} />
+                  </td>
+                  <td className="px-2 py-2">
+                    <div>{row.garage_area?.toLocaleString()}</div>
+                    <AdjustmentCell value={row.garage_area_adjustment} />
+                  </td>
+                  <td className="px-2 py-2">
+                    <div>{row.story}</div>
+                    <AdjustmentCell value={row.story_adjustment} />
+                  </td>
+                  <td className="px-2 py-2">
+                    <div>{row.cdu}</div>
+                    <AdjustmentCell value={row.cdu_adjustment} />
+                  </td>
+                  <td className="px-2 py-2">
+                    <div>{row.year_built}</div>
+                    <AdjustmentCell value={row.year_built_adjustment} />
+                  </td>
+                  <td className="px-2 py-2">
+                    <div>{row.land_use}</div>
+                    <AdjustmentCell value={row.land_use_adjustment} />
+                  </td>
+                  <td className="px-2 py-2">
+                    <div>{row.neighborhood_group}</div>
+                    <AdjustmentCell value={row.neighborhood_group_adjustment} />
+                  </td>
+                  <td className="px-2 py-2">
+                    {row.miles_distance?.toFixed(2)} mi
+                  </td>
+                  <td className="px-2 py-2 print:hidden">
+                    {row.gower_dist?.toFixed(3)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

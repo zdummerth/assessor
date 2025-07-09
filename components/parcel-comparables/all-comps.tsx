@@ -21,7 +21,7 @@ export default async function ServerParcelComparables() {
       test_parcel_images(test_images(*))
       )`
     )
-    .limit(400);
+    .limit(500);
 
   if (error || !data) {
     console.error(error);
