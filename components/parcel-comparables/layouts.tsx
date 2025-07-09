@@ -69,6 +69,7 @@ export default function ComparablesTableSimplified({
     arr.map((c) => Number(c[key] || 0)).filter((n) => n > 0);
 
   const median = (arr: number[]) => {
+    if (arr.length === 0) return 0;
     const sorted = [...arr].sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
     return sorted.length % 2 !== 0
@@ -166,8 +167,6 @@ export default function ComparablesTableSimplified({
                   <td className="px-2 py-1 border font-semibold">Adj. Price</td>
                   <td className="px-2 py-1 border text-green-800 font-semibold">
                     ${Math.round(median(adjustedPrices)).toLocaleString()}{" "}
-                    <br />
-                    <span className="text-xs">Recommended</span>
                   </td>
                   <td className="px-2 py-1 border">
                     ${Math.round(average(adjustedPrices)).toLocaleString()}

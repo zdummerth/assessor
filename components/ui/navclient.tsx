@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 const NavClient = () => {
   const pathname = usePathname();
   const links = [
-    { href: "/appeals", label: "Appeals" },
+    // { href: "/appeals", label: "Appeals" },
     // { href: "/sales", label: "Sales" },
     // { href: "/appraisers", label: "Appraisers" },
     // { href: "/building-permits", label: "Permits" },
-    { href: "/wards/summary/test", label: "Wards" },
-    { href: "/cdas/summary", label: "CDAs" },
+    // { href: "/wards/summary/test", label: "Wards" },
+    // { href: "/cdas/summary", label: "CDAs" },
+    { href: "/pdf-editor", label: "PDF Tools" },
   ];
 
   if (pathname === "/login") {

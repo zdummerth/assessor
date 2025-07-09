@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useSearch } from "@/lib/client-queries";
 import Address from "@/components/ui/address";
-import ParcelNumber from "./ui/parcel-number";
+import ParcelNumber from "./ui/parcel-number-updated";
 
 export default function ParcelSearchClient() {
   const [query, setQuery] = useState("");
@@ -19,6 +19,8 @@ export default function ParcelSearchClient() {
       [parcel]: !prev[parcel],
     }));
   };
+
+  console.log({ error });
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -40,6 +42,12 @@ export default function ParcelSearchClient() {
         {data &&
           data.map((parcel: any) => {
             const isOpen = expanded[parcel.parcel] ?? false;
+            const block = parseInt(parcel.parcel.slice(0, 4), 10);
+            const lot = parcel.parcel.slice(7, 10);
+            const ext = parseInt(parcel.parcel.slice(11, 14), 10);
+
+            const idString = `${block}${lot}${ext}`;
+            const numericId = Number(idString);
             return (
               <li
                 key={parcel.parcel}
@@ -47,7 +55,12 @@ export default function ParcelSearchClient() {
               >
                 {/* Minimized View */}
                 <div className="flex justify-between items-center mb-2">
-                  <ParcelNumber parcelNumber={parcel.parcel} />
+                  <ParcelNumber
+                    block={block}
+                    lot={lot}
+                    ext={ext}
+                    id={numericId}
+                  />
                   <button
                     onClick={() => toggleExpand(parcel.parcel)}
                     className="text-blue-600 text-sm underline"

@@ -2,8 +2,8 @@
 
 import PdfSplitter from "./splitter";
 import PdfMerger from "./merger";
-import ImagePrintPreview from "./image-print-preview";
-import FillableFormPdf from "./generate-pdf";
+// import ImagePrintPreview from "./image-print-preview";
+// import FillableFormPdf from "./generate-pdf";
 
 export default function PdfToolsDashboard() {
   return (
@@ -13,13 +13,11 @@ export default function PdfToolsDashboard() {
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* PDF Splitter */}
         <div className="border rounded-lg shadow p-4 print:hidden">
           <h2 className="text-lg font-semibold mb-4">Split a PDF</h2>
           <PdfSplitter />
         </div>
 
-        {/* PDF Merger */}
         <div className="border rounded-lg shadow p-4 print:hidden">
           <h2 className="text-lg font-semibold mb-4">Merge PDFs</h2>
           <PdfMerger />
@@ -33,10 +31,10 @@ export default function PdfToolsDashboard() {
         <ImagePrintPreview />
       </div> */}
       {/* Prefilled PDF Generator */}
-      <div className="border rounded-lg shadow p-4 mt-6 print:hidden">
+      {/* <div className="border rounded-lg shadow p-4 mt-6 print:hidden">
         <h2 className="text-lg font-semibold mb-4">Prefilled PDF Generator</h2>
         <FillableFormPdf />
-      </div>
+      </div> */}
     </div>
   );
 }

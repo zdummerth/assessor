@@ -19,6 +19,7 @@ export default function ParcelNumber({
   const formattedExt = ext.toString().padStart(3, "0");
 
   const parcelNumber = `${formattedBlock}-9-${formattedLot}.${formattedExt}`;
+
   return (
     <div className="flex gap-2">
       <Link href={`/test/parcels/${id}`} target="_blank">

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log("Search results:", data[0].addresses);
+    // console.log("Search results:", data[0].addresses);
 
     return Response.json(data);
   } catch (err) {
