@@ -39,7 +39,7 @@ export default function NoticeHeader({
 }: NoticeHeaderProps) {
   return (
     <>
-      <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center pt-4">
         <Image src={stlSeal} alt="St. Louis City Seal" width={80} height={80} />
       </div>
 
