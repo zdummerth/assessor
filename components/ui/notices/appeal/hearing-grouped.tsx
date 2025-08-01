@@ -121,7 +121,7 @@ export default function GroupedNoticeFromHearings({ data }: { data: any[] }) {
 
           {/* Hearing Table on Separate Page */}
           <div className="mt-12 text-xs print:mt-4 print:break-after-page">
-            <table className="w-full text-sm border border-gray-400 break-inside-auto">
+            <table className="w-full border border-gray-400 break-inside-auto">
               <thead className="bg-gray-100 print:table-header-group">
                 <tr>
                   <th className="border px-2 py-1 text-left">Parcel</th>
@@ -136,7 +136,9 @@ export default function GroupedNoticeFromHearings({ data }: { data: any[] }) {
               <tbody className="print:table-row-group">
                 {hearings.map((h, j) => (
                   <tr key={j} className="break-inside-avoid">
-                    <td className="border px-2 py-1">{h.parcel_number}</td>
+                    <td className="border px-2 py-1 whitespace-nowrap">
+                      {h.parcel_number}
+                    </td>
                     <td className="border px-2 py-1">{h.site_address}</td>
                     <td className="border px-2 py-1">
                       <FormattedDate
