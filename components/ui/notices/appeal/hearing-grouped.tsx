@@ -74,7 +74,7 @@ export default function GroupedNoticeFromHearings({ data }: { data: any[] }) {
           className="w-[90%] mx-auto print:bg-white print:text-black print:border-none"
         >
           {/* Notice Header and Intro */}
-          <div className="border p-8 print:p-0 break-inside-avoid">
+          <div className="border p-8 print:p-0 print:border-none print:bg-white print:text-black break-inside-avoid">
             <NoticeHeader
               mailingName={formData.owner_name}
               mailingAddress1={formData.address_1}
@@ -120,7 +120,7 @@ export default function GroupedNoticeFromHearings({ data }: { data: any[] }) {
           </div>
 
           {/* Hearing Table on Separate Page */}
-          <div className="mt-12 print:mt-4 print:break-after-page">
+          <div className="mt-12 text-xs print:mt-4 print:break-after-page">
             <table className="w-full text-sm border border-gray-400 break-inside-auto">
               <thead className="bg-gray-100 print:table-header-group">
                 <tr>
