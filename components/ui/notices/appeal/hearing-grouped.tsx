@@ -16,8 +16,8 @@ type MailingKey = string;
 
 function groupHearingsByMailingAddress(
   records: any[]
-): Record<MailingKey, { formData: any; hearings: Hearing[] }> {
-  const groups: Record<MailingKey, { formData: any; hearings: Hearing[] }> = {};
+): { formData: any; hearings: Hearing[] }[] {
+  const groups: Record<string, { formData: any; hearings: Hearing[] }> = {};
 
   records.forEach((rec) => {
     const key = [
@@ -54,7 +54,17 @@ function groupHearingsByMailingAddress(
     });
   });
 
-  return groups;
+  // Convert to array and sort by mailing address_1 then address_2
+  const sortedGroups = Object.values(groups).sort((a, b) => {
+    const a1 = a.formData.address_1?.toLowerCase() || "";
+    const b1 = b.formData.address_1?.toLowerCase() || "";
+    const a2 = a.formData.address_2?.toLowerCase() || "";
+    const b2 = b.formData.address_2?.toLowerCase() || "";
+
+    return a1.localeCompare(b1) || a2.localeCompare(b2);
+  });
+
+  return sortedGroups;
 }
 
 export default function GroupedNoticeFromHearings({ data }: { data: any[] }) {
