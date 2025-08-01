@@ -10,7 +10,7 @@ interface NoticeHeaderProps {
   officeTitle?: string;
   cityHallAddress1?: string;
   cityHallAddress2?: string;
-
+  paddingTop?: string;
   mailingName?: string;
   mailingAddress1?: string;
   mailingAddress2?: string;
@@ -36,10 +36,13 @@ export default function NoticeHeader({
   mailingState = "",
   mailingZip = "",
   date,
+  paddingTop = "pt-4",
 }: NoticeHeaderProps) {
   return (
     <>
-      <div className="flex flex-col items-center justify-center pt-4">
+      <div
+        className={`flex flex-col items-center justify-center ${paddingTop}`}
+      >
         <Image src={stlSeal} alt="St. Louis City Seal" width={80} height={80} />
       </div>
 
@@ -65,7 +68,7 @@ export default function NoticeHeader({
 
       {/* Mailing name, address, and date */}
       <div className="flex justify-between mt-7 mb-16 text-sm/4">
-        <div className="relative left-12">
+        <div className="relative left-10">
           {mailingName && <p>{mailingName}</p>}
           {mailingAddress1 && <p>{mailingAddress1}</p>}
           {mailingAddress2 && <p>{mailingAddress2}</p>}
