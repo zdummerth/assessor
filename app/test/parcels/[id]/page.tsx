@@ -6,6 +6,8 @@ import ParcelNumber from "@/components/ui/parcel-number-updated";
 import ParcelValues from "@/components/parcel-values/server";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
 import ParcelComparables from "@/components/parcel-comparables/server";
+import ParcelStructures from "@/components/parcel-structures/server";
+import ParcelAddress from "@/components/parcel-addresses/server";
 import AppealForm from "@/components/ui/notices/appeal/main";
 
 type Props = {
@@ -72,16 +74,30 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </p>
         )}
       </div>
-      <div className="w-full md:w-96 print:hidden">
-        <ParcelImagePrimary parcel_id={parcel.id} />
+      <div className="flex gap-8">
+        <div className="w-full md:w-96 print:hidden">
+          <ParcelImagePrimary parcel_id={parcel.id} />
+        </div>
+
+        <div>
+          <span className="print:hidden">
+            <Suspense fallback={<div>Loading parcel values...</div>}>
+              <ParcelValues parcel={parcel} />
+            </Suspense>
+          </span>
+
+          <div className="flex-1">
+            <Suspense fallback={<div>Loading parcel address...</div>}>
+              <ParcelAddress parcel={parcel} />
+            </Suspense>
+          </div>
+        </div>
       </div>
 
-      <h2 className="mt-4 mb-2 print:hidden">Value</h2>
-      <span className="print:hidden">
-        <Suspense fallback={<div>Loading parcel values...</div>}>
-          <ParcelValues parcel={parcel} />
-        </Suspense>
-      </span>
+      <h2 className="mt-4 mb-2 print:hidden">Structures</h2>
+      <Suspense fallback={<div>Loading parcel structures...</div>}>
+        <ParcelStructures parcel={parcel} />
+      </Suspense>
 
       <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables parcel={parcel} />

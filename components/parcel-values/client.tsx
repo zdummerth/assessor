@@ -43,7 +43,7 @@ export default function ClientParcelValues({
   return (
     <div className="flex flex-col gap-2">
       <div className="border rounded p-3 shadow-sm flex flex-col gap-1">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <h3 className="text-sm text-gray-600">
               Tax Year - {latest.tax_year}
