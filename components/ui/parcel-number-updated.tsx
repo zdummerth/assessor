@@ -21,7 +21,7 @@ export default function ParcelNumber({
   const parcelNumber = `${formattedBlock}-9-${formattedLot}.${formattedExt}`;
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-4 font-semibold justify-between items-center text-sm text-gray-800 border rounded p-2">
       <Link href={`/test/parcels/${id}`} target="_blank">
         <span>{parcelNumber}</span>
       </Link>

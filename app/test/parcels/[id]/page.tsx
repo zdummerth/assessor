@@ -58,50 +58,44 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   // console.log("Parcel data:", parcel);
 
   return (
-    <div className="w-full p-4">
-      <div className="flex items-center mb-4 gap-4 print:hidden">
-        <h1 className="text-2xl font-semibold print:hidden">
-          <ParcelNumber
-            id={parcel.id}
-            block={parcel.block}
-            lot={parcel.lot}
-            ext={parcel.ext}
-          />
-        </h1>
-        {parcel.retired_at && (
-          <p className="bg-red-100 text-red-800 p-2 rounded print:hidden">
-            Retired: <FormattedDate date={parcel.retired_at} />
-          </p>
-        )}
-      </div>
-      <div className="flex gap-8">
-        <div className="w-full md:w-96 print:hidden">
+    <div className="w-full flex flex-col gap-4 p-4 max-w-4xl mx-auto">
+      <div className="flex justify-between gap-8">
+        <div className="w-full md:w-96">
           <ParcelImagePrimary parcel_id={parcel.id} />
         </div>
 
-        <div>
-          <span className="print:hidden">
-            <Suspense fallback={<div>Loading parcel values...</div>}>
-              <ParcelValues parcel={parcel} />
-            </Suspense>
-          </span>
-
-          <div className="flex-1">
+        <div className="flex flex-col h-64 gap-1 justify-between">
+          <div className="flex flex-col">
+            <ParcelNumber
+              id={parcel.id}
+              block={parcel.block}
+              lot={parcel.lot}
+              ext={parcel.ext}
+            />
+            {parcel.retired_at && (
+              <p className="bg-red-100 text-red-800 p-2 rounded print:hidden">
+                Retired: <FormattedDate date={parcel.retired_at} />
+              </p>
+            )}
+          </div>
+          <div className="">
             <Suspense fallback={<div>Loading parcel address...</div>}>
               <ParcelAddress parcel={parcel} />
             </Suspense>
           </div>
+          <span className="">
+            <Suspense fallback={<div>Loading parcel values...</div>}>
+              <ParcelValues parcel={parcel} />
+            </Suspense>
+          </span>
         </div>
       </div>
-
-      <h2 className="mt-4 mb-2 print:hidden">Structures</h2>
       <Suspense fallback={<div>Loading parcel structures...</div>}>
         <ParcelStructures parcel={parcel} />
       </Suspense>
-
-      <Suspense fallback={<div>Loading parcel comparables...</div>}>
+      {/* <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables parcel={parcel} />
-      </Suspense>
+      </Suspense> */}
 
       {/* <AppealForm /> */}
     </div>

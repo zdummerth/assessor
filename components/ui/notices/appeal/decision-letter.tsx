@@ -247,7 +247,7 @@ export default function Notice({ formData: initialData }: { formData?: any }) {
           <div className="text-xs space-y-4">
             <p>
               Enclosed is a copy of the decision of the Board of Equalization
-              regarding your property appeal for this year. The assessed value
+              regarding your property appeal for this year. The appraised value
               per the decision is shown above.
             </p>
 

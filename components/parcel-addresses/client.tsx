@@ -9,8 +9,8 @@ export default function ClientParcelAddress({ address }: { address: any }) {
   }
 
   return (
-    <div className="border rounded p-4 shadow-sm bg-white text-sm text-gray-800">
-      <div className="flex justify-between items-center mb-1">
+    <div className="border rounded p-2 text-sm text-gray-800">
+      <div className="flex gap-4 justify-between items-center mb-1">
         <div className="font-semibold">
           {address.housenumber} {address.street}
         </div>
@@ -18,6 +18,9 @@ export default function ClientParcelAddress({ address }: { address: any }) {
       </div>
       {address.postcode && (
         <div className="text-xs text-gray-500">{address.postcode}</div>
+      )}
+      {address.district && (
+        <div className="text-xs text-gray-500 mt-1">{address.district}</div>
       )}
     </div>
   );

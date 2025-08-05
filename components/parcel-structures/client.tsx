@@ -19,63 +19,71 @@ export default function ClientParcelStructures({
 
   const latest = data[0];
 
+  const InfoItem = ({
+    value,
+    label,
+  }: {
+    value: React.ReactNode;
+    label: string;
+  }) => (
+    <div>
+      <div className="font-semibold">{value}</div>
+      <div className="text-xs text-gray-500">{label}</div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-2">
-      <div className="border rounded p-4 shadow-sm bg-white flex flex-col gap-2">
-        <div className="flex justify-between items-center">
-          <h3 className="text-sm text-gray-600">
-            Year Built – {latest.year_built || "N/A"}
-          </h3>
+      <div className="border rounded p-2 text-sm text-gray-800 flex">
+        <div className="flex-1">
+          <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-2">
+            <InfoItem
+              value={latest.test_conditions[0]?.condition || "—"}
+              label={
+                latest.test_conditions[0]
+                  ? `condition as of ${latest.test_conditions[0].effective_date}`
+                  : "Condition"
+              }
+            />
+            <InfoItem value={latest.year_built || "N/A"} label="Year Built" />
+            <InfoItem value={latest.material || "—"} label="Material" />
+            <InfoItem value={latest.bedrooms ?? "—"} label="Bedrooms" />
+            <InfoItem
+              value={`${latest.full_bathrooms ?? 0}`}
+              label="Full Baths"
+            />
+            <InfoItem
+              value={`${latest.half_bathrooms ?? 0}`}
+              label="Half Baths"
+            />
+            {latest.test_structure_sections?.length > 0 && (
+              <>
+                {latest.test_structure_sections.map((s: any) => {
+                  const hasFinished = s.finished_area > 0;
+                  const hasUnfinished = s.unfinished_area > 0;
+                  if (!hasFinished && !hasUnfinished) return null;
+
+                  const valueParts = [];
+                  if (hasFinished)
+                    valueParts.push(`${s.finished_area} ft² finished`);
+                  if (hasUnfinished)
+                    valueParts.push(`${s.unfinished_area} ft² unfinished`);
+
+                  return (
+                    <InfoItem
+                      key={s.id}
+                      value={valueParts.join(", ")}
+                      label={s.type}
+                    />
+                  );
+                })}
+              </>
+            )}
+          </div>
+        </div>
+        <div className="print:hidden">
           <StructureHistoryModal parcel={parcel} structures={data} />
         </div>
-
-        <div className="text-sm text-gray-700">
-          <span className="font-medium">Material:</span> {latest.material}
-        </div>
-
-        <div className="text-sm text-gray-700">
-          <span className="font-medium">Beds:</span> {latest.bedrooms}{" "}
-          <span className="ml-4 font-medium">Baths:</span>{" "}
-          {latest.full_bathrooms} Full, {latest.half_bathrooms} Half
-        </div>
-
-        {latest.test_structure_sections?.length > 0 && (
-          <div className="text-sm text-gray-700">
-            <span className="font-medium">Sections:</span>
-            <ul className="list-disc list-inside mt-1">
-              {latest.test_structure_sections.map((s: any) => {
-                const hasFinished = s.finished_area > 0;
-                const hasUnfinished = s.unfinished_area > 0;
-                if (!hasFinished && !hasUnfinished) return null;
-
-                return (
-                  <li key={s.id}>
-                    {s.type}{" "}
-                    {hasFinished && (
-                      <span> – {s.finished_area} ft² finished</span>
-                    )}
-                    {hasUnfinished && (
-                      <span>
-                        {hasFinished ? ", " : " – "}
-                        {s.unfinished_area} ft² unfinished
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-
-        {latest.test_conditions?.length > 0 && (
-          <div className="text-sm text-gray-700">
-            <span className="font-medium">Condition:</span>{" "}
-            {latest.test_conditions[0].condition}{" "}
-            <span className="text-xs text-gray-500 ml-2">
-              (as of {latest.test_conditions[0].effective_date})
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );

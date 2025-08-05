@@ -28,7 +28,7 @@ export default function ParcelImageGallery({
     <div className="w-full space-y-4">
       {/* Main Image */}
       <div className="w-full flex">
-        <div className="relative  w-full h-80 border rounded-lg overflow-hidden">
+        <div className="relative w-full h-64 border rounded-lg overflow-hidden">
           <Image
             src={selectedUrl}
             alt="Primary parcel image"
