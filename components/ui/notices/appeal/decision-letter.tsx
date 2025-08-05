@@ -1,142 +1,66 @@
 "use client";
 
-import React, { useState } from "react";
-import { useModal } from "@/components/ui/modal-context";
-import Modal from "@/components/ui/modal";
+import React from "react";
 import NoticeHeader from "../header";
 import FormattedDate from "../../formatted-date";
+import siganatureImage from "@/public/shawns-signature.png";
+import Image from "next/image";
 
-export default function Notice({ formData: initialData }: { formData?: any }) {
-  const { currentModalId, openModal, closeModal } = useModal();
-  const modalId = `edit-hearing-form`;
-  const isOpen = currentModalId === modalId;
-
-  const initialFormData = {
-    parcel_number: "",
-    owner_name: "",
-    address_1: "",
-    address_2: "",
-    city: "",
-    state: "",
-    zip: "",
-    site_address: "",
-    appeal_number: "",
-    room: "Kennedy Hearing Room 208",
-    hearing_date: "",
-    res_land_original: "",
-    res_structure_original: "",
-    res_land_new: "",
-    res_structure_new: "",
-    com_land_original: "",
-    com_structure_original: "",
-    com_land_new: "",
-    com_structure_new: "",
-  };
-
-  const [formData, setFormData] = useState(initialData ?? initialFormData);
-
-  const hasChanges =
-    JSON.stringify(formData) !== JSON.stringify(initialFormData);
-
+export default function Notice({ formData }: { formData: any }) {
   const currentTimestampString = new Date().toLocaleString("en-US", {
     timeZone: "America/Chicago",
   });
 
   const requiredFieldsEntered =
-    formData.parcel_number &&
-    formData.owner_name &&
-    formData.address_1 &&
-    (formData.address_2 || (formData.city && formData.state && formData.zip)) &&
-    formData.site_address;
+    formData?.parcel_number &&
+    formData?.owner_name &&
+    formData?.address_1 &&
+    (formData?.address_2 ||
+      (formData?.city && formData?.state && formData?.zip)) &&
+    formData?.site_address;
+
+  const calculateAssessed = (
+    value: number | string,
+    multiplier: number,
+    roundTo: number
+  ) => {
+    const raw = Number(value || 0) * multiplier;
+    return Math.round(raw / roundTo) * roundTo;
+  };
+
+  const assessed = {
+    res_land_original: calculateAssessed(formData.res_land_original, 0.19, 10),
+    res_structure_original: calculateAssessed(
+      formData.res_structure_original,
+      0.19,
+      10
+    ),
+    res_land_new: calculateAssessed(formData.res_land_new, 0.19, 10),
+    res_structure_new: calculateAssessed(formData.res_structure_new, 0.19, 10),
+    com_land_original: calculateAssessed(formData.com_land_original, 0.32, 100),
+    com_structure_original: calculateAssessed(
+      formData.com_structure_original,
+      0.32,
+      100
+    ),
+    com_land_new: calculateAssessed(formData.com_land_new, 0.32, 100),
+    com_structure_new: calculateAssessed(formData.com_structure_new, 0.32, 100),
+  };
+
+  const total_original =
+    assessed.res_land_original +
+    assessed.res_structure_original +
+    assessed.com_land_original +
+    assessed.com_structure_original;
+
+  const total_new =
+    assessed.res_land_new +
+    assessed.res_structure_new +
+    assessed.com_land_new +
+    assessed.com_structure_new;
 
   return (
     <div className="w-[90%] mx-auto print:break-after-page border p-8 print:p-0 print:border-none print:bg-white print:text-black">
-      {hasChanges && (
-        <button
-          onClick={() => setFormData(initialFormData)}
-          className="mt-2 px-4 py-2 bg-gray-300 text-sm rounded hover:bg-gray-400 print:hidden"
-        >
-          Reset
-        </button>
-      )}
-
-      <div className="flex justify-end mb-4 print:hidden">
-        <button
-          onClick={() => openModal(modalId)}
-          className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Edit Info
-        </button>
-      </div>
-
-      <Modal open={isOpen} onClose={closeModal}>
-        <div className="p-6 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-center">
-            Edit Property Info
-          </h2>
-
-          {[
-            { label: "Owner Name", key: "owner_name" },
-            { label: "Address 1", key: "address_1" },
-            { label: "Address 2", key: "address_2" },
-            { label: "City", key: "city" },
-            { label: "State", key: "state" },
-            { label: "ZIP Code", key: "zip" },
-            { label: "Parcel Number", key: "parcel_number" },
-            { label: "Site Address", key: "site_address" },
-            { label: "Hearing Date", key: "hearing_date" },
-            { label: "Appeal Number", key: "appeal_number" },
-            { label: "Residential Land (Original)", key: "res_land_original" },
-            {
-              label: "Residential Structure (Original)",
-              key: "res_structure_original",
-            },
-            { label: "Residential Land (New)", key: "res_land_new" },
-            { label: "Residential Structure (New)", key: "res_structure_new" },
-            { label: "Commercial Land (Original)", key: "com_land_original" },
-            {
-              label: "Commercial Structure (Original)",
-              key: "com_structure_original",
-            },
-            { label: "Commercial Land (New)", key: "com_land_new" },
-            { label: "Commercial Structure (New)", key: "com_structure_new" },
-          ].map(({ label, key }) => (
-            <label key={key} className="text-sm">
-              {label}
-              <input
-                className="w-full border px-2 py-1 mt-1 rounded"
-                type={key === "hearing_date" ? "date" : "text"}
-                //@ts-ignore
-                value={formData[key] ?? ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, [key]: e.target.value })
-                }
-              />
-            </label>
-          ))}
-
-          <label className="text-sm">
-            Room
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              type="text"
-              value={formData.room ?? ""}
-              onChange={(e) =>
-                setFormData({ ...formData, room: e.target.value })
-              }
-            />
-          </label>
-
-          <button
-            onClick={closeModal}
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Save
-          </button>
-        </div>
-      </Modal>
-
-      {/* <div className="pt-4"></div> */}
       <NoticeHeader
         mailingName={formData.owner_name}
         mailingAddress1={formData.address_1}
@@ -151,26 +75,26 @@ export default function Notice({ formData: initialData }: { formData?: any }) {
         <>
           <div className="my-4 flex flex-wrap gap-8 text-xs">
             <div>
-              <p className="">Parcel Number</p>
+              <p>Parcel Number</p>
               <div>{formData.parcel_number}</div>
             </div>
             <div>
-              <p className="">Property Address</p>
+              <p>Property Address</p>
               <div>{formData.site_address}</div>
             </div>
             <div>
-              <p className="">Hearing Date</p>
+              <p>Hearing Date</p>
               <div>
                 <FormattedDate date={formData.hearing_date} />
               </div>
             </div>
             <div>
-              <p className="">Appeal Number</p>
+              <p>Appeal Number</p>
               <div>{formData.appeal_number}</div>
             </div>
           </div>
 
-          {/* Value Comparison Table */}
+          {/* Assessed Value Table */}
           <div className="my-4 text-xs">
             <div className="overflow-x-auto border rounded">
               <table className="min-w-full table-auto border-collapse text-xs">
@@ -178,10 +102,10 @@ export default function Notice({ formData: initialData }: { formData?: any }) {
                   <tr>
                     <th className="border px-4 py-2 text-left">Category</th>
                     <th className="border px-4 py-2 text-right">
-                      Original Appraised Value
+                      Original Assessed Value
                     </th>
                     <th className="border px-4 py-2 text-right">
-                      New Appraised Value
+                      New Assessed Value
                     </th>
                   </tr>
                 </thead>
@@ -189,54 +113,42 @@ export default function Notice({ formData: initialData }: { formData?: any }) {
                   {[
                     {
                       label: "Residential Land",
-                      original: formData.res_land_original,
-                      new: formData.res_land_new,
+                      original: assessed.res_land_original,
+                      new: assessed.res_land_new,
                     },
                     {
                       label: "Residential Structure",
-                      original: formData.res_structure_original,
-                      new: formData.res_structure_new,
+                      original: assessed.res_structure_original,
+                      new: assessed.res_structure_new,
                     },
                     {
                       label: "Commercial Land",
-                      original: formData.com_land_original,
-                      new: formData.com_land_new,
+                      original: assessed.com_land_original,
+                      new: assessed.com_land_new,
                     },
                     {
                       label: "Commercial Structure",
-                      original: formData.com_structure_original,
-                      new: formData.com_structure_new,
+                      original: assessed.com_structure_original,
+                      new: assessed.com_structure_new,
                     },
                   ].map((row) => (
                     <tr key={row.label}>
                       <td className="border px-4 py-2">{row.label}</td>
                       <td className="border px-4 py-2 text-right">
-                        ${Number(row.original).toLocaleString() || "0"}
+                        ${row.original.toLocaleString()}
                       </td>
                       <td className="border px-4 py-2 text-right">
-                        ${Number(row.new).toLocaleString() || "0"}
+                        ${row.new.toLocaleString()}
                       </td>
                     </tr>
                   ))}
                   <tr className="font-semibold bg-gray-50">
                     <td className="border px-4 py-2">Total</td>
                     <td className="border px-4 py-2 text-right">
-                      $
-                      {(
-                        Number(formData.res_land_original || 0) +
-                        Number(formData.res_structure_original || 0) +
-                        Number(formData.com_land_original || 0) +
-                        Number(formData.com_structure_original || 0)
-                      ).toLocaleString()}
+                      ${total_original.toLocaleString()}
                     </td>
                     <td className="border px-4 py-2 text-right">
-                      $
-                      {(
-                        Number(formData.res_land_new || 0) +
-                        Number(formData.res_structure_new || 0) +
-                        Number(formData.com_land_new || 0) +
-                        Number(formData.com_structure_new || 0)
-                      ).toLocaleString()}
+                      ${total_new.toLocaleString()}
                     </td>
                   </tr>
                 </tbody>
@@ -247,7 +159,7 @@ export default function Notice({ formData: initialData }: { formData?: any }) {
           <div className="text-xs space-y-4">
             <p>
               Enclosed is a copy of the decision of the Board of Equalization
-              regarding your property appeal for this year. The appraised value
+              regarding your property appeal for this year. The assessed value
               per the decision is shown above.
             </p>
 
@@ -294,9 +206,16 @@ export default function Notice({ formData: initialData }: { formData?: any }) {
           </div>
 
           {/* Signature Line */}
-          <div className="mt-16 text-sm text-left">
-            <div className="border-t border-black w-64 mb-1" />
-            <div>Board Member</div>
+          <div className="mt-8 text-sm text-left">
+            {/* <div className="border-t border-black w-64 mb-1" /> */}
+            <Image
+              src={siganatureImage}
+              alt="Signature"
+              width={200}
+              height={74}
+            />
+            <p className="font-semibold">Shawn T. Ordway</p>
+            <p className="text-xs">Interim Assessor</p>
           </div>
         </>
       ) : (
