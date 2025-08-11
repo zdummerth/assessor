@@ -14,8 +14,8 @@ export default function Notice({ formData }: { formData: any }) {
   const requiredFieldsEntered =
     formData?.parcel_number &&
     formData?.owner_name &&
-    formData?.address_1 &&
-    (formData?.address_2 ||
+    (formData?.address_1 ||
+      formData?.address_2 ||
       (formData?.city && formData?.state && formData?.zip)) &&
     formData?.site_address;
 
