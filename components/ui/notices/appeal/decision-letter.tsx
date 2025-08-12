@@ -117,7 +117,7 @@ export default function Notice({ formData }: { formData: any }) {
                       new: assessed.res_land_new,
                     },
                     {
-                      label: "Residential Structure",
+                      label: "Residential Improvements",
                       original: assessed.res_structure_original,
                       new: assessed.res_structure_new,
                     },
@@ -127,7 +127,7 @@ export default function Notice({ formData }: { formData: any }) {
                       new: assessed.com_land_new,
                     },
                     {
-                      label: "Commercial Structure",
+                      label: "Commercial Improvements",
                       original: assessed.com_structure_original,
                       new: assessed.com_structure_new,
                     },
