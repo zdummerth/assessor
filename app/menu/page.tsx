@@ -14,6 +14,7 @@ const Page = () => {
     { href: "/pdf-editor", label: "PDF Tools" },
     { href: "/notices/decision-letter", label: "Decision Letter" },
     { href: "/notices/hearing", label: "Hearing Notice" },
+    { href: "/notices/appeal-results", label: "Appeal Results" },
   ];
 
   return (
