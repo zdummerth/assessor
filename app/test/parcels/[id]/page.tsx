@@ -93,9 +93,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <Suspense fallback={<div>Loading parcel structures...</div>}>
         <ParcelStructures parcel={parcel} />
       </Suspense>
-      {/* <Suspense fallback={<div>Loading parcel comparables...</div>}>
+      <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables parcel={parcel} />
-      </Suspense> */}
+      </Suspense>
 
       {/* <AppealForm /> */}
     </div>
