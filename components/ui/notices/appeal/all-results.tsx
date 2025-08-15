@@ -141,7 +141,7 @@ export default function HearingResultsCardsTwoPerPage() {
   }, [rows]);
 
   // Two cards per printed page
-  const pairs = useMemo(() => chunk(formatted, 3), [formatted]);
+  const pairs = useMemo(() => chunk(formatted, 2), [formatted]);
 
   return (
     <div className="space-y-4 text-black">
