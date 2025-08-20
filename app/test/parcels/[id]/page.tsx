@@ -122,9 +122,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           weights={{
             land_use: 5,
             district: 4,
-            lat: 4,
-            lon: 4,
-            floor_finished: 2,
+            lat: 3,
+            lon: 3,
+            floor_finished: 4,
             basement_finished: 2,
             basement_unfinished: 2,
             // crawl_finished: 2,
@@ -133,7 +133,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
             // addition_unfinished: 2,
             // attic_finished: 2,
             // attic_unfinished: 2,
-            condition: 2,
+            condition: 3,
           }}
         />
       </Suspense>

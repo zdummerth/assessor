@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Tables } from "@/database-types";
+import FormattedDate from "../ui/formatted-date";
 import SaleHistoryModal from "./history-modal";
 
 type Parcel = Tables<"test_parcels">;
@@ -83,7 +84,7 @@ export default function ClientParcelSales({
                   : "—"}
               </div>
               <div className="text-xs text-gray-500">
-                {toDate(s.date_of_sale)}
+                <FormattedDate date={s.date_of_sale || ""} />
               </div>
             </div>
             <div className="text-xs text-gray-600">
