@@ -80,7 +80,7 @@ export default async function ParcelImageServer({
 
   if (images.length === 0) {
     return (
-      <div className="w-full h-64 flex flex-col gap-4 items-center justify-center border rounded-lg">
+      <div className="w-full h-72 flex flex-col gap-4 items-center justify-center border rounded-lg">
         <p className="text-gray-500">No images found</p>
         <ParcelImageUploadModal parcelId={parcel_id} />
       </div>

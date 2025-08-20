@@ -5,10 +5,13 @@ import FormattedDate from "@/components/ui/formatted-date";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
 import ParcelValues from "@/components/parcel-values/server";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
-import ParcelComparables from "@/components/parcel-comparables/server";
+import ParcelComparables from "@/components/parcel-comparables/server-test";
+// import ParcelComparables_ from "@/components/parcel-comparables/server";
 import ParcelStructures from "@/components/parcel-structures/server";
 import ParcelAddress from "@/components/parcel-addresses/server";
-import AppealForm from "@/components/ui/notices/appeal/main";
+import ParcelSales from "@/components/parcel-sales/server";
+import ParcelLandUses from "@/components/parcel-land-uses/server";
+// import AppealForm from "@/components/ui/notices/appeal/main";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -59,42 +62,80 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="w-full flex flex-col gap-4 p-4 max-w-4xl mx-auto">
-      <div className="flex justify-between gap-8">
-        <div className="w-full md:w-96">
+      <div className="grid gap-8 md:grid-cols-[24rem,1fr] h-72">
+        <div className="w-full h-full">
           <ParcelImagePrimary parcel_id={parcel.id} />
         </div>
 
-        <div className="flex flex-col h-64 gap-1 justify-between">
-          <div className="flex flex-col">
-            <ParcelNumber
-              id={parcel.id}
-              block={parcel.block}
-              lot={parcel.lot}
-              ext={parcel.ext}
-            />
+        <div className="flex flex-col gap-1 justify-between">
+          <div className="flex flex-col justify-between">
+            <div>
+              <ParcelNumber
+                id={parcel.id}
+                block={parcel.block}
+                lot={parcel.lot}
+                ext={parcel.ext}
+              />
+            </div>
             {parcel.retired_at && (
-              <p className="bg-red-100 text-red-800 p-2 rounded print:hidden">
+              <p className="mt-2 bg-red-100 text-red-800 p-2 rounded print:hidden">
                 Retired: <FormattedDate date={parcel.retired_at} />
               </p>
             )}
           </div>
+
+          {/* Row 2: Address */}
           <div className="">
             <Suspense fallback={<div>Loading parcel address...</div>}>
               <ParcelAddress parcel={parcel} />
             </Suspense>
           </div>
-          <span className="">
+
+          {/* Row 3: Land use */}
+          <div className="">
+            <Suspense fallback={<div>Loading land use...</div>}>
+              <ParcelLandUses parcel={parcel} />
+            </Suspense>
+          </div>
+
+          {/* Row 4: Values */}
+          <div className="">
             <Suspense fallback={<div>Loading parcel values...</div>}>
               <ParcelValues parcel={parcel} />
             </Suspense>
-          </span>
+          </div>
         </div>
       </div>
+
       <Suspense fallback={<div>Loading parcel structures...</div>}>
         <ParcelStructures parcel={parcel} />
       </Suspense>
+      <Suspense fallback={<div>Loading parcel sales...</div>}>
+        <ParcelSales parcel={parcel} />
+      </Suspense>
+      {/* <Suspense fallback={<div>Loading parcel comparables...</div>}>
+        <ParcelComparables_ parcel={parcel} />
+      </Suspense> */}
       <Suspense fallback={<div>Loading parcel comparables...</div>}>
-        <ParcelComparables parcel={parcel} />
+        <ParcelComparables
+          parcelId={parcel.id}
+          weights={{
+            land_use: 5,
+            district: 4,
+            lat: 4,
+            lon: 4,
+            floor_finished: 2,
+            basement_finished: 2,
+            basement_unfinished: 2,
+            // crawl_finished: 2,
+            // crawl_unfinished: 2,
+            // addition_finished: 2,
+            // addition_unfinished: 2,
+            // attic_finished: 2,
+            // attic_unfinished: 2,
+            condition: 2,
+          }}
+        />
       </Suspense>
 
       {/* <AppealForm /> */}

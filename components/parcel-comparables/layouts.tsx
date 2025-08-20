@@ -104,28 +104,7 @@ export default function ComparablesTableSimplified({
       {/* Subject Header */}
       <div className="mb-6 p-4 border rounded bg-yellow-50">
         <div className="flex flex-wrap gap-6 items-start justify-between">
-          <div className="w-48 h-48 relative rounded overflow-hidden">
-            {subjectImageUrl ? (
-              <Image
-                src={subjectImageUrl}
-                alt="Subject Image"
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                <House className="w-8 h-8 text-gray-400" />
-              </div>
-            )}
-          </div>
-
           <div className="flex-1 min-w-[300px]">
-            <div className="text-lg font-semibold mb-1">
-              Current Value: $
-              {subject.subject_appraised_total?.toLocaleString()}
-            </div>
-            <ParcelNumber {...subject.subject_parcel} />
-            <div>{subject.subject_address}</div>
             <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
               <div>Year Built: {subject.subject_year_built}</div>
               <div>
