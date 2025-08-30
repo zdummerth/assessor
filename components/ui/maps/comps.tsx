@@ -71,7 +71,7 @@ export default function CompsMapClient({
   neighborhoods,
   cityGeoJson = true,
   className = "",
-  height = "60vh",
+  height = "10vh",
 }: {
   points: MapPoint[];
   neighborhoods?: Neighborhood[];

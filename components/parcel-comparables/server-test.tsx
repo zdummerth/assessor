@@ -335,7 +335,8 @@ export default async function ServerCompsTable({
           </div>
           <CompsMapClientWrapper
             points={points}
-            className="w-full h-64"
+            className="w-full mb-24"
+            height={"80vh"}
             key={JSON.stringify(compPoints)}
           />
         </>

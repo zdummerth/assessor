@@ -11,6 +11,7 @@ import ParcelStructures from "@/components/parcel-structures/server";
 import ParcelAddress from "@/components/parcel-addresses/server";
 import ParcelSales from "@/components/parcel-sales/server";
 import ParcelLandUses from "@/components/parcel-land-uses/server";
+import ParcelScores from "@/components/parcel-scores/server";
 // import AppealForm from "@/components/ui/notices/appeal/main";
 
 type Props = {
@@ -61,7 +62,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   // console.log("Parcel data:", parcel);
 
   return (
-    <div className="w-full flex flex-col gap-4 p-4 max-w-4xl mx-auto">
+    <div className="w-full flex flex-col gap-4 p-4 mb-10 max-w-6xl mx-auto">
       <div className="grid gap-8 md:grid-cols-[24rem,1fr] h-72">
         <div className="w-full h-full">
           <ParcelImagePrimary parcel_id={parcel.id} />
@@ -116,6 +117,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       {/* <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables_ parcel={parcel} />
       </Suspense> */}
+      <Suspense fallback={<div>Loading parcel scores...</div>}>
+        <ParcelScores parcelId={parcel.id} />
+      </Suspense>
       <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables
           parcelId={parcel.id}
