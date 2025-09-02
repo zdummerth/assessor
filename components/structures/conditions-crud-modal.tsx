@@ -45,7 +45,7 @@ export default function ConditionsCRUDModal({
   structureId,
   conditions,
   revalidatePath,
-  buttonLabel = "Manage Conditions",
+  buttonLabel = "Edit Conditions",
   modalTitle = "Conditions",
 }: Props) {
   const { currentModalId, openModal, closeModal } = useModal();
