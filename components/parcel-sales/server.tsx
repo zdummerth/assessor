@@ -1,58 +1,213 @@
-import { SearchX } from "lucide-react";
+// app/components/SalesWithStructuresCardsServer.tsx
 import { createClient } from "@/utils/supabase/server";
-import ClientParcelSales from "./client";
-import { Tables } from "@/database-types";
+import graphql from "@/utils/supabase/graphql";
+import ParcelNumber from "../ui/parcel-number-updated";
 
-type Parcel = Tables<"test_parcels">;
+type GQLEdge<T> = { node: T };
 
-export default async function ServerParcelSales({
-  parcel,
+type SaleType = {
+  id: number;
+  sale_type: string | null;
+  is_valid: boolean | null;
+  created_at: string | null;
+  retired_at: string | null;
+};
+
+type Sale = {
+  sale_id: number;
+  date_of_sale: string; // ISO
+  net_selling_price: number | null;
+  test_sales_sale_typesCollection?: {
+    edges: GQLEdge<{
+      effective_date: string | null;
+      test_sale_types: SaleType;
+    }>[];
+  };
+};
+
+type Condition = {
+  id: number;
+  condition: string;
+  effective_date: string; // ISO
+  created_at: string;
+};
+
+type Structure = {
+  id: number;
+  parcel_id: number;
+  year_built: number | null;
+  full_bathrooms: number | null;
+  half_bathrooms: number | null;
+  test_conditionsCollection?: { edges: GQLEdge<Condition>[] };
+};
+
+function unwrapEdges<T>(edges?: GQLEdge<T>[]) {
+  return (edges ?? []).map((e) => e.node);
+}
+function fmtUSD(n: number | null | undefined) {
+  if (n == null) return "—";
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(n);
+}
+function fmtDate(s?: string | null) {
+  if (!s) return "—";
+  const d = new Date(s);
+  return isNaN(+d) ? "—" : d.toLocaleDateString();
+}
+function pickAsOfCondition(conds: Condition[], saleDateISO: string) {
+  const saleDate = new Date(saleDateISO);
+  const candidates = conds
+    .filter((c) => {
+      const ed = new Date(c.effective_date);
+      return !isNaN(+ed) && ed <= saleDate;
+    })
+    .sort((a, b) => +new Date(b.effective_date) - +new Date(a.effective_date));
+  return candidates[0] ?? null;
+}
+
+export default async function SalesWithStructuresCardsServer({
+  parcelId,
 }: {
-  parcel: Parcel;
+  parcelId: number;
 }) {
   const supabase = await createClient();
 
-  // Fetch sales for this parcel via the link table, and include sale-type history.
-  // We join test_sales (fact) using the link table test_parcel_sales (inner),
-  // and pull all types from test_sales_sale_types and test_sale_types.
-  const { data, error } = await supabase
-    //@ts-expect-error need updated types
-    .from("test_sales")
-    .select(
-      `
-      sale_id,
-      date_of_sale,
-      sale_year,
-      net_selling_price,
-      year,
-      report_timestamp,
-      test_parcel_sales!inner(
-        parcel_id
-      ),
-      test_sales_sale_types(
-        effective_date,
-        test_sale_types(
-          id,
-          sale_type,
-          is_valid
-        )
-      )
-    `
-    )
-    .eq("test_parcel_sales.parcel_id", parcel.id)
-    .order("date_of_sale", { ascending: false });
+  // GraphQL: parcel → sales + parcel → structures(+conditions)
+  const query = /* GraphQL */ `
+    query GetParcelSales($parcelId: BigInt!) {
+      test_parcel_salesCollection(filter: { parcel_id: { eq: $parcelId } }) {
+        edges {
+          node {
+            parcel_id
+            test_sales {
+              sale_id
+              date_of_sale
+              net_selling_price
+              test_sales_sale_typesCollection {
+                edges {
+                  node {
+                    effective_date
+                    test_sale_types {
+                      id
+                      sale_type
+                      is_valid
+                      created_at
+                      retired_at
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
 
-  if (error || !data) {
-    console.error(error);
-    return (
-      <div className="w-full flex flex-col items-center justify-center mt-16">
-        <SearchX className="w-16 h-16 text-gray-400 mx-auto" />
-        <p className="text-center">Error fetching sales data</p>
-        <p>{error?.message}</p>
-      </div>
-    );
+      # Use parcel_id to fetch all structures on the parcel
+      test_structuresCollection(filter: { id: { eq: $parcelId } }) {
+        edges {
+          node {
+            id
+            year_built
+            full_bathrooms
+            half_bathrooms
+            test_conditionsCollection {
+              edges {
+                node {
+                  id
+                  condition
+                  effective_date
+                  created_at
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const res = await graphql(query, { parcelId }, supabase);
+  console.log("SalesWithStructuresCardsServer: GraphQL response", res);
+
+  const salesNodes =
+    res?.data?.test_parcel_salesCollection?.edges?.map((e: any) => e.node) ??
+    [];
+  const sales: Sale[] = salesNodes.flatMap((n: any) => n?.test_sales ?? []);
+
+  const structures: Structure[] =
+    res?.data?.test_structuresCollection?.edges?.map((e: any) => e.node) ?? [];
+
+  console.log("SalesWithStructuresCardsServer: sales", sales);
+  // console.log("SalesWithStructuresCardsServer: structures", structures);
+
+  // Flatten conditions on server
+  const structsWithConds = structures.map((s) => ({
+    ...s,
+    conditions: unwrapEdges<Condition>(s.test_conditionsCollection?.edges),
+  }));
+
+  // Build cards: one per (sale × structure), compute condition as-of sale date
+  const cards = sales.flatMap((sale) =>
+    structsWithConds.map((st) => {
+      const asOf = pickAsOfCondition(st.conditions, sale.date_of_sale);
+      return {
+        key: `${sale.sale_id}-${st.id}`,
+        parcelId: st.parcel_id,
+
+        condition: asOf?.condition ?? "—",
+        saleDate: fmtDate(sale.date_of_sale),
+        salePrice: fmtUSD(sale.net_selling_price),
+        saleType: sale.test_sales_sale_typesCollection
+          ? (unwrapEdges(sale.test_sales_sale_typesCollection.edges)
+              .sort((a, b) =>
+                (b.effective_date ?? "").localeCompare(a.effective_date ?? "")
+              )
+              .map((t) => t.test_sale_types.sale_type)[0] ?? "—")
+          : "—",
+      };
+    })
+  );
+
+  if (cards.length === 0) {
+    return <div className="rounded border p-4 text-gray-600">No results.</div>;
   }
 
-  //@ts-expect-error need updated types
-  return <ClientParcelSales parcel={parcel} data={data} />;
+  cards.sort((a, b) => {
+    const da = new Date(a.saleDate).getTime() || 0;
+    const db = new Date(b.saleDate).getTime() || 0;
+    return db - da;
+  });
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {cards.map((c) => (
+        <div
+          key={c.key}
+          className="rounded border overflow-hidden shadow-sm hover:shadow transition-shadow"
+        >
+          {/* Content */}
+          <div className="p-3 space-y-2">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-1 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Condition</span>
+                <span className="font-medium">{c.condition}</span>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500">Sale Type</div>
+              <div className="font-medium text-sm">{c.saleType}</div>
+            </div>
+            <div className="pt-2 flex items-center justify-between border-t">
+              <span>{c.saleDate}</span>
+              <span className="font-medium">{c.salePrice}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }

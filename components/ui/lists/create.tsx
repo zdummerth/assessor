@@ -1,8 +1,7 @@
 "use client";
 import { create, createListItem } from "@/app/lists/actions";
 import { useActionState, useEffect } from "react";
-import { useToast } from "@/components/ui/toast-context";
-
+import { useToast } from "@/context/ToastContext";
 const initalState = {
   error: "",
   success: "",
@@ -10,24 +9,16 @@ const initalState = {
 
 const CreateList = () => {
   const [state, action, pending] = useActionState(create, initalState);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (state.error) {
-      showToast({
-        message: state.error,
-        type: "error",
-        timeOpen: 10000,
-      });
+      toast({ description: state.error, variant: "error", duration: 10000 });
     }
     if (state.success) {
-      showToast({
-        message: state.success,
-        type: "success",
-        timeOpen: 2000,
-      });
+      toast({ description: state.success, variant: "success", duration: 5000 });
     }
-  }, [state, showToast]);
+  }, [state, toast]);
   return (
     <form action={action}>
       <div className="flex justify-end space-x-2">
@@ -51,24 +42,16 @@ export const CreateListItem = (props: {
   listId: number;
 }) => {
   const [state, action, pending] = useActionState(createListItem, initalState);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (state.error) {
-      showToast({
-        message: state.error,
-        type: "error",
-        timeOpen: 10000,
-      });
+      toast({ description: state.error, variant: "error", duration: 10000 });
     }
     if (state.success) {
-      showToast({
-        message: state.success,
-        type: "success",
-        timeOpen: 2000,
-      });
+      toast({ description: state.success, variant: "success", duration: 5000 });
     }
-  }, [state, showToast]);
+  }, [state, toast]);
   return (
     <form action={action}>
       <input type="hidden" name="parcel_number" value={props.parcel_number} />

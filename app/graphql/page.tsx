@@ -1,57 +1,72 @@
 import { createClient } from "@/utils/supabase/server";
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import graphql from "@/utils/supabase/graphql";
 
-const fetchQuery = async (operation: string, variables: any, supabase: any) => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const response = await fetch(`${SUPABASE_URL}/graphql/v1`, {
-    method: "POST",
-    //@ts-ignore
-    headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${session?.access_token ?? SUPABASE_ANON_KEY}`,
-    },
-    body: JSON.stringify({
-      query: operation,
-      variables,
-    }),
-  });
-
-  return await response.json();
-};
-const WardsList: React.FC = async () => {
+const SalesWithStructures: React.FC = async () => {
   const supabase = await createClient();
 
   const query = `
-      query {
-        parcel_reviews_2025Collection(first: 3) {
-          edges {
-            node {
-              parcel_number,
-              bpsCollection(first: 3) {
-                edges {
-                  node {
-                    id,
-                    permit_type,
-                    issued_date
-                  }
+      query GetParcelSales($parcelId: BigInt!) {
+  test_parcel_salesCollection(filter: { parcel_id: { eq: $parcelId } }) {
+    edges {
+      node {
+        parcel_id
+        test_sales {
+          sale_id
+          date_of_sale
+          net_selling_price
+          test_sales_sale_typesCollection {
+            edges {
+              node {
+                effective_date
+                test_sale_types {
+                  id
+                  is_valid
+                  created_at
+                  retired_at
                 }
               }
             }
           }
         }
       }
+    }
+  }
+  test_structuresCollection(filter: {
+    id: {eq: $parcelId}
+  }) {
+    edges {
+      node {
+        year_built
+        id
+        full_bathrooms
+        half_bathrooms
+        test_conditionsCollection {
+          edges {
+            node {
+              id
+              condition
+              effective_date
+              created_at
+            }
+          }
+        }
+      }
+    }
+  }
+}
   `;
 
-  const res = await fetchQuery(query, {}, supabase);
+  const res = await graphql(
+    query,
+    {
+      parcelId: 58151900,
+    },
+    supabase
+  );
 
   console.log("Fetched data:", res);
   // console.log("Fetched data:", session);
   return <div className="container mx-auto p-4">graphql testing</div>;
 };
 
-export default WardsList;
+export default SalesWithStructures;

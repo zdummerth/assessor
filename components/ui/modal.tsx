@@ -37,7 +37,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children }) => {
       />
 
       {/* Modal Panel */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full mx-4 transform transition-transform duration-200 ease-out scale-100 animate-fade-in-up">
+      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 transform transition-transform duration-200 ease-out scale-100 animate-fade-in-up">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">

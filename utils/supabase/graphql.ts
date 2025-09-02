@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+// import { createClient } from "@/utils/supabase/server";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

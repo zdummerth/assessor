@@ -2,6 +2,7 @@
 
 import React from "react";
 import AddressHistoryModal from "./history-modal";
+import Address from "../ui/address";
 
 export default function ClientParcelAddress({ address }: { address: any }) {
   if (!address) {
@@ -12,7 +13,10 @@ export default function ClientParcelAddress({ address }: { address: any }) {
     <div className="border rounded p-2 text-sm text-gray-800">
       <div className="flex gap-4 justify-between items-center mb-1">
         <div className="font-semibold">
-          {address.housenumber} {address.street}
+          <Address
+            address={`${address.housenumber} ${address.street}`}
+            fullAddress={`${address.housenumber} ${address.street}, ${address.city}, ${address.state} ${address.postcode}`}
+          />
         </div>
         <AddressHistoryModal address={address} />
       </div>

@@ -55,22 +55,6 @@ export default function ClientParcelSales({
     maximumFractionDigits: 0,
   });
 
-  const toDate = (d?: string | null) =>
-    d ? new Date(d).toLocaleDateString() : "—";
-
-  const InfoItem = ({
-    value,
-    label,
-  }: {
-    value: React.ReactNode;
-    label: string;
-  }) => (
-    <div>
-      <div className="font-semibold">{value}</div>
-      <div className="text-xs text-gray-500">{label}</div>
-    </div>
-  );
-
   return (
     <div className="flex flex-col gap-2">
       {/* Recent sales list */}

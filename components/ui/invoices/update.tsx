@@ -1,8 +1,7 @@
 "use client";
 import { useActionState, useState, useEffect } from "react";
 import { update, updateLineItem } from "@/app/invoices/actions";
-import Toast from "@/components/ui/toast";
-import { useToast } from "@/components/ui/toast-context";
+import { useToast } from "@/context/ToastContext";
 import { Tables } from "@/database-types";
 
 const initalState = {
@@ -15,24 +14,24 @@ const Update = ({ item }: { item: Tables<"invoices"> }) => {
   const [formState, setFormState] = useState({
     customer_name: item.customer_name || "",
   });
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (state.error) {
-      showToast({
-        message: state.error,
-        type: "error",
-        timeOpen: 10000,
+      toast({
+        title: state.error,
+        variant: "error",
+        duration: 8000,
       });
     }
     if (state.success) {
-      showToast({
-        message: state.success,
-        type: "success",
-        timeOpen: 2000,
+      toast({
+        title: state.success,
+        variant: "success",
+        duration: 2000,
       });
     }
-  }, [state, showToast]);
+  }, [state, toast]);
 
   const edited = item.customer_name !== formState.customer_name;
   return (
@@ -79,25 +78,25 @@ export const UpdateLineItem = (props: {
   const [state, action, pending] = useActionState(updateLineItem, initalState);
   const [formState, setFormState] = useState(initialFormState);
 
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (state.error) {
-      showToast({
-        message: state.error,
-        type: "error",
-        timeOpen: 10000,
+      toast({
+        description: state.error,
+        variant: "error",
+        duration: 8000,
       });
     }
     if (state.success) {
       setFormState(initialFormState);
-      showToast({
-        message: state.success,
-        type: "success",
-        timeOpen: 2000,
+      toast({
+        description: state.success,
+        variant: "success",
+        duration: 2000,
       });
     }
-  }, [state, showToast]);
+  }, [state, toast]);
 
   const edited =
     initialFormState.description !== formState.description ||

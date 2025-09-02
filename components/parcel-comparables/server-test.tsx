@@ -1,7 +1,7 @@
 // app/components/ServerCompsTable.tsx
 import { createClient } from "@/utils/supabase/server";
-import ParcelNumber from "../ui/parcel-number-updated";
 import CompsMapClientWrapper from "../ui/maps/comps-map-client-wrapper";
+import CompsCardList from "./client-cards";
 
 type Weights = Partial<{
   year_built: number;
@@ -101,7 +101,7 @@ function fmtDate(d?: string | null) {
 
 export default async function ServerCompsTable({
   parcelId,
-  k = 5,
+  k = 4,
   years = 2,
   weights,
   className = "",
@@ -213,134 +213,13 @@ export default async function ServerCompsTable({
 
   return (
     <div className={className}>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-base font-semibold">{title}</h3>
-        <div className="text-xs text-gray-500">
-          {rows.length ? `${rows.length} results` : "No results"}
-        </div>
-      </div>
-
-      {!rows.length ? (
-        <div className="rounded border p-3 text-sm text-gray-600">
-          No comparable sales found.
-        </div>
-      ) : (
-        <>
-          <div className="overflow-auto rounded border">
-            <table className="min-w-[1000px] w-full text-sm">
-              <thead className="sticky top-0 bg-gray-50">
-                <tr className="text-left">
-                  <th className="p-2">Parcel</th>
-                  <th className="p-2">Address</th>
-                  <th className="p-2">Sale Date</th>
-                  <th className="p-2">Sale Price</th>
-                  <th className="p-2">Gower</th>
-                  <th className="p-2">Miles</th>
-                  <th className="p-2">Year Built</th>
-                  <th className="p-2">Material</th>
-                  <th className="p-2">Land Use</th>
-                  <th className="p-2">Condition @Sale</th>
-
-                  <th className="p-2">District</th>
-                  <th className="p-2">ZIP</th>
-
-                  <th className="p-2">Beds</th>
-                  <th className="p-2">Rooms</th>
-                  <th className="p-2">Full Ba</th>
-                  <th className="p-2">Half Ba</th>
-
-                  <th className="p-2">Floor Fin</th>
-                  <th className="p-2">Floor Unfin</th>
-                  <th className="p-2">Attic Fin</th>
-                  <th className="p-2">Attic Unfin</th>
-                  <th className="p-2">Bsmt Fin</th>
-                  <th className="p-2">Bsmt Unfin</th>
-                  <th className="p-2">Crawl Fin</th>
-                  <th className="p-2">Crawl Unfin</th>
-                  <th className="p-2">Add Fin</th>
-                  <th className="p-2">Add Unfin</th>
-
-                  <th className="p-2">Gar Att</th>
-                  <th className="p-2">Gar Det</th>
-                  <th className="p-2">Gar Bsmt</th>
-                  <th className="p-2">Carport</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {rows.map((r) => (
-                  <tr
-                    key={`${r.comp_parcel_id}-${r.sale_id}`}
-                    className="align-top"
-                  >
-                    <td className="p-2 font-medium">
-                      <ParcelNumber
-                        id={r.comp_parcel_id}
-                        block={r.comp_block ?? 0}
-                        lot={r.comp_lot ?? 0}
-                        ext={r.comp_ext ?? 0}
-                      />
-                    </td>
-                    <td className="p-2">
-                      <div>
-                        <span>
-                          {r.comp_house_number} {r.comp_street}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="p-2">{fmtDate(r.sale_date)}</td>
-                    <td className="p-2">{fmtUSD(r.sale_price)}</td>
-                    <td className="p-2">
-                      {r.gower_distance?.toFixed(3) ?? "—"}
-                    </td>
-                    <td className="p-2">
-                      {r.comp_distance_miles?.toFixed(2) ?? "—"}
-                    </td>
-
-                    <td className="p-2">{r.comp_year_built ?? "—"}</td>
-                    <td className="p-2">{r.comp_material ?? "—"}</td>
-                    <td className="p-2">{r.comp_land_use ?? "—"}</td>
-                    <td className="p-2">{r.comp_condition_at_sale ?? "—"}</td>
-
-                    <td className="p-2">{r.comp_district ?? "—"}</td>
-                    <td className="p-2">{r.comp_postcode ?? "—"}</td>
-
-                    <td className="p-2">{r.comp_bedrooms ?? "—"}</td>
-                    <td className="p-2">{r.comp_rooms ?? "—"}</td>
-                    <td className="p-2">{r.comp_full_bathrooms ?? "—"}</td>
-                    <td className="p-2">{r.comp_half_bathrooms ?? "—"}</td>
-
-                    <td className="p-2">{fmtNum(r.floor_finished_total)}</td>
-                    <td className="p-2">{fmtNum(r.floor_unfinished_total)}</td>
-                    <td className="p-2">{fmtNum(r.attic_finished_total)}</td>
-                    <td className="p-2">{fmtNum(r.attic_unfinished_total)}</td>
-                    <td className="p-2">{fmtNum(r.basement_finished_total)}</td>
-                    <td className="p-2">
-                      {fmtNum(r.basement_unfinished_total)}
-                    </td>
-                    <td className="p-2">{fmtNum(r.crawl_finished_total)}</td>
-                    <td className="p-2">{fmtNum(r.crawl_unfinished_total)}</td>
-                    <td className="p-2">{fmtNum(r.addition_finished_total)}</td>
-                    <td className="p-2">
-                      {fmtNum(r.addition_unfinished_total)}
-                    </td>
-
-                    <td className="p-2">{fmtNum(r.attached_garage_area)}</td>
-                    <td className="p-2">{fmtNum(r.detached_garage_area)}</td>
-                    <td className="p-2">{fmtNum(r.basement_garage_area)}</td>
-                    <td className="p-2">{fmtNum(r.carport_area)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <CompsMapClientWrapper
-            points={points}
-            className="w-full mb-24"
-            height={"80vh"}
-            key={JSON.stringify(compPoints)}
-          />
-        </>
-      )}
+      <CompsCardList rows={rows} className="my-4" />
+      <CompsMapClientWrapper
+        points={points}
+        className="w-full mb-24"
+        height={"80vh"}
+        key={JSON.stringify(compPoints)}
+      />
     </div>
   );
 }

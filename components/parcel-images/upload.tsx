@@ -2,7 +2,7 @@
 import { uploadImages } from "@/app/actions";
 import { useActionState } from "react";
 import { useEffect, useState, useRef, ChangeEvent } from "react";
-import { useToast } from "@/components/ui/toast-context";
+import { useToast } from "@/context/ToastContext";
 
 const initialState = { error: "", success: "" };
 
@@ -10,17 +10,25 @@ const UploadImages = ({ parcel_id }: { parcel_id: number }) => {
   const [state, action, pending] = useActionState(uploadImages, initialState);
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (state.error) {
-      showToast({ message: state.error, type: "error", timeOpen: 10000 });
+      toast({
+        title: state.error,
+        variant: "error",
+        duration: 8000,
+      });
     }
     if (state.success) {
-      showToast({ message: state.success, type: "success", timeOpen: 2000 });
+      toast({
+        title: state.success,
+        variant: "success",
+        duration: 4000,
+      });
       setFiles([]);
     }
-  }, [state, showToast]);
+  }, [state, toast]);
 
   const handleSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) setFiles(Array.from(e.target.files));

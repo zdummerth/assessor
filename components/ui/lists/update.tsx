@@ -1,7 +1,7 @@
 "use client";
 import { useActionState, useState, useEffect } from "react";
 import { update } from "@/app/lists/actions";
-import { useToast } from "@/components/ui/toast-context";
+import { useToast } from "@/context/ToastContext";
 import { Tables } from "@/database-types";
 
 const initalState = {
@@ -14,24 +14,16 @@ const Update = ({ item }: { item: Tables<"invoices"> }) => {
   const [formState, setFormState] = useState({
     customer_name: item.customer_name || "",
   });
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (state.error) {
-      showToast({
-        message: state.error,
-        type: "error",
-        timeOpen: 10000,
-      });
+      toast({ description: state.error, variant: "error", duration: 10000 });
     }
     if (state.success) {
-      showToast({
-        message: state.success,
-        type: "success",
-        timeOpen: 2000,
-      });
+      toast({ description: state.success, variant: "success", duration: 5000 });
     }
-  }, [state, showToast]);
+  }, [state, toast]);
 
   const edited = item.customer_name !== formState.customer_name;
   return (

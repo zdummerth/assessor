@@ -1,8 +1,7 @@
 "use client";
 import { deleteFileAction } from "@/app/actions";
 import { useActionState, useEffect } from "react";
-import { useToast } from "@/components/ui/toast-context";
-
+import { useToast } from "@/context/ToastContext";
 const initalState = {
   error: "",
   success: "",
@@ -13,24 +12,16 @@ const DeleteFile = ({ bucket, path }: { bucket: string; path: string }) => {
     deleteFileAction,
     initalState
   );
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (state.error) {
-      showToast({
-        message: state.error,
-        type: "error",
-        timeOpen: 10000,
-      });
+      toast({ description: state.error, variant: "error", duration: 10000 });
     }
     if (state.success) {
-      showToast({
-        message: state.success,
-        type: "success",
-        timeOpen: 2000,
-      });
+      toast({ description: state.success, variant: "success", duration: 5000 });
     }
-  }, [state, showToast]);
+  }, [state, toast]);
 
   return (
     <form action={action}>

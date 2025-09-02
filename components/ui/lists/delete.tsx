@@ -1,7 +1,6 @@
 "use client";
 import { deleteList, deleteListItem } from "@/app/lists/actions";
-import { useActionState, useState, useEffect } from "react";
-import Modal from "@/components/ui/modal";
+import { useActionState } from "react";
 
 const DeleteInvoice = () => {
   const [state, action, pending] = useActionState(deleteList, "");

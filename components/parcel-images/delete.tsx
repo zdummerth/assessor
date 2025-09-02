@@ -1,7 +1,7 @@
 "use client";
 import { deleteParcelImagesAction } from "@/app/actions";
 import { useActionState, useEffect } from "react";
-import { useToast } from "@/components/ui/toast-context";
+import { useToast } from "@/context/ToastContext";
 
 const initalState = {
   error: "",
@@ -19,24 +19,24 @@ const DeleteParcelImage = ({
     deleteParcelImagesAction,
     initalState
   );
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (state.error) {
-      showToast({
-        message: state.error,
-        type: "error",
-        timeOpen: 10000,
+      toast({
+        title: state.error,
+        variant: "error",
+        duration: 8000,
       });
     }
     if (state.success) {
-      showToast({
-        message: state.success,
-        type: "success",
-        timeOpen: 2000,
+      toast({
+        title: state.success,
+        variant: "success",
+        duration: 4000,
       });
     }
-  }, [state, showToast]);
+  }, [state, toast]);
 
   return (
     <form action={action}>

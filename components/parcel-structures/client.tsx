@@ -3,7 +3,8 @@
 import React from "react";
 import { Tables } from "@/database-types";
 import StructureHistoryModal from "./history-modal";
-import AddConditionModal from "@/components/structures/add-conditions-modal";
+// import AddConditionModal from "@/components/structures/add-conditions-modal";
+import ConditionsCRUDModal from "../structures/conditions-crud-modal";
 
 type Parcel = Tables<"test_parcels">;
 
@@ -35,11 +36,16 @@ export default function ClientParcelStructures({
 
   return (
     <div className="flex flex-col gap-2">
-      <AddConditionModal
+      {/* <AddConditionModal
         structureId={latest.id}
         // defaultEffectiveDate={defaultConditionDate} // "YYYY-MM-DD"
         revalidatePath={`/test/parcels`} // or current page path
         buttonLabel="Add Condition"
+      /> */}
+      <ConditionsCRUDModal
+        structureId={latest.id}
+        conditions={latest.test_conditions}
+        revalidatePath={`/test/parcels/${latest.id}`}
       />
       <div className="border rounded p-2 text-sm text-gray-800 flex">
         <div className="flex-1">
