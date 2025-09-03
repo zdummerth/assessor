@@ -1,7 +1,6 @@
 // app/components/SalesWithStructuresCardsServer.tsx
 import { createClient } from "@/utils/supabase/server";
 import graphql from "@/utils/supabase/graphql";
-import ParcelNumber from "../ui/parcel-number-updated";
 
 type GQLEdge<T> = { node: T };
 
@@ -182,7 +181,11 @@ export default async function SalesWithStructuresCardsServer({
   });
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div
+      className={`grid grid-cols-1 ${
+        cards.length % 2 === 0 ? "md:grid-cols-2" : "md:grid-cols-1"
+      } gap-4`}
+    >
       {cards.map((c) => (
         <div
           key={c.key}
@@ -197,13 +200,17 @@ export default async function SalesWithStructuresCardsServer({
               </div>
             </div>
 
-            <div>
+            <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">Sale Type</div>
               <div className="font-medium text-sm">{c.saleType}</div>
             </div>
-            <div className="pt-2 flex items-center justify-between border-t">
-              <span>{c.saleDate}</span>
-              <span className="font-medium">{c.salePrice}</span>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-500">Sale Date</div>
+              <div className="font-medium text-sm">{c.saleDate}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-500">Sale Price</div>
+              <div className="font-medium text-sm">{c.salePrice}</div>
             </div>
           </div>
         </div>

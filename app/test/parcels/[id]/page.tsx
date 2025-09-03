@@ -62,7 +62,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   // console.log("Parcel data:", parcel);
 
   return (
-    <div className="w-full flex flex-col gap-4 p-4 mb-10 max-w-6xl mx-auto">
+    <div className="w-full flex flex-col gap-4 p-4 mb-10 max-w-4xl mx-auto">
       <div className="grid gap-8 md:grid-cols-[24rem,1fr] h-72">
         <div className="w-full h-full">
           <ParcelImagePrimary parcel_id={parcel.id} />

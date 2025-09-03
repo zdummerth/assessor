@@ -97,7 +97,11 @@ export default function ClientParcelStructures({
   return (
     <div className="flex flex-col gap-3">
       {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div
+        className={`grid grid-cols-1 ${
+          cards.length % 2 === 0 ? "md:grid-cols-2" : "md:grid-cols-1"
+        } gap-4`}
+      >
         {cards.map((c) => (
           <div
             key={c.key}
