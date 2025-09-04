@@ -31,6 +31,12 @@ type CompRow = {
   lon: number | null;
   district: string | null;
   land_use: string | null;
+  house_number: string | null;
+  street: string | null;
+  postcode: string | null;
+  comp_lot: string;
+  comp_block: string | null;
+  comp_ext: string | null;
   gower_distance: number | null;
   distance_miles: number | null;
   subject_features: {

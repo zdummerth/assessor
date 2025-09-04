@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Modal from "@/components/ui/modal";
+import ParcelNumber from "../ui/parcel-number-updated";
 
 type CompRow = {
   subject_parcel_id: number;
@@ -19,6 +20,12 @@ type CompRow = {
   lon: number | null;
   district: string | null;
   land_use: string | null;
+  house_number: string | null;
+  street: string | null;
+  postcode: string | null;
+  comp_lot: string;
+  comp_block: string | null;
+  comp_ext: string | null;
   gower_distance: number | null;
   distance_miles: number | null;
   subject_features: any | null;
@@ -67,7 +74,16 @@ export default function CompsCardList({
         return {
           key: `${r.parcel_id}-${r.sale_date ?? "na"}`,
           parcelId: r.parcel_id,
-          address: [r.district, r.land_use].filter(Boolean).join(" • "),
+          block: r.comp_block,
+          lot: r.comp_lot,
+          ext: r.comp_ext,
+          // Construct
+          address:
+            r.house_number && r.street
+              ? `${r.house_number} ${r.street} ${r.postcode ?? ""}`.trim()
+              : null,
+          district: r.district,
+          land_use: r.land_use,
           condition: r.avg_condition != null ? r.avg_condition.toFixed(2) : "—",
           livingArea: living != null ? fmtNum(living) : "—",
           gower: fmtGower(r.gower_distance),
@@ -122,7 +138,12 @@ export default function CompsCardList({
               {/* Content */}
               <div className="p-3 space-y-2 text-sm">
                 <div className="flex items-center justify-between">
-                  <div className="font-semibold">Parcel #{c.parcelId}</div>
+                  <ParcelNumber
+                    id={c.parcelId}
+                    block={Number(c.block) || 0}
+                    lot={Number(c.lot) || 0}
+                    ext={Number(c.ext) || 0}
+                  />
                 </div>
 
                 <div className="text-gray-700">
@@ -130,6 +151,10 @@ export default function CompsCardList({
                 </div>
 
                 <div className="grid grid-cols-1 gap-x-4 gap-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Land Use</span>
+                    <span className="font-medium">{c.land_use}</span>
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-500">Avg Condition</span>
                     <span className="font-medium">{c.condition}</span>
