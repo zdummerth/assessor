@@ -37,7 +37,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const { data, error } = await supabase
     .from("test_parcels")
-    .select("*")
+    .select("*, test_parcel_land_uses(*)")
     .eq("id", params.id)
     .single();
 
@@ -60,6 +60,24 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const parcel = data;
   // console.log("Parcel data:", parcel);
+  const land_uses = parcel.test_parcel_land_uses || [];
+  // console.log("Parcel land uses:", land_uses);
+  //@ts-expect-error TS2345
+  const current_land_use = land_uses.find((lu) => !lu.end_date);
+  const residentailLandUses = [
+    "1110",
+    "1111",
+    "1114",
+    "1115",
+    "1120",
+    "1130",
+    "1140",
+  ];
+
+  const isResidential = residentailLandUses.includes(
+    //@ts-expect-error TS2532
+    current_land_use?.land_use
+  );
 
   return (
     <div className="w-full flex flex-col gap-4 p-4 mb-10 max-w-4xl mx-auto">
@@ -123,14 +141,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables
           parcelId={parcel.id}
+          max_distance_miles={isResidential ? 1 : 2}
+          living_area_band={isResidential ? 500 : 50000}
+          require_same_land_use={isResidential}
           weights={{
             land_use: 5,
             district: 4,
             lat: 3,
             lon: 3,
-            floor_finished: 4,
-            basement_finished: 2,
-            basement_unfinished: 2,
+            // floor_finished: 4,
+            // basement_finished: 2,
+            // basement_unfinished: 2,
             // crawl_finished: 2,
             // crawl_unfinished: 2,
             // addition_finished: 2,
