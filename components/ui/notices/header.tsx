@@ -23,7 +23,7 @@ interface NoticeHeaderProps {
 export default function NoticeHeader({
   mayorName = "Cara Spencer",
   assessorName = "Shawn T. Ordway",
-  assessorTitle = "Interim Assessor",
+  assessorTitle = "Assessor",
   cityTitle = "City Of St. Louis",
   officeTitle = "Office Of The Assessor",
   cityHallAddress1 = "114 - 120 City Hall",

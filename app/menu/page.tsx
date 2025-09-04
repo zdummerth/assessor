@@ -15,6 +15,7 @@ const Page = () => {
     { href: "/notices/decision-letter", label: "Decision Letter" },
     { href: "/notices/hearing", label: "Hearing Notice" },
     { href: "/notices/appeal-results", label: "Appeal Results" },
+    { href: "/notices/tornado", label: "Tornado Notice" },
   ];
 
   return (
