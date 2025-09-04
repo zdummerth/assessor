@@ -2,8 +2,8 @@
 
 import React from "react";
 import NoticeHeader from "../header";
-import Image from "next/image";
-import signatureImage from "@/public/shawns-signature.png";
+// import Image from "next/image";
+// import signatureImage from "@/public/shawns-signature.png";
 
 type NoticeFormData = {
   parcel_number?: string;
@@ -32,7 +32,7 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
     );
 
   return (
-    <div className="w-[90%] mx-auto print:break-after-page border p-8 print:p-0 print:border-none print:bg-white print:text-black">
+    <div className="w-[90%] mx-auto print:break-after-page border p-8 print:p-4 print:border-none print:bg-white print:text-black text-sm leading-6">
       <NoticeHeader
         mailingName={formData.name ?? ""}
         mailingAddress1={formData.address_1 ?? ""}
@@ -48,68 +48,87 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
           {/* Parcel + Site Address */}
           <div className="my-4 flex flex-wrap gap-8 text-xs">
             <div>
-              <p className="font-semibold uppercase tracking-wide text-gray-700">
+              <p className="font-semibold uppercase text-gray-700">
                 Parcel Number
               </p>
               <div>{formData.parcel_number}</div>
             </div>
             <div>
-              <p className="font-semibold uppercase tracking-wide text-gray-700">
+              <p className="font-semibold uppercase text-gray-700">
                 Property Address
               </p>
               <div>{formData.site_address}</div>
             </div>
           </div>
 
-          {/* Letter Body */}
-          <div className="text-sm leading-6 space-y-4">
-            <p>Dear Property Owner,</p>
-
-            <p>
-              We are writing to inform you that your property may qualify for
-              relief related to recent tornado damage. If your parcel suffered
-              damage or destruction due to a tornado, you may be eligible for a
-              reduction in assessed value or other disaster-related tax relief
-              programs for the current assessment year.
+          {/* Condensed Tornado Relief Letter */}
+          <div className="space-y-4">
+            <p className="font-bold uppercase">
+              Property Tax Relief – Tornado-Damaged Homes
             </p>
 
             <p>
-              To determine eligibility, please prepare documentation such as
-              insurance claims, contractor estimates, photographs, or inspection
-              reports that show the nature and extent of the damage, along with
-              the date the damage occurred. Submitting this information helps us
-              verify eligibility and process any applicable adjustments as
-              quickly as possible.
+              Following the May 16, 2025 tornado, the Mayor and Board of
+              Aldermen enacted the Occupancy Law (RSMo 137.082). This law lets
+              the Assessor prorate property taxes for homes left unoccupied and
+              uninhabitable by a natural disaster.
             </p>
 
             <p>
-              If you believe your property at{" "}
-              <strong>{formData.site_address}</strong> (Parcel{" "}
-              <strong>{formData.parcel_number}</strong>) was impacted, please
-              contact our office to start the review. Our staff can walk you
-              through the steps, timelines, and required materials.
+              To apply, submit a relief application to the Assessor’s Office.
+              Forms are available:
+            </p>
+            <ul className="list-disc pl-6">
+              <li>
+                Online:{" "}
+                <a
+                  href="https://www.stlouis-mo.gov/government/departments/assessor/real-estate/disaster-taxrelief/property-tax-relief-service.cfm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  https://www.stlouis-mo.gov/government/departments/assessor/real-estate/disaster-taxrelief/property-tax-relief-service.cfm
+                </a>
+              </li>
+              <li>In person at the Assessor’s Office</li>
+              <li>By mail upon request</li>
+            </ul>
+
+            <p>
+              This program applies only to <strong>residential homes</strong>{" "}
+              that became uninhabitable. Relief depends on how long the home
+              remains vacant — from 30 days of repair to full-year loss.{" "}
+              <em>
+                Commercial, agricultural, and personal property are not
+                eligible.
+              </em>
             </p>
 
             <p>
-              Thank you for your attention. We understand the stress severe
-              weather events can cause and are committed to assisting affected
-              property owners.
+              Homes that remained habitable may not qualify for this program but
+              could be eligible for other disaster recovery assistance:{" "}
+              <a
+                href="https://www.stlouis-mo.gov/government/recovery/tornado-2025/rebuild/index.cfm"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
+                https://www.stlouis-mo.gov/government/recovery/tornado-2025/rebuild/index.cfm
+              </a>
             </p>
 
-            <p>Sincerely,</p>
-          </div>
-
-          {/* Signature */}
-          <div className="mt-8 text-sm text-left">
-            <Image
-              src={signatureImage}
-              alt="Signature"
-              width={200}
-              height={74}
-              className="select-none"
-            />
-            <p className="font-semibold">Shawn T. Ordway</p>
-            <p className="text-xs">Assessor</p>
+            <p>
+              Questions? Contact the Assessor’s Office:
+              <br />
+              <strong>Phone:</strong> 314-622-4185 &nbsp; | &nbsp;
+              <strong>Email:</strong>{" "}
+              <a
+                href="mailto:assessor-office@stlouis-mo.gov"
+                className="text-blue-600 underline"
+              >
+                assessor-office@stlouis-mo.gov
+              </a>
+            </p>
           </div>
         </>
       ) : (
