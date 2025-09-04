@@ -8,7 +8,6 @@ const REQUIRED_HEADERS = [
   "site_address",
   "name",
   "address_1",
-  "address_2",
   "city",
   "state",
   "zip",
