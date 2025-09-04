@@ -27,7 +27,6 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
     !!formData?.name &&
     !!(
       formData?.address_1 ||
-      formData?.address_2 ||
       (formData?.city && formData?.state && formData?.zip)
     );
 
