@@ -97,7 +97,7 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
             <p>
               This program applies only to <strong>residential homes</strong>{" "}
               that became uninhabitable. Relief depends on how long the home
-              remains vacant — from 30 days of repair to full-year loss.{" "}
+              remains vacant.{" "}
               <em>
                 Commercial, agricultural, and personal property are not
                 eligible.
