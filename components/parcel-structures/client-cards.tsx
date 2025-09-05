@@ -71,7 +71,9 @@ export default function ClientParcelStructures({
   }
 
   const [openId, setOpenId] = useState<number | null>(null);
+  const [showDetails, setShowDetails] = useState(true);
 
+  // Per-structure card data
   const cards = useMemo(
     () =>
       data.map((s) => {
@@ -87,93 +89,164 @@ export default function ClientParcelStructures({
           half_bathrooms: s.half_bathrooms,
           condition: lc?.condition ?? "—",
           conditionDate: lc?.effective_date ? fmtDate(lc.effective_date) : "—",
-          livingArea: living != null ? fmtNum(living) : "—",
+          livingArea: living != null ? living : null,
+          livingAreaFmt: living != null ? fmtNum(living) : "—",
           raw: s,
         };
       }),
     [data]
   );
 
+  // Aggregate summary when multiple structures
+  const summary = useMemo(() => {
+    if (data.length <= 1) return null;
+
+    let totalLiving = 0;
+    let totalBedrooms = 0;
+    let totalFullBaths = 0;
+    let totalHalfBaths = 0;
+
+    for (const s of data) {
+      const living = sumFinishedLiving(s);
+      totalLiving += Number.isFinite(living as number) ? (living as number) : 0;
+      totalBedrooms += s.bedrooms ?? 0;
+      totalFullBaths += s.full_bathrooms ?? 0;
+      totalHalfBaths += s.half_bathrooms ?? 0;
+    }
+
+    return {
+      buildings: data.length,
+      totalLiving,
+      totalBedrooms,
+      totalFullBaths,
+      totalHalfBaths,
+      totalLivingFmt: fmtNum(totalLiving),
+    };
+  }, [data]);
+
   return (
     <div className="flex flex-col gap-3">
-      {/* Cards */}
-      <div
-        className={`grid grid-cols-1
-        ${cards.length % 2 === 0 ? "md:grid-cols-2" : "md:grid-cols-1"}
-        ${cards.length === 3 ? "lg:grid-cols-3" : ""}
-        ${cards.length >= 4 ? "lg:grid-cols-4" : ""}
-        gap-4`}
-      >
-        {cards.map((c) => (
-          <div
-            key={c.key}
-            className="rounded border overflow-hidden shadow-sm hover:shadow transition-shadow"
-          >
-            <div className="p-3 space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <div className="font-semibold">Structure #{c.id}</div>
-                {c.year_built && (
-                  <span className="text-xs text-gray-500">
-                    Built {c.year_built}
-                  </span>
-                )}
+      {/* Summary (only when more than one structure) */}
+      {summary && (
+        <div className="rounded border bg-gray-50 p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">Structures Summary</h3>
+            <button
+              onClick={() => setShowDetails((v) => !v)}
+              className="text-sm rounded px-3 py-1 bg-white border hover:bg-gray-100"
+            >
+              {showDetails ? "Hide Details" : "Show Details"}
+            </button>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+            <div className="rounded border bg-white p-3">
+              <div className="text-gray-500">Total Buildings</div>
+              <div className="mt-1 text-lg font-semibold">
+                {summary.buildings}
               </div>
-
-              <div className="grid grid-cols-1 gap-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Condition</span>
-                  <span className="font-medium">
-                    {c.condition}
-                    {c.conditionDate !== "—" && (
-                      <span className="text-xs text-gray-500 ml-2">
-                        ({c.conditionDate})
-                      </span>
-                    )}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Material</span>
-                  <span className="font-medium">{c.material ?? "—"}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Bedrooms</span>
-                  <span className="font-medium">{c.bedrooms ?? "—"}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Baths (F/H)</span>
-                  <span className="font-medium">
-                    {c.full_bathrooms ?? 0}/{c.half_bathrooms ?? 0}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Finished Living Area</span>
-                  <span className="font-medium">{c.livingArea} ft²</span>
-                </div>
+            </div>
+            <div className="rounded border bg-white p-3">
+              <div className="text-gray-500">Total Finished Living</div>
+              <div className="mt-1 text-lg font-semibold">
+                {summary.totalLivingFmt} ft²
               </div>
-
-              <div className="pt-2 flex items-center justify-between border-t">
-                <ConditionsCRUDModal
-                  structureId={c.id}
-                  conditions={c.raw.test_conditions}
-                  revalidatePath={`/test/parcels/${data[0].id}`}
-                />
-                <button
-                  onClick={() => setOpenId(c.id)}
-                  className="text-sm px-3 py-1.5 hover:bg-gray-50"
-                >
-                  Details
-                </button>
+            </div>
+            <div className="rounded border bg-white p-3">
+              <div className="text-gray-500">Total Bedrooms</div>
+              <div className="mt-1 text-lg font-semibold">
+                {summary.totalBedrooms}
+              </div>
+            </div>
+            <div className="rounded border bg-white p-3">
+              <div className="text-gray-500">Total Baths (F/H)</div>
+              <div className="mt-1 text-lg font-semibold">
+                {summary.totalFullBaths}/{summary.totalHalfBaths}
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      {/* Modal(s): render once and hydrate with selected structure */}
+      {/* Cards */}
+      {showDetails && (
+        <div
+          className={`grid grid-cols-1
+          ${cards.length % 2 === 0 ? "md:grid-cols-2" : "md:grid-cols-1"}
+          ${cards.length === 3 ? "lg:grid-cols-3" : ""}
+          ${cards.length >= 4 ? "lg:grid-cols-4" : ""}
+          gap-4`}
+        >
+          {cards.map((c) => (
+            <div
+              key={c.key}
+              className="rounded border overflow-hidden shadow-sm hover:shadow transition-shadow"
+            >
+              <div className="p-3 space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold">Structure #{c.id}</div>
+                  {c.year_built && (
+                    <span className="text-xs text-gray-500">
+                      Built {c.year_built}
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Condition</span>
+                    <span className="font-medium">
+                      {c.condition}
+                      {c.conditionDate !== "—" && (
+                        <span className="text-xs text-gray-500 ml-2">
+                          ({c.conditionDate})
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Material</span>
+                    <span className="font-medium">{c.material ?? "—"}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Bedrooms</span>
+                    <span className="font-medium">{c.bedrooms ?? "—"}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Baths (F/H)</span>
+                    <span className="font-medium">
+                      {c.full_bathrooms ?? 0}/{c.half_bathrooms ?? 0}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Finished Living Area</span>
+                    <span className="font-medium">{c.livingAreaFmt} ft²</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between border-t">
+                  <ConditionsCRUDModal
+                    structureId={c.id}
+                    conditions={c.raw.test_conditions}
+                    revalidatePath={`/test/parcels/${parcel.id}`}
+                  />
+                  <button
+                    onClick={() => setOpenId(c.id)}
+                    className="text-sm px-3 py-1.5 hover:bg-gray-50"
+                  >
+                    Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal: render once and hydrate with selected structure */}
       {openId != null && (
         <DetailModal
           structure={data.find((s) => s.id === openId)!}
