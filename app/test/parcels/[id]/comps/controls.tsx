@@ -1,4 +1,3 @@
-// app/components/ParcelCompsControls.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -7,8 +6,8 @@ import { useComps } from "@/lib/client-queries";
 import CompsMapClientWrapper from "@/components/ui/maps/comps-map-client-wrapper";
 
 type Filters = {
-  md: number; // max_distance_miles
-  band: number; // living_area_band
+  md: number;
+  band: number;
   same_lu: boolean;
   w_lu: number;
   w_dist: number;
@@ -81,7 +80,6 @@ export default function ParcelCompsControls({
     setApplied(form);
   }
 
-  // Map RPC rows -> CompRow shape CompsCardList expects
   const rows = useMemo(() => {
     if (!Array.isArray(comps)) return [];
     return comps.map((r: any) => {
@@ -280,9 +278,8 @@ export default function ParcelCompsControls({
       </form>
 
       {/* Results via CompsCardList */}
-      <div className="rounded-lg border">
+      <div className="">
         <div className="flex items-center justify-between border-b px-3 py-2">
-          <h3 className="text-sm font-semibold">Comparable Sales</h3>
           {(compsLoading || isApplying) && (
             <span
               aria-hidden
@@ -304,7 +301,7 @@ export default function ParcelCompsControls({
             {points.length > 0 && (
               <CompsMapClientWrapper
                 points={points}
-                className="w-full mb-24"
+                className="w-full mb-24 relative"
                 height={"80vh"}
                 key={JSON.stringify(compPoints)}
               />

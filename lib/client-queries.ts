@@ -69,3 +69,57 @@ export function useComps(
     error,
   };
 }
+
+export function useSalesSearch(options?: {
+  start_date?: string;
+  end_date?: string;
+  valid_only?: boolean;
+  address?: string;
+}) {
+  const params = new URLSearchParams();
+
+  if (options?.start_date) params.set("start_date", options.start_date);
+  if (options?.end_date) params.set("end_date", options.end_date);
+  if (options?.valid_only !== undefined) {
+    params.set("valid_only", options.valid_only ? "1" : "0");
+  }
+  if (options?.address) params.set("address", options.address);
+
+  const url =
+    options && Object.keys(options).length > 0
+      ? `/test/sales/search?${params.toString()}`
+      : `/test/sales/search`;
+
+  const { data, error, isLoading } = useSWR(url, fetcher);
+
+  return {
+    data,
+    isLoading,
+    error,
+  };
+}
+
+export function useSalesSearchByAddress(options?: {
+  address?: string;
+  valid_only?: boolean;
+}) {
+  const params = new URLSearchParams();
+
+  if (options?.address) params.set("address", options.address);
+  if (options?.valid_only !== undefined) {
+    params.set("valid_only", options.valid_only ? "1" : "0");
+  }
+
+  const url =
+    options && Object.keys(options).length > 0
+      ? `/test/sales/search-by-address?${params.toString()}`
+      : `/test/sales/search-by-address`;
+
+  const { data, error, isLoading } = useSWR(url, fetcher);
+
+  return {
+    data,
+    isLoading,
+    error,
+  };
+}

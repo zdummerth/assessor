@@ -3,7 +3,6 @@ import { type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("Finding comps for parcel ID:");
     const searchParams = request.nextUrl.searchParams;
 
     // Required

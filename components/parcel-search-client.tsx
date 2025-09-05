@@ -23,12 +23,12 @@ export default function ParcelSearchClient() {
   console.log({ error });
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
+    <div className="flex-1 max-w-3xl mx-auto">
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search parcels..."
+        placeholder="Search parcels...(parcel numbers, addresses, owners)"
         className="w-full border px-4 py-2 rounded shadow-sm mb-6"
       />
 

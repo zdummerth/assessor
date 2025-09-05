@@ -2,8 +2,8 @@
 
 import React from "react";
 import NoticeHeader from "../header";
-// import Image from "next/image";
-// import signatureImage from "@/public/shawns-signature.png";
+import Image from "next/image";
+import signatureImage from "@/public/shawns-signature.png";
 
 type NoticeFormData = {
   parcel_number?: string;
@@ -62,7 +62,7 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
           </div>
 
           {/* Condensed Tornado Relief Letter */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <p className="font-bold uppercase">
               Property Tax Relief – Tornado-Damaged Homes
             </p>
@@ -81,14 +81,9 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
             <ul className="list-disc pl-6">
               <li>
                 Online:{" "}
-                <a
-                  href="https://www.stlouis-mo.gov/government/departments/assessor/real-estate/disaster-taxrelief/property-tax-relief-service.cfm"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
+                <span className="underline">
                   https://www.stlouis-mo.gov/government/departments/assessor/real-estate/disaster-taxrelief/property-tax-relief-service.cfm
-                </a>
+                </span>
               </li>
               <li>In person at the Assessor’s Office</li>
               <li>By mail upon request</li>
@@ -107,14 +102,9 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
             <p>
               Homes that remained habitable may not qualify for this program but
               could be eligible for other disaster recovery assistance:{" "}
-              <a
-                href="https://www.stlouis-mo.gov/government/recovery/tornado-2025/rebuild/index.cfm"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline"
-              >
+              <span className="underline">
                 https://www.stlouis-mo.gov/government/recovery/tornado-2025/rebuild/index.cfm
-              </a>
+              </span>
             </p>
 
             <p>
@@ -124,11 +114,22 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
               <strong>Email:</strong>{" "}
               <a
                 href="mailto:assessor-office@stlouis-mo.gov"
-                className="text-blue-600 underline"
+                className=" underline"
               >
                 assessor-office@stlouis-mo.gov
               </a>
             </p>
+          </div>
+          <div className="mt-8 text-xs text-left">
+            {/* <div className="border-t border-black w-64 mb-1" /> */}
+            <Image
+              src={signatureImage}
+              alt="Signature"
+              width={200}
+              height={74}
+            />
+            <p className="font-semibold">Shawn T. Ordway</p>
+            <p className="text-xs">Assessor</p>
           </div>
         </>
       ) : (

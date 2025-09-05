@@ -42,7 +42,7 @@ const tileLayers = {
 };
 
 const colorByGower = (d?: number) => {
-  if (d == null) return "#888";
+  if (d == null) return "#1F51FF";
   const x = Math.max(0, Math.min(1, d));
   const r = Math.round(255 * x);
   const g = Math.round(180 * (1 - x));
@@ -112,7 +112,7 @@ export default function CompsMapClient({
 
   return (
     <div className={className}>
-      <div className="mb-2 flex items-center gap-2">
+      <div className="absolute right-0 top-0 mb-2 flex items-center gap-2">
         <label
           htmlFor="tileLayerSelect"
           className="text-sm text-muted-foreground"
@@ -136,7 +136,7 @@ export default function CompsMapClient({
       <MapContainer
         center={startCenter}
         zoom={12}
-        style={{ height, width: "100%" }}
+        style={{ height, width: "100%", position: "absolute", zIndex: -1 }}
         scrollWheelZoom
       >
         <TileLayer

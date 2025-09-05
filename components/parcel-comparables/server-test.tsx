@@ -154,8 +154,8 @@ export default async function ServerCompsTable({
       <CompsCardList rows={rows} title={title} className="my-4" />
       <CompsMapClientWrapper
         points={points}
-        className="w-full mb-24"
-        height={"80vh"}
+        className="w-full mb-24 relative"
+        height={"400px"}
         key={JSON.stringify(compPoints)}
       />
     </div>

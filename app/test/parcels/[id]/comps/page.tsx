@@ -1,11 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import FormattedDate from "@/components/ui/formatted-date";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
 import ParcelValues from "@/components/parcel-values/server";
-import ParcelImagePrimary from "@/components/parcel-image-primary/server";
-import ParcelComparables from "@/components/parcel-comparables/server-test";
 import ParcelStructures from "@/components/parcel-structures/server";
 import ParcelAddress from "@/components/parcel-addresses/server";
 import ParcelLandUses from "@/components/parcel-land-uses/server";
@@ -16,10 +14,7 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata(
-  { params, searchParams }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // read route params
   const id = (await params).id;
 
@@ -28,39 +23,8 @@ export async function generateMetadata(
   };
 }
 
-function toNum(v: string | string[] | undefined, fallback: number) {
-  if (v === undefined) return fallback;
-  const s = Array.isArray(v) ? v[0] : v;
-  const n = Number(s);
-  return Number.isNaN(n) ? fallback : n;
-}
-function toBool(v: string | string[] | undefined, fallback: boolean) {
-  if (v === undefined) return fallback;
-  const s = (Array.isArray(v) ? v[0] : v).toLowerCase();
-  return s === "1" || s === "true";
-}
-
-export default async function Page(props: {
-  params: Promise<{ id: string }>;
-  searchParams?: Promise<{ [k: string]: string | string[] | undefined }>;
-}) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const sp = (await props.searchParams) ?? {};
-
-  // Defaults mirror your current hard-coded values
-  const max_distance_miles = toNum(sp.md, 2);
-  const living_area_band = toNum(sp.band, 500);
-  const require_same_land_use = toBool(sp.same_lu, true);
-
-  const weights = {
-    land_use: toNum(sp.w_lu, 5),
-    district: toNum(sp.w_dist, 4),
-    lat: toNum(sp.w_lat, 3),
-    lon: toNum(sp.w_lon, 3),
-    condition: toNum(sp.w_cond, 3),
-  } as const;
-
-  const suspenseKey = `${params.id}|${max_distance_miles}|${living_area_band}|${require_same_land_use}|${Object.values(weights).join(",")}`;
 
   const supabase = await createClient();
 
@@ -134,19 +98,6 @@ export default async function Page(props: {
         <ParcelStructures parcel={parcel} />
       </Suspense>
       <ParcelCompsControls parcelId={parcel.id} />
-
-      {/* <Suspense
-        key={suspenseKey}
-        fallback={<div>Loading parcel comparables...</div>}
-      >
-        <ParcelComparables
-          parcelId={parcel.id}
-          max_distance_miles={max_distance_miles}
-          living_area_band={living_area_band}
-          require_same_land_use={require_same_land_use}
-          weights={weights}
-        />
-      </Suspense> */}
     </div>
   );
 }

@@ -140,6 +140,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       </Suspense>
       <Suspense fallback={<div>Loading parcel comparables...</div>}>
         <ParcelComparables
+          className="w-full"
           parcelId={parcel.id}
           max_distance_miles={isResidential ? 1 : 2}
           living_area_band={isResidential ? 500 : 50000}
