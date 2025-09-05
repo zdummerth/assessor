@@ -1,18 +1,17 @@
 import { createClient } from "@/utils/supabase/server";
 import type { Metadata, ResolvingMetadata } from "next";
 import { Suspense } from "react";
+import Link from "next/link";
 import FormattedDate from "@/components/ui/formatted-date";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
 import ParcelValues from "@/components/parcel-values/server";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
-import ParcelComparables from "@/components/parcel-comparables/server-test";
-// import ParcelComparables_ from "@/components/parcel-comparables/server";
 import ParcelStructures from "@/components/parcel-structures/server";
 import ParcelAddress from "@/components/parcel-addresses/server";
 import ParcelSales from "@/components/parcel-sales/server";
 import ParcelLandUses from "@/components/parcel-land-uses/server";
 import ParcelScores from "@/components/parcel-scores/server";
-// import AppealForm from "@/components/ui/notices/appeal/main";
+import ParcelCompsControls from "./comps/controls";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -59,9 +58,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   const parcel = data;
-  // console.log("Parcel data:", parcel);
   const land_uses = parcel.test_parcel_land_uses || [];
-  // console.log("Parcel land uses:", land_uses);
   //@ts-expect-error TS2345
   const current_land_use = land_uses.find((lu) => !lu.end_date);
   const residentailLandUses = [
@@ -132,39 +129,27 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <Suspense fallback={<div>Loading parcel sales...</div>}>
         <ParcelSales parcelId={parcel.id} />
       </Suspense>
-      {/* <Suspense fallback={<div>Loading parcel comparables...</div>}>
-        <ParcelComparables_ parcel={parcel} />
-      </Suspense> */}
       <Suspense fallback={<div>Loading parcel scores...</div>}>
         <ParcelScores parcelId={parcel.id} />
       </Suspense>
-      <Suspense fallback={<div>Loading parcel comparables...</div>}>
-        <ParcelComparables
-          className="w-full"
-          parcelId={parcel.id}
-          max_distance_miles={isResidential ? 1 : 2}
-          living_area_band={isResidential ? 500 : 50000}
-          require_same_land_use={isResidential}
-          weights={{
-            land_use: 5,
-            district: 4,
-            lat: 3,
-            lon: 3,
-            // floor_finished: 4,
-            // basement_finished: 2,
-            // basement_unfinished: 2,
-            // crawl_finished: 2,
-            // crawl_unfinished: 2,
-            // addition_finished: 2,
-            // addition_unfinished: 2,
-            // attic_finished: 2,
-            // attic_unfinished: 2,
-            condition: 3,
-          }}
-        />
-      </Suspense>
+      <h2 className="font-semibold mt-6 mb-2">Comparable Sales</h2>
+      <Link
+        href={`/test/parcels/${parcel.id}/comps`}
+        className="text-sm text-blue-600 underline mb-2"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Select Manual Comps
+      </Link>
 
-      {/* <AppealForm /> */}
+      <ParcelCompsControls
+        parcelId={parcel.id}
+        defaults={{
+          md: isResidential ? 1 : 2,
+          band: isResidential ? 500 : 10000,
+          same_lu: isResidential,
+        }}
+      />
     </div>
   );
 }

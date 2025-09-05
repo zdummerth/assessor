@@ -103,7 +103,6 @@ export default function CompsCardList({
   return (
     <div className={className}>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-base font-semibold">{title}</h3>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">
             {rows?.length ? `${rows.length} results` : "No results"}

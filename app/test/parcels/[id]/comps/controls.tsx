@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import CompsCardList from "@/components/parcel-comparables/client-cards";
 import { useComps } from "@/lib/client-queries";
 import CompsMapClientWrapper from "@/components/ui/maps/comps-map-client-wrapper";
@@ -16,25 +16,61 @@ type Filters = {
   w_cond: number;
 };
 
-const DEFAULTS: Filters = {
-  md: 2,
-  band: 500,
-  same_lu: true,
-  w_lu: 5,
-  w_dist: 4,
-  w_lat: 3,
-  w_lon: 3,
-  w_cond: 3,
-};
-
 export default function ParcelCompsControls({
   parcelId,
+  // Provide per-field defaults directly via props (no global defaults object)
+  defaults,
+  /**
+   * Optional: change this value to force-reset the form/applied state
+   * when you intentionally want to re-apply new defaults.
+   * e.g. defaultsKey={runId} or defaultsKey={`${parcelId}-${profileId}`}
+   */
+  defaultsKey,
 }: {
   parcelId: number;
+  defaults?: Partial<Filters>;
+  defaultsKey?: string | number;
 }) {
-  // Editing vs applied state
-  const [form, setForm] = useState<Filters>(DEFAULTS);
-  const [applied, setApplied] = useState<Filters>(DEFAULTS);
+  // Build initial defaults exactly once (lazy initializer), so we don't loop
+  const [form, setForm] = useState<Filters>(() => ({
+    md: defaults?.md ?? 2,
+    band: defaults?.band ?? 500,
+    same_lu: defaults?.same_lu ?? true,
+    w_lu: defaults?.w_lu ?? 5,
+    w_dist: defaults?.w_dist ?? 4,
+    w_lat: defaults?.w_lat ?? 3,
+    w_lon: defaults?.w_lon ?? 3,
+    w_cond: defaults?.w_cond ?? 3,
+  }));
+
+  const [applied, setApplied] = useState<Filters>(() => ({
+    md: defaults?.md ?? 2,
+    band: defaults?.band ?? 500,
+    same_lu: defaults?.same_lu ?? true,
+    w_lu: defaults?.w_lu ?? 5,
+    w_dist: defaults?.w_dist ?? 4,
+    w_lat: defaults?.w_lat ?? 3,
+    w_lon: defaults?.w_lon ?? 3,
+    w_cond: defaults?.w_cond ?? 3,
+  }));
+
+  // Optional: only reset when a *stable key* changes (NOT when the defaults object reference changes)
+  useEffect(() => {
+    if (defaultsKey === undefined) return;
+    const next: Filters = {
+      md: defaults?.md ?? 2,
+      band: defaults?.band ?? 500,
+      same_lu: defaults?.same_lu ?? true,
+      w_lu: defaults?.w_lu ?? 5,
+      w_dist: defaults?.w_dist ?? 4,
+      w_lat: defaults?.w_lat ?? 3,
+      w_lon: defaults?.w_lon ?? 3,
+      w_cond: defaults?.w_cond ?? 3,
+    };
+    setForm(next);
+    setApplied(next);
+  }, [defaultsKey]); // <- only this, not `defaults`
+
   const [isApplying, setIsApplying] = useState(false);
 
   const weights = useMemo(
@@ -123,6 +159,7 @@ export default function ParcelCompsControls({
   const subjFromRows = rows.find(
     (r) => r.subject_parcel_id === parcelId
   )?.subject_features;
+
   const subjectPoint =
     subjFromRows?.lat != null && subjFromRows?.lon != null
       ? {
@@ -277,9 +314,9 @@ export default function ParcelCompsControls({
         </div>
       </form>
 
-      {/* Results via CompsCardList */}
-      <div className="">
-        <div className="flex items-center justify-between border-b px-3 py-2">
+      {/* Results */}
+      <div>
+        <div className="flex items-center justify-between px-3 py-2">
           {(compsLoading || isApplying) && (
             <span
               aria-hidden
@@ -296,7 +333,7 @@ export default function ParcelCompsControls({
         ) : (
           <div>
             {!compsLoading && !isApplying && (
-              <CompsCardList rows={rows} className="p-3" />
+              <CompsCardList rows={rows} className="mb-4" />
             )}
             {points.length > 0 && (
               <CompsMapClientWrapper

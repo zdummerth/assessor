@@ -214,6 +214,62 @@ export function SetUrlParam({
   );
 }
 
+export function AppendUrlParam({
+  urlParam,
+  value,
+  className = "",
+}: {
+  urlParam: string;
+  className?: string;
+  value: {
+    id: string;
+    label: string;
+  };
+}) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  const handleClick = () => {
+    const params = new URLSearchParams(searchParams);
+
+    // Get current values as array
+    const current = params.get(urlParam)?.split(",").filter(Boolean) ?? [];
+
+    // Append if not present, otherwise remove (toggle behavior)
+    let next: string[];
+    if (current.includes(value.id)) {
+      next = current.filter((id) => id !== value.id);
+    } else {
+      next = [...current, value.id];
+    }
+
+    if (next.length > 0) {
+      params.set(urlParam, next.join(","));
+    } else {
+      params.delete(urlParam);
+    }
+
+    // Reset pagination
+    params.delete("page");
+
+    replace(`${pathname}?${params.toString()}`);
+  };
+
+  const isActive = (searchParams.get(urlParam)?.split(",") ?? []).includes(
+    value.id
+  );
+
+  return (
+    <button
+      className={`${className} ${isActive ? "bg-blue-600 p-1 rounded text-white" : ""}`}
+      onClick={handleClick}
+    >
+      {value.label}
+    </button>
+  );
+}
+
 export function DateRangeMenu({ isActive }: { isActive: boolean }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();

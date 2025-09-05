@@ -123,3 +123,29 @@ export function useSalesSearchByAddress(options?: {
     error,
   };
 }
+
+export function useCompare(
+  parcelId: number | null,
+  compSaleIds: number[] | null
+) {
+  const params = new URLSearchParams();
+
+  if (compSaleIds && compSaleIds.length > 0) {
+    params.set("comp_sale_ids", compSaleIds.join(","));
+  }
+
+  if (parcelId) params.set("subject_parcel_id", String(parcelId));
+
+  const url =
+    parcelId !== null && compSaleIds && compSaleIds.length > 0
+      ? `/test/parcels/${parcelId}/compare?${params.toString()}`
+      : null;
+
+  const { data, error, isLoading } = useSWR(url, fetcher);
+
+  return {
+    data,
+    isLoading,
+    error,
+  };
+}

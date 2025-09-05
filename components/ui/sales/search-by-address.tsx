@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSalesSearchByAddress } from "@/lib/client-queries"; // adjust import path
 import ParcelNumber from "../parcel-number-updated";
+import { AppendUrlParam } from "../filter-client";
 
 type SaleRow = {
   sale_id: number;
@@ -119,6 +120,13 @@ export default function SalesAddressSearchCards({
                       <ActionButton sale={r} />
                     </div>
                   )}
+                  <AppendUrlParam
+                    urlParam="saleIds"
+                    value={{
+                      id: r.sale_id.toString(),
+                      label: `Compare`,
+                    }}
+                  />
                 </div>
 
                 <div className="grid gap-1 text-sm text-gray-700">
