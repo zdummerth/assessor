@@ -18,7 +18,6 @@ type Filters = {
 
 export default function ParcelCompsControls({
   parcelId,
-  // Provide per-field defaults directly via props (no global defaults object)
   defaults,
   /**
    * Optional: change this value to force-reset the form/applied state

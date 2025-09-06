@@ -24,6 +24,7 @@ type Props = {
   debounceMs?: number;
   ActionButton?: React.ComponentType<{ sale: SaleRow }>;
   className?: string;
+  showValidOnlyToggle?: boolean;
 };
 
 export default function SalesAddressSearchCards({
@@ -32,6 +33,7 @@ export default function SalesAddressSearchCards({
   debounceMs = 300,
   ActionButton,
   className,
+  showValidOnlyToggle = false,
 }: Props) {
   const [q, setQ] = useState("");
   const [validOnly, setValidOnly] = useState(initialValidOnly);
@@ -68,26 +70,20 @@ export default function SalesAddressSearchCards({
           aria-label="Search address"
         />
 
-        <label className="flex items-center gap-2 text-sm px-2 whitespace-nowrap">
-          <input
-            type="checkbox"
-            checked={validOnly}
-            onChange={(e) => setValidOnly(e.target.checked)}
-            className="h-4 w-4"
-          />
-          Valid only
-        </label>
-
-        {/* Reserve spinner space */}
-        <span className="inline-flex items-center justify-center w-4 h-4">
-          {isLoading && (
-            <span
-              aria-hidden
-              className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
-              title="Loading…"
-            />
-          )}
-        </span>
+        {showValidOnlyToggle && (
+          <>
+            {" "}
+            <label className="flex items-center gap-2 text-sm px-2 whitespace-nowrap">
+              <input
+                type="checkbox"
+                checked={validOnly}
+                onChange={(e) => setValidOnly(e.target.checked)}
+                className="h-4 w-4"
+              />
+              Valid only
+            </label>
+          </>
+        )}
       </div>
 
       {/* Results container */}

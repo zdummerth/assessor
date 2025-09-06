@@ -22,12 +22,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
 
   return (
-    <div className="flex">
+    <div className="flex gap-2 p-2">
       <div className="w-[400px]">
         <Suspense fallback={<div>Loading...</div>}>
           <ParcelFeatures params={Promise.resolve({ id: params.id })} />
         </Suspense>
-        <SalesAddressSearch />
+        <SalesAddressSearch className="w-full" />
       </div>
       <ParcelCompareViewer />
     </div>

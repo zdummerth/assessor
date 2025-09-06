@@ -77,17 +77,36 @@ function fmtInt(n: number | null | undefined, unit?: string) {
   if (n == null) return "—";
   return `${n.toLocaleString()}${unit ?? ""}`;
 }
-
 function fmtNum(n: number | null | undefined, digits = 2, unit?: string) {
   if (n == null) return "—";
   return `${n.toFixed(digits)}${unit ?? ""}`;
 }
-
 function diffClass(n: number | null | undefined) {
-  if (n == null) return "text-gray-600";
+  if (n == null) return "text-gray-500";
   if (n > 0) return "text-emerald-700";
   if (n < 0) return "text-rose-700";
-  return "text-gray-800";
+  return "text-gray-700";
+}
+
+function ValueDiffCell({
+  value,
+  valueFmt = (x: number | null | undefined) =>
+    (x ?? null) !== null ? String(x) : "—",
+  diff,
+  diffFmt = (x: number | null | undefined) =>
+    (x ?? null) !== null ? String(x) : "—",
+}: {
+  value: number | string | null | undefined;
+  valueFmt?: (x: any) => string;
+  diff: number | null | undefined;
+  diffFmt?: (x: number | null | undefined) => string;
+}) {
+  return (
+    <div className="flex flex-col items-end">
+      <div className="font-medium text-gray-900">{valueFmt(value)}</div>
+      <div className={`text-[11px] ${diffClass(diff)}`}>{diffFmt(diff)}</div>
+    </div>
+  );
 }
 
 export default function ParcelCompareViewer() {
@@ -118,19 +137,16 @@ export default function ParcelCompareViewer() {
       </div>
     );
   }
-
   if (isLoading) {
     return (
       <div className="p-4 text-sm text-gray-500">Loading comparisons…</div>
     );
   }
-
   if (error) {
     return (
       <div className="p-4 text-sm text-red-600">Error loading comparisons.</div>
     );
   }
-
   if (!rows.length) {
     return (
       <div className="p-4 text-sm text-gray-500">
@@ -141,145 +157,160 @@ export default function ParcelCompareViewer() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-        {rows.map((r) => (
-          <div
-            key={`${r.comp_sale_id}-${r.comp_parcel_id}`}
-            className="rounded-lg border bg-white p-4 shadow-sm space-y-3"
-          >
-            {/* Header / Sale summary */}
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-sm text-gray-500">Comp Sale</div>
-                <div className="text-base font-semibold">#{r.comp_sale_id}</div>
-                <div className="text-sm text-gray-700">
-                  {r.comp_sale_date ?? "—"}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-gray-500">Price</div>
-                <div className="text-base font-semibold">
-                  {r.comp_sale_price != null
-                    ? `$${r.comp_sale_price.toLocaleString()}`
-                    : "—"}
-                </div>
-                {r.comp_sale_type && (
-                  <div className="mt-1">
-                    <Badge>{r.comp_sale_type}</Badge>
-                  </div>
-                )}
-              </div>
-            </div>
+      <div className="rounded-lg border bg-white">
+        <div className="overflow-x-auto">
+          <table className="min-w-[900px] w-full border-collapse text-sm">
+            <thead className="bg-gray-50">
+              <tr className="text-gray-600">
+                <th className="border-b px-3 py-2 text-left font-medium">
+                  Sale
+                </th>
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Price
+                </th>
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Date
+                </th>
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Dist (mi)
+                </th>
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Land Use
+                </th>
 
-            {/* Distance & land use */}
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge intent="default">
-                {r.distance_miles != null
-                  ? `${r.distance_miles.toFixed(2)} mi`
-                  : "— mi"}
-              </Badge>
-              <Badge intent={r.same_land_use ? "success" : "warning"}>
-                {r.same_land_use ? "Same land use" : "Different land use"}
-              </Badge>
-            </div>
+                {/* Feature columns */}
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Struct Cnt
+                </th>
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Finished (sf)
+                </th>
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Unfinished (sf)
+                </th>
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Avg Yr Built
+                </th>
+                <th className="border-b px-3 py-2 text-right font-medium">
+                  Avg Cond
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr
+                  key={`${r.comp_sale_id}-${r.comp_parcel_id}`}
+                  className="odd:bg-white even:bg-gray-50"
+                >
+                  {/* Sale */}
+                  <td className="border-t px-3 py-2 align-top">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-900">
+                        #{r.comp_sale_id}
+                      </span>
+                      {r.comp_sale_type && <Badge>{r.comp_sale_type}</Badge>}
+                    </div>
+                  </td>
 
-            <div className="grid grid-cols-2 gap-2 rounded-md border p-2">
-              <div className="text-xs text-gray-500">Subject LU</div>
-              <div className="text-right text-sm font-medium">
-                {r.subject_land_use ?? "—"}
-              </div>
-              <div className="text-xs text-gray-500">Comp LU</div>
-              <div className="text-right text-sm font-medium">
-                {r.comp_land_use ?? "—"}
-              </div>
-            </div>
+                  {/* Price */}
+                  <td className="border-t px-3 py-2 align-top text-right">
+                    <div className="font-semibold text-gray-900">
+                      {r.comp_sale_price != null
+                        ? `$${r.comp_sale_price.toLocaleString()}`
+                        : "—"}
+                    </div>
+                  </td>
 
-            {/* Differences (Subject vs Comp vs Diff) */}
-            <div className="rounded-md border p-3">
-              <div className="mb-2 text-sm font-medium text-gray-800">
-                Differences
-              </div>
-              <table className="w-full text-sm border-collapse">
-                <thead>
-                  <tr className="text-gray-500">
-                    <th className="border-b text-left font-medium py-1">
-                      Feature
-                    </th>
+                  {/* Date */}
+                  <td className="border-t px-3 py-2 align-top text-right">
+                    <div className="text-gray-900">
+                      {r.comp_sale_date ?? "—"}
+                    </div>
+                  </td>
 
-                    <th className="border-b text-right font-medium py-1">
-                      Comp
-                    </th>
-                    <th className="border-b text-right font-medium py-1">
-                      Diff
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="py-1">Finished Area</td>
+                  {/* Distance */}
+                  <td className="border-t px-3 py-2 align-top text-right">
+                    <div className="font-medium text-gray-900">
+                      {r.distance_miles != null
+                        ? r.distance_miles.toFixed(2)
+                        : "—"}
+                    </div>
+                  </td>
 
-                    <td className="text-right">
-                      {fmtInt(r.comp_total_finished_area, " sf")}
-                    </td>
-                    <td
-                      className={`text-right font-medium ${diffClass(r.diff_total_finished_area)}`}
-                    >
-                      {fmtInt(r.diff_total_finished_area, " sf")}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-1">Unfinished Area</td>
+                  {/* Land Use (value + small same/diff) */}
+                  <td className="border-t px-3 py-2 align-top">
+                    <div className="flex flex-col items-end">
+                      <div className="font-medium text-gray-900">
+                        {r.comp_land_use ?? "—"}
+                      </div>
+                      <div className="text-[11px]">
+                        {r.same_land_use == null ? (
+                          <span className="text-gray-500">—</span>
+                        ) : r.same_land_use ? (
+                          <span className="text-emerald-700">same</span>
+                        ) : (
+                          <span className="text-rose-700">
+                            {r.subject_land_use ?? "—"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </td>
 
-                    <td className="text-right">
-                      {fmtInt(r.comp_total_unfinished_area, " sf")}
-                    </td>
-                    <td
-                      className={`text-right font-medium ${diffClass(r.diff_total_unfinished_area)}`}
-                    >
-                      {fmtInt(r.diff_total_unfinished_area, " sf")}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-1">Structure Count</td>
+                  {/* Structure Count */}
+                  <td className="border-t px-3 py-2 align-top text-right">
+                    <ValueDiffCell
+                      value={r.comp_structure_count}
+                      valueFmt={(v) => fmtInt(v)}
+                      diff={r.diff_structure_count}
+                      diffFmt={(d) => fmtInt(d)}
+                    />
+                  </td>
 
-                    <td className="text-right">
-                      {fmtInt(r.comp_structure_count)}
-                    </td>
-                    <td
-                      className={`text-right font-medium ${diffClass(r.diff_structure_count)}`}
-                    >
-                      {fmtInt(r.diff_structure_count)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-1">Avg Year Built</td>
+                  {/* Finished Area */}
+                  <td className="border-t px-3 py-2 align-top text-right">
+                    <ValueDiffCell
+                      value={r.comp_total_finished_area}
+                      valueFmt={(v) => fmtInt(v, " sf")}
+                      diff={r.diff_total_finished_area}
+                      diffFmt={(d) => fmtInt(d, " sf")}
+                    />
+                  </td>
 
-                    <td className="text-right">
-                      {fmtInt(r.comp_avg_year_built)}
-                    </td>
-                    <td
-                      className={`text-right font-medium ${diffClass(r.diff_avg_year_built)}`}
-                    >
-                      {fmtInt(r.diff_avg_year_built)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-1">Avg Condition</td>
+                  {/* Unfinished Area */}
+                  <td className="border-t px-3 py-2 align-top text-right">
+                    <ValueDiffCell
+                      value={r.comp_total_unfinished_area}
+                      valueFmt={(v) => fmtInt(v, " sf")}
+                      diff={r.diff_total_unfinished_area}
+                      diffFmt={(d) => fmtInt(d, " sf")}
+                    />
+                  </td>
 
-                    <td className="text-right">
-                      {fmtNum(r.comp_avg_condition, 2)}
-                    </td>
-                    <td
-                      className={`text-right font-medium ${diffClass(r.diff_avg_condition)}`}
-                    >
-                      {fmtNum(r.diff_avg_condition, 2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
+                  {/* Avg Year Built */}
+                  <td className="border-t px-3 py-2 align-top text-right">
+                    <ValueDiffCell
+                      value={r.comp_avg_year_built}
+                      valueFmt={(v) => fmtInt(v)}
+                      diff={r.diff_avg_year_built}
+                      diffFmt={(d) => fmtInt(d)}
+                    />
+                  </td>
+
+                  {/* Avg Condition */}
+                  <td className="border-t px-3 py-2 align-top text-right">
+                    <ValueDiffCell
+                      value={r.comp_avg_condition}
+                      valueFmt={(v) => fmtNum(v, 2)}
+                      diff={r.diff_avg_condition}
+                      diffFmt={(d) => fmtNum(d, 2)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
