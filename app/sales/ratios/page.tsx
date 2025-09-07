@@ -4,13 +4,11 @@ import SalesFilters from "@/components/ui/filters-sales";
 import { getFilteredData } from "@/lib/data";
 import { getMedian, getMean } from "../lib";
 
-export default async function ChartsPage(
-  props: {
-    searchParams?: Promise<{
-      nbrhdcode?: string;
-    }>;
-  }
-) {
+export default async function ChartsPage(props: {
+  searchParams?: Promise<{
+    nbrhdcode?: string;
+  }>;
+}) {
   const searchParams = await props.searchParams;
   const formattedSearchParams = Object.fromEntries(
     Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [

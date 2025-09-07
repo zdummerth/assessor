@@ -211,3 +211,46 @@ export function useLandUseOptions() {
     error,
   };
 }
+
+export type RatioRow = {
+  // minimal shape expected from get_ratios
+  sale_id: number;
+  parcel_id: number;
+  sale_date: string; // 'YYYY-MM-DD' (or ISO)
+  sale_price: number | null;
+  sale_type?: string | null;
+
+  // grouping keys we may use
+  land_use_sale?: string | null;
+  land_use_asof?: string | null;
+  district?: string | null;
+  value_year?: number | null;
+
+  // computed by get_ratios
+  ratio: number | null;
+  // you may have more columns — keep it open-ended
+  [k: string]: any;
+};
+
+export function useRatiosRaw(options?: {
+  start_date?: string; // 'YYYY-MM-DD'
+  end_date?: string; // 'YYYY-MM-DD'
+  as_of_date?: string; // 'YYYY-MM-DD'
+  land_uses?: string[]; // filter returned rows by land_use_sale
+}) {
+  const params = new URLSearchParams();
+  if (options?.start_date) params.set("start_date", options.start_date);
+  if (options?.end_date) params.set("end_date", options.end_date);
+  if (options?.as_of_date) params.set("as_of_date", options.as_of_date);
+  if (options?.land_uses?.length)
+    params.set("land_uses", options.land_uses.join(","));
+
+  const url =
+    options && Object.keys(options).length > 0
+      ? `/test/ratios/raw?${params.toString()}`
+      : `/test/ratios/raw`;
+
+  const { data, error, isLoading } = useSWR<RatioRow[]>(url, fetcher);
+
+  return { data: data ?? [], error, isLoading };
+}
