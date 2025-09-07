@@ -149,3 +149,65 @@ export function useCompare(
     error,
   };
 }
+
+export type RatioMediansRow = {
+  group_key: string | null;
+  median_ratio: number | null;
+  min_ratio: number | null;
+  max_ratio: number | null;
+  avg_ratio: number | null;
+  n: number;
+  raw_data?: any; // jsonb array if include_raw=true
+};
+
+export function useRatioMedians(options?: {
+  start_date?: string; // 'YYYY-MM-DD'
+  end_date?: string; // 'YYYY-MM-DD'
+  as_of_date?: string; // 'YYYY-MM-DD'
+  group_by?: string[]; // e.g., ['district', 'land_use_sale']
+  land_uses?: string[]; // e.g., ['5000','5100']
+  trim_factor?: 1.5 | 3; // or undefined
+  include_raw?: boolean; // default false
+}) {
+  const params = new URLSearchParams();
+
+  if (options?.start_date) params.set("start_date", options.start_date);
+  if (options?.end_date) params.set("end_date", options.end_date);
+  if (options?.as_of_date) params.set("as_of_date", options.as_of_date);
+
+  if (options?.group_by?.length) {
+    params.set("group_by", options.group_by.join(","));
+  }
+  if (options?.land_uses?.length) {
+    params.set("land_uses", options.land_uses.join(","));
+  }
+  if (options?.trim_factor) {
+    params.set("trim_factor", String(options.trim_factor));
+  }
+  if (options?.include_raw !== undefined) {
+    params.set("include_raw", options.include_raw ? "1" : "0");
+  }
+
+  const hasAny =
+    options && Object.keys(options).length > 0 && Array.from(params).length > 0;
+
+  const url = hasAny
+    ? `/test/ratios/medians?${params.toString()}`
+    : `/test/ratios/medians`;
+
+  const { data, error, isLoading } = useSWR<RatioMediansRow[]>(url, fetcher);
+
+  return { data, error, isLoading };
+}
+
+export function useLandUseOptions() {
+  const { data, error, isLoading } = useSWR<string[]>(
+    "/test/land-uses",
+    fetcher
+  );
+  return {
+    options: Array.isArray(data) ? data : [],
+    isLoading,
+    error,
+  };
+}
