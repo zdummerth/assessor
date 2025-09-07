@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NavClient = () => {
+  // call hook to cache  salesdata
   const pathname = usePathname();
   const links = [
     // { href: "/appeals", label: "Appeals" },

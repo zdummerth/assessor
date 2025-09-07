@@ -28,7 +28,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "components/ui/building-permits"
+    "components/ui/building-permits",
+    "lib/stats.js"
   ],
   "exclude": ["node_modules"]
 }

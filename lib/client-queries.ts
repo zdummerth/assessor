@@ -254,3 +254,59 @@ export function useRatiosRaw(options?: {
 
   return { data: data ?? [], error, isLoading };
 }
+
+export type RatiosFeaturesRow = {
+  sale_id: number;
+  sale_date: string; // date
+  sale_price: number | null;
+  sale_type: string | null;
+  parcel_id: number;
+  value_row_id: number | null;
+  value_year: number | null;
+  date_of_assessment: string | null; // timestamptz
+  current_value: number | string | null; // PG numeric may be string
+  ratio: number | string | null; // PG numeric may be string
+  land_use_sale: string | null;
+  land_use_asof: string | null;
+  block: number | null;
+  lot: string | null;
+  ext: number | null;
+  structure_count: number | null;
+  total_finished_area: number | null;
+  total_unfinished_area: number | null;
+  avg_year_built: number | null;
+  avg_condition: number | string | null; // PG numeric may be string
+  land_use: string | null;
+  lat: number | null;
+  lon: number | null;
+  district: string | null;
+  house_number: string | null;
+  street: string | null;
+  postcode: string | null;
+};
+
+export function useRatiosFeatures(options?: {
+  start_date?: string; // 'YYYY-MM-DD'
+  end_date?: string; // 'YYYY-MM-DD'
+  as_of_date?: string; // 'YYYY-MM-DD'
+  land_uses?: string[]; // filter by land_use_sale
+  valid_only?: boolean; // defaults to true on the API
+}) {
+  const params = new URLSearchParams();
+  if (options?.start_date) params.set("start_date", options.start_date);
+  if (options?.end_date) params.set("end_date", options.end_date);
+  if (options?.as_of_date) params.set("as_of_date", options.as_of_date);
+  if (options?.land_uses?.length)
+    params.set("land_uses", options.land_uses.join(","));
+  if (typeof options?.valid_only === "boolean")
+    params.set("valid_only", String(options.valid_only));
+
+  const url =
+    options && Object.keys(options).length > 0
+      ? `/test/ratios/ratio-features?${params.toString()}`
+      : `/test/ratios/ratio-features`;
+
+  const { data, error, isLoading } = useSWR<RatiosFeaturesRow[]>(url, fetcher);
+
+  return { data: data ?? [], error, isLoading };
+}
