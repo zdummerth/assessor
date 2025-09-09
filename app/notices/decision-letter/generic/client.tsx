@@ -238,7 +238,7 @@ export default function Notice() {
         <>
           <div className="my-4 flex flex-wrap gap-8 text-xs">
             <div>
-              <p>Parcel Number</p>
+              <p>Account Number</p>
               <div>{form.parcel_number}</div>
             </div>
             <div>
