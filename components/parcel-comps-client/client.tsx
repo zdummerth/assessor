@@ -66,6 +66,9 @@ export default function GowerCompsClient({
 
   // Keep fetching BOTH valid + invalid (server-side)
   const { data, isLoading, error } = useRatiosFeatures({
+    start_date: startDate,
+    end_date: endDate,
+    as_of_date: asOfDate,
     valid_only: false,
   });
 
@@ -344,10 +347,17 @@ export default function GowerCompsClient({
                   </tr>
                 );
               })}
-              {!ranked.length && (
+              {!ranked.length && !isLoading && (
                 <tr>
                   <td colSpan={12} className="px-3 py-4 text-gray-500">
                     No comps found with current filters.
+                  </td>
+                </tr>
+              )}
+              {isLoading && (
+                <tr>
+                  <td colSpan={12} className="px-3 py-4 text-gray-500">
+                    Loading...
                   </td>
                 </tr>
               )}

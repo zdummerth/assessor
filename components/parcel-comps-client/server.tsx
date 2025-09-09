@@ -1,7 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import ParcelNumber from "../ui/parcel-number-updated";
 import GowerCompsClient from "./client";
-import ManualComps from "./manual";
 
 type ParcelFeaturesRow = {
   parcel_id: number;
@@ -118,9 +117,7 @@ export default async function ParcelCompsClient({
         </dl>
       </div>
 
-      {/* Gower comps client component */}
       <GowerCompsClient subject={subject} />
-      <ManualComps subject={subject} />
     </div>
   );
 }
