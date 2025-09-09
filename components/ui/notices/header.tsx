@@ -36,7 +36,7 @@ export default function NoticeHeader({
   mailingState = "",
   mailingZip = "",
   date,
-  paddingTop = "pt-4",
+  paddingTop = "pt-3",
 }: NoticeHeaderProps) {
   return (
     <>
@@ -67,8 +67,8 @@ export default function NoticeHeader({
       </div>
 
       {/* Mailing name, address, and date */}
-      <div className="flex justify-between mt-7 mb-16 text-sm/4">
-        <div className="relative left-10">
+      <div className="flex justify-between mt-6 mb-20 text-sm/4">
+        <div className="relative left-6">
           {mailingName && <p>{mailingName}</p>}
           {mailingAddress1 && <p>{mailingAddress1}</p>}
           {mailingAddress2 && <p>{mailingAddress2}</p>}

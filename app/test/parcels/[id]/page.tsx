@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import FormattedDate from "@/components/ui/formatted-date";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
-import ParcelValues from "@/components/parcel-values/server";
+// import ParcelValues from "@/components/parcel-values/server";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
 import ParcelStructures from "@/components/parcel-structures/server";
 import ParcelAddress from "@/components/parcel-addresses/server";
@@ -12,6 +12,7 @@ import ParcelSales from "@/components/parcel-sales/server";
 import ParcelLandUses from "@/components/parcel-land-uses/server";
 import ParcelScores from "@/components/parcel-scores/server";
 import ParcelCompsControls from "./comps/controls";
+import ParcelCompsClient from "@/components/parcel-comps-client/server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -115,11 +116,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </div>
 
           {/* Row 4: Values */}
-          <div className="">
+          {/* <div className="">
             <Suspense fallback={<div>Loading parcel values...</div>}>
               <ParcelValues parcel={parcel} />
             </Suspense>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -142,14 +143,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         Select Manual Comps
       </Link>
 
-      <ParcelCompsControls
+      {/* <ParcelCompsControls
         parcelId={parcel.id}
         defaults={{
           md: isResidential ? 1 : 2,
           band: isResidential ? 500 : 10000,
           same_lu: isResidential,
         }}
-      />
+      /> */}
+      <Suspense fallback={<div>Loading comparable sales...</div>}>
+        <ParcelCompsClient parcelId={parcel.id} />
+      </Suspense>
     </div>
   );
 }

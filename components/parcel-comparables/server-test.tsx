@@ -53,23 +53,6 @@ type CompRow = {
   } | null;
 };
 
-function fmtUSD(n?: number | null) {
-  if (n == null) return "—";
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-function fmtNum(n?: number | null) {
-  if (n == null) return "—";
-  return new Intl.NumberFormat().format(n);
-}
-function fmtDate(d?: string | null) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString();
-}
-
 export default async function ServerCompsTable({
   parcelId,
   k = 4,

@@ -310,3 +310,59 @@ export function useRatiosFeatures(options?: {
 
   return { data: data ?? [], error, isLoading };
 }
+
+export type ParcelFeaturesRow = {
+  parcel_id: number;
+  block: number | null;
+  lot: string | null;
+  ext: number | null;
+  structure_count: number | null;
+  total_finished_area: number | null;
+  total_unfinished_area: number | null;
+  avg_year_built: number | null;
+  avg_condition: number | null;
+  land_use: string | null;
+  lat: number | null;
+  lon: number | null;
+  district: string | null;
+  house_number: string | null;
+  street: string | null;
+  postcode: string | null;
+};
+
+export function useParcelFeatures(
+  parcelId: number | null,
+  options?: {
+    as_of_date?: string | Date; // "YYYY-MM-DD" or Date
+  }
+) {
+  const params = new URLSearchParams();
+
+  // keep the query param for parity, even though parcelId is in the path
+  if (parcelId !== null) params.set("parcel_id", String(parcelId));
+
+  if (options?.as_of_date) {
+    const v =
+      options.as_of_date instanceof Date
+        ? options.as_of_date.toISOString().slice(0, 10)
+        : options.as_of_date;
+    params.set("as_of_date", v);
+  }
+
+  // path: /test/[parcel_id]/features
+  const base = parcelId !== null ? `/test/${parcelId}/features` : null;
+  const qs = params.toString();
+  const url = base ? (qs ? `${base}?${qs}` : base) : null;
+
+  const { data, error, isLoading, mutate } = useSWR<ParcelFeaturesRow[]>(
+    url,
+    fetcher
+  );
+
+  return {
+    data, // array (usually 0 or 1 row, filtered by parcel_id)
+    isLoading,
+    error,
+    mutate,
+  };
+}
