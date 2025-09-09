@@ -121,7 +121,7 @@ export default function RatioSidebar({
         </label>
 
         <label className="flex items-center gap-2 mb-3">
-          <span className="w-24 text-sm">Trim</span>
+          <span className="w-24 text-sm">Trim Outliers</span>
           <select
             className="w-full rounded-md border px-2 py-1 text-sm"
             value={trim}
@@ -163,7 +163,7 @@ export default function RatioSidebar({
           </button>
         </div>
 
-        <label className="flex items-center gap-2 mb-3">
+        {/* <label className="flex items-center gap-2 mb-3">
           <input
             type="checkbox"
             className="h-4 w-4"
@@ -171,7 +171,7 @@ export default function RatioSidebar({
             onChange={(e) => setIncludeRaw(e.target.checked)}
           />
           <span className="text-sm">Include raw JSON</span>
-        </label>
+        </label> */}
 
         {/* CSV buttons */}
         <div className="flex gap-2">
@@ -189,7 +189,7 @@ export default function RatioSidebar({
             className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
             title="Export raw rows"
           >
-            Export Raw CSV
+            Export Sales CSV
           </button>
         </div>
       </div>
