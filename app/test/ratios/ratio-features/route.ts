@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
         p_start_date: startDate || null,
         p_end_date: endDate || null,
         p_as_of_date: asOfDate || null,
+        p_land_uses: landUses,
         p_valid_only: validOnly,
       });
 
@@ -50,15 +51,7 @@ export async function GET(request: NextRequest) {
 
     const rows = Array.isArray(data) ? data : [];
 
-    // Apply optional land-use filter (matches your existing raw route behavior)
-    const filtered = landUses?.length
-      ? rows.filter(
-          (r: any) =>
-            r?.land_use_sale && landUses.includes(String(r.land_use_sale))
-        )
-      : rows;
-
-    return Response.json(filtered);
+    return Response.json(rows);
   } catch (err) {
     console.error("Unexpected error:", err);
     return Response.json({ error: "Unexpected error" }, { status: 500 });
