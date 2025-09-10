@@ -8,13 +8,14 @@ import {
 } from "@/lib/client-queries";
 import RatioSidebar from "../../ratios/_components/sidebar";
 import RawSalesView from "./raw-sales";
+import MultiParcelSalesCards from "./multi-parcel-sales";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import { getSaleYear } from "@/lib/ratio-stats";
 import { computeGroupedNumeric, sortGroupSummaries } from "@/lib/stats";
 import { Chart } from "react-google-charts";
 
 type TrimChoice = "" | "1.5" | "3";
-type Tab = "sale_price" | "ratio" | "raw"; // NEW
+type Tab = "sale_price" | "ratio" | "raw" | "multi"; // NEW
 export type SortDir = "asc" | "desc";
 export type SortKey =
   | "median"
@@ -237,7 +238,7 @@ export default function SoldParcelRatiosFeaturesStats() {
       {/* Main */}
       <section className="min-w-0 space-y-4">
         {/* Tabs + View toggle */}
-        <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center justify-between flex-wrap gap-2 mt-2">
           <div className="text-sm text-gray-600">
             {tab !== "raw"
               ? groupBy.length
@@ -251,24 +252,31 @@ export default function SoldParcelRatiosFeaturesStats() {
             <div className="inline-flex rounded-lg border p-1 bg-white">
               <button
                 type="button"
+                onClick={() => setTab("raw")}
+                className={`px-3 py-1.5 text-sm rounded-md ${tab === "raw" ? "bg-gray-900 text-white" : "hover:bg-gray-50"}`}
+              >
+                Sales
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab("multi")}
+                className={`px-3 py-1.5 text-sm rounded-md ${tab === "multi" ? "bg-gray-900 text-white" : "hover:bg-gray-50"}`}
+              >
+                Multi-Parcel Sales
+              </button>
+              <button
+                type="button"
                 onClick={() => setTab("sale_price")}
                 className={`px-3 py-1.5 text-sm rounded-md ${tab === "sale_price" ? "bg-gray-900 text-white" : "hover:bg-gray-50"}`}
               >
-                Sale Prices
+                Sale Summaries
               </button>
               <button
                 type="button"
                 onClick={() => setTab("ratio")}
                 className={`px-3 py-1.5 text-sm rounded-md ${tab === "ratio" ? "bg-gray-900 text-white" : "hover:bg-gray-50"}`}
               >
-                Ratios
-              </button>
-              <button
-                type="button"
-                onClick={() => setTab("raw")}
-                className={`px-3 py-1.5 text-sm rounded-md ${tab === "raw" ? "bg-gray-900 text-white" : "hover:bg-gray-50"}`}
-              >
-                Raw Sales
+                Ratio Summaries
               </button>
             </div>
 
@@ -299,7 +307,13 @@ export default function SoldParcelRatiosFeaturesStats() {
         </div>
 
         {/* ===== MAIN BODY ===== */}
-        {tab === "raw" ? (
+        {tab === "multi" ? (
+          <MultiParcelSalesCards
+            start_date={startDate || undefined}
+            end_date={endDate || undefined}
+            land_uses={selectedLandUses.length ? selectedLandUses : undefined}
+          />
+        ) : tab === "raw" ? (
           <RawSalesView rows={rows} viewMode={viewMode} />
         ) : viewMode === "table" ? (
           <div className="rounded-md border">

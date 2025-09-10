@@ -13,9 +13,9 @@ export async function GET(_req: NextRequest) {
     // Distinct land uses from parcel_land_uses
     // You can switch to a dedicated view/function if you prefer.
     const { data, error } = await supabase
-      .from("test_parcel_land_uses")
-      .select("land_use")
-      .not("land_use", "is", null);
+      .from("land_use_codes")
+      .select("code")
+      .not("code", "is", null);
 
     console.log("Supabase data:", data, "error:", error);
 
@@ -29,7 +29,7 @@ export async function GET(_req: NextRequest) {
 
     // Unique, sorted
     const options = Array.from(
-      new Set((data ?? []).map((r: any) => r.land_use))
+      new Set((data ?? []).map((r: any) => r.code.toString()))
     ).sort();
 
     return Response.json(options);

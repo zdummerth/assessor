@@ -63,9 +63,6 @@ export default function RatioSidebar({
   toggleGroup,
   groupables,
 
-  includeRaw,
-  setIncludeRaw,
-
   resetToResidential,
 
   onExportStats,

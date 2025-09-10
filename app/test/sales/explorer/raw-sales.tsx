@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect } from "react";
-import { type RatiosFeaturesRow } from "@/lib/client-queries";
 import {
   ViewMode,
   SortDir,
@@ -11,7 +10,7 @@ import {
 } from "./page";
 
 // =======================================================
-// RawSalesView with client-side pagination
+// RawSalesView with all DB columns + client-side pagination
 // =======================================================
 
 type RawViewProps = {
@@ -19,7 +18,10 @@ type RawViewProps = {
   viewMode: ViewMode; // "table" | "cards"
 };
 
+// Add sort keys for new numeric fields you care about
 type RawSortKey =
+  | "sale_id"
+  | "parcel_id"
   | "sale_date"
   | "sale_price"
   | "ratio"
@@ -27,20 +29,39 @@ type RawSortKey =
   | "land_use"
   | "avg_year_built"
   | "avg_condition"
-  | "postcode";
+  | "postcode"
+  | "value_year"
+  | "structure_count"
+  | "total_finished_area"
+  | "total_unfinished_area"
+  | "land_area"
+  | "land_to_building_area_ratio"
+  | "price_per_sqft_building_total"
+  | "price_per_sqft_finished";
 
 const RAW_SORT_OPTIONS: { key: RawSortKey; label: string }[] = [
   { key: "sale_date", label: "Sale Date" },
   { key: "sale_price", label: "Sale Price" },
   { key: "ratio", label: "Ratio" },
-  { key: "district", label: "District" },
-  { key: "land_use", label: "Land Use" },
+  { key: "land_area", label: "Land Area" },
+  { key: "price_per_sqft_building_total", label: "PPSF (Total)" },
+  { key: "price_per_sqft_finished", label: "PPSF (Finished)" },
+  { key: "land_to_building_area_ratio", label: "Land/Building Area" },
   { key: "avg_year_built", label: "Avg Year Built" },
   { key: "avg_condition", label: "Avg Condition" },
+  { key: "structure_count", label: "Structures" },
+  { key: "total_finished_area", label: "Finished Area" },
+  { key: "total_unfinished_area", label: "Unfinished Area" },
+  { key: "district", label: "District" },
+  { key: "land_use", label: "Land Use" },
   { key: "postcode", label: "Postcode" },
+  { key: "sale_id", label: "Sale ID" },
+  { key: "parcel_id", label: "Parcel ID" },
+  { key: "value_year", label: "Value Year" },
 ];
 
-const PAGE_SIZES = [25, 50, 100, 250];
+const SORTABLE_KEYS = new Set<RawSortKey>(RAW_SORT_OPTIONS.map((o) => o.key));
+const PAGE_SIZES = [10, 25, 50, 100, 250];
 
 function cmp(a: any, b: any) {
   const an = a === null || a === undefined;
@@ -51,8 +72,7 @@ function cmp(a: any, b: any) {
 
   if (typeof a === "number" && typeof b === "number") return a - b;
 
-  // Dates come in as strings; try Date compare when key is sale_date
-  // (Caller passes raw strings like "2024-05-01")
+  // attempt date compare first
   const da = Date.parse(a);
   const db = Date.parse(b);
   if (!Number.isNaN(da) && !Number.isNaN(db)) return da - db;
@@ -146,20 +166,194 @@ function PaginationControls({
   );
 }
 
+// ---------- format helpers specific to extra columns ----------
+const fmtYesNo = (b: boolean | null | undefined) =>
+  b === null || b === undefined ? "—" : b ? "Valid" : "Invalid";
+
+const fmtInt = (n: any) => (isNum(n) ? Math.trunc(n).toLocaleString() : "—");
+const fmtFloat = (n: any, d = 2) => (isNum(n) ? n.toFixed(d) : "—");
+const fmtCurrency2 = (n: any) =>
+  isNum(n)
+    ? new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(n)
+    : "—";
+const fmtLatLon = (n: any) => (isNum(n) ? n.toFixed(6) : "—");
+const fmtDateTime = (s: string | null | undefined) =>
+  s ? new Date(s).toLocaleString() : "—";
+
+// ---------- column model ----------
+type AnyRow = RawRow & Record<string, any>;
+type ColDef = {
+  key:
+    | "sale_id"
+    | "sale_date"
+    | "sale_price"
+    | "sale_type"
+    | "is_valid"
+    | "parcel_id"
+    | "value_row_id"
+    | "value_year"
+    | "date_of_assessment"
+    | "current_value"
+    | "ratio"
+    | "land_use_sale"
+    | "land_use_asof"
+    | "block"
+    | "lot"
+    | "ext"
+    | "structure_count"
+    | "total_finished_area"
+    | "total_unfinished_area"
+    | "avg_year_built"
+    | "avg_condition"
+    | "land_area"
+    | "land_to_building_area_ratio"
+    | "price_per_sqft_building_total"
+    | "price_per_sqft_finished"
+    | "land_use"
+    | "total_units"
+    | "price_per_unit"
+    | "lat"
+    | "lon"
+    | "district"
+    | "house_number"
+    | "street"
+    | "postcode";
+  label: string;
+  align?: "left" | "right";
+  // custom formatter (value, row) -> string | JSX
+  fmt?: (v: any, row: AnyRow) => any;
+};
+
+const DB_COLUMNS: ColDef[] = [
+  { key: "sale_id", label: "Sale ID", align: "right" },
+  { key: "sale_date", label: "Sale Date", fmt: (v) => fmtDate(v) },
+  {
+    key: "sale_price",
+    label: "Sale Price",
+    align: "right",
+    fmt: (v) => fmtMoney(v),
+  },
+  { key: "sale_type", label: "Sale Type" },
+  { key: "is_valid", label: "Validity", fmt: (v) => fmtYesNo(v) },
+  { key: "parcel_id", label: "Parcel ID", align: "right" },
+  { key: "value_year", label: "Value Year", align: "right" },
+
+  {
+    key: "current_value",
+    label: "Current Value",
+    align: "right",
+    fmt: (v) => fmtMoney(v),
+  },
+  { key: "ratio", label: "Ratio", align: "right", fmt: (v) => fmtRatio(v) },
+
+  { key: "land_use_sale", label: "Land Use (Sale)" },
+  { key: "land_use_asof", label: "Land Use (As-Of)" },
+
+  { key: "structure_count", label: "Structures", align: "right", fmt: fmtInt },
+  {
+    key: "total_finished_area",
+    label: "Finished Area",
+    align: "right",
+    fmt: fmtInt,
+  },
+  {
+    key: "total_unfinished_area",
+    label: "Unfinished Area",
+    align: "right",
+    fmt: fmtInt,
+  },
+  {
+    key: "avg_year_built",
+    label: "Avg Year Built",
+    align: "right",
+  },
+  {
+    key: "avg_condition",
+    label: "Avg Condition",
+    align: "right",
+    fmt: (v) => (isNum(v) ? v.toFixed(1) : "—"),
+  },
+  {
+    key: "total_units",
+    label: "Total Units",
+    align: "right",
+    fmt: fmtInt,
+  },
+  {
+    key: "price_per_unit",
+    label: "Price/Unit",
+    align: "right",
+  },
+
+  { key: "land_area", label: "Land Area", align: "right", fmt: fmtInt },
+  {
+    key: "land_to_building_area_ratio",
+    label: "Land/Building Area",
+    align: "right",
+    fmt: (v) => fmtFloat(v, 3),
+  },
+  {
+    key: "price_per_sqft_building_total",
+    label: "PPSF (Total)",
+    align: "right",
+    fmt: (v) => fmtCurrency2(v),
+  },
+  {
+    key: "price_per_sqft_finished",
+    label: "PPSF (Finished)",
+    align: "right",
+    fmt: (v) => fmtCurrency2(v),
+  },
+
+  { key: "land_use", label: "Land Use" },
+  { key: "district", label: "District" },
+  { key: "house_number", label: "House #" },
+  { key: "street", label: "Street" },
+  { key: "postcode", label: "Postcode" },
+];
+
+const PAGE_SIZES_DEFAULT = PAGE_SIZES[0]; // 10
+
+function Th({
+  label,
+  onClick,
+  align = "left",
+}: {
+  label: string;
+  onClick?: () => void;
+  align?: "left" | "right";
+}) {
+  return (
+    <th
+      className={`px-3 py-2 text-${align} border-b ${
+        onClick ? "cursor-pointer whitespace-nowrap" : ""
+      }`}
+      onClick={onClick}
+    >
+      {label}
+    </th>
+  );
+}
+
 export default function RawSalesView({ rows, viewMode }: RawViewProps) {
   const [sortKey, setSortKey] = useState<RawSortKey>("sale_date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(PAGE_SIZES[1]); // default 50
+  const [pageSize, setPageSize] = useState(PAGE_SIZES_DEFAULT);
 
   // Sort rows (no filtering)
   const sorted = useMemo(() => {
     const arr = [...rows];
     arr.sort((r1, r2) => {
-      const v1 = r1[sortKey as keyof RawRow];
-      const v2 = r2[sortKey as keyof RawRow];
+      const v1 = (r1 as any)[sortKey];
+      const v2 = (r2 as any)[sortKey];
       const base = cmp(v1, v2);
       return sortDir === "asc" ? base : -base;
     });
@@ -186,6 +380,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
     sortKey === k ? (sortDir === "asc" ? " ▲" : " ▼") : "";
 
   const toggleSort = (k: RawSortKey) => {
+    if (!SORTABLE_KEYS.has(k)) return;
     if (k === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else {
       setSortKey(k);
@@ -193,7 +388,6 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
     }
   };
 
-  // shared header (top controls)
   const HeaderBar = (
     <PaginationControls
       page={clampedPage}
@@ -210,7 +404,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
     />
   );
 
-  // --- TABLE VIEW ---
+  // ===== TABLE VIEW (all DB columns) =====
   if (viewMode === "table") {
     return (
       <div className="rounded-md border">
@@ -220,47 +414,25 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
         <div className="px-3 py-2">{HeaderBar}</div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="min-w-[1100px] w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <Th
-                  onClick={() => toggleSort("sale_date")}
-                  label={`Sale Date${indicator("sale_date")}`}
-                />
-                <Th
-                  onClick={() => toggleSort("sale_price")}
-                  align="right"
-                  label={`Sale Price${indicator("sale_price")}`}
-                />
-                <Th
-                  onClick={() => toggleSort("ratio")}
-                  align="right"
-                  label={`Ratio${indicator("ratio")}`}
-                />
-                <Th
-                  onClick={() => toggleSort("district")}
-                  label={`District${indicator("district")}`}
-                />
-                <Th
-                  onClick={() => toggleSort("land_use")}
-                  label={`Land Use${indicator("land_use")}`}
-                />
-                <Th
-                  onClick={() => toggleSort("avg_year_built")}
-                  align="right"
-                  label={`Avg Yr Built${indicator("avg_year_built")}`}
-                />
-                <Th
-                  onClick={() => toggleSort("avg_condition")}
-                  align="right"
-                  label={`Avg Cond${indicator("avg_condition")}`}
-                />
-                <Th
-                  onClick={() => toggleSort("postcode")}
-                  label={`Postcode${indicator("postcode")}`}
-                />
-                <th className="px-3 py-2 text-left border-b">Address</th>
-                <th className="px-3 py-2 text-left border-b">Block•Lot•Ext</th>
+                {DB_COLUMNS.map((col) => (
+                  <Th
+                    key={col.key}
+                    align={col.align ?? "left"}
+                    onClick={
+                      SORTABLE_KEYS.has(col.key as RawSortKey)
+                        ? () => toggleSort(col.key as RawSortKey)
+                        : undefined
+                    }
+                    label={
+                      SORTABLE_KEYS.has(col.key as RawSortKey)
+                        ? `${col.label}${indicator(col.key as RawSortKey)}`
+                        : col.label
+                    }
+                  />
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -269,38 +441,28 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
                   key={`${r.sale_id}-${i}`}
                   className="odd:bg-white even:bg-gray-50 border-b"
                 >
-                  <td className="px-3 py-2">{fmtDate(r.sale_date)}</td>
-                  <td className="px-3 py-2 text-right">
-                    {fmtMoney(r.sale_price)}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    {fmtRatio(r.ratio as any)}
-                  </td>
-                  <td className="px-3 py-2">{r.district ?? "—"}</td>
-                  <td className="px-3 py-2">{r.land_use ?? "—"}</td>
-                  <td className="px-3 py-2 text-right">
-                    {r.avg_year_built ?? "—"}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    {isNum(r.avg_condition) ? r.avg_condition.toFixed(1) : "—"}
-                  </td>
-                  <td className="px-3 py-2">{r.postcode ?? "—"}</td>
-                  <td className="px-3 py-2">
-                    {[r.house_number, r.street].filter(Boolean).join(" ") ||
-                      "—"}
-                  </td>
-                  <td className="px-3 py-2">
-                    {[
-                      r.block ?? "—",
-                      r.lot ?? "—",
-                      r.ext ?? (r.ext === 0 ? 0 : "—"),
-                    ].join("•")}
-                  </td>
+                  {DB_COLUMNS.map((col) => {
+                    const raw = (r as AnyRow)[col.key];
+                    const content = col.fmt
+                      ? col.fmt(raw, r as AnyRow)
+                      : (raw ?? "—");
+                    const cls =
+                      "px-3 py-2 " +
+                      (col.align === "right" ? "text-right" : "");
+                    return (
+                      <td key={`${col.key}-${i}`} className={cls}>
+                        {content}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
               {totalCount === 0 && (
                 <tr>
-                  <td className="px-3 py-4 text-sm text-gray-500" colSpan={10}>
+                  <td
+                    className="px-3 py-4 text-sm text-gray-500"
+                    colSpan={DB_COLUMNS.length}
+                  >
                     No rows to display.
                   </td>
                 </tr>
@@ -314,7 +476,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
     );
   }
 
-  // --- CARD VIEW ---
+  // ===== CARD VIEW (all DB columns) =====
   return (
     <div className="space-y-3">
       <div>{HeaderBar}</div>
@@ -342,46 +504,39 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
         </button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         {pageRows.map((r, i) => (
           <div
             key={`${r.sale_id}-${i}`}
             className="rounded-lg border p-3 bg-white shadow-sm space-y-2"
           >
-            <div className="text-sm text-gray-500">{fmtDate(r.sale_date)}</div>
+            <div className="text-sm text-gray-500">
+              {fmtDate((r as AnyRow).sale_date)}
+            </div>
             <div className="text-base font-semibold">
-              {fmtMoney(r.sale_price)}
+              {fmtMoney((r as AnyRow).sale_price)}
             </div>
             <div className="text-sm">
               Ratio:{" "}
-              <span className="font-medium">{fmtRatio(r.ratio as any)}</span>
+              <span className="font-medium">{fmtRatio(Number(r.ratio))}</span>
             </div>
 
-            <div className="text-sm text-gray-700">
-              {[r.house_number, r.street].filter(Boolean).join(" ") || "—"}
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-              <div className="text-gray-500">District</div>
-              <div className="text-right">{r.district ?? "—"}</div>
-              <div className="text-gray-500">Land Use</div>
-              <div className="text-right">{r.land_use ?? "—"}</div>
-              <div className="text-gray-500">Avg Yr Built</div>
-              <div className="text-right">{r.avg_year_built ?? "—"}</div>
-              <div className="text-gray-500">Avg Cond</div>
-              <div className="text-right">
-                {isNum(r.avg_condition) ? r.avg_condition.toFixed(1) : "—"}
-              </div>
-              <div className="text-gray-500">Postcode</div>
-              <div className="text-right">{r.postcode ?? "—"}</div>
-              <div className="text-gray-500">Block•Lot•Ext</div>
-              <div className="text-right">
-                {[
-                  r.block ?? "—",
-                  r.lot ?? "—",
-                  r.ext ?? (r.ext === 0 ? 0 : "—"),
-                ].join("•")}
-              </div>
+            {/* All DB fields in a tidy grid */}
+            <div className="grid grid-cols-1 gap-x-4 gap-y-1 text-xs">
+              {DB_COLUMNS.map((col) => {
+                const raw = (r as AnyRow)[col.key];
+                const value = col.fmt
+                  ? col.fmt(raw, r as AnyRow)
+                  : (raw ?? "—");
+                return (
+                  <div key={`${col.key}-${i}`} className="flex justify-between">
+                    <div className="text-gray-500">{col.label}</div>
+                    <div className={col.align === "right" ? "text-right" : ""}>
+                      {value}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}
@@ -392,24 +547,5 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
 
       <div>{HeaderBar}</div>
     </div>
-  );
-}
-
-function Th({
-  label,
-  onClick,
-  align = "left",
-}: {
-  label: string;
-  onClick?: () => void;
-  align?: "left" | "right";
-}) {
-  return (
-    <th
-      className={`px-3 py-2 text-${align} border-b ${onClick ? "cursor-pointer whitespace-nowrap" : ""}`}
-      onClick={onClick}
-    >
-      {label}
-    </th>
   );
 }

@@ -366,3 +366,69 @@ export function useParcelFeatures(
     mutate,
   };
 }
+
+export type SaleParcelJSON = {
+  parcel_id: number;
+  land_use_sale: string | null;
+  district: string | null;
+  house_number: string | null;
+  street: string | null;
+  postcode: string | null;
+  lat: number | null;
+  lon: number | null;
+  block: number | null;
+  lot: string | null;
+  ext: number | null;
+  land_area: number | null;
+};
+
+export type MultiParcelSaleRow = {
+  sale_id: number;
+  sale_date: string; // 'YYYY-MM-DD'
+  sale_price: number | null;
+  sale_type: string | null;
+  is_valid: boolean | null;
+
+  parcel_count: number;
+  structure_count: number;
+  total_finished_area: number | null;
+  total_unfinished_area: number | null;
+  land_area_total: number | null;
+  avg_year_built: number | null;
+  avg_condition: number | null;
+  total_units: number | null;
+
+  land_to_building_area_ratio: number | null;
+  price_per_sqft_building_total: number | null;
+  price_per_sqft_finished: number | null;
+  price_per_sqft_land: number | null;
+  price_per_unit: number | null;
+
+  parcels: SaleParcelJSON[] | null; // JSONB array from SQL
+};
+
+// ---- Hook ----
+
+export function useMultiParcelSales(options?: {
+  start_date?: string; // 'YYYY-MM-DD'
+  end_date?: string; // 'YYYY-MM-DD'
+  land_uses?: string[]; // filter: any parcel in sale matches
+  valid_only?: boolean; // defaults to true on the API
+}) {
+  const params = new URLSearchParams();
+  if (options?.start_date) params.set("start_date", options.start_date);
+  if (options?.end_date) params.set("end_date", options.end_date);
+  if (options?.land_uses?.length)
+    params.set("land_uses", options.land_uses.join(","));
+  if (typeof options?.valid_only === "boolean")
+    params.set("valid_only", String(options.valid_only));
+
+  const url =
+    options && Object.keys(options).length > 0
+      ? `/test/ratios/ratio-features-multi?${params.toString()}`
+      : `/test/ratios/ratio-features-multi`;
+
+  const { data, error, isLoading } = useSWR<MultiParcelSaleRow[]>(url, fetcher);
+
+  return { data: data ?? [], error, isLoading };
+}
