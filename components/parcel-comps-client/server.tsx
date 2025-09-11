@@ -67,7 +67,7 @@ export default async function ParcelCompsClient({
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="">
       <div className="rounded-lg border p-4 shadow-sm bg-white space-y-3">
         {/* Header: Parcel number + address */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

@@ -147,7 +147,7 @@ export default function GowerCompsClient({
   // ---------- UI ----------
   return (
     <div
-      className={`grid gap-4 ${
+      className={`grid gap-4 mt-4 ${
         sidebarOpen ? "lg:grid-cols-[275px,1fr]" : "grid-cols-1"
       }`}
     >
@@ -279,19 +279,6 @@ export default function GowerCompsClient({
 
       {/* Main */}
       <section className="min-w-0">
-        {/* Toolbar with sidebar toggle */}
-        <div className="mb-2 flex items-center justify-end">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen((v) => !v)}
-            aria-pressed={sidebarOpen}
-            className="border rounded px-3 py-1.5 text-sm"
-          >
-            {sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-          </button>
-        </div>
-
-        {/* Comps table */}
         <div className="border rounded-md overflow-x-auto bg-white">
           <div className="px-3 py-2 border-b text-sm font-medium">
             Top {k} comps (candidates after filters: {candidates.length})

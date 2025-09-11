@@ -109,23 +109,7 @@ export default async function ServerParcelFieldReviews({
     `
     )
     .eq("parcel_id", parcel.id)
-    .order("created_at", { ascending: false }) // reviews newest → oldest
-    .order("created_at", {
-      ascending: false,
-      foreignTable: "field_review_notes",
-    })
-    .order("created_at", {
-      ascending: false,
-      foreignTable: "field_review_statuses",
-    })
-    .order("sort_order", {
-      ascending: true,
-      foreignTable: "field_review_images",
-    })
-    .order("created_at", {
-      ascending: false,
-      foreignTable: "field_review_images",
-    });
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error(error);
@@ -187,7 +171,7 @@ export default async function ServerParcelFieldReviews({
               <UploadReviewImagesModal
                 reviewId={latest.id}
                 revalidatePath={revalidatePath}
-                buttonLabel="Add Images"
+                buttonLabel="Images"
                 title="Upload Images"
               />
               <ReviewThreadModal
@@ -197,7 +181,7 @@ export default async function ServerParcelFieldReviews({
                 trigger={
                   <button className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border hover:bg-gray-50">
                     <PlusCircle className="w-4 h-4" />
-                    Open Thread
+                    Open
                   </button>
                 }
                 revalidatePath={revalidatePath}

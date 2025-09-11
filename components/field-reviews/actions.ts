@@ -20,7 +20,6 @@ export async function createFieldReviewWithInitial(
     const revalidate_path = (formData.get("revalidate_path") as string) || null;
 
     if (!parcel_id) return { error: "Missing parcel_id", success: "" };
-    if (!due_date) return { error: "Missing due_date", success: "" };
     if (!type) return { error: "Missing type", success: "" };
     if (!initial_status && !initial_note)
       return { error: "Provide an initial status or note", success: "" };
@@ -32,7 +31,7 @@ export async function createFieldReviewWithInitial(
       // @ts-ignore rpc is typed loosely in supabase-js
       .rpc("create_field_review", {
         p_parcel_id: parcel_id,
-        p_due_date: due_date, // 'YYYY-MM-DD' ok for date
+        p_due_date: due_date || null,
         p_type: type,
         p_initial_status: initial_status || null,
         p_initial_note: initial_note || null,
