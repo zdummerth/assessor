@@ -21,11 +21,6 @@ const UploadImages = ({ parcel_id }: { parcel_id: number }) => {
       });
     }
     if (state.success) {
-      toast({
-        title: state.success,
-        variant: "success",
-        duration: 4000,
-      });
       setFiles([]);
     }
   }, [state, toast]);

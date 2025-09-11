@@ -7,7 +7,7 @@ import {
   fmtDate,
   fmtRatio,
   RawRow,
-} from "./page";
+} from "./utils";
 
 // =======================================================
 // RawSalesView with all DB columns + client-side pagination

@@ -13,6 +13,7 @@ import ParcelLandUses from "@/components/parcel-land-uses/server";
 import ParcelScores from "@/components/parcel-scores/server";
 import ParcelCompsControls from "./comps/controls";
 import ParcelCompsClient from "@/components/parcel-comps-client/server";
+import ServerParcelFieldReviews from "@/components/field-reviews/server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -79,7 +80,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="w-full flex flex-col gap-4 p-4 mb-10 max-w-5xl mx-auto">
-      <div className="grid gap-8 md:grid-cols-[24rem,1fr] h-72">
+      <div className="grid gap-8 md:grid-cols-[24rem,1fr]">
         <div className="w-full h-full">
           <ParcelImagePrimary parcel_id={parcel.id} />
         </div>
@@ -101,6 +102,14 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
             )}
           </div>
 
+          <Suspense fallback={<div>Loading field reviews...</div>}>
+            <ServerParcelFieldReviews
+              parcel={parcel}
+              revalidatePath={`/test/parcels/${parcel.id}`}
+              // buttonLabel="Add Field Review"
+              title="Field Reviews"
+            />
+          </Suspense>
           {/* Row 2: Address */}
           <div className="">
             <Suspense fallback={<div>Loading parcel address...</div>}>

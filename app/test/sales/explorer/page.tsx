@@ -13,50 +13,20 @@ import { toCsv, downloadCsv } from "@/lib/csv";
 import { getSaleYear } from "@/lib/ratio-stats";
 import { computeGroupedNumeric, sortGroupSummaries } from "@/lib/stats";
 import { Chart } from "react-google-charts";
+import {
+  RESIDENTIAL_LU_DEFAULTS,
+  isNum,
+  fmtMoney,
+  fmtRatio,
+  fmtDate,
+  type SortDir,
+  type SortKey,
+  type ViewMode,
+  type RawRow,
+} from "./utils";
 
 type TrimChoice = "" | "1.5" | "3";
 type Tab = "sale_price" | "ratio" | "raw" | "multi"; // NEW
-export type SortDir = "asc" | "desc";
-export type SortKey =
-  | "median"
-  | "avg"
-  | "min"
-  | "max"
-  | "count"
-  | `group:${string}`;
-export type ViewMode = "table" | "cards";
-export type RawRow = RatiosFeaturesRow & { sale_year?: number | null };
-
-// ---- helpers ----
-const RESIDENTIAL_LU_DEFAULTS = [
-  "1010",
-  "1110",
-  "1111",
-  "1114",
-  "1115",
-  "1120",
-  "1130",
-  "1140",
-];
-export const isNum = (x: any): x is number =>
-  typeof x === "number" && Number.isFinite(x);
-export const fmtMoney = (n: number | null) =>
-  isNum(n)
-    ? new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0,
-      }).format(n)
-    : "—";
-export const fmtRatio = (n: number | null) => (isNum(n) ? n.toFixed(3) : "—");
-export const fmtDate = (d: string | null | undefined) =>
-  d
-    ? new Date(d).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "—";
 
 // =======================================================
 // Main component (adds "Raw Sales" tab and uses RawSalesView)
