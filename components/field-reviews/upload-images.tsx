@@ -1,12 +1,17 @@
 // app/test/field-reviews/UploadReviewImagesModal.tsx
 "use client";
 
-import { useMemo, useState } from "react";
-import Modal from "@/components/ui/modal";
-import { useModal } from "@/components/ui/modal-context";
+import { useState, useEffect } from "react";
 import { PlusCircle } from "lucide-react";
 import { useActionState } from "react";
 import { uploadReviewImages } from "./actions";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+  Description,
+} from "@headlessui/react";
 
 const initialState = { error: "", success: "" };
 
@@ -21,7 +26,6 @@ type PreviewItem = {
 async function probeImage(
   file: File
 ): Promise<{ width: number; height: number }> {
-  // Fast path
   if ("createImageBitmap" in window) {
     const bmp = await createImageBitmap(file);
     const w = bmp.width;
@@ -30,7 +34,6 @@ async function probeImage(
     bmp.close?.();
     return { width: w, height: h };
   }
-  // Fallback via <img>
   const url = URL.createObjectURL(file);
   try {
     const { width, height } = await new Promise<{
@@ -60,9 +63,7 @@ export default function UploadReviewImagesModal({
   buttonLabel?: string;
   title?: string;
 }) {
-  const { currentModalId, openModal, closeModal } = useModal();
-  const modalId = useMemo(() => `upload-images-${reviewId}`, [reviewId]);
-  const isOpen = currentModalId === modalId;
+  const [isOpen, setIsOpen] = useState(false);
 
   const [state, action, pending] = useActionState(
     uploadReviewImages,
@@ -70,6 +71,12 @@ export default function UploadReviewImagesModal({
   );
   const [items, setItems] = useState<PreviewItem[]>([]);
   const [error, setError] = useState<string>("");
+
+  // Auto-close on success
+  useEffect(() => {
+    if (state.success) clearAndClose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.success]);
 
   const onFiles = async (fileList: FileList | null) => {
     if (!fileList) return;
@@ -115,7 +122,6 @@ export default function UploadReviewImagesModal({
   };
 
   const submit = async (formData: FormData) => {
-    // Attach in the same order as previews
     items.forEach((it) => {
       formData.append("files", it.file);
       formData.append("captions", it.caption || "");
@@ -130,106 +136,128 @@ export default function UploadReviewImagesModal({
   const clearAndClose = () => {
     items.forEach((it) => URL.revokeObjectURL(it.url));
     setItems([]);
-    closeModal();
+    setError("");
+    setIsOpen(false);
   };
 
   return (
     <>
       <button
-        onClick={() => openModal(modalId)}
+        onClick={() => setIsOpen(true)}
         className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded border hover:bg-gray-50"
       >
         <PlusCircle className="w-4 h-4" />
         {buttonLabel}
       </button>
 
-      <Modal open={isOpen} onClose={clearAndClose} title={title}>
-        <form action={submit} className="p-3 space-y-3 text-sm">
-          <div className="grid gap-2">
-            <label className="font-medium">Select Images</label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) => onFiles(e.currentTarget.files)}
-              className="border rounded px-3 py-2"
-            />
-            {error && <div className="text-xs text-red-600">{error}</div>}
-          </div>
+      <Dialog
+        open={isOpen}
+        onClose={() => {
+          if (!pending) clearAndClose();
+        }}
+        className="relative z-50"
+      >
+        <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm" />
 
-          {items.length > 0 && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {items.map((it, idx) => (
-                <div
-                  key={idx}
-                  className="rounded border bg-white p-2 space-y-2"
-                >
-                  <div className="aspect-video overflow-hidden rounded">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={it.url}
-                      alt={`preview-${idx}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {it.width}×{it.height}px • {Math.round(it.file.size / 1024)}{" "}
-                    KB
-                  </div>
-                  <div className="grid gap-1">
-                    <label className="text-xs text-gray-600">Caption</label>
-                    <input
-                      type="text"
-                      value={it.caption}
-                      onChange={(e) => onCaption(idx, e.target.value)}
-                      className="border rounded px-2 py-1"
-                      placeholder="Optional caption"
-                    />
-                  </div>
-                  <div className="text-right">
-                    <button
-                      type="button"
-                      onClick={() => removeAt(idx)}
-                      className="text-xs px-2 py-1 rounded border hover:bg-gray-50"
+        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-2xl space-y-4 border bg-white p-6 md:p-8 rounded-xl shadow-lg">
+            <DialogTitle className="text-base font-semibold">
+              {title}
+            </DialogTitle>
+            <Description className="text-sm text-gray-600">
+              Select and upload images for this review. You can add captions for
+              each image before uploading.
+            </Description>
+
+            <form action={submit} className="space-y-4 text-sm">
+              <div className="grid gap-2">
+                <label className="font-medium">Select Images</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => onFiles(e.currentTarget.files)}
+                  className="border rounded px-3 py-2"
+                />
+                {error && <div className="text-xs text-red-600">{error}</div>}
+              </div>
+
+              {items.length > 0 && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {items.map((it, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded border bg-white p-2 space-y-2"
                     >
-                      Remove
-                    </button>
-                  </div>
+                      <div className="aspect-video overflow-hidden rounded">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={it.url}
+                          alt={`preview-${idx}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {it.width}×{it.height}px •{" "}
+                        {Math.round(it.file.size / 1024)} KB
+                      </div>
+                      <div className="grid gap-1">
+                        <label className="text-xs text-gray-600">Caption</label>
+                        <input
+                          type="text"
+                          value={it.caption}
+                          onChange={(e) => onCaption(idx, e.target.value)}
+                          className="border rounded px-2 py-1"
+                          placeholder="Optional caption"
+                        />
+                      </div>
+                      <div className="text-right">
+                        <button
+                          type="button"
+                          onClick={() => removeAt(idx)}
+                          className="text-xs px-2 py-1 rounded border hover:bg-gray-50"
+                          disabled={pending}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
+              )}
 
-          <div className="pt-2 flex items-center justify-between gap-2">
-            <div className="text-xs text-gray-600">
-              {state.error && (
-                <span className="text-red-600">{state.error}</span>
-              )}
-              {state.success && (
-                <span className="text-green-700">{state.success}</span>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="px-4 py-2 rounded border"
-                onClick={clearAndClose}
-                disabled={pending}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 rounded bg-green-600 text-white"
-                aria-busy={pending}
-                disabled={items.length === 0}
-              >
-                {pending ? "Uploading…" : "Upload"}
-              </button>
-            </div>
-          </div>
-        </form>
-      </Modal>
+              <div className="pt-2 flex items-center justify-between gap-2">
+                <div className="text-xs text-gray-600">
+                  {state.error && (
+                    <span className="text-red-600">{state.error}</span>
+                  )}
+                  {state.success && (
+                    <span className="text-green-700">{state.success}</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded border"
+                    onClick={clearAndClose}
+                    disabled={pending}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded bg-green-600 text-white disabled:opacity-60"
+                    aria-busy={pending}
+                    disabled={pending || items.length === 0}
+                  >
+                    {pending ? "Uploading…" : "Upload"}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </>
   );
 }

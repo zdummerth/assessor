@@ -10,7 +10,7 @@ export default function ClientParcelAddress({ address }: { address: any }) {
   }
 
   return (
-    <div className="border rounded p-2 text-sm text-gray-800">
+    <div className="">
       <div className="flex gap-4 justify-between items-center mb-1">
         <div className="font-semibold">
           <Address

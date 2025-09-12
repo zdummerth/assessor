@@ -9,7 +9,7 @@ export default async function ParcelLandUses({ parcel }: { parcel: Parcel }) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    //@ts-expect-error need update types
+    // @ts-expect-error need update types
     .from("test_parcel_land_uses")
     .select("id, parcel_id, land_use, effective_date, end_date")
     .eq("parcel_id", parcel.id)
@@ -18,14 +18,24 @@ export default async function ParcelLandUses({ parcel }: { parcel: Parcel }) {
   if (error || !data) {
     console.error(error);
     return (
-      <div className="w-full flex flex-col items-center justify-center mt-16">
-        <SearchX className="w-16 h-16 text-gray-400 mx-auto" />
-        <p className="text-center">Error fetching land use history</p>
-        <p className="text-xs text-gray-600">{error?.message}</p>
-      </div>
+      <section className="rounded-lg border bg-white p-4">
+        <h3 className="text-sm font-semibold text-gray-800">Land Use</h3>
+        <div className="mt-3 flex items-center gap-2 text-sm text-red-700">
+          <SearchX className="w-4 h-4" />
+          <span>Error fetching land use history</span>
+        </div>
+        {error?.message && (
+          <div className="mt-1 text-xs text-red-700">{error.message}</div>
+        )}
+      </section>
     );
   }
 
-  //@ts-expect-error need update types
-  return <ClientParcelLandUses parcel={parcel} data={data} />;
+  return (
+    <section className="rounded-lg border bg-white p-4">
+      <h3 className="text-sm font-semibold text-gray-800">Land Use</h3>
+      {/* @ts-expect-error need update types */}
+      <ClientParcelLandUses parcel={parcel} data={data} />
+    </section>
+  );
 }

@@ -53,7 +53,7 @@ export default function ClientParcelLandUses({
   return (
     <div className="flex flex-col gap-2">
       {/* Summary */}
-      <div className="border rounded p-2 text-sm text-gray-800 flex items-start">
+      <div className="mt-2 text-sm text-gray-800 flex items-start">
         <div className="flex-1">
           <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-2">
             <InfoItem

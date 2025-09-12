@@ -7,12 +7,14 @@ export default function ParcelNumber({
   ext,
   id,
   showCopy = true,
+  className = "",
 }: {
   block: number;
   lot: number;
   ext: number;
   id: number;
   showCopy?: boolean;
+  className?: string;
 }) {
   const formattedBlock = block.toString().padStart(4, "0");
   const formattedLot = lot.toString().padStart(3, "0");
@@ -21,12 +23,17 @@ export default function ParcelNumber({
   const parcelNumber = `${formattedBlock}-9-${formattedLot}.${formattedExt}`;
 
   return (
-    <div className="flex gap-4 font-semibold justify-between items-center text-sm text-gray-800">
-      <Link href={`/test/parcels/${id}`} target="_blank">
-        <span>{parcelNumber}</span>
-      </Link>
-
-      {showCopy && <CopyToClipboard text={parcelNumber} />}
-    </div>
+    <section className={`${className}`}>
+      <div className="flex items-center gap-4">
+        <Link
+          href={`/test/parcels/${id}`}
+          target="_blank"
+          className="underline-offset-2 hover:underline"
+        >
+          <span>{parcelNumber}</span>
+        </Link>
+        {showCopy && <CopyToClipboard text={parcelNumber} />}
+      </div>
+    </section>
   );
 }

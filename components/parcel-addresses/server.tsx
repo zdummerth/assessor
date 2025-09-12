@@ -13,7 +13,7 @@ export default async function ServerParcelAddress({
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    //@ts-ignore
+    // @ts-ignore
     .from("test_parcel_addresses")
     .select("*, test_geocoded_addresses(*)")
     .eq("parcel_id", parcel.id);
@@ -21,15 +21,27 @@ export default async function ServerParcelAddress({
   if (error || !data || data.length === 0) {
     console.error(error);
     return (
-      <div className="w-full flex flex-col items-center justify-center mt-16">
-        <SearchX className="w-16 h-16 text-gray-400 mx-auto" />
-        <p className="text-center">Error fetching address</p>
-        <p>{error?.message}</p>
-      </div>
+      <section className="">
+        <h3 className="text-sm font-semibold text-gray-800">Address</h3>
+        <div className="mt-3 flex items-center gap-2 text-sm text-red-700">
+          <SearchX className="w-4 h-4" />
+          <span>Error fetching address</span>
+        </div>
+        {error?.message && (
+          <div className="mt-1 text-xs text-red-700">{error.message}</div>
+        )}
+      </section>
     );
   }
 
   const address = data[0].test_geocoded_addresses;
 
-  return <ClientParcelAddress address={address} />;
+  return (
+    <section className="rounded-lg border p-4">
+      <h3 className="text-sm font-semibold text-gray-800">Address</h3>
+      <div className="mt-3">
+        <ClientParcelAddress address={address} />
+      </div>
+    </section>
+  );
 }

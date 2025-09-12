@@ -4,7 +4,7 @@ import { SearchX, PlusCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import ReviewThreadModal from "./thread";
 import NewFieldReviewModal from "./create";
-import UploadReviewImagesModal from "./upload-images"; // keep your local path
+import UploadReviewImagesModal from "./upload-images";
 import { Tables } from "@/database-types";
 
 type Parcel = Tables<"test_parcels">;
@@ -28,7 +28,6 @@ type ImageRow = {
   height: number;
   sort_order: number | null;
   created_at?: string | null;
-  // nested
   files?: FileRow | null;
 };
 
@@ -59,6 +58,18 @@ type ReviewRow = {
   field_review_images?: ImageRow[];
 };
 
+// What we pass into the thread dialog
+type ImageDisplay = {
+  id: number;
+  url: string;
+  caption: string | null;
+  width: number;
+  height: number;
+  sort_order: number | null;
+  created_at?: string | null;
+  original_name?: string | null;
+};
+
 const fmtShortDateTime = (s?: string | null) =>
   s
     ? new Date(s).toLocaleString(undefined, {
@@ -83,7 +94,6 @@ export default async function ServerParcelFieldReviews({
 }) {
   const supabase = await createClient();
 
-  // Pull reviews + nested notes/statuses/images (newest first on reviews, images by sort_order then created_at)
   const { data, error } = await supabase
     // @ts-expect-error: nested select is valid in Supabase
     .from("field_reviews")
@@ -131,17 +141,34 @@ export default async function ServerParcelFieldReviews({
   // @ts-expect-error - nested select typing
   const reviews = (data ?? []) as ReviewRow[];
 
-  const latestOf = <T extends { created_at: string | null }>(arr?: T[]) =>
-    (arr && arr.length > 0 ? arr[0] : undefined) as T | undefined;
-
   const publicUrl = (file?: FileRow | null) => {
     if (!file) return "";
-    // If the bucket is public, this will be a stable URL
     const { data } = supabase.storage
       .from(file.bucket_name)
       .getPublicUrl(file.path);
     return data.publicUrl || "";
   };
+
+  const toImageDisplay = (imgs?: ImageRow[] | null): ImageDisplay[] =>
+    (imgs ?? [])
+      .map((img) => {
+        const url = publicUrl(img.files || null);
+        if (!url) return null;
+        return {
+          id: img.id,
+          url,
+          caption: img.caption,
+          width: img.width,
+          height: img.height,
+          sort_order: img.sort_order,
+          created_at: img.created_at ?? undefined,
+          original_name: img.files?.original_name ?? undefined,
+        };
+      })
+      .filter(Boolean) as ImageDisplay[];
+
+  const latestOf = <T extends { created_at: string | null }>(arr?: T[]) =>
+    (arr && arr.length > 0 ? arr[0] : undefined) as T | undefined;
 
   const [latest, ...rest] = reviews;
 
@@ -155,7 +182,7 @@ export default async function ServerParcelFieldReviews({
         />
       </div>
 
-      {/* LATEST REVIEW — status + note + ALL images as thumbnails */}
+      {/* LATEST REVIEW */}
       {!latest ? (
         <div className="text-sm text-gray-500 border rounded p-4">
           No field reviews yet for this parcel.
@@ -178,6 +205,7 @@ export default async function ServerParcelFieldReviews({
                 reviewId={latest.id}
                 initialNotes={latest.field_review_notes ?? []}
                 initialStatuses={latest.field_review_statuses ?? []}
+                initialImages={toImageDisplay(latest.field_review_images)}
                 trigger={
                   <button className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border hover:bg-gray-50">
                     <PlusCircle className="w-4 h-4" />
@@ -219,20 +247,16 @@ export default async function ServerParcelFieldReviews({
             );
           })()}
 
-          {/* ALL images for latest review (thumbnails) */}
+          {/* Latest images (thumbnails in card) */}
           {(latest.field_review_images?.length ?? 0) > 0 && (
             <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
               {latest.field_review_images!.map((img) => {
-                const f = img.files || null;
-                const src = publicUrl(f);
+                const src = publicUrl(img.files || null);
                 if (!src) return null;
-
-                // Constrain thumbnail width; compute height by aspect
                 const thumbW = 220;
                 const w = Math.max(1, img.width || 1);
                 const h = Math.max(1, img.height || 1);
                 const thumbH = Math.max(1, Math.round((h / w) * thumbW));
-
                 return (
                   <div
                     key={img.id}
@@ -240,7 +264,11 @@ export default async function ServerParcelFieldReviews({
                   >
                     <Image
                       src={src}
-                      alt={img.caption || f?.original_name || `image-${img.id}`}
+                      alt={
+                        img.caption ||
+                        img.files?.original_name ||
+                        `image-${img.id}`
+                      }
                       width={thumbW}
                       height={thumbH}
                       className="w-full h-auto object-cover"
@@ -258,7 +286,7 @@ export default async function ServerParcelFieldReviews({
         </div>
       )}
 
-      {/* PREVIOUS REVIEWS — only the FIRST image (if any), plus status + date */}
+      {/* PREVIOUS REVIEWS */}
       {rest.length > 0 && (
         <div className="rounded-lg border bg-white">
           <div className="px-3 py-2 border-b text-xs font-medium text-gray-600">
@@ -270,7 +298,6 @@ export default async function ServerParcelFieldReviews({
               const firstImage = r.field_review_images?.[0];
               const src = firstImage?.files ? publicUrl(firstImage.files) : "";
 
-              // small thumbnail dims
               const tW = 96;
               const w = Math.max(1, firstImage?.width || 1);
               const h = Math.max(1, firstImage?.height || 1);
@@ -278,7 +305,6 @@ export default async function ServerParcelFieldReviews({
 
               return (
                 <li key={r.id} className="px-3 py-3 flex items-center gap-3">
-                  {/* Small thumbnail (first image only) */}
                   <div className="shrink-0">
                     {src ? (
                       <Image
@@ -297,7 +323,6 @@ export default async function ServerParcelFieldReviews({
                     )}
                   </div>
 
-                  {/* Meta */}
                   <div className="min-w-0 flex-1">
                     <div className="text-xs text-gray-500">
                       Created {fmtShortDateTime(r.created_at)} • Due{" "}
@@ -315,11 +340,11 @@ export default async function ServerParcelFieldReviews({
                     </div>
                   </div>
 
-                  {/* Open thread */}
                   <ReviewThreadModal
                     reviewId={r.id}
                     initialNotes={r.field_review_notes ?? []}
                     initialStatuses={r.field_review_statuses ?? []}
+                    initialImages={toImageDisplay(r.field_review_images)}
                     trigger={
                       <button className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border hover:bg-gray-50 shrink-0">
                         <PlusCircle className="w-4 h-4" />

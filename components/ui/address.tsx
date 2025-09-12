@@ -57,7 +57,7 @@ export default function Address({ address, fullAddress }: Props) {
   const copy = normalizeAddress(originalOrFull);
 
   return (
-    <div className="flex items-center justify-between gap-4 w-full">
+    <div className="flex items-center gap-4">
       <p className="">{normalizedAddress}</p>
       <div className="flex gap-2">
         <a

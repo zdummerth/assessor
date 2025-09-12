@@ -5,7 +5,14 @@ import { useMemo, useState, useEffect } from "react";
 import { useActionState } from "react";
 import { addReviewNote, deleteReviewNotes, addReviewStatus } from "./actions";
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
+import UploadReviewImagesModal from "./upload-images";
+import ReviewImagesGrid from "./images-editor";
 
 type NoteRow = {
   id: number;
@@ -21,6 +28,18 @@ type StatusRow = {
   status: string;
   created_at: string | null;
   created_by: string | null;
+};
+
+// Simple image shape passed in from the server with public URLs
+type ImageDisplay = {
+  id: number;
+  url: string;
+  caption: string | null;
+  width: number;
+  height: number;
+  sort_order: number | null;
+  created_at?: string | null;
+  original_name?: string | null;
 };
 
 const initialState = { error: "", success: "" };
@@ -42,6 +61,7 @@ export default function ReviewThreadModal({
   reviewId,
   initialNotes,
   initialStatuses,
+  initialImages = [],
   trigger,
   revalidatePath,
   title = "Review Thread",
@@ -49,14 +69,13 @@ export default function ReviewThreadModal({
   reviewId: number;
   initialNotes: NoteRow[];
   initialStatuses: StatusRow[];
+  initialImages?: ImageDisplay[];
   trigger?: React.ReactNode;
   revalidatePath?: string;
   title?: string;
 }) {
-  // Local open/close state for Headless UI dialog
   const [isOpen, setIsOpen] = useState(false);
 
-  // Server actions
   const [addStatusState, addStatusAction, addingStatus] = useActionState(
     addReviewStatus,
     initialState
@@ -70,13 +89,11 @@ export default function ReviewThreadModal({
     initialState
   );
 
-  // Track which note is currently being deleted for per-button loading UI
   const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null);
   useEffect(() => {
     if (!deletingNotes) setDeletingNoteId(null);
   }, [deletingNotes]);
 
-  // Sort newest-first
   const statuses = useMemo(
     () =>
       [...(initialStatuses || [])].sort(
@@ -97,6 +114,20 @@ export default function ReviewThreadModal({
     [initialNotes]
   );
 
+  const images = useMemo(
+    () =>
+      [...(initialImages || [])].sort((a, b) => {
+        // sort by sort_order (nulls last), then created_at desc
+        const soA = a.sort_order ?? Number.MAX_SAFE_INTEGER;
+        const soB = b.sort_order ?? Number.MAX_SAFE_INTEGER;
+        if (soA !== soB) return soA - soB;
+        const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return db - da;
+      }),
+    [initialImages]
+  );
+
   const latestStatus = statuses[0];
   const olderStatuses = statuses.slice(1);
   const [showHistory, setShowHistory] = useState(false);
@@ -110,19 +141,31 @@ export default function ReviewThreadModal({
       </span>
 
       <Dialog open={isOpen} onClose={setIsOpen} className="relative z-50">
-        {/* Backdrop */}
-        <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+        <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm" />
 
-        {/* Panel */}
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-          <DialogPanel className="w-full max-h-[95vh] overflow-y-auto max-w-2xl space-y-4 border bg-white p-6 md:p-8 rounded-xl shadow-lg">
-            <DialogTitle className="text-base font-semibold">
-              {title}
+          <DialogPanel className="w-full max-h-[95vh] overflow-y-auto max-w-4xl space-y-4 border bg-white p-6 md:p-8 rounded-xl shadow-lg">
+            <DialogTitle className="text-base font-semibold flex items-center justify-between">
+              <div>{title}</div>
+              <UploadReviewImagesModal
+                reviewId={reviewId}
+                revalidatePath={revalidatePath}
+                buttonLabel="Images"
+                title="Upload Images"
+              />
             </DialogTitle>
+
+            {/* ===== IMAGES (from server) ===== */}
+            {images.length > 0 && (
+              <ReviewImagesGrid
+                images={images}
+                revalidatePath={revalidatePath}
+                className="space-y-2"
+              />
+            )}
 
             {/* ===== STATUSES ===== */}
             <div className="space-y-3 text-sm">
-              {/* Add Status */}
               <form action={addStatusAction} className="flex items-end gap-2">
                 <input type="hidden" name="review_id" value={reviewId} />
                 {revalidatePath && (
@@ -162,7 +205,6 @@ export default function ReviewThreadModal({
                 </button>
               </form>
 
-              {/* Latest status */}
               {latestStatus ? (
                 <div className="rounded border bg-white p-3">
                   <div className="font-medium">{latestStatus.status}</div>
@@ -174,7 +216,6 @@ export default function ReviewThreadModal({
                 <div className="text-gray-500">No statuses yet.</div>
               )}
 
-              {/* Older statuses (collapsible) */}
               {olderStatuses.length > 0 && (
                 <div className="rounded border bg-gray-50">
                   <button
@@ -244,7 +285,7 @@ export default function ReviewThreadModal({
               </form>
             </div>
 
-            {/* ===== NOTES (Cards) ===== */}
+            {/* ===== NOTES ===== */}
             <div className="space-y-2 text-sm">
               <div className="text-xs font-semibold text-gray-700">Notes</div>
               {notes.length === 0 ? (
@@ -305,7 +346,6 @@ export default function ReviewThreadModal({
               </button>
             </div>
 
-            {/* Error surfaces (optional) */}
             {(addStatusState.error ||
               addNoteState.error ||
               delNotesState.error) && (

@@ -1,6 +1,6 @@
-// app/components/ServerScoresLite.tsx
 import { createClient } from "@/utils/supabase/server";
 import ClientScoresLite from "./client";
+import { SearchX } from "lucide-react";
 
 export type FeatureBreakdown = Record<
   string,
@@ -40,9 +40,13 @@ export default async function ServerScoresLite({
   if (error) {
     console.error("score_sales_with_model RPC error:", error);
     return (
-      <div className={`rounded border p-3 text-sm text-red-700 ${className}`}>
-        Failed to load model scores: {error.message}
-      </div>
+      <section className={`rounded-lg border bg-white p-4 ${className}`}>
+        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+        <div className="mt-3 flex items-center gap-2 text-sm text-red-700">
+          <SearchX className="w-4 h-4" />
+          <span>Failed to load model scores: {error.message}</span>
+        </div>
+      </section>
     );
   }
 
@@ -50,11 +54,16 @@ export default async function ServerScoresLite({
 
   if (!rows.length) {
     return (
-      <div className={`rounded border p-3 text-sm text-gray-600 ${className}`}>
-        No scores found.
-      </div>
+      <section className={`rounded-lg border bg-white p-4 ${className}`}>
+        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+        <div className="mt-3 text-sm text-gray-600">No scores found.</div>
+      </section>
     );
   }
 
-  return <ClientScoresLite rows={rows} className={className} title={title} />;
+  return (
+    <section className={`rounded-lg border bg-white p-4 ${className}`}>
+      <ClientScoresLite rows={rows} className="" title={title} />
+    </section>
+  );
 }

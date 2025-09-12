@@ -69,15 +69,14 @@ export default function ClientScoresLite({
         {cards.map((c, idx) => (
           <div
             key={c.key}
-            className="rounded border overflow-hidden shadow-sm hover:shadow transition-shadow"
+            className="overflow-hidden hover:shadow transition-shadow"
           >
             <div className="p-3 space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <div className="text-gray-600">Estimated Value</div>
                 <div className="text-lg font-semibold">{fmtUSD(c.y_pred)}</div>
               </div>
 
-              <div className="pt-2 flex items-center justify-end border-t print:hidden">
+              <div className="pt-2 flex items-center justify-end print:hidden">
                 <button
                   onClick={() => setOpenIdx(idx)}
                   className="text-sm px-3 py-1.5 rounded border hover:bg-gray-50"

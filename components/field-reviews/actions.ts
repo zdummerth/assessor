@@ -293,3 +293,127 @@ export const uploadReviewImages = async (
     return { error: e?.message || "Upload failed", success: "" };
   }
 };
+
+type FileRef = {
+  file_id: number;
+  bucket_name: string;
+  path: string;
+};
+
+function parseIds(formData: FormData): number[] {
+  const out = new Set<number>();
+
+  // Preferred: JSON array
+  const idsJson = formData.get("ids_json")?.toString();
+  if (idsJson) {
+    try {
+      const arr = JSON.parse(idsJson);
+      if (Array.isArray(arr)) {
+        for (const v of arr) {
+          const n = Number(v);
+          if (Number.isFinite(n) && n > 0) out.add(n);
+        }
+      }
+    } catch {
+      /* ignore parse error; fall back to other inputs */
+    }
+  }
+
+  // image_ids[]=1&image_ids[]=2
+  const multi = formData.getAll("image_ids");
+  for (const v of multi) {
+    const n = Number(v);
+    if (Number.isFinite(n) && n > 0) out.add(n);
+  }
+
+  // single image_id
+  const single = formData.get("image_id");
+  if (single) {
+    const n = Number(single);
+    if (Number.isFinite(n) && n > 0) out.add(n);
+  }
+
+  //@ts-expect-error ts
+  return [...out];
+}
+
+export const deleteReviewImagesAndStorage = async (
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> => {
+  try {
+    const supabase = await createClient();
+    const imageIds = parseIds(formData);
+    const revalidate_path = (formData.get("revalidate_path") as string) || null;
+
+    if (imageIds.length === 0) {
+      return { error: "No image ids provided", success: "" };
+    }
+
+    // Call the new DB function that deletes images + files and returns bucket/path
+    const { data: rpcData, error: rpcErr } = await supabase.rpc(
+      //@ts-expect-error ts
+      "delete_field_review_images_and_files",
+      { p_image_ids: imageIds }
+    );
+
+    if (rpcErr) {
+      // your plpgsql uses DETAIL for remaining refs; include it if present
+      const msg = (rpcErr as any).details
+        ? `${rpcErr.message} — ${(rpcErr as any).details}`
+        : rpcErr.message;
+      return { error: `Delete failed: ${msg}`, success: "" };
+    }
+
+    const rows = rpcData ?? [];
+    let deletedImageCount = 0;
+    const deletedFileIds = new Set<number>();
+    const bucketToPaths = new Map<string, string[]>();
+    //@ts-expect-error ts
+    for (const row of rows) {
+      if (row.deleted_image_id) deletedImageCount++;
+      if (row.deleted_file_id && row.bucket_name && row.path) {
+        deletedFileIds.add(row.deleted_file_id);
+        const arr = bucketToPaths.get(row.bucket_name) ?? [];
+        arr.push(row.path);
+        bucketToPaths.set(row.bucket_name, arr);
+      }
+    }
+
+    // Remove storage objects for files actually deleted by the DB
+    let storageDeleted = 0;
+    let storageTried = 0;
+    //@ts-expect-error ts
+    for (const [bucket, paths] of bucketToPaths) {
+      if (!paths.length) continue;
+      storageTried += paths.length;
+      const { error: rmErr } = await supabase.storage
+        .from(bucket)
+        .remove(paths);
+      if (!rmErr) {
+        storageDeleted += paths.length;
+      } else {
+        console.error("storage.remove error:", rmErr.message, {
+          bucket,
+          paths,
+        });
+      }
+    }
+
+    if (revalidate_path) rp(revalidate_path);
+
+    const fileCount = deletedFileIds.size;
+
+    return {
+      error: "",
+      success:
+        `Deleted ${deletedImageCount} image${deletedImageCount === 1 ? "" : "s"}, ` +
+        `${fileCount} file record${fileCount === 1 ? "" : "s"}` +
+        (storageTried
+          ? `, removed ${storageDeleted}/${storageTried} storage object${storageTried === 1 ? "" : "s"}`
+          : ""),
+    };
+  } catch (e: any) {
+    return { error: e?.message || "Delete failed", success: "" };
+  }
+};
