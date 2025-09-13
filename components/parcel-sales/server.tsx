@@ -182,6 +182,14 @@ export default async function SalesWithStructuresCardsServer({
           .map((t) => t.test_sale_types.sale_type)[0] ?? "—")
       : "—";
 
+    const isValid = sale.test_sales_sale_typesCollection
+      ? (unwrapEdges(sale.test_sales_sale_typesCollection.edges)
+          .sort((a, b) =>
+            (b.effective_date ?? "").localeCompare(a.effective_date ?? "")
+          )
+          .map((t) => t.test_sale_types.is_valid)[0] ?? null)
+      : null;
+
     const active = structLinks.filter((lnk) =>
       linkActiveOn(lnk, sale.date_of_sale)
     );
@@ -238,6 +246,7 @@ export default async function SalesWithStructuresCardsServer({
       sale_date: sale.date_of_sale,
       sale_price: sale.net_selling_price,
       sale_type: saleType ?? "—",
+      isValid,
       summary,
       structures,
     };
@@ -246,5 +255,6 @@ export default async function SalesWithStructuresCardsServer({
   // Sort by newest sale first
   cards.sort((a, b) => +new Date(b.sale_date) - +new Date(a.sale_date));
 
+  console.log("Sales cards:", cards);
   return <ClientSalesWithStructuresCards cards={cards} />;
 }

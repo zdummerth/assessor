@@ -2,18 +2,14 @@ import { createClient } from "@/utils/supabase/server";
 import type { Metadata, ResolvingMetadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
-import FormattedDate from "@/components/ui/formatted-date";
-import ParcelNumber from "@/components/ui/parcel-number-updated";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
 import ParcelStructures from "@/components/parcel-structures/server";
-import ParcelAddress from "@/components/parcel-addresses/server";
 import ParcelSales from "@/components/parcel-sales/server";
-import ParcelLandUses from "@/components/parcel-land-uses/server";
 import ParcelScores from "@/components/parcel-scores/server";
 import ParcelCompsClient from "@/components/parcel-comps-client/server";
 import ServerParcelFieldReviews from "@/components/field-reviews/server";
 import ServerParcelSnapshot from "@/components/parcel-snapshot/server";
-import { Server } from "lucide-react";
+import ServerParcelValues from "@/components/parcel-values/server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -81,45 +77,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
         {/* Right column */}
         <section className="flex flex-col gap-4">
-          {/* Top info grid */}
-          <ServerParcelSnapshot parcelId={parcel.id} title="Parcel Info" />
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Parcel Number (with retired banner) */}
-            {/* <div className="flex flex-col">
-              <ParcelNumber
-                id={parcel.id}
-                block={parcel.block}
-                lot={parcel.lot}
-                ext={parcel.ext}
-              />
-              {parcel.retired_at && (
-                <p className="mt-2 bg-red-100 text-red-800 p-2 rounded print:hidden">
-                  Retired: <FormattedDate date={parcel.retired_at} />
-                </p>
-              )}
-            </div> */}
-
-            {/* <div>
-              <Suspense fallback={<div>Loading parcel address...</div>}>
-                <ParcelAddress parcel={parcel} />
-              </Suspense>
-            </div>
-
-            <div>
-              <Suspense fallback={<div>Loading land use...</div>}>
-                <ParcelLandUses parcel={parcel} />
-              </Suspense>
-            </div> */}
-
-            {/* <div>
-              <Suspense fallback={<div>Loading parcel scores...</div>}>
-                <ParcelScores parcelId={parcel.id} />
-              </Suspense>
-            </div> */}
-          </div>
-
-          {/* Below the grid */}
+          <Suspense fallback={<div>Loading parcel snapshot...</div>}>
+            <ServerParcelSnapshot parcelId={parcel.id} />
+          </Suspense>
+          <Suspense fallback={<div>Loading parcel values...</div>}>
+            <ServerParcelValues parcelId={parcel.id} />
+          </Suspense>
           <Suspense fallback={<div>Loading parcel structures...</div>}>
             <ParcelStructures parcel={parcel} />
           </Suspense>
@@ -127,6 +90,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <Suspense fallback={<div>Loading parcel sales...</div>}>
             <ParcelSales parcelId={parcel.id} />
           </Suspense>
+          <Suspense fallback={<div>Loading parcel scores...</div>}>
+            <ParcelScores parcelId={parcel.id} />
+          </Suspense>
+
+          {/* End right column */}
         </section>
       </div>
 

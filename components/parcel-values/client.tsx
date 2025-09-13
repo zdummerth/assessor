@@ -1,74 +1,359 @@
+// app/components/client/ClientParcelValues.tsx
 "use client";
 
-import React from "react";
-import { Tables } from "@/database-types";
-import ParcelValuesModal from "./history-modal";
+import { useMemo, useState } from "react";
+import type { ParcelValueRow } from "./server";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
+import { Plus } from "lucide-react";
 
-type Parcel = Tables<"test_parcels">;
-type ParcelValue = Tables<"test_parcel_values">;
+function fmtUSD(n?: number | null) {
+  if (n == null || Number.isNaN(Number(n))) return "—";
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(n));
+}
+function fmtDate(s?: string | null) {
+  if (!s) return "—";
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
+}
+function sum(...vals: Array<number | null | undefined>) {
+  return vals.reduce((a, b) => (a || 0) + (Number(b) || 0), 0);
+}
 
 export default function ClientParcelValues({
-  values,
-  parcel,
+  rows,
 }: {
-  values: ParcelValue[];
-  parcel: Parcel;
+  rows: ParcelValueRow[];
 }) {
-  if (!values || values.length === 0) {
-    return <p className="text-gray-500">No parcel values found.</p>;
-  }
+  const [open, setOpen] = useState(false);
 
-  const latest = values[0];
+  const currentYear = new Date().getFullYear();
 
-  const total =
-    latest.res_land +
-    latest.res_building +
-    latest.com_land +
-    latest.com_building +
-    latest.agr_land +
-    latest.agr_building;
+  const sorted = useMemo(() => {
+    const getTs = (r: ParcelValueRow) =>
+      new Date(
+        r.date_of_assessment || r.last_changed || `${r.year}-01-01`
+      ).getTime();
+    return [...(rows ?? [])].sort((a, b) => {
+      const byYear = b.year - a.year;
+      if (byYear !== 0) return byYear;
+      return getTs(b) - getTs(a);
+    });
+  }, [rows]);
 
-  const newConstructionTotal =
-    latest.res_new_construction +
-    latest.com_new_construction +
-    latest.agr_new_construction;
+  const currentYearRows = useMemo(
+    () => sorted.filter((r) => r.year === currentYear),
+    [sorted, currentYear]
+  );
 
-  const resTotal = latest.res_land + latest.res_building;
-  const comTotal = latest.com_land + latest.com_building;
-  const agrTotal = latest.agr_land + latest.agr_building;
+  const mostRecentThisYear = currentYearRows[0] ?? null;
+
+  // Precompute a compact “appraised” breakdown for each row
+  type Derived = {
+    id: number;
+    year: number;
+    appBldg: number;
+    appLand: number;
+    appNewConst: number;
+    appTotal: number | null;
+    dateOfAssessment: string | null;
+    lastChanged: string | null;
+    category: string | null;
+    changedBy: string | null;
+    reason: string | null;
+    raw: ParcelValueRow;
+  };
+
+  const derived = useMemo<Derived[]>(
+    () =>
+      //@ts-expect-error TS2345
+      sorted.map((r) => ({
+        id: r.id,
+        year: r.year,
+        appBldg: sum(
+          r.app_bldg_agriculture,
+          r.app_bldg_commercial,
+          r.app_bldg_residential,
+          r.app_bldg_exempt
+        ),
+        appLand: sum(
+          r.app_land_agriculture,
+          r.app_land_commercial,
+          r.app_land_residential,
+          r.app_land_exempt
+        ),
+        appNewConst: sum(
+          r.app_new_const_agriculture,
+          r.app_new_const_commercial,
+          r.app_new_const_residential,
+          r.app_new_const_exempt
+        ),
+        appTotal: r.app_total_value,
+        dateOfAssessment: r.date_of_assessment,
+        lastChanged: r.last_changed,
+        category: r.category,
+        changedBy: r.changed_by,
+        reason: r.reason_for_change,
+        raw: r,
+      })),
+    [sorted]
+  );
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="border rounded p-2 text-sm text-gray-800 flex flex-col gap-1">
-        <div className="flex gap-4 justify-between items-center gap-4">
-          <p className="text-base font-semibold">${total.toLocaleString()}</p>
-          <ParcelValuesModal parcel={parcel} allValues={values} />
+    <div>
+      {/* Inline: most recent value for current year */}
+      {mostRecentThisYear ? (
+        <div className="flex items-start justify-between">
+          <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            <Info label="Year" value={mostRecentThisYear.year} />
+            <Info
+              label="Appraised Total"
+              value={fmtUSD(mostRecentThisYear.app_total_value)}
+            />
+            <Info
+              label="Date of Assessment"
+              value={fmtDate(mostRecentThisYear.date_of_assessment)}
+            />
+            <Info
+              label="Last Changed"
+              value={fmtDate(mostRecentThisYear.last_changed)}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="hover:bg-gray-50"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
-        {resTotal > 0 && (
-          <p className="text-gray-500">
-            Residential: ${resTotal.toLocaleString()}
-          </p>
-        )}
-        {comTotal > 0 && (
-          <p className="text-gray-500">
-            Commercial: ${comTotal.toLocaleString()}
-          </p>
-        )}
-        {agrTotal > 0 && (
-          <p className="text-gray-500">
-            Agricultural: ${agrTotal.toLocaleString()}
-          </p>
-        )}
-        {newConstructionTotal > 0 && (
-          <p className="text-gray-500">
-            New Construction: ${newConstructionTotal.toLocaleString()}
-          </p>
-        )}
-        <div className="flex items-center gap-4 pt-1">
-          <p className="text-gray-600">{latest.tax_year}</p>
-          <span className="text-xs text-gray-500">{latest.value_type}</span>
+      ) : (
+        <div className="mt-3 text-sm text-gray-600">
+          No values found for {currentYear}.
+        </div>
+      )}
+
+      {/* Dialog: all values + details */}
+      <Dialog open={open} onClose={setOpen} className="relative z-50">
+        <DialogBackdrop className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-5xl rounded-xl border bg-background max-h-[90vh] overflow-y-auto p-6">
+            <DialogTitle className="text-sm font-semibold text-gray-800">
+              All Values — Details
+            </DialogTitle>
+
+            <div className="mt-3 space-y-6">
+              {derived.map((row) => (
+                <ValueDetails key={row.id} d={row} />
+              ))}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="px-4 py-2 rounded border text-sm hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+    </div>
+  );
+}
+
+function ValueDetails({
+  d,
+}: {
+  d: {
+    id: number;
+    year: number;
+    appBldg: number;
+    appLand: number;
+    appNewConst: number;
+    appTotal: number | null;
+    dateOfAssessment: string | null;
+    lastChanged: string | null;
+    category: string | null;
+    changedBy: string | null;
+    reason: string | null;
+    raw: ParcelValueRow;
+  };
+}) {
+  const r = d.raw;
+
+  const assessedBldg =
+    sum(
+      r.bldg_agriculture,
+      r.bldg_commercial,
+      r.bldg_residential,
+      r.bldg_exempt
+    ) || 0;
+  const assessedLand =
+    sum(
+      r.land_agriculture,
+      r.land_commercial,
+      r.land_residential,
+      r.land_exempt
+    ) || 0;
+  const assessedNewConst = sum(
+    r.new_const_agriculture,
+    r.new_const_commercial,
+    r.new_const_residential,
+    r.new_const_exempt
+  );
+  const assessedTotal = assessedBldg + assessedLand; // exclude new const if separate; adjust if needed
+
+  return (
+    <div className="rounded-lg border">
+      {/* Summary header */}
+      <div className="p-3">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
+          <Info label="Year" value={d.year} />
+          <Info label="Appraised Building" value={fmtUSD(d.appBldg)} />
+          <Info label="Appraised Land" value={fmtUSD(d.appLand)} />
+          <Info label="Appraised New Const." value={fmtUSD(d.appNewConst)} />
+          <Info label="Appraised Total" value={fmtUSD(d.appTotal)} />
+          <Info label="Category" value={d.category ?? "—"} />
+          <Info label="Assessed Date" value={fmtDate(d.dateOfAssessment)} />
+          <Info label="Last Changed" value={fmtDate(d.lastChanged)} />
+          <Info label="Changed By" value={d.changedBy ?? "—"} />
+          <Info label="Reason" value={d.reason ?? "—"} />
         </div>
       </div>
+
+      {/* Appraised breakdown table */}
+      <div className="border-t overflow-auto">
+        <table className="min-w-[720px] w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr className="text-left">
+              <th className="p-2">Type</th>
+              <th className="p-2">Agriculture</th>
+              <th className="p-2">Commercial</th>
+              <th className="p-2">Residential</th>
+              <th className="p-2">Exempt</th>
+              <th className="p-2">Row Total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            <Row4
+              label="Appraised Building"
+              a={r.app_bldg_agriculture}
+              c={r.app_bldg_commercial}
+              r={r.app_bldg_residential}
+              e={r.app_bldg_exempt}
+            />
+            <Row4
+              label="Appraised Land"
+              a={r.app_land_agriculture}
+              c={r.app_land_commercial}
+              r={r.app_land_residential}
+              e={r.app_land_exempt}
+            />
+            <Row4
+              label="Appraised New Const."
+              a={r.app_new_const_agriculture}
+              c={r.app_new_const_commercial}
+              r={r.app_new_const_residential}
+              e={r.app_new_const_exempt}
+            />
+            <tr className="bg-gray-50 font-medium">
+              <td className="p-2">Appraised Total (DB)</td>
+              <td className="p-2" colSpan={4}></td>
+              <td className="p-2">{fmtUSD(r.app_total_value)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Assessed (non-appraised) breakdown table */}
+      <div className="border-t overflow-auto">
+        <table className="min-w-[720px] w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr className="text-left">
+              <th className="p-2">Type</th>
+              <th className="p-2">Agriculture</th>
+              <th className="p-2">Commercial</th>
+              <th className="p-2">Residential</th>
+              <th className="p-2">Exempt</th>
+              <th className="p-2">Row Total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            <Row4
+              label="Assessed Building"
+              a={r.bldg_agriculture}
+              c={r.bldg_commercial}
+              r={r.bldg_residential}
+              e={r.bldg_exempt}
+            />
+            <Row4
+              label="Assessed Land"
+              a={r.land_agriculture}
+              c={r.land_commercial}
+              r={r.land_residential}
+              e={r.land_exempt}
+            />
+            <Row4
+              label="Assessed New Const."
+              a={r.new_const_agriculture}
+              c={r.new_const_commercial}
+              r={r.new_const_residential}
+              e={r.new_const_exempt}
+            />
+            <tr className="bg-gray-50 font-medium">
+              <td className="p-2">Assessed Total (calc)</td>
+              <td className="p-2" colSpan={4}></td>
+              <td className="p-2">{fmtUSD(assessedTotal)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function Row4({
+  label,
+  a,
+  c,
+  r,
+  e,
+}: {
+  label: string;
+  a?: number | null;
+  c?: number | null;
+  r?: number | null;
+  e?: number | null;
+}) {
+  const rowTotal = sum(a, c, r, e);
+  return (
+    <tr>
+      <td className="p-2 font-medium">{label}</td>
+      <td className="p-2">{fmtUSD(a)}</td>
+      <td className="p-2">{fmtUSD(c)}</td>
+      <td className="p-2">{fmtUSD(r)}</td>
+      <td className="p-2">{fmtUSD(e)}</td>
+      <td className="p-2">{fmtUSD(rowTotal)}</td>
+    </tr>
+  );
+}
+
+function Info({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-gray-500">{label}</div>
+      <div className="font-medium">{value}</div>
     </div>
   );
 }

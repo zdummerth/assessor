@@ -143,7 +143,40 @@ export default function ClientParcelStructures({
 
   return (
     <div className="rounded-lg border p-4">
-      <div className="flex items-center justify-end">
+      {/* Parcel summary strip */}
+      <div className="flex justify-between items-start">
+        <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <div className="">
+            <div className="text-gray-500">Total Structures</div>
+            <div className="mt-1 text-lg font-semibold">
+              {parcelSummary.totalStructures}
+            </div>
+          </div>
+          <div className="">
+            <div className="text-gray-500">Total Living Area</div>
+            <div className="mt-1 text-lg font-semibold">
+              {parcelSummary.totalLivingAreaFmt} ft²
+            </div>
+          </div>
+          <div className="">
+            <div className="text-gray-500">Total Stories</div>
+            <div className="mt-1 text-lg font-semibold">
+              {fmtNum(parcelSummary.totalStories)}
+            </div>
+          </div>
+          <div className="">
+            <div className="text-gray-500">Current Condition</div>
+            <div className="text-lg font-semibold">
+              {parcelSummary.currentCondition}
+              {parcelSummary.currentConditionDate !== "—" && (
+                <span className="ml-2 text-xs text-gray-500">
+                  ({parcelSummary.currentConditionDate})
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
         <button
           type="button"
           onClick={() => setStructuresOpen(true)}
@@ -151,38 +184,6 @@ export default function ClientParcelStructures({
         >
           <Plus className="w-4 h-4" />
         </button>
-      </div>
-      {/* Parcel summary strip */}
-      <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-        <div className="">
-          <div className="text-gray-500">Total Structures</div>
-          <div className="mt-1 text-lg font-semibold">
-            {parcelSummary.totalStructures}
-          </div>
-        </div>
-        <div className="">
-          <div className="text-gray-500">Total Living Area</div>
-          <div className="mt-1 text-lg font-semibold">
-            {parcelSummary.totalLivingAreaFmt} ft²
-          </div>
-        </div>
-        <div className="">
-          <div className="text-gray-500">Total Stories</div>
-          <div className="mt-1 text-lg font-semibold">
-            {fmtNum(parcelSummary.totalStories)}
-          </div>
-        </div>
-        <div className="">
-          <div className="text-gray-500">Current Condition</div>
-          <div className="text-lg font-semibold">
-            {parcelSummary.currentCondition}
-            {parcelSummary.currentConditionDate !== "—" && (
-              <span className="ml-2 text-xs text-gray-500">
-                ({parcelSummary.currentConditionDate})
-              </span>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* ===== Dialog: All structures (click to view one) ===== */}

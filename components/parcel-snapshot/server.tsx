@@ -16,7 +16,7 @@ type Parcel = Tables<"test_parcels">;
 export default async function ServerParcelSnapshot({
   parcelId,
   className = "",
-  title = "Parcel Snapshot",
+  title,
 }: {
   parcelId: number;
   className?: string;
@@ -39,7 +39,7 @@ export default async function ServerParcelSnapshot({
   if (error) {
     console.error("ServerParcelSnapshot error:", error);
     return (
-      <section className={`rounded-lg border bg-white p-4 ${className}`}>
+      <section className={`rounded-lg border p-4 ${className}`}>
         <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
         <div className="mt-3 flex items-center gap-2 text-sm text-red-700">
           <SearchX className="w-4 h-4" />
@@ -125,11 +125,11 @@ export default async function ServerParcelSnapshot({
   const parcel: Parcel = data;
 
   return (
-    <section className={`rounded-lg border bg-white p-4 ${className}`}>
-      <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+    <section className={`rounded-lg border p-4 ${className}`}>
+      {title && <h3 className="text-sm font-semibold">{title}</h3>}
 
       {/* Top grid: basics, address list, land uses */}
-      <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="flex flex-col">
           <ParcelNumber
             id={parcel.id}

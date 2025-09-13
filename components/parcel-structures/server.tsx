@@ -54,7 +54,7 @@ export default async function ServerParcelStructures({
   if (error) {
     console.error(error);
     return (
-      <div className="w-full flex flex-col items-center justify-center mt-16">
+      <div className="w-full flex flex-col items-center justify-center">
         <SearchX className="w-16 h-16 text-gray-400 mx-auto" />
         <p className="text-center">Error fetching structure data</p>
         <p className="text-sm text-gray-600">{error.message}</p>
@@ -83,7 +83,7 @@ export default async function ServerParcelStructures({
 
   if (!structures.length) {
     return (
-      <div className="w-full flex flex-col items-center justify-center mt-16">
+      <div className="w-full flex flex-col items-center justify-center">
         <SearchX className="w-16 h-16 text-gray-400 mx-auto" />
         <p className="text-center">No structures linked to this parcel.</p>
       </div>
