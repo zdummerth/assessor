@@ -1,20 +1,15 @@
-// app/components/ServerParcelSnapshot.tsx
 import { createClient } from "@/utils/supabase/server";
 import type { Tables } from "@/database-types";
 import { SearchX } from "lucide-react";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
-import { Info } from "../ui/lib";
+import { Info } from "@/components/ui/lib";
 import FormattedDate from "@/components/ui/formatted-date";
-
-// Placeholder (or real) clients
-// import ParcelBasicsClient from "./placeholders/ParcelBasicsClient";
 import ParcelAddressClient from "./address-client";
 import ParcelLandUsesClient from "./land-use-client";
-// import ParcelLandUsesClient from "./placeholders/ParcelLandUsesClient";
 
 type Parcel = Tables<"test_parcels">;
 
-export default async function ServerParcelSnapshot({
+export default async function ParcelDetails({
   parcelId,
   className = "",
   title,

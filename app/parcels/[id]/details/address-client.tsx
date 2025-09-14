@@ -8,9 +8,9 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import Address from "../ui/address";
+import Address from "@/components/ui/address";
 import { Plus } from "lucide-react";
-import { Info } from "../ui/lib";
+import { Info } from "@/components/ui/lib";
 
 type AnyAddress = {
   housenumber?: string | number | null;

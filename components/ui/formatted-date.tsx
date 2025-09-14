@@ -1,6 +1,6 @@
 const FormattedDate = ({
   date,
-  className = "text-sm text-foreground/80",
+  className = "",
   month = "short",
   showTime,
 }: {

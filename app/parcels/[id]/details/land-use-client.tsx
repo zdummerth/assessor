@@ -9,8 +9,8 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { Plus } from "lucide-react";
-import { Info } from "../ui/lib";
-import FormattedDate from "../ui/formatted-date";
+import { Info } from "@/components/ui/lib";
+import FormattedDate from "@/components/ui/formatted-date";
 
 type AnyLandUse = {
   id?: number | string | null;

@@ -10,7 +10,8 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { Plus } from "lucide-react";
-import { Info } from "../ui/lib";
+import { Info } from "@/components/ui/lib";
+import FormattedDate from "@/components/ui/formatted-date";
 
 function fmtUSD(n?: number | null) {
   if (n == null || Number.isNaN(Number(n))) return "—";
@@ -19,11 +20,6 @@ function fmtUSD(n?: number | null) {
     currency: "USD",
     maximumFractionDigits: 0,
   }).format(Number(n));
-}
-function fmtDate(s?: string | null) {
-  if (!s) return "—";
-  const d = new Date(s);
-  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
 }
 function sum(...vals: Array<number | null | undefined>) {
   return vals.reduce((a, b) => (a || 0) + (Number(b) || 0), 0);
@@ -123,11 +119,17 @@ export default function ClientParcelValues({
             />
             <Info
               label="Date of Assessment"
-              value={fmtDate(mostRecentThisYear.date_of_assessment)}
+              value={
+                <FormattedDate
+                  date={mostRecentThisYear.date_of_assessment || ""}
+                />
+              }
             />
             <Info
               label="Last Changed"
-              value={fmtDate(mostRecentThisYear.last_changed)}
+              value={
+                <FormattedDate date={mostRecentThisYear.last_changed || ""} />
+              }
             />
           </div>
           <button
@@ -144,10 +146,10 @@ export default function ClientParcelValues({
 
       {/* Dialog: all values + details */}
       <Dialog open={open} onClose={setOpen} className="relative z-50">
-        <DialogBackdrop className="fixed inset-0 bg-background/70 backdrop-blur-sm" />
+        <DialogBackdrop className="fixed inset-0 bg-zinc-800/70 backdrop-blur-sm" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <DialogPanel className="w-full max-w-5xl rounded border bg-background max-h-[90vh] overflow-y-auto p-4">
-            <DialogTitle className="text-sm font-semibold text-gray-800">
+            <DialogTitle className="text-sm font-semibold">
               All Values — Details
             </DialogTitle>
 
@@ -207,16 +209,10 @@ function ValueDetails({
       r.land_residential,
       r.land_exempt
     ) || 0;
-  const assessedNewConst = sum(
-    r.new_const_agriculture,
-    r.new_const_commercial,
-    r.new_const_residential,
-    r.new_const_exempt
-  );
   const assessedTotal = assessedBldg + assessedLand; // exclude new const if separate; adjust if needed
 
   return (
-    <div className="rounded-lg border">
+    <div className="rounded border">
       {/* Summary header */}
       <div className="p-2">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
@@ -226,8 +222,14 @@ function ValueDetails({
           <Info label="Appraised New Const." value={fmtUSD(d.appNewConst)} />
           <Info label="Appraised Total" value={fmtUSD(d.appTotal)} />
           <Info label="Category" value={d.category ?? "—"} />
-          <Info label="Assessed Date" value={fmtDate(d.dateOfAssessment)} />
-          <Info label="Last Changed" value={fmtDate(d.lastChanged)} />
+          <Info
+            label="Assessed Date"
+            value={<FormattedDate date={d.dateOfAssessment || ""} />}
+          />
+          <Info
+            label="Last Changed"
+            value={<FormattedDate date={d.lastChanged || ""} />}
+          />
           <Info label="Changed By" value={d.changedBy ?? "—"} />
           <Info label="Reason" value={d.reason ?? "—"} />
         </div>
@@ -236,7 +238,7 @@ function ValueDetails({
       {/* Appraised breakdown table */}
       <div className="border-t overflow-auto">
         <table className="min-w-[720px] w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-gray-800">
             <tr className="text-left">
               <th className="p-2">Type</th>
               <th className="p-2">Agriculture</th>
@@ -268,7 +270,7 @@ function ValueDetails({
               r={r.app_new_const_residential}
               e={r.app_new_const_exempt}
             />
-            <tr className="bg-gray-50 font-medium">
+            <tr className="bg-gray-50 dark:bg-gray-800 font-medium">
               <td className="p-2">Appraised Total (DB)</td>
               <td className="p-2" colSpan={4}></td>
               <td className="p-2">{fmtUSD(r.app_total_value)}</td>
@@ -280,7 +282,7 @@ function ValueDetails({
       {/* Assessed (non-appraised) breakdown table */}
       <div className="border-t overflow-auto">
         <table className="min-w-[720px] w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-gray-800">
             <tr className="text-left">
               <th className="p-2">Type</th>
               <th className="p-2">Agriculture</th>
@@ -312,7 +314,7 @@ function ValueDetails({
               r={r.new_const_residential}
               e={r.new_const_exempt}
             />
-            <tr className="bg-gray-50 font-medium">
+            <tr className="bg-gray-50 dark:bg-gray-800 font-medium">
               <td className="p-2">Assessed Total (calc)</td>
               <td className="p-2" colSpan={4}></td>
               <td className="p-2">{fmtUSD(assessedTotal)}</td>

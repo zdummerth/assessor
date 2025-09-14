@@ -8,8 +8,8 @@ import ParcelSales from "@/components/parcel-sales/server";
 import ParcelScores from "@/components/parcel-scores/server";
 import ParcelCompsClient from "@/components/parcel-comps-client/server";
 import ServerParcelFieldReviews from "@/components/field-reviews/server";
-import ServerParcelSnapshot from "@/components/parcel-snapshot/server";
-import ServerParcelValues from "@/components/parcel-values/server";
+import ParcelDetails from "./details/server";
+import ServerParcelValues from "./values/server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -78,7 +78,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         {/* Right column */}
         <section className="flex flex-col gap-4">
           <Suspense fallback={<div>Loading parcel snapshot...</div>}>
-            <ServerParcelSnapshot parcelId={parcel.id} />
+            <ParcelDetails parcelId={parcel.id} />
           </Suspense>
           <Suspense fallback={<div>Loading parcel values...</div>}>
             <ServerParcelValues
