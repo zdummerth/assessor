@@ -7,7 +7,7 @@ import ParcelStructures from "@/components/parcel-structures/server";
 import ParcelSales from "@/components/parcel-sales/server";
 import ParcelScores from "@/components/parcel-scores/server";
 import ParcelCompsClient from "@/components/parcel-comps-client/server";
-import ServerParcelFieldReviews from "@/components/field-reviews/server";
+import ServerParcelFieldReviews from "./field-reviews/server";
 import ParcelDetails from "./details/server";
 import ServerParcelValues from "./values/server";
 

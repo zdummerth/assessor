@@ -169,7 +169,7 @@ export default function ClientParcelStructures({
         <button
           type="button"
           onClick={() => setStructuresOpen(true)}
-          className="hover:bg-gray-50"
+          className="hover:bg-gray-500"
           aria-label="View all land uses"
           title="View all land uses"
         >
@@ -185,8 +185,8 @@ export default function ClientParcelStructures({
       >
         <DialogBackdrop className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="w-full max-w-5xl rounded-xl border bg-white p-6">
-            <DialogTitle className="text-sm font-semibold text-gray-800">
+          <DialogPanel className="w-full max-w-5xl rounded border bg-background p-2">
+            <DialogTitle className="text-sm font-semibold">
               Structures — Details
             </DialogTitle>
 
@@ -196,10 +196,7 @@ export default function ClientParcelStructures({
                 const cond = latestCondition(s);
                 const stories = countStories(s);
                 return (
-                  <div
-                    key={s.id}
-                    className="rounded border bg-white p-3 text-sm"
-                  >
+                  <div key={s.id} className="rounded border p-2 text-sm">
                     <div className="flex items-center justify-between">
                       <div className="font-semibold">Structure #{s.id}</div>
                       {s.year_built && (
@@ -262,7 +259,7 @@ export default function ClientParcelStructures({
               <button
                 type="button"
                 onClick={() => setStructuresOpen(false)}
-                className="px-4 py-2 rounded border text-sm hover:bg-gray-50"
+                className="px-4 py-2 rounded border text-sm"
               >
                 Close
               </button>
@@ -280,7 +277,7 @@ export default function ClientParcelStructures({
               >
                 <DialogBackdrop className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
                 <div className="fixed inset-0 flex items-center justify-center p-4">
-                  <DialogPanel className="w-full max-w-4xl rounded-xl border bg-white p-6">
+                  <DialogPanel className="w-full max-w-5xl rounded border bg-background p-2">
                     <DialogTitle className="text-sm font-semibold text-gray-800">
                       Structure #{activeStructure.id} — Full Details
                     </DialogTitle>
@@ -340,7 +337,7 @@ export default function ClientParcelStructures({
                     {/* Sections table */}
                     <div className="mt-3 rounded border overflow-auto">
                       <table className="min-w-[720px] w-full text-sm">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-gray-50 dark:bg-gray-800">
                           <tr className="text-left">
                             <th className="p-2">Section</th>
                             <th className="p-2">Floor #</th>
@@ -379,7 +376,7 @@ export default function ClientParcelStructures({
                                     <td className="p-2 text-right">
                                       <button
                                         type="button"
-                                        className="px-2 py-1 rounded border hover:bg-gray-50"
+                                        className="px-2 py-1 rounded border hover:bg-gray-500"
                                         onClick={() =>
                                           setActiveSectionId(sec.id)
                                         }
@@ -399,7 +396,7 @@ export default function ClientParcelStructures({
                     {/* Conditions history */}
                     <div className="mt-3 rounded border overflow-auto">
                       <table className="min-w-[600px] w-full text-sm">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-gray-50 dark:bg-gray-800">
                           <tr className="text-left">
                             <th className="p-2">Condition</th>
                             <th className="p-2">Effective Date</th>
@@ -445,7 +442,7 @@ export default function ClientParcelStructures({
                     <div className="mt-4 flex justify-end">
                       <button
                         type="button"
-                        className="px-4 py-2 rounded border text-sm hover:bg-gray-50"
+                        className="px-4 py-2 rounded border text-sm hover:bg-gray-500"
                         onClick={() => {
                           setActiveSectionId(null);
                           setActiveStructureId(null);
@@ -464,7 +461,7 @@ export default function ClientParcelStructures({
                       >
                         <DialogBackdrop className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
                         <div className="fixed inset-0 flex items-center justify-center p-4">
-                          <DialogPanel className="w-full max-w-md rounded-xl border bg-white p-6">
+                          <DialogPanel className="w-full max-w-md rounded border bg-background p-2">
                             <DialogTitle className="text-sm font-semibold text-gray-800">
                               Section #{activeSection.id}
                             </DialogTitle>
@@ -504,7 +501,7 @@ export default function ClientParcelStructures({
                               <button
                                 type="button"
                                 onClick={() => setActiveSectionId(null)}
-                                className="px-4 py-2 rounded border text-sm hover:bg-gray-50"
+                                className="px-4 py-2 rounded border text-sm hover:bg-gray-500"
                               >
                                 Close
                               </button>

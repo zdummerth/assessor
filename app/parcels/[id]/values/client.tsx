@@ -33,7 +33,6 @@ export default function ClientParcelValues({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
-
   const currentYear = new Date().getFullYear();
 
   const sorted = useMemo(() => {
@@ -55,7 +54,6 @@ export default function ClientParcelValues({
 
   const mostRecentThisYear = currentYearRows[0] ?? null;
 
-  // Precompute a compact “appraised” breakdown for each row
   type Derived = {
     id: number;
     year: number;
@@ -108,7 +106,6 @@ export default function ClientParcelValues({
 
   return (
     <div className={className}>
-      {/* Inline: most recent value for current year */}
       {mostRecentThisYear ? (
         <div className="flex justify-between items-start">
           <div className="flex-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -136,6 +133,8 @@ export default function ClientParcelValues({
             type="button"
             onClick={() => setOpen(true)}
             className="hover:bg-gray-50"
+            aria-label="Open all values"
+            title="Show all values"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -144,7 +143,6 @@ export default function ClientParcelValues({
         <div>No values found for {currentYear}.</div>
       )}
 
-      {/* Dialog: all values + details */}
       <Dialog open={open} onClose={setOpen} className="relative z-50">
         <DialogBackdrop className="fixed inset-0 bg-zinc-800/70 backdrop-blur-sm" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -152,6 +150,12 @@ export default function ClientParcelValues({
             <DialogTitle className="text-sm font-semibold">
               All Values — Details
             </DialogTitle>
+
+            <p className="mt-1 text-xs text-muted-foreground">
+              Each cell shows <span className="font-medium">Appraised</span>{" "}
+              (larger) over <span className="font-medium">Assessed</span>{" "}
+              (smaller).
+            </p>
 
             <div className="mt-3 space-y-6">
               {derived.map((row) => (
@@ -171,6 +175,25 @@ export default function ClientParcelValues({
           </DialogPanel>
         </div>
       </Dialog>
+    </div>
+  );
+}
+
+function ValuePair({
+  appraised,
+  assessed,
+  appClass = "text-sm md:text-base font-semibold",
+  assessedClass = "text-[11px] text-muted-foreground",
+}: {
+  appraised?: number | null;
+  assessed?: number | null;
+  appClass?: string;
+  assessedClass?: string;
+}) {
+  return (
+    <div className="leading-tight">
+      <div className={appClass}>{fmtUSD(appraised)}</div>
+      <div className={assessedClass}>{fmtUSD(assessed)}</div>
     </div>
   );
 }
@@ -195,21 +218,59 @@ function ValueDetails({
 }) {
   const r = d.raw;
 
-  const assessedBldg =
-    sum(
-      r.bldg_agriculture,
-      r.bldg_commercial,
-      r.bldg_residential,
-      r.bldg_exempt
-    ) || 0;
-  const assessedLand =
-    sum(
-      r.land_agriculture,
-      r.land_commercial,
-      r.land_residential,
-      r.land_exempt
-    ) || 0;
-  const assessedTotal = assessedBldg + assessedLand; // exclude new const if separate; adjust if needed
+  // Assessed category components
+  const assessedBldgA = r.bldg_agriculture;
+  const assessedBldgC = r.bldg_commercial;
+  const assessedBldgR = r.bldg_residential;
+  const assessedBldgE = r.bldg_exempt;
+
+  const assessedLandA = r.land_agriculture;
+  const assessedLandC = r.land_commercial;
+  const assessedLandR = r.land_residential;
+  const assessedLandE = r.land_exempt;
+
+  const assessedNewA = r.new_const_agriculture;
+  const assessedNewC = r.new_const_commercial;
+  const assessedNewR = r.new_const_residential;
+  const assessedNewE = r.new_const_exempt;
+
+  const assessedBldg = sum(
+    assessedBldgA,
+    assessedBldgC,
+    assessedBldgR,
+    assessedBldgE
+  );
+  const assessedLand = sum(
+    assessedLandA,
+    assessedLandC,
+    assessedLandR,
+    assessedLandE
+  );
+  const assessedNewConst = sum(
+    assessedNewA,
+    assessedNewC,
+    assessedNewR,
+    assessedNewE
+  );
+  const assessedTotal = sum(assessedBldg, assessedLand, assessedNewConst);
+
+  // Appraised category components
+  const appBldgA = r.app_bldg_agriculture;
+  const appBldgC = r.app_bldg_commercial;
+  const appBldgR = r.app_bldg_residential;
+  const appBldgE = r.app_bldg_exempt;
+
+  const appLandA = r.app_land_agriculture;
+  const appLandC = r.app_land_commercial;
+  const appLandR = r.app_land_residential;
+  const appLandE = r.app_land_exempt;
+
+  const appNewA = r.app_new_const_agriculture;
+  const appNewC = r.app_new_const_commercial;
+  const appNewR = r.app_new_const_residential;
+  const appNewE = r.app_new_const_exempt;
+
+  const appTotal = d.appTotal ?? sum(d.appBldg, d.appLand, d.appNewConst);
 
   return (
     <div className="rounded border">
@@ -217,10 +278,6 @@ function ValueDetails({
       <div className="p-2">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
           <Info label="Year" value={d.year} />
-          <Info label="Appraised Building" value={fmtUSD(d.appBldg)} />
-          <Info label="Appraised Land" value={fmtUSD(d.appLand)} />
-          <Info label="Appraised New Const." value={fmtUSD(d.appNewConst)} />
-          <Info label="Appraised Total" value={fmtUSD(d.appTotal)} />
           <Info label="Category" value={d.category ?? "—"} />
           <Info
             label="Assessed Date"
@@ -235,11 +292,11 @@ function ValueDetails({
         </div>
       </div>
 
-      {/* Appraised breakdown table */}
+      {/* Combined table with breakouts (Ag, Com, Res, Exempt) */}
       <div className="border-t overflow-auto">
-        <table className="min-w-[720px] w-full text-sm">
+        <table className="min-w-[900px] w-full text-sm">
           <thead className="bg-gray-50 dark:bg-gray-800">
-            <tr className="text-left">
+            <tr className="text-left align-bottom">
               <th className="p-2">Type</th>
               <th className="p-2">Agriculture</th>
               <th className="p-2">Commercial</th>
@@ -249,105 +306,116 @@ function ValueDetails({
             </tr>
           </thead>
           <tbody className="divide-y">
-            <Row4
-              label="Appraised Building"
-              a={r.app_bldg_agriculture}
-              c={r.app_bldg_commercial}
-              r={r.app_bldg_residential}
-              e={r.app_bldg_exempt}
-            />
-            <Row4
-              label="Appraised Land"
-              a={r.app_land_agriculture}
-              c={r.app_land_commercial}
-              r={r.app_land_residential}
-              e={r.app_land_exempt}
-            />
-            <Row4
-              label="Appraised New Const."
-              a={r.app_new_const_agriculture}
-              c={r.app_new_const_commercial}
-              r={r.app_new_const_residential}
-              e={r.app_new_const_exempt}
-            />
-            <tr className="bg-gray-50 dark:bg-gray-800 font-medium">
-              <td className="p-2">Appraised Total (DB)</td>
-              <td className="p-2" colSpan={4}></td>
-              <td className="p-2">{fmtUSD(r.app_total_value)}</td>
+            {/* Building */}
+            <tr>
+              <td className="p-2 font-medium">Building</td>
+              <td className="p-2">
+                <ValuePair appraised={appBldgA} assessed={assessedBldgA} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appBldgC} assessed={assessedBldgC} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appBldgR} assessed={assessedBldgR} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appBldgE} assessed={assessedBldgE} />
+              </td>
+              <td className="p-2">
+                <ValuePair
+                  appraised={d.appBldg}
+                  assessed={assessedBldg}
+                  appClass="text-base font-semibold"
+                />
+              </td>
             </tr>
-          </tbody>
-        </table>
-      </div>
 
-      {/* Assessed (non-appraised) breakdown table */}
-      <div className="border-t overflow-auto">
-        <table className="min-w-[720px] w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-gray-800">
-            <tr className="text-left">
-              <th className="p-2">Type</th>
-              <th className="p-2">Agriculture</th>
-              <th className="p-2">Commercial</th>
-              <th className="p-2">Residential</th>
-              <th className="p-2">Exempt</th>
-              <th className="p-2">Row Total</th>
+            {/* Land */}
+            <tr>
+              <td className="p-2 font-medium">Land</td>
+              <td className="p-2">
+                <ValuePair appraised={appLandA} assessed={assessedLandA} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appLandC} assessed={assessedLandC} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appLandR} assessed={assessedLandR} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appLandE} assessed={assessedLandE} />
+              </td>
+              <td className="p-2">
+                <ValuePair
+                  appraised={d.appLand}
+                  assessed={assessedLand}
+                  appClass="text-base font-semibold"
+                />
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y">
-            <Row4
-              label="Assessed Building"
-              a={r.bldg_agriculture}
-              c={r.bldg_commercial}
-              r={r.bldg_residential}
-              e={r.bldg_exempt}
-            />
-            <Row4
-              label="Assessed Land"
-              a={r.land_agriculture}
-              c={r.land_commercial}
-              r={r.land_residential}
-              e={r.land_exempt}
-            />
-            <Row4
-              label="Assessed New Const."
-              a={r.new_const_agriculture}
-              c={r.new_const_commercial}
-              r={r.new_const_residential}
-              e={r.new_const_exempt}
-            />
+
+            {/* New Construction */}
+            <tr>
+              <td className="p-2 font-medium">New Const.</td>
+              <td className="p-2">
+                <ValuePair appraised={appNewA} assessed={assessedNewA} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appNewC} assessed={assessedNewC} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appNewR} assessed={assessedNewR} />
+              </td>
+              <td className="p-2">
+                <ValuePair appraised={appNewE} assessed={assessedNewE} />
+              </td>
+              <td className="p-2">
+                <ValuePair
+                  appraised={d.appNewConst}
+                  assessed={assessedNewConst}
+                  appClass="text-base font-semibold"
+                />
+              </td>
+            </tr>
+
+            {/* Totals */}
             <tr className="bg-gray-50 dark:bg-gray-800 font-medium">
-              <td className="p-2">Assessed Total (calc)</td>
-              <td className="p-2" colSpan={4}></td>
-              <td className="p-2">{fmtUSD(assessedTotal)}</td>
+              <td className="p-2">Total</td>
+              <td className="p-2">
+                <ValuePair
+                  appraised={sum(appBldgA, appLandA, appNewA)}
+                  assessed={sum(assessedBldgA, assessedLandA, assessedNewA)}
+                />
+              </td>
+              <td className="p-2">
+                <ValuePair
+                  appraised={sum(appBldgC, appLandC, appNewC)}
+                  assessed={sum(assessedBldgC, assessedLandC, assessedNewC)}
+                />
+              </td>
+              <td className="p-2">
+                <ValuePair
+                  appraised={sum(appBldgR, appLandR, appNewR)}
+                  assessed={sum(assessedBldgR, assessedLandR, assessedNewR)}
+                />
+              </td>
+              <td className="p-2">
+                <ValuePair
+                  appraised={sum(appBldgE, appLandE, appNewE)}
+                  assessed={sum(assessedBldgE, assessedLandE, assessedNewE)}
+                />
+              </td>
+              <td className="p-2">
+                <ValuePair
+                  appraised={appTotal}
+                  assessed={assessedTotal}
+                  appClass="text-lg font-semibold"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-  );
-}
-
-function Row4({
-  label,
-  a,
-  c,
-  r,
-  e,
-}: {
-  label: string;
-  a?: number | null;
-  c?: number | null;
-  r?: number | null;
-  e?: number | null;
-}) {
-  const rowTotal = sum(a, c, r, e);
-  return (
-    <tr>
-      <td className="p-2 font-medium">{label}</td>
-      <td className="p-2">{fmtUSD(a)}</td>
-      <td className="p-2">{fmtUSD(c)}</td>
-      <td className="p-2">{fmtUSD(r)}</td>
-      <td className="p-2">{fmtUSD(e)}</td>
-      <td className="p-2">{fmtUSD(rowTotal)}</td>
-    </tr>
   );
 }
