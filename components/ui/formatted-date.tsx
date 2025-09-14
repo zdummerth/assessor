@@ -1,7 +1,7 @@
 const FormattedDate = ({
   date,
-  className = "",
-  month = "long",
+  className = "text-sm text-foreground/80",
+  month = "short",
   showTime,
 }: {
   date: string;

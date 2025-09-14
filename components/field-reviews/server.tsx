@@ -188,9 +188,9 @@ export default async function ServerParcelFieldReviews({
           No field reviews yet for this parcel.
         </div>
       ) : (
-        <div className="rounded-lg border bg-white p-4 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-xs text-gray-500">
+        <div className="rounded border p-2 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-xs">
               Created {fmtShortDateTime(latest.created_at)} • Due{" "}
               {fmtDate(latest.due_date)}
             </div>
@@ -207,9 +207,8 @@ export default async function ServerParcelFieldReviews({
                 initialStatuses={latest.field_review_statuses ?? []}
                 initialImages={toImageDisplay(latest.field_review_images)}
                 trigger={
-                  <button className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border hover:bg-gray-50">
+                  <button className="hover:bg-gray-50">
                     <PlusCircle className="w-4 h-4" />
-                    Open
                   </button>
                 }
                 revalidatePath={revalidatePath}
@@ -222,7 +221,7 @@ export default async function ServerParcelFieldReviews({
             const s = latestOf(latest.field_review_statuses);
             if (!s) return null;
             return (
-              <div className="rounded border bg-gray-50 px-3 py-2">
+              <div className="rounded border p-2">
                 <div className="flex items-center justify-between">
                   <div className="font-medium">{s.status}</div>
                   <div className="text-[11px] text-gray-500">
@@ -238,9 +237,9 @@ export default async function ServerParcelFieldReviews({
             const n = latestOf(latest.field_review_notes);
             if (!n) return null;
             return (
-              <div className="rounded border bg-white shadow-sm p-3">
+              <div className="rounded border p-2">
                 <div className="whitespace-pre-wrap">{n.note}</div>
-                <div className="mt-1 text-[11px] text-gray-500">
+                <div className="mt-1 text-sm text-foreground/80">
                   {fmtShortDateTime(n.created_at)}
                 </div>
               </div>
@@ -288,7 +287,7 @@ export default async function ServerParcelFieldReviews({
 
       {/* PREVIOUS REVIEWS */}
       {rest.length > 0 && (
-        <div className="rounded-lg border bg-white">
+        <div className="rounded border">
           <div className="px-3 py-2 border-b text-xs font-medium text-gray-600">
             Previous Reviews
           </div>

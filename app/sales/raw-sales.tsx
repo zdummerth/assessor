@@ -113,7 +113,7 @@ function PaginationControls({
       <div className="flex items-center gap-2">
         <label className="text-gray-600">Rows per page</label>
         <select
-          className="border rounded-md px-2 py-1 bg-white"
+          className="border rounded px-2 py-1"
           value={pageSize}
           onChange={(e) => setPageSize(Number(e.target.value))}
         >
@@ -126,7 +126,7 @@ function PaginationControls({
 
         <div className="inline-flex border rounded-md overflow-hidden">
           <button
-            className="px-2 py-1 hover:bg-gray-50 disabled:opacity-40"
+            className="px-2 py-1 disabled:opacity-40"
             onClick={() => setPage(1)}
             disabled={page <= 1}
             aria-label="First page"
@@ -134,18 +134,18 @@ function PaginationControls({
             «
           </button>
           <button
-            className="px-2 py-1 hover:bg-gray-50 disabled:opacity-40"
+            className="px-2 py-1 disabled:opacity-40"
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page <= 1}
             aria-label="Previous page"
           >
             ‹
           </button>
-          <div className="px-3 py-1 bg-white select-none">
+          <div className="px-3 py-1 select-none">
             {page} / {totalPages}
           </div>
           <button
-            className="px-2 py-1 hover:bg-gray-50 disabled:opacity-40"
+            className="px-2 py-1 disabled:opacity-40"
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page >= totalPages}
             aria-label="Next page"
@@ -153,7 +153,7 @@ function PaginationControls({
             ›
           </button>
           <button
-            className="px-2 py-1 hover:bg-gray-50 disabled:opacity-40"
+            className="px-2 py-1 disabled:opacity-40"
             onClick={() => setPage(totalPages)}
             disabled={page >= totalPages}
             aria-label="Last page"
@@ -415,7 +415,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
 
         <div className="overflow-x-auto">
           <table className="min-w-[1100px] w-full text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
                 {DB_COLUMNS.map((col) => (
                   <Th
@@ -439,7 +439,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
               {pageRows.map((r, i) => (
                 <tr
                   key={`${r.sale_id}-${i}`}
-                  className="odd:bg-white even:bg-gray-50 border-b"
+                  className="odd:bg-background even:bg-gray-50 dark:even:bg-gray-800 border-b"
                 >
                   {DB_COLUMNS.map((col) => {
                     const raw = (r as AnyRow)[col.key];
@@ -484,7 +484,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
       <div className="flex items-center gap-2 text-sm">
         <label className="text-gray-600">Sort by</label>
         <select
-          className="border rounded-md px-2 py-1 bg-white"
+          className="border rounded px-2 py-1"
           value={sortKey}
           onChange={(e) => setSortKey(e.target.value as RawSortKey)}
         >
@@ -497,7 +497,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
         <button
           type="button"
           onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-          className="px-2 py-1 border rounded-md bg-white"
+          className="px-2 py-1 border rounded"
           title="Toggle sort direction"
         >
           {sortDir === "asc" ? "Asc ▲" : "Desc ▼"}
@@ -508,7 +508,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
         {pageRows.map((r, i) => (
           <div
             key={`${r.sale_id}-${i}`}
-            className="rounded-lg border p-3 bg-white shadow-sm space-y-2"
+            className="rounded border p-2 shadow-sm space-y-2"
           >
             <div className="text-sm text-gray-500">
               {fmtDate((r as AnyRow).sale_date)}

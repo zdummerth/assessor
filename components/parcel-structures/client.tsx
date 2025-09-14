@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Tables } from "@/database-types";
 import {
   Dialog,
   DialogBackdrop,
@@ -10,8 +9,8 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { Plus } from "lucide-react";
-
-type Parcel = Tables<"test_parcels">;
+import { Info } from "../ui/lib";
+import FormattedDate from "../ui/formatted-date";
 
 // Narrow types used below so we can rely on them without any/unknown
 type Structure = {
@@ -82,13 +81,13 @@ function countStories(s: Structure) {
 
 export default function ClientParcelStructures({
   data,
-  parcel,
+  className = "",
 }: {
   data: Structure[];
-  parcel: Parcel;
+  className?: string;
 }) {
   if (!data || data.length === 0) {
-    return <p className="text-gray-500">No structure data found.</p>;
+    return <p>No structure data found.</p>;
   }
 
   // ===== Parcel-level summary =====
@@ -142,45 +141,37 @@ export default function ClientParcelStructures({
   }, [activeStructure, activeSectionId]);
 
   return (
-    <div className="rounded-lg border p-4">
+    <div className={className}>
       {/* Parcel summary strip */}
       <div className="flex justify-between items-start">
-        <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-          <div className="">
-            <div className="text-gray-500">Total Structures</div>
-            <div className="mt-1 text-lg font-semibold">
-              {parcelSummary.totalStructures}
-            </div>
-          </div>
-          <div className="">
-            <div className="text-gray-500">Total Living Area</div>
-            <div className="mt-1 text-lg font-semibold">
-              {parcelSummary.totalLivingAreaFmt} ft²
-            </div>
-          </div>
-          <div className="">
-            <div className="text-gray-500">Total Stories</div>
-            <div className="mt-1 text-lg font-semibold">
-              {fmtNum(parcelSummary.totalStories)}
-            </div>
-          </div>
-          <div className="">
-            <div className="text-gray-500">Current Condition</div>
-            <div className="text-lg font-semibold">
-              {parcelSummary.currentCondition}
-              {parcelSummary.currentConditionDate !== "—" && (
-                <span className="ml-2 text-xs text-gray-500">
-                  ({parcelSummary.currentConditionDate})
-                </span>
-              )}
-            </div>
-          </div>
+        <div className="flex-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Info
+            label="Total Structures"
+            value={parcelSummary.totalStructures}
+          />
+          <Info
+            label="Total Living Area"
+            value={`${parcelSummary.totalLivingAreaFmt} ft²`}
+          />
+          <Info label="Total Stories" value={parcelSummary.totalStories} />
+          <Info
+            label="Current Condition"
+            value={
+              <>
+                <div className="flex items-center gap-4">
+                  <div>{parcelSummary.currentCondition}</div>
+                  <FormattedDate date={parcelSummary.currentConditionDate} />
+                </div>
+              </>
+            }
+          />
         </div>
-
         <button
           type="button"
           onClick={() => setStructuresOpen(true)}
           className="hover:bg-gray-50"
+          aria-label="View all land uses"
+          title="View all land uses"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -334,14 +325,12 @@ export default function ClientParcelStructures({
                             {latestCondition(activeStructure)?.condition ?? "—"}
                             {latestCondition(activeStructure)
                               ?.effective_date && (
-                              <span className="text-xs text-gray-500 ml-2">
-                                (
-                                {fmtDate(
+                              <FormattedDate
+                                date={
                                   latestCondition(activeStructure)
-                                    ?.effective_date
-                                )}
-                                )
-                              </span>
+                                    ?.effective_date || ""
+                                }
+                              />
                             )}
                           </dd>
                         </dl>
@@ -440,7 +429,7 @@ export default function ClientParcelStructures({
                                     {c.condition}
                                   </td>
                                   <td className="p-2">
-                                    {fmtDate(c.effective_date)}
+                                    <FormattedDate date={c.effective_date} />
                                   </td>
                                   <td className="p-2">
                                     {fmtDate(c.created_at ?? null)}

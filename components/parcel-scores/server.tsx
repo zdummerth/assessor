@@ -54,16 +54,16 @@ export default async function ServerScoresLite({
 
   if (!rows.length) {
     return (
-      <section className={`rounded-lg border bg-white p-4 ${className}`}>
-        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
-        <div className="mt-3 text-sm text-gray-600">No scores found.</div>
+      <section className={className}>
+        <h3 className="text-sm font-semibold text-foreground/80">{title}</h3>
+        <div className="mt-3 text-foreground/80">No scores found.</div>
       </section>
     );
   }
 
   return (
-    <section className={`rounded-lg border bg-white p-4 ${className}`}>
-      <ClientScoresLite rows={rows} className="" title={title} />
+    <section className={className}>
+      <ClientScoresLite rows={rows} title={title} />
     </section>
   );
 }

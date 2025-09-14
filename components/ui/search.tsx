@@ -7,9 +7,11 @@ import { useDebouncedCallback } from "use-debounce";
 export default function Search({
   placeholder,
   param = "query",
+  debounceMs = 200,
 }: {
   placeholder: string;
   param?: string;
+  debounceMs?: number;
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -24,7 +26,7 @@ export default function Search({
       params.delete(param);
     }
     replace(`${pathname}?${params.toString()}`);
-  }, 200);
+  }, debounceMs);
 
   return (
     <div className="relative flex flex-1 w-full">

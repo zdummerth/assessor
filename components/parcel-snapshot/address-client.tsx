@@ -10,6 +10,7 @@ import {
 } from "@headlessui/react";
 import Address from "../ui/address";
 import { Plus } from "lucide-react";
+import { Info } from "../ui/lib";
 
 type AnyAddress = {
   housenumber?: string | number | null;
@@ -78,17 +79,24 @@ export default function ParcelAddressClient({
     <div className={className}>
       {/* Most recent address */}
       <div className="flex items-center gap-4">
-        <Address
-          address={recentProps.address}
-          fullAddress={recentProps.fullAddress}
+        <Info
+          label="Site Address"
+          value={
+            <div className="flex items-center gap-4">
+              <Address
+                address={recentProps.address}
+                fullAddress={recentProps.fullAddress}
+              />
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
+                className="hover:bg-gray-50"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          }
         />
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="hover:bg-gray-50"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
       </div>
 
       {/* Full list dialog */}

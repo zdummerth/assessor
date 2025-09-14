@@ -153,7 +153,7 @@ export default function GowerCompsClient({
     >
       {/* Sidebar (conditionally rendered; completely hidden when closed) */}
       {sidebarOpen && (
-        <aside className="space-y-4 p-3 border rounded-md bg-white">
+        <aside className="space-y-4 p-2 border rounded">
           <div className="space-y-2">
             <div className="space-y-2">
               <input
@@ -279,12 +279,12 @@ export default function GowerCompsClient({
 
       {/* Main */}
       <section className="min-w-0">
-        <div className="border rounded-md overflow-x-auto bg-white">
-          <div className="px-3 py-2 border-b text-sm font-medium">
+        <div className="border rounded overflow-x-auto">
+          <div className="p-2 border-b text-sm font-medium">
             Top {k} comps (candidates after filters: {candidates.length})
           </div>
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50">
+            <thead className="">
               <tr>
                 <Th>Parcel</Th>
                 <Th>Address</Th>
@@ -308,7 +308,10 @@ export default function GowerCompsClient({
                   (r.item as any).lon
                 );
                 return (
-                  <tr key={i} className={i % 2 ? "bg-white" : "bg-gray-50"}>
+                  <tr
+                    key={i}
+                    className={i % 2 ? "bg-background" : "bg-background/70"}
+                  >
                     <Td>{String((r.item as any).parcel_id ?? "—")}</Td>
                     <Td>
                       {`${(r.item as any).house_number ?? ""} ${(r.item as any).street ?? ""}`.trim() ||

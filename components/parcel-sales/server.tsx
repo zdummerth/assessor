@@ -82,8 +82,10 @@ function linkActiveOn(link: ParcelStructureLink, onISO: string) {
 
 export default async function SalesWithStructuresCardsServer({
   parcelId,
+  className = "",
 }: {
   parcelId: number;
+  className?: string;
 }) {
   const supabase = await createClient();
 
@@ -256,5 +258,5 @@ export default async function SalesWithStructuresCardsServer({
   cards.sort((a, b) => +new Date(b.sale_date) - +new Date(a.sale_date));
 
   console.log("Sales cards:", cards);
-  return <ClientSalesWithStructuresCards cards={cards} />;
+  return <ClientSalesWithStructuresCards cards={cards} className={className} />;
 }

@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { Plus } from "lucide-react";
+import { Info } from "../ui/lib";
+import FormattedDate from "../ui/formatted-date";
 
 type AnyLandUse = {
   id?: number | string | null;
@@ -64,30 +66,24 @@ export default function ParcelLandUsesClient({
   return (
     <div className={className}>
       {/* Current land use */}
-      <div className="flex items-center gap-4">
-        <div className="flex flex-col">
-          <div className="text-sm font-medium text-gray-800">
-            {current.land_use ?? "—"}
+      <Info
+        label="Occupancy"
+        value={
+          <div className="flex items-center gap-4">
+            <div>{current.land_use ?? "—"}</div>
+            <FormattedDate date={currentEff ?? ""} />
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="hover:bg-gray-50"
+              aria-label="View all land uses"
+              title="View all land uses"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
           </div>
-          <div className="text-xs text-gray-600">
-            {currentEff
-              ? `${currentEff} – ${currentEnd ?? "Present"}`
-              : currentEnd
-                ? `— ${currentEnd}`
-                : "—"}
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="hover:bg-gray-50"
-          aria-label="View all land uses"
-          title="View all land uses"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
-      </div>
+        }
+      />
 
       {/* Full list dialog */}
       <Dialog open={open} onClose={setOpen} className="relative z-50">

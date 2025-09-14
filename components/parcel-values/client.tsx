@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { Plus } from "lucide-react";
+import { Info } from "../ui/lib";
 
 function fmtUSD(n?: number | null) {
   if (n == null || Number.isNaN(Number(n))) return "—";
@@ -30,8 +31,10 @@ function sum(...vals: Array<number | null | undefined>) {
 
 export default function ClientParcelValues({
   rows,
+  className = "",
 }: {
   rows: ParcelValueRow[];
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -108,11 +111,11 @@ export default function ClientParcelValues({
   );
 
   return (
-    <div>
+    <div className={className}>
       {/* Inline: most recent value for current year */}
       {mostRecentThisYear ? (
-        <div className="flex items-start justify-between">
-          <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex justify-between items-start">
+          <div className="flex-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Info label="Year" value={mostRecentThisYear.year} />
             <Info
               label="Appraised Total"
@@ -136,16 +139,14 @@ export default function ClientParcelValues({
           </button>
         </div>
       ) : (
-        <div className="mt-3 text-sm text-gray-600">
-          No values found for {currentYear}.
-        </div>
+        <div>No values found for {currentYear}.</div>
       )}
 
       {/* Dialog: all values + details */}
       <Dialog open={open} onClose={setOpen} className="relative z-50">
-        <DialogBackdrop className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+        <DialogBackdrop className="fixed inset-0 bg-background/70 backdrop-blur-sm" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="w-full max-w-5xl rounded-xl border bg-background max-h-[90vh] overflow-y-auto p-6">
+          <DialogPanel className="w-full max-w-5xl rounded border bg-background max-h-[90vh] overflow-y-auto p-4">
             <DialogTitle className="text-sm font-semibold text-gray-800">
               All Values — Details
             </DialogTitle>
@@ -217,8 +218,8 @@ function ValueDetails({
   return (
     <div className="rounded-lg border">
       {/* Summary header */}
-      <div className="p-3">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
+      <div className="p-2">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
           <Info label="Year" value={d.year} />
           <Info label="Appraised Building" value={fmtUSD(d.appBldg)} />
           <Info label="Appraised Land" value={fmtUSD(d.appLand)} />
@@ -346,14 +347,5 @@ function Row4({
       <td className="p-2">{fmtUSD(e)}</td>
       <td className="p-2">{fmtUSD(rowTotal)}</td>
     </tr>
-  );
-}
-
-function Info({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div>
-      <div className="text-gray-500">{label}</div>
-      <div className="font-medium">{value}</div>
-    </div>
   );
 }

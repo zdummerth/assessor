@@ -17,12 +17,6 @@ export function useSearch(query: string) {
   };
 }
 
-/**
- * Hook to fetch comparable sales using the find_comps function.
- *
- * @param parcelId The subject parcel ID (required)
- * @param options  Optional params like k, years, max_distance_miles, etc.
- */
 export function useComps(
   parcelId: number | null,
   options?: {
@@ -58,37 +52,8 @@ export function useComps(
 
   const url =
     parcelId !== null
-      ? `/test/parcels/${parcelId}/comps/search/?${params.toString()}`
+      ? `/parcels/${parcelId}/comps/search/?${params.toString()}`
       : null;
-
-  const { data, error, isLoading } = useSWR(url, fetcher);
-
-  return {
-    data,
-    isLoading,
-    error,
-  };
-}
-
-export function useSalesSearch(options?: {
-  start_date?: string;
-  end_date?: string;
-  valid_only?: boolean;
-  address?: string;
-}) {
-  const params = new URLSearchParams();
-
-  if (options?.start_date) params.set("start_date", options.start_date);
-  if (options?.end_date) params.set("end_date", options.end_date);
-  if (options?.valid_only !== undefined) {
-    params.set("valid_only", options.valid_only ? "1" : "0");
-  }
-  if (options?.address) params.set("address", options.address);
-
-  const url =
-    options && Object.keys(options).length > 0
-      ? `/test/sales/search?${params.toString()}`
-      : `/test/sales/search`;
 
   const { data, error, isLoading } = useSWR(url, fetcher);
 
@@ -112,8 +77,8 @@ export function useSalesSearchByAddress(options?: {
 
   const url =
     options && Object.keys(options).length > 0
-      ? `/test/sales/search-by-address?${params.toString()}`
-      : `/test/sales/search-by-address`;
+      ? `/sales/search-by-address?${params.toString()}`
+      : `/sales/search-by-address`;
 
   const { data, error, isLoading } = useSWR(url, fetcher);
 
@@ -138,7 +103,7 @@ export function useCompare(
 
   const url =
     parcelId !== null && compSaleIds && compSaleIds.length > 0
-      ? `/test/parcels/${parcelId}/compare?${params.toString()}`
+      ? `/parcels/${parcelId}/compare?${params.toString()}`
       : null;
 
   const { data, error, isLoading } = useSWR(url, fetcher);
@@ -160,51 +125,8 @@ export type RatioMediansRow = {
   raw_data?: any; // jsonb array if include_raw=true
 };
 
-export function useRatioMedians(options?: {
-  start_date?: string; // 'YYYY-MM-DD'
-  end_date?: string; // 'YYYY-MM-DD'
-  as_of_date?: string; // 'YYYY-MM-DD'
-  group_by?: string[]; // e.g., ['district', 'land_use_sale']
-  land_uses?: string[]; // e.g., ['5000','5100']
-  trim_factor?: 1.5 | 3; // or undefined
-  include_raw?: boolean; // default false
-}) {
-  const params = new URLSearchParams();
-
-  if (options?.start_date) params.set("start_date", options.start_date);
-  if (options?.end_date) params.set("end_date", options.end_date);
-  if (options?.as_of_date) params.set("as_of_date", options.as_of_date);
-
-  if (options?.group_by?.length) {
-    params.set("group_by", options.group_by.join(","));
-  }
-  if (options?.land_uses?.length) {
-    params.set("land_uses", options.land_uses.join(","));
-  }
-  if (options?.trim_factor) {
-    params.set("trim_factor", String(options.trim_factor));
-  }
-  if (options?.include_raw !== undefined) {
-    params.set("include_raw", options.include_raw ? "1" : "0");
-  }
-
-  const hasAny =
-    options && Object.keys(options).length > 0 && Array.from(params).length > 0;
-
-  const url = hasAny
-    ? `/test/ratios/medians?${params.toString()}`
-    : `/test/ratios/medians`;
-
-  const { data, error, isLoading } = useSWR<RatioMediansRow[]>(url, fetcher);
-
-  return { data, error, isLoading };
-}
-
 export function useLandUseOptions() {
-  const { data, error, isLoading } = useSWR<string[]>(
-    "/test/land-uses",
-    fetcher
-  );
+  const { data, error, isLoading } = useSWR<string[]>("/land-uses", fetcher);
   return {
     options: Array.isArray(data) ? data : [],
     isLoading,
@@ -231,29 +153,6 @@ export type RatioRow = {
   // you may have more columns — keep it open-ended
   [k: string]: any;
 };
-
-export function useRatiosRaw(options?: {
-  start_date?: string; // 'YYYY-MM-DD'
-  end_date?: string; // 'YYYY-MM-DD'
-  as_of_date?: string; // 'YYYY-MM-DD'
-  land_uses?: string[]; // filter returned rows by land_use_sale
-}) {
-  const params = new URLSearchParams();
-  if (options?.start_date) params.set("start_date", options.start_date);
-  if (options?.end_date) params.set("end_date", options.end_date);
-  if (options?.as_of_date) params.set("as_of_date", options.as_of_date);
-  if (options?.land_uses?.length)
-    params.set("land_uses", options.land_uses.join(","));
-
-  const url =
-    options && Object.keys(options).length > 0
-      ? `/test/ratios/raw?${params.toString()}`
-      : `/test/ratios/raw`;
-
-  const { data, error, isLoading } = useSWR<RatioRow[]>(url, fetcher);
-
-  return { data: data ?? [], error, isLoading };
-}
 
 export type RatiosFeaturesRow = {
   sale_id: number;
@@ -303,8 +202,8 @@ export function useRatiosFeatures(options?: {
 
   const url =
     options && Object.keys(options).length > 0
-      ? `/test/ratios/ratio-features?${params.toString()}`
-      : `/test/ratios/ratio-features`;
+      ? `/sales/ratio-features?${params.toString()}`
+      : `/sales/ratio-features`;
 
   const { data, error, isLoading } = useSWR<RatiosFeaturesRow[]>(url, fetcher);
 
@@ -329,43 +228,6 @@ export type ParcelFeaturesRow = {
   street: string | null;
   postcode: string | null;
 };
-
-export function useParcelFeatures(
-  parcelId: number | null,
-  options?: {
-    as_of_date?: string | Date; // "YYYY-MM-DD" or Date
-  }
-) {
-  const params = new URLSearchParams();
-
-  // keep the query param for parity, even though parcelId is in the path
-  if (parcelId !== null) params.set("parcel_id", String(parcelId));
-
-  if (options?.as_of_date) {
-    const v =
-      options.as_of_date instanceof Date
-        ? options.as_of_date.toISOString().slice(0, 10)
-        : options.as_of_date;
-    params.set("as_of_date", v);
-  }
-
-  // path: /test/[parcel_id]/features
-  const base = parcelId !== null ? `/test/${parcelId}/features` : null;
-  const qs = params.toString();
-  const url = base ? (qs ? `${base}?${qs}` : base) : null;
-
-  const { data, error, isLoading, mutate } = useSWR<ParcelFeaturesRow[]>(
-    url,
-    fetcher
-  );
-
-  return {
-    data, // array (usually 0 or 1 row, filtered by parcel_id)
-    isLoading,
-    error,
-    mutate,
-  };
-}
 
 export type SaleParcelJSON = {
   parcel_id: number;
@@ -407,8 +269,6 @@ export type MultiParcelSaleRow = {
   parcels: SaleParcelJSON[] | null; // JSONB array from SQL
 };
 
-// ---- Hook ----
-
 export function useMultiParcelSales(options?: {
   start_date?: string; // 'YYYY-MM-DD'
   end_date?: string; // 'YYYY-MM-DD'
@@ -425,8 +285,8 @@ export function useMultiParcelSales(options?: {
 
   const url =
     options && Object.keys(options).length > 0
-      ? `/test/ratios/ratio-features-multi?${params.toString()}`
-      : `/test/ratios/ratio-features-multi`;
+      ? `/sales/ratio-features-multi?${params.toString()}`
+      : `/sales/ratio-features-multi`;
 
   const { data, error, isLoading } = useSWR<MultiParcelSaleRow[]>(url, fetcher);
 

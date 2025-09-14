@@ -23,10 +23,10 @@ export default function ParcelNumber({
   const parcelNumber = `${formattedBlock}-9-${formattedLot}.${formattedExt}`;
 
   return (
-    <section className={`${className}`}>
+    <section className={className}>
       <div className="flex items-center gap-4">
         <Link
-          href={`/test/parcels/${id}`}
+          href={`/parcels/${id}`}
           target="_blank"
           className="underline-offset-2 hover:underline"
         >

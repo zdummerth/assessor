@@ -95,7 +95,7 @@ export default function SalesAddressSearchCards({
         )}
 
         {!error && hasQuery && rows.length === 0 && (
-          <div className="p-3 text-sm text-gray-500">
+          <div className="p-3 text-sm text-gray-700 dark:text-gray-300">
             {isLoading ? "Searching…" : "No matches found for this address."}
           </div>
         )}
@@ -105,7 +105,7 @@ export default function SalesAddressSearchCards({
             {rows.map((r) => (
               <div
                 key={`${r.sale_id}-${r.parcel_id}`}
-                className="rounded-lg border p-4 shadow-sm bg-white space-y-2 min-h-[150px]"
+                className="rounded-lg border p-2 shadow-sm space-y-2 min-h-[150px]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="text-base font-semibold break-words">
@@ -125,7 +125,7 @@ export default function SalesAddressSearchCards({
                   />
                 </div>
 
-                <div className="grid gap-1 text-sm text-gray-700">
+                <div className="grid gap-1 text-sm">
                   <div>
                     <span className="font-medium">Sale Date: </span>
                     {r.sale_date ?? "—"}

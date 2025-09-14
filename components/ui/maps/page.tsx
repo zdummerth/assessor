@@ -1,20 +1,17 @@
 // import BaseMap from "@/components/ui/maps/base";
 import { getFilteredData, getNeighborhoods } from "@/lib/data";
 import dynamic from "next/dynamic";
-import SalesFilters from "@/components/ui/filters-sales";
-import { getMedian, getMean } from "@/app/sales/lib";
+import { getMedian, getMean } from "@/app/sales/utils";
 
 const NbrhdMap = dynamic(() => import("@/components/ui/maps/nbrhdstest"), {
   ssr: false,
 });
 
-export default async function SalesMapPage(
-  props: {
-    searchParams?: Promise<{
-      nbrhdcode?: string;
-    }>;
-  }
-) {
+export default async function SalesMapPage(props: {
+  searchParams?: Promise<{
+    nbrhdcode?: string;
+  }>;
+}) {
   const searchParams = await props.searchParams;
   const formattedSearchParams = Object.fromEntries(
     Object.entries(searchParams ? searchParams : {}).map(([key, value]) => [

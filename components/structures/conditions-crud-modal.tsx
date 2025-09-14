@@ -11,7 +11,7 @@ import {
   addCondition,
   deleteConditions,
   bulkUpdateConditions,
-} from "@/app/test/structures/actions";
+} from "@/app/structures/actions";
 
 type ConditionRow = {
   id: number;

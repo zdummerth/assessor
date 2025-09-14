@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import type { Tables } from "@/database-types";
 import { SearchX } from "lucide-react";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
+import { Info } from "../ui/lib";
 import FormattedDate from "@/components/ui/formatted-date";
 
 // Placeholder (or real) clients
@@ -125,30 +126,35 @@ export default async function ServerParcelSnapshot({
   const parcel: Parcel = data;
 
   return (
-    <section className={`rounded-lg border p-4 ${className}`}>
+    <section className={className}>
       {title && <h3 className="text-sm font-semibold">{title}</h3>}
 
       {/* Top grid: basics, address list, land uses */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="flex flex-col">
-          <ParcelNumber
-            id={parcel.id}
-            block={parcel.block}
-            lot={parcel.lot}
-            ext={parcel.ext}
+        <div className="flex flex-col border rounded p-2">
+          <Info
+            label="Parcel ID"
+            value={
+              <ParcelNumber
+                id={parcel.id}
+                block={parcel.block}
+                lot={parcel.lot}
+                ext={parcel.ext}
+              />
+            }
           />
           {parcel.retired_at && (
-            <p className="mt-2 bg-red-100 text-red-800 p-2 rounded print:hidden">
+            <p className="mt-2 bg-red-100 text-red-800">
               Retired: <FormattedDate date={parcel.retired_at} />
             </p>
           )}
         </div>
 
-        <div className="">
+        <div className="border rounded p-2">
           <ParcelAddressClient addresses={addresses} />
         </div>
 
-        <div className="">
+        <div className="border rounded p-2">
           <ParcelLandUsesClient landUses={landUses} />
         </div>
       </div>

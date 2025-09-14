@@ -10,6 +10,7 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
+import { Info } from "../ui/lib";
 
 function fmtUSD(n?: number | null) {
   if (n == null || Number.isNaN(Number(n))) return "—";
@@ -60,7 +61,7 @@ export default function ClientScoresLite({
   return (
     <div className={className}>
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-base font-semibold">{title}</h3>
+        <h3 className="text-sm text-foreground/80">{title}</h3>
         <button
           onClick={() => setOpenIdx(0)}
           className="hover:bg-gray-50 print:hidden"
@@ -81,7 +82,7 @@ export default function ClientScoresLite({
         {cards.map((c) => (
           <div key={c.key} className="">
             <div className="flex items-center justify-between">
-              <div className="text-lg font-semibold">{fmtUSD(c.y_pred)}</div>
+              <div className="font-semibold">{fmtUSD(c.y_pred)}</div>
             </div>
           </div>
         ))}

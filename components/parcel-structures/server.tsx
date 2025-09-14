@@ -25,8 +25,10 @@ type ParcelStructureRow = {
 
 export default async function ServerParcelStructures({
   parcel,
+  className = "",
 }: {
   parcel: Parcel;
+  className?: string;
 }) {
   const supabase = await createClient();
 
@@ -90,5 +92,5 @@ export default async function ServerParcelStructures({
     );
   }
 
-  return <ClientParcelStructures data={structures} parcel={parcel} />;
+  return <ClientParcelStructures data={structures} className={className} />;
 }

@@ -1,4 +1,3 @@
-// app/test/ratios/ratios-features/route.ts
 import { createClient } from "@supabase/supabase-js";
 import { type NextRequest } from "next/server";
 
@@ -33,9 +32,10 @@ export async function GET(request: NextRequest) {
     // Call the database function (server-side defaults apply if args are null)
     const { data, error } = await supabase
       // @ts-ignore rpc is typed loosely in supabase-js
-      .rpc("get_sold_parcel_features_multi", {
+      .rpc("get_sold_parcel_ratios_features", {
         p_start_date: startDate || null,
         p_end_date: endDate || null,
+        p_as_of_date: asOfDate || null,
         p_land_uses: landUses,
         p_valid_only: validOnly,
       });

@@ -81,10 +81,8 @@ export default async function ServerParcelValues({
   const rows = (data ?? []) as ParcelValueRow[];
 
   return (
-    <section className={`rounded-lg border bg-white p-4 ${className}`}>
-      {title && (
-        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
-      )}
+    <section className={className}>
+      {title && <h3 className="font-semibold">{title}</h3>}
       <ClientParcelValues rows={rows} />
     </section>
   );

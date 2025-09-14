@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { Plus } from "lucide-react";
+import { Info } from "../ui/lib";
 
 function fmtUSD(n?: number | null) {
   if (n == null) return "—";
@@ -91,12 +92,12 @@ export default function ClientSalesWithStructuresCards({
   const mostRecent = sorted[0];
 
   return (
-    <section className={`rounded-lg border p-4 ${className}`}>
+    <section className={className}>
       {title && <h3 className="font-semibold">{title}</h3>}
 
       {/* Most recent sale summary */}
       <div className="flex justify-between items-start">
-        <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Info
             label="Most Recent Sale Date"
             value={fmtDate(mostRecent.sale_date)}
@@ -262,15 +263,6 @@ function SaleDetails({ card }: { card: SaleCard }) {
           </div>
         ))
       )}
-    </div>
-  );
-}
-
-function Info({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div>
-      <div className="text-gray-500">{label}</div>
-      <div className="font-medium">{value}</div>
     </div>
   );
 }

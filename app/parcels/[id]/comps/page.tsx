@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import SalesAddressSearch from "@/components/ui/sales/search-by-address";
 import ManualComps from "@/components/parcel-comps-client/manual";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
-// import SearchSalesClient from "@/components/ui/sales/search-sales-client";
 
 type ParcelFeaturesRow = {
   parcel_id: number;
@@ -84,10 +83,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <div className="flex gap-2 p-2">
       <div className="w-[400px]">
         <SalesAddressSearch className="w-full" />
-        {/* <SearchSalesClient className="w-full" /> */}
       </div>
       <div>
-        <div className="rounded-lg border p-4 shadow-sm bg-white space-y-3">
+        <div className="rounded-lg border p-2 shadow-sm space-y-4">
           {/* Header: Parcel number + address */}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <ParcelNumber
@@ -96,11 +94,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
               lot={Number(p.lot)}
               ext={p.ext}
             />
-            <div className="text-sm text-gray-700">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
               <div className="font-medium">
                 {p.house_number} {p.street}
               </div>
-              <div className="text-gray-600">
+              <div className="text-gray-700 dark:text-gray-300">
                 {p.district}
                 {p.postcode ? `, ${p.postcode}` : ""}
               </div>

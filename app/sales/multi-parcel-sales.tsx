@@ -118,7 +118,7 @@ function PaginationControls({
       <div className="flex items-center gap-2">
         <label className="text-gray-600">Rows per page</label>
         <select
-          className="border rounded-md px-2 py-1 bg-white"
+          className="border rounded px-2 py-1"
           value={pageSize}
           onChange={(e) => setPageSize(Number(e.target.value))}
         >
@@ -131,7 +131,7 @@ function PaginationControls({
 
         <div className="inline-flex border rounded-md overflow-hidden">
           <button
-            className="px-2 py-1 hover:bg-gray-50 disabled:opacity-40"
+            className="px-2 py-1 disabled:opacity-40"
             onClick={() => setPage(1)}
             disabled={page <= 1}
             aria-label="First page"
@@ -139,18 +139,18 @@ function PaginationControls({
             «
           </button>
           <button
-            className="px-2 py-1 hover:bg-gray-50 disabled:opacity-40"
+            className="px-2 py-1 disabled:opacity-40"
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page <= 1}
             aria-label="Previous page"
           >
             ‹
           </button>
-          <div className="px-3 py-1 bg-white select-none">
+          <div className="px-3 py-1 select-none">
             {page} / {totalPages}
           </div>
           <button
-            className="px-2 py-1 hover:bg-gray-50 disabled:opacity-40"
+            className="px-2 py-1 disabled:opacity-40"
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page >= totalPages}
             aria-label="Next page"
@@ -158,7 +158,7 @@ function PaginationControls({
             ›
           </button>
           <button
-            className="px-2 py-1 hover:bg-gray-50 disabled:opacity-40"
+            className="px-2 py-1 disabled:opacity-40"
             onClick={() => setPage(totalPages)}
             disabled={page >= totalPages}
             aria-label="Last page"
@@ -241,7 +241,7 @@ export default function MultiParcelSalesCards(props?: {
       <div className="flex items-center gap-2 text-sm">
         <label className="text-gray-600">Sort by</label>
         <select
-          className="border rounded-md px-2 py-1 bg-white"
+          className="border rounded px-2 py-1"
           value={sortKey}
           onChange={(e) => setSortKey(e.target.value as SortKey)}
         >
@@ -254,7 +254,7 @@ export default function MultiParcelSalesCards(props?: {
         <button
           type="button"
           onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-          className="px-2 py-1 border rounded-md bg-white"
+          className="px-2 py-1 border rounded"
           title="Toggle sort direction"
         >
           {sortDir === "asc" ? "Asc ▲" : "Desc ▼"}
@@ -267,7 +267,7 @@ export default function MultiParcelSalesCards(props?: {
           {Array.from({ length: Math.min(pageSize, 6) }).map((_, i) => (
             <div
               key={`sk-${i}`}
-              className="rounded-lg border p-3 bg-white shadow-sm space-y-2 animate-pulse"
+              className="rounded border p-3 bg-gray-300 shadow-sm space-y-2 animate-pulse"
             >
               <div className="h-4 w-32 bg-gray-200 rounded" />
               <div className="h-6 w-24 bg-gray-200 rounded" />
@@ -315,7 +315,7 @@ function SaleCard({ row }: { row: MultiParcelSaleRow }) {
     (row.total_finished_area ?? 0) + (row.total_unfinished_area ?? 0);
 
   return (
-    <div className="rounded-lg border p-3 bg-white shadow-sm space-y-3">
+    <div className="rounded border p-2 shadow-sm space-y-3">
       <div className="flex items-baseline justify-between gap-2">
         <div className="text-sm text-gray-500">{fmtDate(row.sale_date)}</div>
         <span
