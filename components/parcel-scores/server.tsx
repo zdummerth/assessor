@@ -17,7 +17,7 @@ export default async function ServerScoresLite({
   runId = null,
   limit = 200,
   className = "",
-  title = "Model Estimate",
+  title,
 }: {
   parcelId: number;
   runId?: number | null;

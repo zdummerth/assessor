@@ -39,7 +39,7 @@ function toSortedBreakdown(
 export default function ClientScoresLite({
   rows,
   className = "",
-  title = "Model Estimate",
+  title,
 }: {
   rows: ScoreRow[];
   className?: string;
@@ -60,17 +60,7 @@ export default function ClientScoresLite({
 
   return (
     <div className={className}>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm text-foreground/80">{title}</h3>
-        <button
-          onClick={() => setOpenIdx(0)}
-          className="hover:bg-gray-50 print:hidden"
-          aria-label="Open model estimate details"
-          title="Open model estimate details"
-        >
-          <Plus className="inline w-4 h-4 mr-1" />
-        </button>
-      </div>
+      {title && <h3 className="text-sm mb-2 text-foreground/80">{title}</h3>}
 
       <div
         className={`grid grid-cols-1
@@ -80,10 +70,19 @@ export default function ClientScoresLite({
         gap-4`}
       >
         {cards.map((c) => (
-          <div key={c.key} className="">
-            <div className="flex items-center justify-between">
-              <div className="font-semibold">{fmtUSD(c.y_pred)}</div>
-            </div>
+          <div
+            key={c.key}
+            className="flex items-start gap-4 border rounded p-2 justify-between"
+          >
+            <Info label="Predicted Price" value={fmtUSD(c.y_pred)} />
+            <button
+              onClick={() => setOpenIdx(0)}
+              className="hover:bg-gray-50 print:hidden"
+              aria-label="Open model estimate details"
+              title="Open model estimate details"
+            >
+              <Plus className="inline w-4 h-4 mr-1" />
+            </button>
           </div>
         ))}
       </div>

@@ -6,6 +6,7 @@ import { Info } from "@/components/ui/lib";
 import FormattedDate from "@/components/ui/formatted-date";
 import ParcelAddressClient from "./address-client";
 import ParcelLandUsesClient from "./land-use-client";
+import ServerParcelNeighborhoods from "../neighborhoods/server";
 
 type Parcel = Tables<"test_parcels">;
 
