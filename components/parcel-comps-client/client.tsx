@@ -6,6 +6,15 @@ import {
   type RatiosFeaturesRow,
 } from "@/lib/client-queries";
 import { haversineMiles, gowerDistances, FieldSpec } from "@/lib/gower";
+// land-use-arrays.ts
+import data from "@/lib/land_use_arrays.json";
+
+const residential = data.residential as number[];
+const commercial = data.commercial as number[];
+const industrial = data.agriculture as number[];
+const lots = data.lots as number[];
+
+//console lo
 
 // ---------- Types ----------
 type SubjectFeatures = {
@@ -48,7 +57,6 @@ export default function GowerCompsClient({
   const [asOfDate, setAsOfDate] = useState<string>(() => TODAY_STR);
 
   // filters
-  const [filtersOpen, setFiltersOpen] = useState<boolean>(true);
   const [clientValidOnly, setClientValidOnly] = useState<boolean>(true); // client-side toggle
   const [k, setK] = useState<number>(5);
   const [livingAreaBand, setLivingAreaBand] = useState<number>(500); // 0 = off
