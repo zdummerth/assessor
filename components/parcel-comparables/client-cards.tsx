@@ -3,33 +3,9 @@
 import { useMemo, useState } from "react";
 import Modal from "@/components/ui/modal";
 import ParcelNumber from "../ui/parcel-number-updated";
+import { Database } from "@/database-types";
 
-type CompRow = {
-  subject_parcel_id: number;
-  parcel_id: number;
-  structure_count: number | null;
-  total_finished_area: number | null;
-  total_unfinished_area: number | null;
-  avg_year_built: number | null;
-  avg_condition: number | null;
-  sale_price: number | null;
-  sale_date: string | null;
-  sale_type: string | null;
-  price_per_sqft: number | null;
-  lat: number | null;
-  lon: number | null;
-  district: string | null;
-  land_use: string | null;
-  house_number: string | null;
-  street: string | null;
-  postcode: string | null;
-  comp_lot: string;
-  comp_block: string | null;
-  comp_ext: string | null;
-  gower_distance: number | null;
-  distance_miles: number | null;
-  subject_features: any | null;
-};
+type Comps = Database["public"]["Functions"]["find_comps"]["Returns"];
 
 function fmtUSD(n?: number | null) {
   if (n == null) return "—";
@@ -58,11 +34,9 @@ function fmtGower(n?: number | null) {
 
 export default function CompsCardList({
   rows,
-  title = "Comparable Sales",
   className = "",
 }: {
-  rows: CompRow[];
-  title?: string;
+  rows: Comps;
   className?: string;
 }) {
   const [open, setOpen] = useState(false);

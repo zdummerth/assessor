@@ -13,7 +13,6 @@ export default async function ServerParcelAddress({
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    // @ts-ignore
     .from("test_parcel_addresses")
     .select("*, test_geocoded_addresses(*)")
     .eq("parcel_id", parcel.id);

@@ -13,11 +13,9 @@ type ParcelStructureRow = {
   structure_id: number;
   effective_date: string | null;
   end_date: string | null;
-  test_structures: // @ts-expect-error: nested select is valid in Supabase
-  | (Tables<"test_structures"> & {
-        // @ts-expect-error: nested select is valid in Supabase
+  test_structures:
+    | (Tables<"test_structures"> & {
         test_structure_sections: Tables<"test_structure_sections">[];
-        // @ts-expect-error: nested select is valid in Supabase
         test_conditions: Tables<"test_conditions">[];
       })
     | null;
@@ -34,7 +32,6 @@ export default async function ServerParcelStructures({
 
   // Pull all structure links for this parcel, plus the nested structure + relations
   const { data, error } = await supabase
-    // @ts-expect-error: nested select is valid in Supabase
     .from("test_parcel_structures")
     .select(
       `
@@ -67,13 +64,11 @@ export default async function ServerParcelStructures({
   // Flatten: feed ClientParcelStructures the structure objects it expects,
   // but keep link metadata alongside (prefixed with _link_* for clarity).
   const structures =
-    // @ts-expect-error: nested select is valid in Supabase
     (data as ParcelStructureRow[] | null)?.flatMap((row) => {
       if (!row?.test_structures) return [];
       const s = row.test_structures;
       return [
         {
-          // @ts-expect-error: nested select is valid in Supabase
           ...s,
           _link_id: row.id,
           _link_effective_date: row.effective_date,

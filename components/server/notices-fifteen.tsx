@@ -6,7 +6,7 @@ export default async function Data({ listId }: { listId: number }) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    //@ts-ignore
+
     .from("list")
     .select(
       `

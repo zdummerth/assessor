@@ -9,7 +9,6 @@ export default async function ParcelLandUses({ parcel }: { parcel: Parcel }) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    // @ts-expect-error need update types
     .from("test_parcel_land_uses")
     .select("id, parcel_id, land_use, effective_date, end_date")
     .eq("parcel_id", parcel.id)

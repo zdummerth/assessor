@@ -95,7 +95,6 @@ export default async function ServerParcelFieldReviews({
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    // @ts-expect-error: nested select is valid in Supabase
     .from("field_reviews")
     .select(
       `
@@ -138,7 +137,6 @@ export default async function ServerParcelFieldReviews({
     );
   }
 
-  // @ts-expect-error - nested select typing
   const reviews = (data ?? []) as ReviewRow[];
 
   const publicUrl = (file?: FileRow | null) => {

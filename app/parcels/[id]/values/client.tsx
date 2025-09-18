@@ -2,7 +2,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { ParcelValueRow } from "./server";
 import {
   Dialog,
   DialogBackdrop,
@@ -12,6 +11,49 @@ import {
 import { Plus } from "lucide-react";
 import { Info } from "@/components/ui/lib";
 import FormattedDate from "@/components/ui/formatted-date";
+
+export type ParcelValueRow = {
+  id: number;
+  parcel_id: number;
+  year: number;
+  category: string | null;
+  date_of_assessment: string | null; // timestamptz
+  last_changed: string | null; // date
+  changed_by: string | null;
+  reason_for_change: string | null;
+
+  app_bldg_agriculture: number | null;
+  app_bldg_commercial: number | null;
+  app_bldg_residential: number | null;
+  app_bldg_exempt: number | null;
+
+  app_land_agriculture: number | null;
+  app_land_commercial: number | null;
+  app_land_residential: number | null;
+  app_land_exempt: number | null;
+
+  app_new_const_agriculture: number | null;
+  app_new_const_commercial: number | null;
+  app_new_const_residential: number | null;
+  app_new_const_exempt: number | null;
+
+  bldg_agriculture: number | null;
+  bldg_commercial: number | null;
+  bldg_residential: number | null;
+  bldg_exempt: number | null;
+
+  land_agriculture: number | null;
+  land_commercial: number | null;
+  land_residential: number | null;
+  land_exempt: number | null;
+
+  new_const_agriculture: number | null;
+  new_const_commercial: number | null;
+  new_const_residential: number | null;
+  new_const_exempt: number | null;
+
+  app_total_value: number | null; // generated column
+};
 
 function fmtUSD(n?: number | null) {
   if (n == null || Number.isNaN(Number(n))) return "—";

@@ -4,25 +4,6 @@ import SalesAddressSearch from "@/components/ui/sales/search-by-address";
 import ManualComps from "@/components/parcel-comps-client/manual";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
 
-type ParcelFeaturesRow = {
-  parcel_id: number;
-  block: number;
-  lot: string;
-  ext: number;
-  structure_count: number;
-  total_finished_area: number | null;
-  total_unfinished_area: number | null;
-  avg_year_built: number | null;
-  avg_condition: number | null;
-  land_use: string | null;
-  lat: number | null;
-  lon: number | null;
-  district: string | null;
-  house_number: string | null;
-  street: string | null;
-  postcode: string | null;
-};
-
 type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -41,10 +22,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const supabase = await createClient();
   const { data, error } = await supabase
-    // @ts-expect-error rpc name typing varies by codegen
     .rpc("find_parcel_features")
     .eq("parcel_id", params.id)
-    .single<ParcelFeaturesRow>();
+    .single();
 
   if (error) {
     return (

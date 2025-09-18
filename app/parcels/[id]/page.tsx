@@ -54,7 +54,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const parcel = data;
   const land_uses = parcel.test_parcel_land_uses || [];
-  // @ts-expect-error TS2345
   const current_land_use = land_uses.find((lu) => !lu.end_date);
 
   return (

@@ -16,7 +16,6 @@ export default async function ServerParcelNeighborhoods({
 
   // Pull all links (newest first), and nest neighborhood + set names
   const { data, error } = await supabase
-    // @ts-expect-error nested select is valid in Supabase
     .from("test_parcel_neighborhoods")
     .select(
       `
@@ -53,7 +52,6 @@ export default async function ServerParcelNeighborhoods({
     );
   }
 
-  //@ts-expect-error TS2345
   const rows = (data ?? []) as ParcelNeighborhoodRow[];
 
   return (

@@ -1,25 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import ParcelNumber from "../ui/parcel-number-updated";
 
-type ParcelFeaturesRow = {
-  parcel_id: number;
-  block: number;
-  lot: string;
-  ext: number;
-  structure_count: number;
-  total_finished_area: number;
-  total_unfinished_area: number;
-  avg_year_built: number;
-  avg_condition: number;
-  land_use: string;
-  lat: number;
-  lon: number;
-  district: string;
-  house_number: string;
-  street: string;
-  postcode: string;
-};
-
 export default async function ParcelFeatures(props: {
   params: Promise<{ id: string }>;
 }) {
@@ -27,10 +8,9 @@ export default async function ParcelFeatures(props: {
 
   const supabase = await createClient();
   const { data, error } = await supabase
-    // @ts-expect-error rpc name typing varies by codegen
     .rpc("find_parcel_features")
     .eq("parcel_id", id)
-    .single<ParcelFeaturesRow>();
+    .single();
 
   if (error) {
     return (

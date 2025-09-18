@@ -18,7 +18,6 @@ export default async function ParcelAppealsTable({
 
   const supabase = await createClient();
   const { data, error } = await supabase
-    // @ts-ignore
     .from("appeals")
     .select("*")
     .eq("parcel_number", parcel)

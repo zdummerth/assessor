@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
     );
 
     const { data, error } = await supabase
-      //@ts-ignore
       .rpc("search_parcels", { prefix: query })
       .order("retired", { nullsFirst: true })
       .order("parcel")

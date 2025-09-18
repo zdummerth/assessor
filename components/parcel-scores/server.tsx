@@ -28,7 +28,6 @@ export default async function ServerScoresLite({
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc(
-    // @ts-expect-error: rpc name typing varies by codegen
     "score_sales_with_model_with_coeff",
     {
       p_limit: limit,

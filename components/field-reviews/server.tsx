@@ -31,33 +31,6 @@ type ImageRow = {
   files?: FileRow | null;
 };
 
-type NoteRow = {
-  id: number;
-  review_id: number;
-  note: string;
-  created_at: string | null;
-  created_by: string | null;
-};
-
-type StatusRow = {
-  id: number;
-  review_id: number;
-  status: string;
-  created_at: string | null;
-  created_by: string | null;
-};
-
-type ReviewRow = {
-  id: number;
-  parcel_id: number;
-  due_date: string | null;
-  created_at: string | null;
-  created_by: string | null;
-  field_review_notes?: NoteRow[];
-  field_review_statuses?: StatusRow[];
-  field_review_images?: ImageRow[];
-};
-
 // What we pass into the thread dialog
 type ImageDisplay = {
   id: number;
@@ -95,7 +68,6 @@ export default async function ServerParcelFieldReviews({
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    // @ts-expect-error: nested select is valid in Supabase
     .from("field_reviews")
     .select(
       `
@@ -138,8 +110,7 @@ export default async function ServerParcelFieldReviews({
     );
   }
 
-  // @ts-expect-error - nested select typing
-  const reviews = (data ?? []) as ReviewRow[];
+  const reviews = data ?? [];
 
   const publicUrl = (file?: FileRow | null) => {
     if (!file) return "";
@@ -177,7 +148,7 @@ export default async function ServerParcelFieldReviews({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">{title}</h3>
         <NewFieldReviewModal
-          parcelId={parcel.id as number}
+          parcelId={parcel.id}
           revalidatePath={revalidatePath}
         />
       </div>

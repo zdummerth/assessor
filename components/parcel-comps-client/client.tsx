@@ -1,14 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  useRatiosFeatures,
-  type RatiosFeaturesRow,
-} from "@/lib/client-queries";
+import { useRatiosFeatures } from "@/lib/client-queries"; // ⟵ no type import
 import { haversineMiles, gowerDistances, FieldSpec } from "@/lib/gower";
 import data from "@/lib/land_use_arrays.json";
-import { ParcelFeaturesRow } from "./server";
+import { Database } from "@/database-types";
 
+// ---------- Types ----------
+type FeatureRow =
+  Database["public"]["Functions"]["get_parcel_value_features_asof"]["Returns"][0];
+
+type Candidates =
+  Database["public"]["Functions"]["test_get_sold_parcel_ratios_features"]["Returns"];
+
+type CandidateRow = Candidates extends Array<infer R> ? R : never;
+
+// ---------- land use sets ----------
 const residential = data.residential as number[];
 const commercial = data.commercial as number[];
 const industrial = data.agriculture as number[];
@@ -26,11 +33,7 @@ function fmtDate(d: Date) {
 const TODAY_STR = fmtDate(new Date());
 const START_TWO_YEARS_AGO_STR = `${new Date().getFullYear() - 2}-01-01`;
 
-export default function GowerCompsClient({
-  subject,
-}: {
-  subject: ParcelFeaturesRow;
-}) {
+export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
   const subjectLandUse = subject.land_use;
   const landUseSet = subjectLandUse
     ? residential.includes(Number(subjectLandUse))
@@ -48,7 +51,7 @@ export default function GowerCompsClient({
                 : [subjectLandUse]
     : null;
 
-  // dates (defaults set per request)
+  // dates (defaults)
   const [startDate, setStartDate] = useState<string>(
     () => START_TWO_YEARS_AGO_STR
   );
@@ -85,12 +88,15 @@ export default function GowerCompsClient({
   });
 
   // Candidates
-  const candidates = useMemo(() => {
-    if (!data) return [] as RatiosFeaturesRow[];
-    let cand = data.filter((r) => r.parcel_id !== subject.parcel_id);
+  const candidates = useMemo<CandidateRow[]>(() => {
+    if (!data) return [];
+    let cand = (data as unknown as CandidateRow[]).filter(
+      (r) => r.parcel_id !== subject.parcel_id
+    );
 
     if (clientValidOnly) {
-      cand = cand.filter((r) => (r as any).is_valid === true);
+      // tolerate either boolean flag or truthy
+      cand = cand.filter((r: any) => r.is_valid === true);
     }
 
     if (forceSameLandUse && subject.land_use) {
@@ -102,7 +108,7 @@ export default function GowerCompsClient({
       const min = sTFA - livingAreaBand;
       const max = sTFA + livingAreaBand;
       cand = cand.filter((r) => {
-        const t = toNum(r.total_finished_area);
+        const t = toNum(r.total_finished_area as any);
         return Number.isFinite(t) ? t >= min && t <= max : false;
       });
     }
@@ -112,7 +118,12 @@ export default function GowerCompsClient({
         sLon = toNum(subject.lon);
       if (Number.isFinite(sLat) && Number.isFinite(sLon)) {
         cand = cand.filter((r) => {
-          const miles = haversineMiles(sLat, sLon, toNum(r.lat), toNum(r.lon));
+          const miles = haversineMiles(
+            sLat,
+            sLon,
+            toNum(r.lat as any),
+            toNum(r.lon as any)
+          );
           return miles != null && miles <= maxDistanceMiles;
         });
       }
@@ -128,8 +139,8 @@ export default function GowerCompsClient({
     maxDistanceMiles,
   ]);
 
-  // Fields for Gower (keep lat/lon for distance but HIDE in table)
-  const fields = useMemo<FieldSpec<RatiosFeaturesRow>[]>(
+  // Fields for Gower (exclude lat/lon from display later)
+  const fields = useMemo<FieldSpec<CandidateRow>[]>(
     () => [
       {
         key: "land_use",
@@ -212,7 +223,7 @@ export default function GowerCompsClient({
   const ranked = useMemo(() => {
     if (!subject || candidates.length === 0) return [];
     return gowerDistances(
-      subject as unknown as RatiosFeaturesRow,
+      subject as unknown as CandidateRow,
       candidates,
       fields
     );
@@ -220,7 +231,7 @@ export default function GowerCompsClient({
 
   // Build table rows (subject first)
   const tableRows = useMemo(() => {
-    const subjectDisplay: Partial<RatiosFeaturesRow> & {
+    const subjectDisplay: Partial<CandidateRow> & {
       parcel_id: number;
       house_number?: string | null;
       street?: string | null;
@@ -230,30 +241,29 @@ export default function GowerCompsClient({
       district?: string | null;
     } = {
       parcel_id: subject.parcel_id,
-      house_number: subject.house_number ?? null,
-      street: subject.street ?? null,
-      sale_date: null,
-      sale_price: null,
-      land_use: (subject.land_use as any) ?? null,
-      district: subject.district ?? null,
-      total_finished_area: subject.total_finished_area ?? null,
-      total_unfinished_area: subject.total_unfinished_area ?? null,
-      avg_condition: subject.avg_condition ?? null,
-      lat: subject.lat ?? null,
-      lon: subject.lon ?? null,
-      total_units: (subject as any).total_units ?? null,
-      land_area: (subject as any).land_area ?? null,
-      avg_year_built: (subject as any).avg_year_built ?? null,
-      land_to_building_area_ratio:
-        (subject as any).land_to_building_area_ratio ?? null,
-      structure_count: (subject as any).structure_count ?? null,
+      house_number: subject.house_number,
+      street: subject.street,
+      sale_date: undefined,
+      sale_price: undefined,
+      land_use: subject.land_use,
+      district: subject.district,
+      total_finished_area: subject.total_finished_area,
+      total_unfinished_area: subject.total_unfinished_area,
+      avg_condition: subject.avg_condition,
+      lat: subject.lat,
+      lon: subject.lon,
+      total_units: subject.total_units,
+      land_area: subject.land_area,
+      avg_year_built: subject.avg_year_built,
+      land_to_building_area_ratio: subject.land_to_building_area_ratio,
+      structure_count: subject.structure_count,
     };
 
     const subjectRow = {
       isSubject: true as const,
       distance: 0,
       miles: 0,
-      item: subjectDisplay as RatiosFeaturesRow,
+      item: subjectDisplay as CandidateRow,
     };
 
     const compRows = ranked.slice(0, k).map((r, i) => {
@@ -267,7 +277,7 @@ export default function GowerCompsClient({
         isSubject: false as const,
         distance: r.distance,
         miles,
-        item: r.item as RatiosFeaturesRow,
+        item: r.item as CandidateRow,
       };
     });
 
@@ -277,118 +287,66 @@ export default function GowerCompsClient({
   // ---------- UI ----------
   return (
     <div className="grid gap-4 mt-4">
-      {/* Controls above the table */}
+      {/* Controls */}
       <div className="border rounded p-3">
         <div className="flex flex-wrap gap-3">
-          <div className="flex flex-col gap-1 min-w-[200px]">
-            <label htmlFor="startDate" className="text-sm">
-              Start date
-            </label>
-            <input
-              id="startDate"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border rounded px-2 py-1 text-sm w-full"
-            />
-          </div>
+          <InputCol
+            id="startDate"
+            label="Start date"
+            type="date"
+            value={startDate}
+            onChange={setStartDate}
+          />
+          <InputCol
+            id="endDate"
+            label="End date"
+            type="date"
+            value={endDate}
+            onChange={setEndDate}
+          />
+          <InputCol
+            id="asOfDate"
+            label="As-of date"
+            type="date"
+            value={asOfDate}
+            onChange={setAsOfDate}
+          />
 
-          <div className="flex flex-col gap-1 min-w-[200px]">
-            <label htmlFor="endDate" className="text-sm">
-              End date
-            </label>
-            <input
-              id="endDate"
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="border rounded px-2 py-1 text-sm w-full"
-            />
-          </div>
+          <CheckboxCol
+            id="validOnly"
+            label="Valid sales only"
+            checked={clientValidOnly}
+            onChange={setClientValidOnly}
+          />
+          <CheckboxCol
+            id="sameLU"
+            label="Force same land use"
+            checked={forceSameLandUse}
+            onChange={setForceSameLandUse}
+          />
 
-          <div className="flex flex-col gap-1 min-w-[200px]">
-            <label htmlFor="asOfDate" className="text-sm">
-              As-of date
-            </label>
-            <input
-              id="asOfDate"
-              type="date"
-              value={asOfDate}
-              onChange={(e) => setAsOfDate(e.target.value)}
-              className="border rounded px-2 py-1 text-sm w-full"
-            />
-          </div>
+          <NumberCol
+            id="livingBand"
+            label="Living area band (± sq ft)"
+            value={livingAreaBand}
+            onChange={(v) => setLivingAreaBand(toInt(v, 0))}
+          />
+          <NumberCol
+            id="milesLimit"
+            label="Miles limit"
+            step={0.1}
+            value={maxDistanceMiles}
+            onChange={(v) => setMaxDistanceMiles(toNum(v) || 0)}
+          />
+          <NumberCol
+            id="topK"
+            label="Top K comps"
+            min={1}
+            value={k}
+            onChange={(v) => setK(Math.max(1, toInt(v, 5)))}
+          />
 
-          <div className="flex flex-col gap-1 min-w-[200px]">
-            <label htmlFor="validOnly" className="text-sm">
-              Valid sales only
-            </label>
-            <input
-              id="validOnly"
-              type="checkbox"
-              checked={clientValidOnly}
-              onChange={(e) => setClientValidOnly(e.target.checked)}
-              className="h-4 w-4"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1 min-w-[200px]">
-            <label htmlFor="sameLU" className="text-sm">
-              Force same land use
-            </label>
-            <input
-              id="sameLU"
-              type="checkbox"
-              checked={forceSameLandUse}
-              onChange={(e) => setForceSameLandUse(e.target.checked)}
-              className="h-4 w-4"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1 min-w-[200px]">
-            <label htmlFor="livingBand" className="text-sm">
-              Living area band (± sq ft)
-            </label>
-            <input
-              id="livingBand"
-              type="number"
-              min={0}
-              value={livingAreaBand}
-              onChange={(e) => setLivingAreaBand(toInt(e.target.value, 0))}
-              className="border rounded px-2 py-1 text-sm w-full"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1 min-w-[200px]">
-            <label htmlFor="milesLimit" className="text-sm">
-              Miles limit
-            </label>
-            <input
-              id="milesLimit"
-              type="number"
-              min={0}
-              step={0.1}
-              value={maxDistanceMiles}
-              onChange={(e) => setMaxDistanceMiles(toNum(e.target.value) || 0)}
-              className="border rounded px-2 py-1 text-sm w-full"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1 min-w-[200px]">
-            <label htmlFor="topK" className="text-sm">
-              Top K comps
-            </label>
-            <input
-              id="topK"
-              type="number"
-              min={1}
-              value={k}
-              onChange={(e) => setK(Math.max(1, toInt(e.target.value, 5)))}
-              className="border rounded px-2 py-1 text-sm w-full"
-            />
-          </div>
-
-          {/* Weights (also flex-wrap, label over input) */}
+          {/* Weights */}
           <div className="flex flex-wrap gap-2 w-full mt-1">
             <WeightRow
               label="Land use"
@@ -469,9 +427,11 @@ export default function GowerCompsClient({
                 {displayFields.map((f) => (
                   <Th
                     key={String(f.key)}
-                    className={isNumericField(f) ? "text-right" : ""}
+                    className={
+                      isNumericField<CandidateRow>(f) ? "text-right" : ""
+                    }
                   >
-                    {/* @ts-expect-error ts */}
+                    {/* @ts-expect-error label on FieldSpec */}
                     {f.label ?? toLabel(String(f.key))}
                   </Th>
                 ))}
@@ -503,14 +463,16 @@ export default function GowerCompsClient({
                     <Td className="text-right">{moneyFmt(it.sale_price)}</Td>
 
                     {displayFields.map((f) => {
-                      const v = it[f.key as keyof RatiosFeaturesRow];
-                      const right = isNumericField(f) ? "text-right" : "";
+                      const v = it[f.key as keyof CandidateRow];
+                      const right = isNumericField<CandidateRow>(f)
+                        ? "text-right"
+                        : "";
                       return (
                         <Td
                           key={`${String(f.key)}-${isSubject ? "subj" : i}`}
                           className={right}
                         >
-                          {isNumericField(f)
+                          {isNumericField<CandidateRow>(f)
                             ? numFmt(v as any)
                             : String(v ?? "—")}
                         </Td>
@@ -575,6 +537,75 @@ function WeightRow({
   );
 }
 
+function InputCol(props: {
+  id: string;
+  label: string;
+  type: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1 min-w-[200px]">
+      <label htmlFor={props.id} className="text-sm">
+        {props.label}
+      </label>
+      <input
+        id={props.id}
+        type={props.type}
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+        className="border rounded px-2 py-1 text-sm w-full"
+      />
+    </div>
+  );
+}
+function NumberCol(props: {
+  id: string;
+  label: string;
+  value: number;
+  onChange: (v: string) => void;
+  min?: number;
+  step?: number;
+}) {
+  return (
+    <div className="flex flex-col gap-1 min-w-[200px]">
+      <label htmlFor={props.id} className="text-sm">
+        {props.label}
+      </label>
+      <input
+        id={props.id}
+        type="number"
+        value={props.value}
+        min={props.min}
+        step={props.step}
+        onChange={(e) => props.onChange(e.target.value)}
+        className="border rounded px-2 py-1 text-sm w-full"
+      />
+    </div>
+  );
+}
+function CheckboxCol(props: {
+  id: string;
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1 min-w-[200px]">
+      <label htmlFor={props.id} className="text-sm">
+        {props.label}
+      </label>
+      <input
+        id={props.id}
+        type="checkbox"
+        checked={props.checked}
+        onChange={(e) => props.onChange(e.target.checked)}
+        className="h-4 w-4"
+      />
+    </div>
+  );
+}
+
 function Th({
   children,
   className = "",
@@ -600,7 +631,8 @@ function Td({
   return <td className={`px-3 py-2 border-b ${className}`}>{children}</td>;
 }
 
-function isNumericField(f: FieldSpec<RatiosFeaturesRow>) {
+// generic numeric check over FieldSpec<T>
+function isNumericField<T>(f: FieldSpec<T>) {
   return f.type === "numeric";
 }
 function toLabel(key: string) {

@@ -31,10 +31,10 @@ export async function createFieldReviewWithInitial(
       // @ts-ignore rpc is typed loosely in supabase-js
       .rpc("create_field_review", {
         p_parcel_id: parcel_id,
-        p_due_date: due_date || null,
+        p_due_date: due_date,
         p_type: type,
-        p_initial_status: initial_status || null,
-        p_initial_note: initial_note || null,
+        p_initial_status: initial_status,
+        p_initial_note: initial_note,
       });
 
     if (error) {
@@ -61,9 +61,7 @@ export async function addReviewNote(_prev: ActionState, formData: FormData) {
 
     const supabase = await createClient();
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("field_review_notes")
-      // @ts-expect-error - need to generate types from Supabase
       .insert({ review_id, note });
     if (error) throw error;
     if (revalidate_path) rp(revalidate_path);
@@ -82,7 +80,6 @@ export async function updateReviewNote(_prev: ActionState, formData: FormData) {
 
     const supabase = await createClient();
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("field_review_notes")
       .update({ note })
       .eq("id", id);
@@ -107,7 +104,6 @@ export async function deleteReviewNotes(
 
     const supabase = await createClient();
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("field_review_notes")
       .delete()
       .in("id", ids);
@@ -129,7 +125,6 @@ export async function addReviewStatus(_prev: ActionState, formData: FormData) {
 
     const supabase = await createClient();
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("field_review_statuses")
       .insert({ review_id, status });
     if (error) throw error;
@@ -152,7 +147,6 @@ export async function updateReviewStatus(
 
     const supabase = await createClient();
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("field_review_statuses")
       .update({ status })
       .eq("id", id);
@@ -177,7 +171,6 @@ export async function deleteReviewStatuses(
 
     const supabase = await createClient();
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("field_review_statuses")
       .delete()
       .in("id", ids);
@@ -352,7 +345,6 @@ export const deleteReviewImagesAndStorage = async (
 
     // Call the new DB function that deletes images + files and returns bucket/path
     const { data: rpcData, error: rpcErr } = await supabase.rpc(
-      //@ts-expect-error ts
       "delete_field_review_images_and_files",
       { p_image_ids: imageIds }
     );
@@ -369,7 +361,6 @@ export const deleteReviewImagesAndStorage = async (
     let deletedImageCount = 0;
     const deletedFileIds = new Set<number>();
     const bucketToPaths = new Map<string, string[]>();
-    //@ts-expect-error ts
     for (const row of rows) {
       if (row.deleted_image_id) deletedImageCount++;
       if (row.deleted_file_id && row.bucket_name && row.path) {

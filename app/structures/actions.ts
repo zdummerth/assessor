@@ -16,7 +16,6 @@ export async function addCondition(
     const revalidate_path = formData.get("revalidate_path") as string | null;
 
     const supabase = await createClient();
-    // @ts-expect-error - need to generate types from Supabase
     const { error } = await supabase.from("test_conditions").insert({
       structure_id,
       condition,
@@ -44,7 +43,6 @@ export async function updateCondition(
     const supabase = await createClient();
 
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("test_conditions")
       .update({ condition, effective_date })
       .eq("id", id);
@@ -70,7 +68,6 @@ export async function deleteConditions(
 
     const supabase = await createClient();
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("test_conditions")
       .delete()
       .in("id", ids);
@@ -106,7 +103,6 @@ export async function bulkUpdateConditions(
 
     const supabase = await createClient();
     const { error } = await supabase
-      // @ts-expect-error - need to generate types from Supabase
       .from("test_conditions")
       .update(patch)
       .in("id", ids);
