@@ -2,19 +2,14 @@
 
 import React, { useState } from "react";
 import Notice from "./notice";
-
-const REQUIRED_HEADERS = [
-  "parcel_number",
-  "site_address",
-  "name",
-  "address_1",
-  "city",
-  "state",
-  "zip",
-] as const;
+import {
+  REQUIRED_HEADERS,
+  type NoticeFormData,
+  type RequiredHeader,
+} from "./shared";
 
 export default function NoticePrinter() {
-  const [rows, setRows] = useState<Record<string, string>[]>([]);
+  const [rows, setRows] = useState<NoticeFormData[]>([]);
   const [error, setError] = useState("");
 
   const handleTSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +29,7 @@ export default function NoticePrinter() {
 
       const headers = lines[0].split("\t").map((h) => h.trim().toLowerCase());
 
-      // Validate required headers
+      // Validate required headers against the type keys
       const missing = REQUIRED_HEADERS.filter((h) => !headers.includes(h));
       if (missing.length) {
         setError(`Missing required column(s): ${missing.join(", ")}`);
@@ -46,15 +41,22 @@ export default function NoticePrinter() {
         number
       >;
 
-      const parsed = lines.slice(1).map((line) => {
+      const parsed: NoticeFormData[] = lines.slice(1).map((line) => {
         const cols = line.split("\t").map((v) => v.trim());
-        const row: Record<string, string> = {};
-        REQUIRED_HEADERS.forEach((h) => {
-          row[h] = cols[idx[h]] ?? "";
-        });
+
+        // Build a row with only the required headers (matches NoticeFormData keys)
+        const row = REQUIRED_HEADERS.reduce(
+          (acc, h) => {
+            acc[h] = cols[idx[h]] ?? "";
+            return acc;
+          },
+          {} as Record<RequiredHeader, string>
+        ) as NoticeFormData;
+
         return row;
       });
 
+      // Keep rows that have at least one non-empty value (optional)
       setRows(parsed.filter((r) => Object.values(r).some((v) => v !== "")));
     };
 

@@ -4,42 +4,34 @@ import React from "react";
 import NoticeHeader from "@/components/ui/notices/header";
 import Image from "next/image";
 import signatureImage from "@/public/shawns-signature.png";
-
-type NoticeFormData = {
-  parcel_number?: string;
-  site_address?: string;
-  name?: string;
-  address_1?: string;
-  address_2?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-};
+import { type NoticeFormData } from "./shared";
 
 export default function Notice({ formData }: { formData: NoticeFormData }) {
   const currentTimestampString = new Date().toLocaleString("en-US", {
     timeZone: "America/Chicago",
   });
 
+  // Optional: ensure the rendered notice only shows when all fields are non-empty.
   const requiredFieldsEntered =
-    !!formData?.parcel_number &&
-    !!formData?.site_address &&
-    !!formData?.name &&
-    !!(
-      formData?.address_1 ||
-      formData?.address_2 ||
-      (formData?.city && formData?.state && formData?.zip)
-    );
+    formData.parcel_number &&
+    formData.site_address &&
+    formData.name &&
+    formData.address_1 &&
+    formData.city &&
+    formData.state &&
+    formData.zip &&
+    formData.av &&
+    formData.mv;
 
   return (
     <div className="w-[90%] mx-auto print:break-after-page border p-8 print:p-4 print:border-none print:bg-white print:text-black text-sm leading-6">
       <NoticeHeader
-        mailingName={formData.name ?? ""}
-        mailingAddress1={formData.address_1 ?? ""}
-        mailingAddress2={formData.address_2 ?? ""}
-        mailingCity={formData.city ?? ""}
-        mailingState={formData.state ?? ""}
-        mailingZip={formData.zip ?? ""}
+        mailingName={formData.name}
+        mailingAddress1={formData.address_1}
+        mailingAddress2={"" /* no address_2 in type */}
+        mailingCity={formData.city}
+        mailingState={formData.state}
+        mailingZip={formData.zip}
         date={currentTimestampString}
       />
 
@@ -61,7 +53,7 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
             </div>
           </div>
 
-          {/* New Notice Content */}
+          {/* Notice Content */}
           <div className="space-y-2">
             <div>
               <div className="font-semibold text-center">
@@ -69,8 +61,9 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
                 Equalization
               </div>
               <div className="text-center my-2">
-                $ 5,700 <span className="italic">appraised value</span>
-                <br />$ 1,900 <span className="italic">assessed value</span>
+                ${formData.mv} <span className="italic">appraised value</span>
+                <br />${formData.av}{" "}
+                <span className="italic">assessed value</span>
               </div>
             </div>
 
@@ -149,9 +142,12 @@ export default function Notice({ formData }: { formData: NoticeFormData }) {
           </p>
           <ul className="list-disc pl-5">
             <li>Owner Name</li>
-            <li>Address 1 (or Address 2, or City/State/ZIP)</li>
+            <li>Address 1</li>
+            <li>City, State, ZIP</li>
             <li>Parcel Number</li>
             <li>Site Address</li>
+            <li>Assessed Value</li>
+            <li>Appraised Value</li>
           </ul>
         </div>
       )}
