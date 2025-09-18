@@ -2,20 +2,40 @@ import { createClient } from "@/utils/supabase/server";
 import ParcelNumber from "../ui/parcel-number-updated";
 import GowerCompsClient from "./client";
 
-type ParcelFeaturesRow = {
+export type ParcelFeaturesRow = {
   parcel_id: number;
   block: number;
   lot: string;
   ext: number;
+
+  // Values (present but not all displayed here)
+  value_row_id: number | null;
+  value_year: number | null;
+  date_of_assessment: string | null;
+  current_value: number | null;
+
+  // Structure / physical
   structure_count: number;
   total_finished_area: number | null;
   total_unfinished_area: number | null;
   avg_year_built: number | null;
   avg_condition: number | null;
-  land_use: string | null;
+  total_units: number | null;
+
+  // Land + per metrics (present but not all displayed here)
+  land_area: number | null;
+  land_to_building_area_ratio: number | null;
+  values_per_sqft_building_total: number | null;
+  values_per_sqft_finished: number | null;
+  values_per_sqft_land: number | null;
+  values_per_unit: number | null;
+
+  // LU & geo
+  land_use: string | null; // <- new function returns text
   lat: number | null;
   lon: number | null;
   district: string | null;
+  neighborhoods_at_as_of: any; // jsonb
   house_number: string | null;
   street: string | null;
   postcode: string | null;
@@ -27,10 +47,16 @@ export default async function ParcelCompsClient({
   parcelId: number;
 }) {
   const supabase = await createClient();
+
+  // Call the new RPC; rely on function defaults for p_as_of_date / other filters.
   const { data, error } = await supabase
     // @ts-expect-error rpc name typing varies by codegen
-    .rpc("find_parcel_features")
-    .eq("parcel_id", parcelId)
+    .rpc("get_parcel_value_features_asof", {
+      p_parcel_ids: [parcelId], // filter to this parcel
+      p_as_of_date: new Date(),
+      p_land_uses: null, // no LU filter
+      p_neighborhoods: null, // no neighborhood filter
+    })
     .single<ParcelFeaturesRow>();
 
   if (error) {
@@ -52,72 +78,9 @@ export default async function ParcelCompsClient({
 
   const p = data;
 
-  // Subject object for the client comps component
-  const subject = {
-    parcel_id: p.parcel_id,
-    land_use: p.land_use,
-    district: p.district,
-    total_finished_area: p.total_finished_area,
-    total_unfinished_area: p.total_unfinished_area,
-    avg_condition: p.avg_condition,
-    lat: p.lat,
-    lon: p.lon,
-    house_number: p.house_number,
-    street: p.street,
-  };
-
   return (
-    <div className="">
-      <div className="rounded border p-2">
-        {/* Header: Parcel number + address */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <ParcelNumber
-            id={p.parcel_id}
-            block={p.block}
-            lot={Number(p.lot)}
-            ext={p.ext}
-          />
-          <div className="text-sm text-gray-700">
-            <div className="font-medium">
-              {p.house_number} {p.street}
-            </div>
-            <div className="text-gray-600">
-              {p.district}
-              {p.postcode ? `, ${p.postcode}` : ""}
-            </div>
-          </div>
-        </div>
-
-        {/* Compact metrics grid */}
-        <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
-          <div>
-            <dt className="text-gray-500">Land Use</dt>
-            <dd className="font-medium">{p.land_use ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500">Structures</dt>
-            <dd className="font-medium">{p.structure_count}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500">Avg Year Built</dt>
-            <dd className="font-medium">{p.avg_year_built ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500">Avg Condition</dt>
-            <dd className="font-medium">{p.avg_condition ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500">Finished (sf)</dt>
-            <dd className="font-medium">{p.total_finished_area ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500">Unfinished (sf)</dt>
-            <dd className="font-medium">{p.total_unfinished_area ?? "—"}</dd>
-          </div>
-        </dl>
-      </div>
-
-      <GowerCompsClient subject={subject} />
+    <div>
+      <GowerCompsClient subject={p} />
     </div>
   );
 }

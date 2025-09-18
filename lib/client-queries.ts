@@ -154,31 +154,98 @@ export type RatioRow = {
   [k: string]: any;
 };
 
+type PgNumeric = number | string | null;
 export type RatiosFeaturesRow = {
-  sale_id: number;
-  sale_date: string; // date
-  sale_price: number | null;
-  sale_type: string | null;
   parcel_id: number;
+  block: number;
+  lot: string;
+  ext: number;
+
+  // Values as-of
   value_row_id: number | null;
   value_year: number | null;
   date_of_assessment: string | null; // timestamptz
-  current_value: number | string | null; // PG numeric may be string
-  ratio: number | string | null; // PG numeric may be string
-  land_use_sale: string | null;
-  land_use_asof: string | null;
-  block: number | null;
-  lot: string | null;
-  ext: number | null;
-  structure_count: number | null;
+  current_value: PgNumeric;
+  sale_id: number | null; // if part of a sale
+  sale_date: string | null; // 'YYYY-MM-DD'
+  sale_price: number | null; // if part of a sale
+  sale_type: string | null; // if part of a sale
+  ratio: PgNumeric; // if part of a sale
+
+  // Structures / physical
+  structure_count: number;
   total_finished_area: number | null;
   total_unfinished_area: number | null;
   avg_year_built: number | null;
-  avg_condition: number | string | null; // PG numeric may be string
+  avg_condition: PgNumeric;
+  total_units: number | null;
+
+  // Land & derived
+  land_area: PgNumeric;
+  land_to_building_area_ratio: PgNumeric;
+  values_per_sqft_building_total: PgNumeric;
+  values_per_sqft_finished: PgNumeric;
+  values_per_sqft_land: PgNumeric;
+  values_per_unit: PgNumeric;
+
+  // LU & geo
   land_use: string | null;
   lat: number | null;
   lon: number | null;
   district: string | null;
+  neighborhoods_at_as_of: Array<{
+    set_id: number | null;
+    set_name: string | null;
+    neighborhood_id: number | null;
+    neighborhood_code: number | string | null;
+    neighborhood_name: string | null;
+  }>;
+  house_number: string | null;
+  street: string | null;
+  postcode: string | null;
+};
+
+// For get_parcel_value_features_asof
+export type ParcelValueFeaturesRow = {
+  parcel_id: number;
+  block: number;
+  lot: string;
+  ext: number;
+
+  // Values as-of
+  value_row_id: number | null;
+  value_year: number | null;
+  date_of_assessment: string | null; // timestamptz
+  current_value: number | string | null; // PG numeric
+
+  // Structures / physical
+  structure_count: number;
+  total_finished_area: number | null;
+  total_unfinished_area: number | null;
+  avg_year_built: number | null;
+  avg_condition: number | string | null; // PG numeric
+  total_units: number | null;
+
+  // Land & derived
+  land_area: number | string | null; // PG numeric
+  land_to_building_area_ratio: number | string | null; // PG numeric
+  values_per_sqft_building_total: number | string | null; // PG numeric
+  values_per_sqft_finished: number | string | null; // PG numeric
+  values_per_sqft_land: number | string | null; // PG numeric
+  values_per_unit: number | string | null; // PG numeric
+
+  // LU & geo
+  land_use: string | null;
+  lat: number | null;
+  lon: number | null;
+  district: string | null;
+  neighborhoods_at_as_of: Array<{
+    set_id: number | null;
+    set_name: string | null;
+    neighborhood_id: number | null;
+    neighborhood_code: number | string | null; // sometimes stored numeric-like
+    neighborhood_name: string | null;
+  }>;
   house_number: string | null;
   street: string | null;
   postcode: string | null;
