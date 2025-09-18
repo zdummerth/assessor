@@ -215,7 +215,7 @@ export default function Notice({ formData }: { formData: any }) {
               height={74}
             />
             <p className="font-semibold">Shawn T. Ordway</p>
-            <p className="text-xs">Interim Assessor</p>
+            <p className="text-xs">Assessor</p>
           </div>
         </>
       ) : (
