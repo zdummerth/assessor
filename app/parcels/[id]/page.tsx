@@ -108,7 +108,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <div className="mt-6">
         <h2 className="font-semibold mb-2">Comparable Sales</h2>
         <Link
-          href={`/test/parcels/${parcel.id}/comps`}
+          href={`/parcels/${parcel.id}/comps`}
           className="text-sm text-blue-600 underline mb-3 inline-block"
           target="_blank"
           rel="noreferrer"
