@@ -678,13 +678,6 @@ function GowerCompsDisplay(props: {
   const finStats = computeStats(ppsfFinished);
   const totStats = computeStats(ppsfTotal);
 
-  const fmtMoneyStats = (s: ReturnType<typeof computeStats>) =>
-    s
-      ? `Med ${moneyFmt(s.med)} · Avg ${moneyFmt(s.avg)} · Min ${moneyFmt(
-          s.min
-        )} · Max ${moneyFmt(s.max)}`
-      : "—";
-
   // --- subject areas & estimated values ---
   const subjectItem = useMemo(
     () => tableRows.find((r) => r.isSubject)?.item,
@@ -705,23 +698,53 @@ function GowerCompsDisplay(props: {
       ? Math.round(totStats.med) * subjTotalArea
       : NaN;
 
-  const medPpsfFinStr = finStats ? moneyFmt(finStats.med) : "—";
-  const medPpsfTotStr = totStats ? moneyFmt(totStats.med) : "—";
-  const subjFinishedStr = Number.isFinite(subjFinished)
-    ? numFmt(subjFinished)
-    : "—";
-  const subjTotalAreaStr = Number.isFinite(subjTotalArea)
-    ? numFmt(subjTotalArea)
-    : "—";
+  // --- small card component ---
+  const StatCard = ({
+    label,
+    value,
+    sub,
+  }: {
+    label: string;
+    value: React.ReactNode;
+    sub?: React.ReactNode;
+  }) => (
+    <div className="rounded-md border bg-background p-3 min-w-[160px] w-full">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="font-medium tabular-nums">{value}</div>
+      {sub ? (
+        <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>
+      ) : null}
+    </div>
+  );
 
-  console.log({
-    estFinished,
-    estTotal,
-    fin_med: finStats?.med,
-    tot_med: totStats?.med,
-    medPpsfFinStr,
-    medPpsfTotStr,
-  });
+  // --- concise stats table (Med/Avg/Min/Max) ---
+  const StatsTableRow = ({
+    label,
+    s,
+    money = false,
+  }: {
+    label: string;
+    s: ReturnType<typeof computeStats>;
+    money?: boolean;
+  }) => (
+    <tr>
+      <td className="px-3 py-1 text-xs text-muted-foreground">{label}</td>
+      <td className="px-3 py-1 tabular-nums text-right">{s?.n ?? 0}</td>
+      <td className="px-3 py-1 tabular-nums text-right">
+        {s ? (money ? moneyFmt(s.med) : numFmt(s.med, 2)) : "—"}
+      </td>
+      <td className="px-3 py-1 tabular-nums text-right">
+        {s ? (money ? moneyFmt(s.avg) : numFmt(s.avg, 2)) : "—"}
+      </td>
+      <td className="px-3 py-1 tabular-nums text-right">
+        {s ? (money ? moneyFmt(s.min) : numFmt(s.min, 2)) : "—"}
+      </td>
+      <td className="px-3 py-1 tabular-nums text-right">
+        {s ? (money ? moneyFmt(s.max) : numFmt(s.max, 2)) : "—"}
+      </td>
+    </tr>
+  );
+
   return (
     <section className="min-w-0">
       <div className="border rounded overflow-x-auto">
@@ -729,75 +752,82 @@ function GowerCompsDisplay(props: {
           Subject + Top {k} comps (candidates after filters: {candidatesCount})
         </div>
 
-        {/* --- Summary box (not part of the table) --- */}
-        <div className="p-3 border-b flex gap-4 h-[400px]">
-          {/* Top stats */}
-          <div className="flex flex-col gap-1 w-3/4 justify-between text-sm">
-            <div className="rounded-md border bg-background p-2">
-              <div className="text-xs text-muted-foreground">
-                Selected comps
-              </div>
-              <div className="font-medium tabular-nums">
-                {saleStats?.n ?? 0}
-              </div>
+        {/* --- Cards + concise stats table --- */}
+        <div className="flex gap-2">
+          <div className="p-3 border-b space-y-3 w-[70%]">
+            {/* Cards */}
+            <div className="flex gap-2 w-full">
+              <StatCard
+                label="Est. Value (Finished × Median $/sf)"
+                value={
+                  Number.isFinite(estFinished) ? moneyFmt(estFinished) : "—"
+                }
+                sub={
+                  Number.isFinite(subjFinished) && finStats
+                    ? `${numFmt(subjFinished)} sf × ${moneyFmt(finStats.med)}/sf`
+                    : undefined
+                }
+              />
+              <StatCard
+                label="Est. Value (Total × Median $/sf)"
+                value={Number.isFinite(estTotal) ? moneyFmt(estTotal) : "—"}
+                sub={
+                  Number.isFinite(subjTotalArea) && totStats
+                    ? `${numFmt(subjTotalArea)} sf × ${moneyFmt(totStats.med)}/sf`
+                    : undefined
+                }
+              />
             </div>
-            <div className="rounded-md border bg-background p-2">
-              <div className="text-xs text-muted-foreground">Sale Price</div>
-              <div className="font-medium tabular-nums">
-                {fmtMoneyStats(saleStats)}
-              </div>
-            </div>
-            <div className="rounded-md border bg-background p-2">
-              <div className="text-xs text-muted-foreground">
-                Price/Sf (Finished)
-              </div>
-              <div className="font-medium tabular-nums">
-                {fmtMoneyStats(finStats)}
-              </div>
-            </div>
-            <div className="rounded-md border bg-background p-2">
-              <div className="text-xs text-muted-foreground">
-                Price/Sf (Total)
-              </div>
-              <div className="font-medium tabular-nums">
-                {fmtMoneyStats(totStats)}
-              </div>
-            </div>
-            <div className="rounded-md border bg-background p-2">
-              <div className="text-xs text-muted-foreground">
-                Estimated Subject Value = Finished Area × Median Price/Sf
-              </div>
-              <div className="font-medium tabular-nums">
-                {moneyFmt(estFinished)}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {subjFinishedStr} sf × {medPpsfFinStr}/sf
-              </div>
-            </div>
-            <div className="rounded-md border bg-background p-2">
-              <div className="text-xs text-muted-foreground">
-                Estimated Subject Value = Total Area × Median Price/Sf
-              </div>
-              <div className="font-medium tabular-nums">
-                {moneyFmt(estTotal)}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {subjTotalAreaStr} sf × {medPpsfTotStr}/sf
-              </div>
+
+            {/* Concise stats table */}
+            <div className="rounded-md border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40">
+                  <tr>
+                    <th className="px-3 py-1 text-left text-xs font-medium text-muted-foreground">
+                      Metric
+                    </th>
+                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                      N
+                    </th>
+                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                      Median
+                    </th>
+                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                      Avg
+                    </th>
+                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                      Min
+                    </th>
+                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                      Max
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <StatsTableRow label="Sale Price" s={saleStats} money />
+                  <StatsTableRow
+                    label="Price/Sf (Finished)"
+                    s={finStats}
+                    money
+                  />
+                  <StatsTableRow label="Price/Sf (Total)" s={totStats} money />
+                </tbody>
+              </table>
             </div>
           </div>
-          <div className="flex-1 min-w-[350px]">
-            <CompsMapFromRows
-              tableRows={[
-                ...selectedComps,
-                ...(tableRows.find((r) => r.isSubject) ? [tableRows[0]] : []),
-              ]}
-              className="h-full"
-            />
-          </div>
+          <CompsMapFromRows
+            tableRows={[
+              ...tableRows.filter(
+                (r) => r.isSubject || selectedIds.has(getRowId(r))
+              ),
+              ...selectedComps,
+            ]}
+            className="h-64 md:h-96 flex-1 border-b"
+          />
         </div>
 
-        {/* --- Table --- */}
+        {/* --- Table of subject + comps --- */}
         <table className="min-w-full text-sm">
           <thead>
             <tr>
