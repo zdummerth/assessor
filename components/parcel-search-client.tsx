@@ -41,16 +41,16 @@ export default function ParcelSearchClient() {
 
       <ul className="space-y-4">
         {data?.map((parcel: any) => {
-          const isOpen = expanded[parcel.parcel] ?? false;
-          const block = parseInt(parcel.parcel.slice(0, 4), 10);
-          const lot = parcel.parcel.slice(7, 10);
-          const ext = parseInt(parcel.parcel.slice(11, 14), 10);
+          const isOpen = expanded[parcel.parcel_number] ?? false;
+          const block = parseInt(parcel.parcel_number.slice(0, 4), 10);
+          const lot = parcel.parcel_number.slice(7, 10);
+          const ext = parseInt(parcel.parcel_number.slice(11, 14), 10);
           const idString = `${block}${lot}${ext}`;
           const numericId = Number(idString);
 
           return (
             <li
-              key={parcel.parcel}
+              key={parcel.parcel_number}
               className="border p-4 rounded shadow-sm transition"
             >
               <div className="flex justify-between items-center mb-2">
@@ -90,42 +90,11 @@ export default function ParcelSearchClient() {
 
               {isOpen && (
                 <>
-                  {parcel.retired && (
+                  {parcel.retired_at && (
                     <p className="text-sm text-red-600 font-medium mb-2">
                       Retired
                     </p>
                   )}
-
-                  <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
-                    <div>
-                      <p className="text-xs text-gray-500">Neighborhood</p>
-                      <p className="text-gray-800">{parcel.neighborhood}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Land Use</p>
-                      <p className="text-gray-800">{parcel.land_use}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Class</p>
-                      <p className="text-gray-800">{parcel.prop_class}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Appraised Value</p>
-                      <p className="text-gray-800">
-                        ${parcel.appraised_total?.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 text-sm">
-                    <p className="text-xs text-gray-500">Appraiser</p>
-                    <p className="text-gray-800 font-medium">
-                      {parcel.appraiser}
-                    </p>
-                    <p className="text-gray-600">
-                      {parcel.appraiser_email} · {parcel.appraiser_phone}
-                    </p>
-                  </div>
                 </>
               )}
             </li>

@@ -29,7 +29,7 @@ type MapPoint = {
 
 type Neighborhood = {
   neighborhood: number | string;
-  polygon: number[][][]; // array of rings; each ring is [lat, lon][] (Leaflet accepts lat-lng order)
+  polygon: number[][][]; // rings of [lat, lon]
   group?: number;
 };
 
@@ -66,18 +66,31 @@ const FitBounds: React.FC<{ points: MapPoint[] }> = ({ points }) => {
   return null;
 };
 
+// Keeps Leaflet sized correctly when the container resizes
+const InvalidateOnResize: React.FC = () => {
+  const map = useMap();
+  useEffect(() => {
+    const el = map.getContainer();
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [map]);
+  return null;
+};
+
 export default function CompsMapClient({
   points,
   neighborhoods,
   cityGeoJson = true,
   className = "",
-  height = "10vh",
+  // If parent sets no height, this acts as a fallback. Otherwise it's ignored.
+  height,
 }: {
   points: MapPoint[];
   neighborhoods?: Neighborhood[];
   cityGeoJson?: boolean;
   className?: string;
-  height?: string | number;
+  height?: string | number; // optional fallback
 }) {
   const subject = useMemo(
     () => points.find((p) => p.kind === "subject"),
@@ -111,8 +124,14 @@ export default function CompsMapClient({
   const comps = points.filter((p) => p.kind !== "subject");
 
   return (
-    <div className={className}>
-      <div className="absolute right-0 top-0 mb-2 flex items-center gap-2">
+    // Fill the parent: parent must provide a height (e.g., className="h-[420px]" or "flex-1").
+    // If not, we use the optional `height` prop as a fallback.
+    <div
+      className={`relative w-full h-full ${className}`}
+      style={height ? { height } : undefined}
+    >
+      {/* UI overlay */}
+      <div className="absolute right-2 top-2 z-10 mb-2 flex items-center gap-2">
         <label
           htmlFor="tileLayerSelect"
           className="text-sm text-muted-foreground"
@@ -133,10 +152,11 @@ export default function CompsMapClient({
         </select>
       </div>
 
+      {/* Leaflet map fills container */}
       <MapContainer
         center={startCenter}
         zoom={12}
-        style={{ height, width: "100%", position: "absolute", zIndex: -1 }}
+        className="h-full w-full z-0"
         scrollWheelZoom
       >
         <TileLayer
@@ -251,6 +271,7 @@ export default function CompsMapClient({
         })}
 
         <FitBounds points={points} />
+        <InvalidateOnResize />
       </MapContainer>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useRatiosFeatures } from "@/lib/client-queries";
+import CompsMapFromRows from "./comp-map";
 import { haversineMiles, gowerDistances, FieldSpec } from "@/lib/gower";
 import data from "@/lib/land_use_arrays.json";
 import { Database } from "@/database-types";
@@ -511,13 +512,6 @@ function GowerCompsControls(props: {
           value={endDate}
           onChange={setEndDate}
         />
-        <InputCol
-          id="asOfDate"
-          label="As-of date"
-          type="date"
-          value={asOfDate}
-          onChange={setAsOfDate}
-        />
 
         <CheckboxCol
           id="validOnly"
@@ -560,16 +554,7 @@ function GowerCompsControls(props: {
             value={wDistrict}
             setValue={setWDistrict}
           />
-          <WeightRow
-            label="Latitude (kept for score)"
-            value={wLat}
-            setValue={setWLat}
-          />
-          <WeightRow
-            label="Longitude (kept for score)"
-            value={wLon}
-            setValue={setWLon}
-          />
+
           <WeightRow
             label="Finished area"
             value={wFinished}
@@ -745,9 +730,9 @@ function GowerCompsDisplay(props: {
         </div>
 
         {/* --- Summary box (not part of the table) --- */}
-        <div className="p-3 border-b bg-muted/20">
+        <div className="p-3 border-b flex gap-4 h-[400px]">
           {/* Top stats */}
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+          <div className="flex flex-col gap-1 w-3/4 justify-between text-sm">
             <div className="rounded-md border bg-background p-2">
               <div className="text-xs text-muted-foreground">
                 Selected comps
@@ -778,10 +763,6 @@ function GowerCompsDisplay(props: {
                 {fmtMoneyStats(totStats)}
               </div>
             </div>
-          </div>
-
-          {/* Estimated subject values */}
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 text-sm">
             <div className="rounded-md border bg-background p-2">
               <div className="text-xs text-muted-foreground">
                 Estimated Subject Value = Finished Area × Median Price/Sf
@@ -804,6 +785,15 @@ function GowerCompsDisplay(props: {
                 {subjTotalAreaStr} sf × {medPpsfTotStr}/sf
               </div>
             </div>
+          </div>
+          <div className="flex-1 min-w-[350px]">
+            <CompsMapFromRows
+              tableRows={[
+                ...selectedComps,
+                ...(tableRows.find((r) => r.isSubject) ? [tableRows[0]] : []),
+              ]}
+              className="h-full"
+            />
           </div>
         </div>
 

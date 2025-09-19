@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
     );
 
     const { data, error } = await supabase
-      .rpc("search_parcels", { prefix: query })
-      .order("retired", { nullsFirst: true })
-      .order("parcel")
+      .rpc("search_parcels_by_prefix", { prefix: query, active: false })
+      .order("retired_at", { nullsFirst: true })
+      .order("parcel_number")
       .limit(9);
 
     if (error) {
