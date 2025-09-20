@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useRatiosFeatures } from "@/lib/client-queries";
 import CompsMapFromRows from "./comp-map";
 import { haversineMiles, gowerDistances, FieldSpec } from "@/lib/gower";
+import ParcelNumber from "../ui/parcel-number-updated";
 import data from "@/lib/land_use_arrays.json";
 import { Database } from "@/database-types";
 
@@ -74,6 +75,26 @@ function toLabel(key: string) {
   return key.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
+// ---- neighborhoods → district (set_id = 2) helpers ----
+function ensureArray(value: any): any[] {
+  if (Array.isArray(value)) return value;
+  if (value == null) return [];
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+function districtFromNeighborhoods(value: any, setId = 2): string | undefined {
+  const arr = ensureArray(value);
+  const match = arr.find((n: any) => Number(n?.set_id) === setId);
+  return match?.neighborhood_name;
+}
+
 // Pick the correct LU array (or a single-item array fallback)
 function pickLandUseSet(lu?: string | null): number[] | null {
   if (!lu) return null;
@@ -129,7 +150,16 @@ export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
     land_uses: landUseSet?.map(String),
   });
 
-  // Candidates
+  // ---- compute district via neighborhoods (set_id = 2) ----
+  const subjectDistrict = useMemo(
+    () =>
+      districtFromNeighborhoods((subject as any)?.neighborhoods_at_as_of, 2) ??
+      subject.district ??
+      undefined,
+    [subject]
+  );
+
+  // Candidates (apply filters, then override their district from neighborhoods_at_sale)
   const candidates = useMemo<CandidateRow[]>(() => {
     //@ts-expect-error s
     const rows = (data ?? []) as Candidates;
@@ -162,7 +192,17 @@ export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
         });
       }
     }
-    return cand;
+
+    // *** override district based on neighborhoods_at_sale (set_id = 2) ***
+    const withDistrict = cand.map((r) => {
+      const district2 =
+        districtFromNeighborhoods((r as any)?.neighborhoods_at_sale, 2) ??
+        r.district;
+      // keep type shape; just replace district value
+      return { ...r, district: district2 } as CandidateRow;
+    });
+
+    return withDistrict;
   }, [
     data,
     subject,
@@ -183,7 +223,7 @@ export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
           label: "Land Use",
         },
         {
-          key: "district",
+          key: "district", // <- computed for subject & candidates from set_id 2
           type: "categorical",
           weight: wDistrict,
           label: "District",
@@ -270,8 +310,8 @@ export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
         align: "right",
         get: (_row, isSubject) =>
           isSubject
-            ? subject.values_per_sqft_finished
-            : _row.price_per_sqft_finished,
+            ? (subject as any).values_per_sqft_finished
+            : (_row as any).price_per_sqft_finished,
       },
       {
         key: "ppsf_building_total",
@@ -279,23 +319,27 @@ export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
         align: "right",
         get: (_row, isSubject) =>
           isSubject
-            ? subject.values_per_sqft_building_total
-            : _row.price_per_sqft_building_total,
+            ? (subject as any).values_per_sqft_building_total
+            : (_row as any).price_per_sqft_building_total,
       }
     );
 
     return base;
   }, [displayFields, subject]);
 
+  // Subject for gower: override district with set_id=2 neighborhood name
+  const subjectForGower = useMemo(() => {
+    return {
+      ...(subject as any),
+      district: subjectDistrict,
+    } as unknown as CandidateRow;
+  }, [subject, subjectDistrict]);
+
   // One localized cast so gower gets the exact row type it expects
   const ranked = useMemo(() => {
-    if (!subject || candidates.length === 0) return [];
-    return gowerDistances(
-      subject as unknown as CandidateRow,
-      candidates,
-      fields
-    );
-  }, [subject, candidates, fields]);
+    if (!subjectForGower || candidates.length === 0) return [];
+    return gowerDistances(subjectForGower, candidates, fields);
+  }, [subjectForGower, candidates, fields]);
 
   // Build table rows (subject first)
   type TableRow = {
@@ -313,7 +357,7 @@ export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
       sale_date: undefined,
       sale_price: undefined,
       land_use: subject.land_use,
-      district: subject.district,
+      district: subjectDistrict ?? subject.district,
       total_finished_area: subject.total_finished_area,
       total_unfinished_area: subject.total_unfinished_area,
       avg_condition: subject.avg_condition,
@@ -324,6 +368,9 @@ export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
       avg_year_built: subject.avg_year_built,
       land_to_building_area_ratio: subject.land_to_building_area_ratio,
       structure_count: subject.structure_count,
+      lot: subject.lot,
+      ext: subject.ext,
+      block: subject.block,
     };
 
     const subjectRow: TableRow = {
@@ -344,7 +391,7 @@ export default function GowerCompsClient({ subject }: { subject: FeatureRow }) {
     });
 
     return [subjectRow, ...compRows];
-  }, [ranked, k, subject]);
+  }, [ranked, k, subject, subjectDistrict]);
 
   return (
     <div className="grid gap-4 mt-4">
@@ -752,81 +799,6 @@ function GowerCompsDisplay(props: {
           Subject + Top {k} comps (candidates after filters: {candidatesCount})
         </div>
 
-        {/* --- Cards + concise stats table --- */}
-        <div className="flex gap-2">
-          <div className="p-3 border-b space-y-3 w-[70%]">
-            {/* Cards */}
-            <div className="flex gap-2 w-full">
-              <StatCard
-                label="Est. Value (Finished × Median $/sf)"
-                value={
-                  Number.isFinite(estFinished) ? moneyFmt(estFinished) : "—"
-                }
-                sub={
-                  Number.isFinite(subjFinished) && finStats
-                    ? `${numFmt(subjFinished)} sf × ${moneyFmt(finStats.med)}/sf`
-                    : undefined
-                }
-              />
-              <StatCard
-                label="Est. Value (Total × Median $/sf)"
-                value={Number.isFinite(estTotal) ? moneyFmt(estTotal) : "—"}
-                sub={
-                  Number.isFinite(subjTotalArea) && totStats
-                    ? `${numFmt(subjTotalArea)} sf × ${moneyFmt(totStats.med)}/sf`
-                    : undefined
-                }
-              />
-            </div>
-
-            {/* Concise stats table */}
-            <div className="rounded-md border">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/40">
-                  <tr>
-                    <th className="px-3 py-1 text-left text-xs font-medium text-muted-foreground">
-                      Metric
-                    </th>
-                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
-                      N
-                    </th>
-                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
-                      Median
-                    </th>
-                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
-                      Avg
-                    </th>
-                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
-                      Min
-                    </th>
-                    <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
-                      Max
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <StatsTableRow label="Sale Price" s={saleStats} money />
-                  <StatsTableRow
-                    label="Price/Sf (Finished)"
-                    s={finStats}
-                    money
-                  />
-                  <StatsTableRow label="Price/Sf (Total)" s={totStats} money />
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <CompsMapFromRows
-            tableRows={[
-              ...tableRows.filter(
-                (r) => r.isSubject || selectedIds.has(getRowId(r))
-              ),
-              ...selectedComps,
-            ]}
-            className="h-64 md:h-96 flex-1 border-b"
-          />
-        </div>
-
         {/* --- Table of subject + comps --- */}
         <table className="min-w-full text-sm">
           <thead>
@@ -877,7 +849,14 @@ function GowerCompsDisplay(props: {
                       <span className="text-xs text-muted-foreground">—</span>
                     )}
                   </Td>
-                  <Td>{String(it.parcel_id ?? "—")}</Td>
+                  <Td>
+                    <ParcelNumber
+                      id={it.parcel_id || 0}
+                      lot={parseInt(it.lot || "0", 10) || 0}
+                      ext={it.ext || 0}
+                      block={it.block || 0}
+                    />
+                  </Td>
                   <Td>
                     {`${it.house_number ?? ""} ${it.street ?? ""}`.trim() ||
                       "—"}
@@ -925,6 +904,75 @@ function GowerCompsDisplay(props: {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* --- Cards + concise stats table --- */}
+      <div className="flex gap-2">
+        <div className="p-3 border-b space-y-3 w-[70%]">
+          {/* Cards */}
+          <div className="flex gap-2 w-full">
+            <StatCard
+              label="Est. Value (Finished × Median $/sf)"
+              value={Number.isFinite(estFinished) ? moneyFmt(estFinished) : "—"}
+              sub={
+                Number.isFinite(subjFinished) && finStats
+                  ? `${numFmt(subjFinished)} sf × ${moneyFmt(finStats.med)}/sf`
+                  : undefined
+              }
+            />
+            <StatCard
+              label="Est. Value (Total × Median $/sf)"
+              value={Number.isFinite(estTotal) ? moneyFmt(estTotal) : "—"}
+              sub={
+                Number.isFinite(subjTotalArea) && totStats
+                  ? `${numFmt(subjTotalArea)} sf × ${moneyFmt(totStats.med)}/sf`
+                  : undefined
+              }
+            />
+          </div>
+
+          {/* Concise stats table */}
+          <div className="rounded-md border">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40">
+                <tr>
+                  <th className="px-3 py-1 text-left text-xs font-medium text-muted-foreground">
+                    Metric
+                  </th>
+                  <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                    N
+                  </th>
+                  <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                    Median
+                  </th>
+                  <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                    Avg
+                  </th>
+                  <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                    Min
+                  </th>
+                  <th className="px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                    Max
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <StatsTableRow label="Sale Price" s={saleStats} money />
+                <StatsTableRow label="Price/Sf (Finished)" s={finStats} money />
+                <StatsTableRow label="Price/Sf (Total)" s={totStats} money />
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <CompsMapFromRows
+          tableRows={[
+            ...tableRows.filter(
+              (r) => r.isSubject || selectedIds.has(getRowId(r))
+            ),
+            ...selectedComps,
+          ]}
+          className="h-64 md:h-96 flex-1 border-b"
+        />
       </div>
     </section>
   );

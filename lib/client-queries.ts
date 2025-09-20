@@ -1,6 +1,7 @@
 "use client";
 
 import useSWR from "swr";
+import { Database } from "@/database-types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -127,6 +128,18 @@ export type RatioMediansRow = {
 
 export function useLandUseOptions() {
   const { data, error, isLoading } = useSWR<string[]>("/land-uses", fetcher);
+  return {
+    options: Array.isArray(data) ? data : [],
+    isLoading,
+    error,
+  };
+}
+
+export function useNeighborhoods() {
+  const { data, error, isLoading } = useSWR<string[]>(
+    "/neighborhoods",
+    fetcher
+  );
   return {
     options: Array.isArray(data) ? data : [],
     isLoading,
@@ -358,4 +371,96 @@ export function useMultiParcelSales(options?: {
   const { data, error, isLoading } = useSWR<MultiParcelSaleRow[]>(url, fetcher);
 
   return { data: data ?? [], error, isLoading };
+}
+
+export type ParcelValueFeatureRow =
+  Database["public"]["Functions"]["get_parcel_value_features_asof"]["Returns"][number];
+
+export type ParcelFeaturesMeta = {
+  page: number;
+  page_size: number;
+  start: number;
+  end: number;
+  total: number | null;
+  has_more: boolean;
+  sort: { col: string; asc: boolean }[];
+};
+
+// If you already have a fetcher elsewhere, use that instead
+
+type Filters = {
+  eq?: Record<string, string | number>;
+  neq?: Record<string, string | number>;
+  gt?: Record<string, number>;
+  gte?: Record<string, number>;
+  lt?: Record<string, number>;
+  lte?: Record<string, number>;
+  ilike?: Record<string, string>;
+  in?: Record<string, Array<string | number>>;
+  is?: Record<string, "null" | "not.null">;
+};
+
+export function useParcelValueFeatures(options?: {
+  as_of_date?: string; // 'YYYY-MM-DD'
+  land_uses?: Array<string | number>;
+  neighborhoods?: Array<string | number>;
+  parcel_ids?: Array<string | number>;
+  page?: number; // default: 1
+  page_size?: number; // default: 50
+  sort?: string; // e.g. "value_year,-current_value"
+  filters?: Filters; // maps to eq_col=, gte_col=, ilike_col=, in_col=, is_col=...
+}) {
+  const params = new URLSearchParams();
+
+  if (options?.as_of_date) params.set("as_of_date", options.as_of_date);
+  if (options?.land_uses?.length)
+    params.set("land_uses", options.land_uses.join(","));
+  if (options?.neighborhoods?.length)
+    params.set("neighborhoods", options.neighborhoods.join(","));
+  if (options?.parcel_ids?.length)
+    params.set("parcel_ids", options.parcel_ids.join(","));
+  if (options?.page) params.set("page", String(options.page));
+  if (options?.page_size) params.set("page_size", String(options.page_size));
+  if (options?.sort) params.set("sort", options.sort);
+
+  // flexible filters -> op_column=value
+  const appendFilterGroup = (op: string, obj?: Record<string, any>) => {
+    if (!obj) return;
+    for (const [col, val] of Object.entries(obj)) {
+      if (val === undefined) continue;
+      const key = `${op}_${col}`;
+      if (Array.isArray(val)) {
+        if (val.length) params.set(key, val.join(","));
+      } else {
+        params.set(key, String(val));
+      }
+    }
+  };
+
+  appendFilterGroup("eq", options?.filters?.eq);
+  appendFilterGroup("neq", options?.filters?.neq);
+  appendFilterGroup("gt", options?.filters?.gt);
+  appendFilterGroup("gte", options?.filters?.gte);
+  appendFilterGroup("lt", options?.filters?.lt);
+  appendFilterGroup("lte", options?.filters?.lte);
+  appendFilterGroup("ilike", options?.filters?.ilike);
+  appendFilterGroup("in", options?.filters?.in);
+  appendFilterGroup("is", options?.filters?.is);
+
+  const url =
+    options && Object.keys(options).length > 0
+      ? `/parcels/features?${params.toString()}`
+      : `/parcels/features`;
+
+  const { data, error, isLoading } = useSWR<{
+    data: ParcelValueFeatureRow[];
+    meta: ParcelFeaturesMeta;
+  }>(url, fetcher);
+
+  return {
+    data: data?.data ?? [],
+    meta: data?.meta,
+    error,
+    isLoading,
+  };
 }
