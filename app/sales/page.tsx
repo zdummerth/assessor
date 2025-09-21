@@ -19,6 +19,19 @@ import {
   type ViewMode,
   type RawRow,
 } from "./utils";
+import data from "@/lib/land_use_arrays.json";
+
+// ---------- land use sets ----------
+const residential = data.residential as number[];
+const commercial = data.commercial as number[];
+const industrial = data.agriculture as number[];
+const lots = data.lots as number[];
+const single_family = data.single_family as number[];
+const condo = data.condo as number[];
+
+const all_residential = [...residential, ...single_family, ...condo];
+const all_other = [...commercial, ...industrial];
+const all_lots = lots;
 
 type TrimChoice = "" | "1.5" | "3";
 type Tab = "sale_price" | "ratio" | "raw" | "multi"; // NEW
@@ -59,8 +72,20 @@ export default function SoldParcelRatiosFeaturesStats() {
     );
   }
   function resetToResidential() {
-    setSelectedLandUses(RESIDENTIAL_LU_DEFAULTS);
+    setSelectedLandUses(all_residential.map(String));
     setTrim("1.5");
+  }
+  function resetToOther() {
+    setSelectedLandUses(all_other.map(String));
+    setTrim("");
+  }
+  function resetToLots() {
+    setSelectedLandUses(all_lots.map(String));
+    setTrim("");
+  }
+  function resetToAll() {
+    setSelectedLandUses([]);
+    setTrim("");
   }
 
   // Land uses
@@ -196,6 +221,9 @@ export default function SoldParcelRatiosFeaturesStats() {
         includeRaw={tab === "raw"} // harmless; keeps existing prop usage
         setIncludeRaw={(val: boolean) => setTab(val ? "raw" : "sale_price")}
         resetToResidential={resetToResidential}
+        resetToOther={resetToOther}
+        resetToLots={resetToLots}
+        resetToAll={resetToAll}
         onExportStats={tab === "raw" ? exportRawCsv : exportCurrentCsv}
         onExportRaw={exportRawCsv}
       />

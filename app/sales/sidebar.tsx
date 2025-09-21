@@ -34,6 +34,9 @@ type Props = {
 
   // helpers
   resetToResidential: () => void;
+  resetToOther: () => void;
+  resetToLots: () => void;
+  resetToAll: () => void;
 
   // actions
   onExportStats: () => void;
@@ -64,6 +67,9 @@ export default function RatioSidebar({
   groupables,
 
   resetToResidential,
+  resetToOther,
+  resetToLots,
+  resetToAll,
 
   onExportStats,
   onExportRaw,
@@ -157,6 +163,27 @@ export default function RatioSidebar({
             onClick={resetToResidential}
           >
             Set to Residential
+          </button>
+          <button
+            type="button"
+            className="rounded-md border px-2 py-1 text-xs"
+            onClick={resetToOther}
+          >
+            Set to Other
+          </button>
+          <button
+            type="button"
+            className="rounded-md border px-2 py-1 text-xs"
+            onClick={resetToLots}
+          >
+            Set to Lots
+          </button>
+          <button
+            type="button"
+            className="rounded-md border px-2 py-1 text-xs"
+            onClick={resetToAll}
+          >
+            Set to All
           </button>
         </div>
 

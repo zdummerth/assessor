@@ -9,7 +9,7 @@ export default async function ParcelCompsClient({
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .rpc("get_parcel_value_features_asof", {
+    .rpc("get_parcel_features", {
       p_parcel_ids: [parcelId],
       p_as_of_date: new Date().toISOString(),
       p_land_uses: undefined,

@@ -5,7 +5,7 @@ import Link from "next/link";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
 import ParcelStructures from "@/components/parcel-structures/server";
 import ParcelSales from "@/components/parcel-sales/server";
-import ParcelScores from "@/components/parcel-scores/server";
+// import ParcelScores from "@/components/parcel-scores/server";
 import ParcelCompsClient from "@/components/parcel-comps-client/server";
 import ServerParcelFieldReviews from "./field-reviews/server";
 import ParcelDetails from "./details/server";
@@ -96,9 +96,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <Suspense fallback={<div>Loading parcel sales...</div>}>
             <ParcelSales parcelId={parcel.id} className="border rounded p-2" />
           </Suspense>
-          <Suspense fallback={<div>Loading parcel scores...</div>}>
+          {/* <Suspense fallback={<div>Loading parcel scores...</div>}>
             <ParcelScores parcelId={parcel.id} />
-          </Suspense>
+          </Suspense> */}
 
           {/* End right column */}
         </section>

@@ -8,9 +8,16 @@ import {
   fmtRatio,
   RawRow,
 } from "./utils";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+  Description,
+} from "@headlessui/react";
 
 // =======================================================
-// RawSalesView with all DB columns + client-side pagination
+// RawSalesView with table/cards + client-side pagination
 // =======================================================
 
 type RawViewProps = {
@@ -64,8 +71,8 @@ const SORTABLE_KEYS = new Set<RawSortKey>(RAW_SORT_OPTIONS.map((o) => o.key));
 const PAGE_SIZES = [10, 25, 50, 100, 250];
 
 function cmp(a: any, b: any) {
-  const an = a === null || a === undefined;
-  const bn = b === null || b === undefined;
+  const an = a == null;
+  const bn = b == null;
   if (an && bn) return 0;
   if (an) return 1;
   if (bn) return -1;
@@ -168,7 +175,7 @@ function PaginationControls({
 
 // ---------- format helpers specific to extra columns ----------
 const fmtYesNo = (b: boolean | null | undefined) =>
-  b === null || b === undefined ? "—" : b ? "Valid" : "Invalid";
+  b == null ? "—" : b ? "Valid" : "Invalid";
 
 const fmtInt = (n: any) => (isNum(n) ? Math.trunc(n).toLocaleString() : "—");
 const fmtFloat = (n: any, d = 2) => (isNum(n) ? n.toFixed(d) : "—");
@@ -225,7 +232,6 @@ type ColDef = {
     | "postcode";
   label: string;
   align?: "left" | "right";
-  // custom formatter (value, row) -> string | JSX
   fmt?: (v: any, row: AnyRow) => any;
 };
 
@@ -347,6 +353,9 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
   // Pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES_DEFAULT);
+
+  // Dialog state for full details (card view)
+  const [detailRow, setDetailRow] = useState<AnyRow | null>(null);
 
   // Sort rows (no filtering)
   const sorted = useMemo(() => {
@@ -476,7 +485,7 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
     );
   }
 
-  // ===== CARD VIEW (all DB columns) =====
+  // ===== CARD VIEW (compact + dialog for full details) =====
   return (
     <div className="space-y-3">
       <div>{HeaderBar}</div>
@@ -504,48 +513,200 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
         </button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {pageRows.map((r, i) => (
-          <div
-            key={`${r.sale_id}-${i}`}
-            className="rounded border p-2 shadow-sm space-y-2"
-          >
-            <div className="text-sm text-gray-500">
-              {fmtDate((r as AnyRow).sale_date)}
-            </div>
-            <div className="text-base font-semibold">
-              {fmtMoney((r as AnyRow).sale_price)}
-            </div>
-            <div className="text-sm">
-              Ratio:{" "}
-              <span className="font-medium">{fmtRatio(Number(r.ratio))}</span>
-            </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {pageRows.map((r, i) => {
+          const any = r as AnyRow;
+          const addr = [any.house_number, any.street].filter(Boolean).join(" ");
+          const cityline = [any.district, any.postcode]
+            .filter(Boolean)
+            .join(" • ");
 
-            {/* All DB fields in a tidy grid */}
-            <div className="grid grid-cols-1 gap-x-4 gap-y-1 text-xs">
-              {DB_COLUMNS.map((col) => {
-                const raw = (r as AnyRow)[col.key];
-                const value = col.fmt
-                  ? col.fmt(raw, r as AnyRow)
-                  : (raw ?? "—");
-                return (
-                  <div key={`${col.key}-${i}`} className="flex justify-between">
-                    <div className="text-gray-500">{col.label}</div>
-                    <div className={col.align === "right" ? "text-right" : ""}>
-                      {value}
-                    </div>
+          return (
+            <div
+              key={`${r.sale_id}-${i}`}
+              className="rounded border p-3 shadow-sm space-y-2"
+            >
+              {/* Top line: Date */}
+              <div className="text-xs text-gray-500">
+                {fmtDate(any.sale_date)}{" "}
+                {any.sale_type ? `• ${any.sale_type}` : ""}
+              </div>
+
+              {/* Price big */}
+              <div className="text-lg font-semibold">
+                {fmtMoney(any.sale_price)}
+              </div>
+
+              {/* Ratio + Parcel */}
+              <div className="text-sm">
+                Ratio:{" "}
+                <span className="font-medium">
+                  {fmtRatio(Number(any.ratio))}
+                </span>
+                {isNum(any.parcel_id) ? (
+                  <span className="text-gray-500">
+                    {" "}
+                    • Parcel {any.parcel_id}
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Address / LU */}
+              {(addr || cityline || any.land_use_asof || any.land_use_sale) && (
+                <div className="text-sm space-y-0.5">
+                  {addr && <div className="font-medium">{addr}</div>}
+                  {cityline && <div className="text-gray-600">{cityline}</div>}
+                  <div className="text-gray-600">
+                    {any.land_use_sale && (
+                      <span className="mr-2">
+                        Sale LU:{" "}
+                        <span className="font-medium">{any.land_use_sale}</span>
+                      </span>
+                    )}
+                    {any.land_use_asof && (
+                      <span>
+                        As-Of LU:{" "}
+                        <span className="font-medium">{any.land_use_asof}</span>
+                      </span>
+                    )}
                   </div>
-                );
-              })}
+                </div>
+              )}
+
+              {/* Key sizes */}
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="rounded bg-gray-50 dark:bg-gray-800 p-2">
+                  <div className="text-gray-500">Finished sf</div>
+                  <div className="font-medium">
+                    {fmtInt(any.total_finished_area)}
+                  </div>
+                </div>
+                {/* finished ppsqft */}
+                <div className="rounded bg-gray-50 dark:bg-gray-800 p-2">
+                  <div className="text-gray-500">PPSF (Finished)</div>
+                  <div className="font-medium">
+                    {fmtCurrency2(any.price_per_sqft_finished)}
+                  </div>
+                </div>
+                {/* total ppsqft */}
+                <div className="rounded bg-gray-50 dark:bg-gray-800 p-2">
+                  <div className="text-gray-500">PPSF (Total)</div>
+                  <div className="font-medium">
+                    {fmtCurrency2(any.price_per_sqft_building_total)}
+                  </div>
+                </div>
+                <div className="rounded bg-gray-50 dark:bg-gray-800 p-2">
+                  <div className="text-gray-500">Unfinished sf</div>
+                  <div className="font-medium">
+                    {fmtInt(any.total_unfinished_area)}
+                  </div>
+                </div>
+                <div className="rounded bg-gray-50 dark:bg-gray-800 p-2">
+                  <div className="text-gray-500">Land sf</div>
+                  <div className="font-medium">{fmtInt(any.land_area)}</div>
+                </div>
+                <div className="rounded bg-gray-50 dark:bg-gray-800 p-2">
+                  <div className="text-gray-500">Condition</div>
+                  <div className="font-medium">
+                    {isNum(any.avg_condition)
+                      ? any.avg_condition.toFixed(1)
+                      : "—"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="pt-1">
+                <button
+                  className="text-sm rounded border px-3 py-1 hover:bg-gray-50"
+                  onClick={() => setDetailRow(any)}
+                  type="button"
+                >
+                  View full details
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {totalCount === 0 && (
           <div className="text-sm text-gray-500">No rows to display.</div>
         )}
       </div>
 
       <div>{HeaderBar}</div>
+
+      {/* Full details dialog (Headless UI example style) */}
+      <Dialog
+        open={!!detailRow}
+        onClose={() => setDetailRow(null)}
+        className="relative z-50"
+      >
+        {/* The backdrop */}
+        <DialogBackdrop className="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm" />
+
+        {/* Full-screen container to center the panel */}
+        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+          {/* The actual dialog panel */}
+          <DialogPanel className="w-full max-w-4xl bg-background max-h-[90vh] overflow-y-auto space-y-4 rounded-md p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <DialogTitle className="font-bold">
+                  Sale {detailRow?.sale_id ?? "—"}
+                </DialogTitle>
+                <Description className="text-sm text-gray-600">
+                  Parcel {detailRow?.parcel_id ?? "—"} •{" "}
+                  {detailRow?.sale_date ? fmtDate(detailRow.sale_date) : "—"} •{" "}
+                  {/* @ts-expect-error d */}
+                  Price {fmtMoney(detailRow?.sale_price)}
+                </Description>
+              </div>
+              <button
+                onClick={() => setDetailRow(null)}
+                className="rounded-md border px-2 py-1 text-sm"
+                type="button"
+                aria-label="Close dialog"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* All DB fields in a tidy grid */}
+            <div className="grid gap-3 md:grid-cols-2">
+              {detailRow &&
+                DB_COLUMNS.map((col) => {
+                  const raw = (detailRow as AnyRow)[col.key];
+                  const value = col.fmt
+                    ? col.fmt(raw, detailRow)
+                    : (raw ?? "—");
+                  return (
+                    <div key={String(col.key)} className="rounded border p-2">
+                      <div className="text-xs font-semibold text-gray-600">
+                        {col.label}
+                      </div>
+                      <div
+                        className={`mt-1 text-sm ${
+                          col.align === "right" ? "text-right" : ""
+                        }`}
+                      >
+                        {value}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setDetailRow(null)}
+                className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                type="button"
+              >
+                Done
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </div>
   );
 }
