@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
     if (parcelIdsArg) args.p_parcel_ids = parcelIdsArg;
 
     // ---- Base query (use count for pagination metadata if available) ----
-    let query = supabase.rpc("get_parcel_value_features_asof", args, {
+    let query = supabase.rpc("get_parcel_features", args, {
       count: "exact",
     });
 

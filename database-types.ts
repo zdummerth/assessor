@@ -341,13 +341,6 @@ export type Database = {
             referencedRelation: "appraisers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "parcel_review_appeals_parcel_number_year_fkey"
-            columns: ["parcel_number", "year"]
-            isOneToOne: false
-            referencedRelation: "parcel_year"
-            referencedColumns: ["parcel_number", "year"]
-          },
         ]
       }
       appraiser_appeal_stats: {
@@ -473,15 +466,7 @@ export type Database = {
           status?: string | null
           year?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "bps_parcel_number_fkey"
-            columns: ["parcel_number"]
-            isOneToOne: false
-            referencedRelation: "parcel_reviews_2025"
-            referencedColumns: ["parcel_number"]
-          },
-        ]
+        Relationships: []
       }
       cda_codes: {
         Row: {
@@ -647,130 +632,6 @@ export type Database = {
           total_percent_change?: number | null
         }
         Relationships: []
-      }
-      comparables: {
-        Row: {
-          address: string | null
-          condition: string | null
-          construction_type: string | null
-          date_of_sale: string | null
-          gla: number | null
-          gower_dist: number | null
-          id: number
-          lat: number | null
-          lon: number | null
-          neighborhood: string | null
-          net_selling_price: number | null
-          parcel_number: string | null
-          subject_parcel: string | null
-          touched: number | null
-        }
-        Insert: {
-          address?: string | null
-          condition?: string | null
-          construction_type?: string | null
-          date_of_sale?: string | null
-          gla?: number | null
-          gower_dist?: number | null
-          id?: number
-          lat?: number | null
-          lon?: number | null
-          neighborhood?: string | null
-          net_selling_price?: number | null
-          parcel_number?: string | null
-          subject_parcel?: string | null
-          touched?: number | null
-        }
-        Update: {
-          address?: string | null
-          condition?: string | null
-          construction_type?: string | null
-          date_of_sale?: string | null
-          gla?: number | null
-          gower_dist?: number | null
-          id?: number
-          lat?: number | null
-          lon?: number | null
-          neighborhood?: string | null
-          net_selling_price?: number | null
-          parcel_number?: string | null
-          subject_parcel?: string | null
-          touched?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comparables_subject_parcel_fkey"
-            columns: ["subject_parcel"]
-            isOneToOne: false
-            referencedRelation: "parcel_master"
-            referencedColumns: ["parcel_number"]
-          },
-        ]
-      }
-      compare_appraised_total_results: {
-        Row: {
-          appraiser_id: number | null
-          difference: number | null
-          end_total: number | null
-          land_use: string | null
-          neighborhood: string | null
-          neighborhood_int: number | null
-          occupancy: string | null
-          parcel_number: string | null
-          pct_change: number | null
-          prefix_directional: string | null
-          prop_class: string | null
-          site_street_name: string | null
-          site_street_number: string | null
-          site_zip_code: string | null
-          start_total: number | null
-          tax_status: string | null
-        }
-        Insert: {
-          appraiser_id?: number | null
-          difference?: number | null
-          end_total?: number | null
-          land_use?: string | null
-          neighborhood?: string | null
-          neighborhood_int?: number | null
-          occupancy?: string | null
-          parcel_number?: string | null
-          pct_change?: number | null
-          prefix_directional?: string | null
-          prop_class?: string | null
-          site_street_name?: string | null
-          site_street_number?: string | null
-          site_zip_code?: string | null
-          start_total?: number | null
-          tax_status?: string | null
-        }
-        Update: {
-          appraiser_id?: number | null
-          difference?: number | null
-          end_total?: number | null
-          land_use?: string | null
-          neighborhood?: string | null
-          neighborhood_int?: number | null
-          occupancy?: string | null
-          parcel_number?: string | null
-          pct_change?: number | null
-          prefix_directional?: string | null
-          prop_class?: string | null
-          site_street_name?: string | null
-          site_street_number?: string | null
-          site_zip_code?: string | null
-          start_total?: number | null
-          tax_status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "compare_appraised_total_results_appraiser_id_fkey"
-            columns: ["appraiser_id"]
-            isOneToOne: false
-            referencedRelation: "appraisers"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       departments: {
         Row: {
@@ -1310,13 +1171,6 @@ export type Database = {
             referencedRelation: "list"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "list_parcel_year_parcel_number_year_fkey"
-            columns: ["parcel_number", "year"]
-            isOneToOne: false
-            referencedRelation: "parcel_year"
-            referencedColumns: ["parcel_number", "year"]
-          },
         ]
       }
       ml_model_coefficients: {
@@ -1591,213 +1445,6 @@ export type Database = {
         }
         Relationships: []
       }
-      parcel_master: {
-        Row: {
-          created_at: string | null
-          parcel_number: string
-          retired_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          parcel_number: string
-          retired_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          parcel_number?: string
-          retired_at?: string | null
-        }
-        Relationships: []
-      }
-      parcel_review_abatements: {
-        Row: {
-          abate_description: string | null
-          abate_notes: string | null
-          id: number
-          name: string | null
-          parcel_number: string | null
-          year_created: number | null
-          year_expires: number | null
-        }
-        Insert: {
-          abate_description?: string | null
-          abate_notes?: string | null
-          id?: number
-          name?: string | null
-          parcel_number?: string | null
-          year_created?: number | null
-          year_expires?: number | null
-        }
-        Update: {
-          abate_description?: string | null
-          abate_notes?: string | null
-          id?: number
-          name?: string | null
-          parcel_number?: string | null
-          year_created?: number | null
-          year_expires?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_review_abatements_parcel_number_fkey"
-            columns: ["parcel_number"]
-            isOneToOne: false
-            referencedRelation: "parcel_reviews_2025"
-            referencedColumns: ["parcel_number"]
-          },
-        ]
-      }
-      parcel_review_sales: {
-        Row: {
-          date_of_sale: string | null
-          document_number: string | null
-          field_review_date: string | null
-          id: number
-          net_selling_price: number | null
-          parcel_number: string | null
-          report_date: string | null
-          sale_type: string | null
-          sale_year: number | null
-          year: number | null
-        }
-        Insert: {
-          date_of_sale?: string | null
-          document_number?: string | null
-          field_review_date?: string | null
-          id?: number
-          net_selling_price?: number | null
-          parcel_number?: string | null
-          report_date?: string | null
-          sale_type?: string | null
-          sale_year?: number | null
-          year?: number | null
-        }
-        Update: {
-          date_of_sale?: string | null
-          document_number?: string | null
-          field_review_date?: string | null
-          id?: number
-          net_selling_price?: number | null
-          parcel_number?: string | null
-          report_date?: string | null
-          sale_type?: string | null
-          sale_year?: number | null
-          year?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_review_sales_parcel_number_fkey"
-            columns: ["parcel_number"]
-            isOneToOne: false
-            referencedRelation: "parcel_reviews_2025"
-            referencedColumns: ["parcel_number"]
-          },
-        ]
-      }
-      parcel_reviews_2025: {
-        Row: {
-          appraised_total_2024: number | null
-          appraised_total_2025: number | null
-          appraiser_id: number | null
-          current_value_difference: number | null
-          data_collection: string | null
-          difference: number | null
-          field_reviewed: string | null
-          fire_time: string | null
-          geometry: Json | null
-          neighborhood: string | null
-          neighborhood_int: number | null
-          occupancy: string | null
-          owner_address1: string | null
-          owner_address2: string | null
-          owner_city: string | null
-          owner_name: string | null
-          owner_state: string | null
-          owner_zip: string | null
-          parcel_number: string
-          percent_change: number | null
-          prefix_directional: string | null
-          prop_class: string | null
-          site_street_name: string | null
-          site_street_number: string | null
-          site_zip_code: string | null
-          tax_status: string | null
-          working_appraised_total_2025: number | null
-          working_difference: number | null
-          working_percent_change: number | null
-        }
-        Insert: {
-          appraised_total_2024?: number | null
-          appraised_total_2025?: number | null
-          appraiser_id?: number | null
-          current_value_difference?: number | null
-          data_collection?: string | null
-          difference?: number | null
-          field_reviewed?: string | null
-          fire_time?: string | null
-          geometry?: Json | null
-          neighborhood?: string | null
-          neighborhood_int?: number | null
-          occupancy?: string | null
-          owner_address1?: string | null
-          owner_address2?: string | null
-          owner_city?: string | null
-          owner_name?: string | null
-          owner_state?: string | null
-          owner_zip?: string | null
-          parcel_number: string
-          percent_change?: number | null
-          prefix_directional?: string | null
-          prop_class?: string | null
-          site_street_name?: string | null
-          site_street_number?: string | null
-          site_zip_code?: string | null
-          tax_status?: string | null
-          working_appraised_total_2025?: number | null
-          working_difference?: number | null
-          working_percent_change?: number | null
-        }
-        Update: {
-          appraised_total_2024?: number | null
-          appraised_total_2025?: number | null
-          appraiser_id?: number | null
-          current_value_difference?: number | null
-          data_collection?: string | null
-          difference?: number | null
-          field_reviewed?: string | null
-          fire_time?: string | null
-          geometry?: Json | null
-          neighborhood?: string | null
-          neighborhood_int?: number | null
-          occupancy?: string | null
-          owner_address1?: string | null
-          owner_address2?: string | null
-          owner_city?: string | null
-          owner_name?: string | null
-          owner_state?: string | null
-          owner_zip?: string | null
-          parcel_number?: string
-          percent_change?: number | null
-          prefix_directional?: string | null
-          prop_class?: string | null
-          site_street_name?: string | null
-          site_street_number?: string | null
-          site_zip_code?: string | null
-          tax_status?: string | null
-          working_appraised_total_2025?: number | null
-          working_difference?: number | null
-          working_percent_change?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_reviews_2025_appraiser_id_fkey"
-            columns: ["appraiser_id"]
-            isOneToOne: false
-            referencedRelation: "appraisers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       parcel_site_addresses: {
         Row: {
           address_id: number
@@ -2023,176 +1670,6 @@ export type Database = {
           },
         ]
       }
-      parcel_year: {
-        Row: {
-          agr_bldg: number | null
-          agr_bldg_assess: number | null
-          agr_land: number | null
-          agr_land_assess: number | null
-          agr_new_const: number | null
-          agr_new_const_assess: number | null
-          appraised_total: number | null
-          appraiser_id: number | null
-          area: number | null
-          assessed_total: number | null
-          com_bldg: number | null
-          com_bldg_assess: number | null
-          com_land: number | null
-          com_land_assess: number | null
-          com_new_const: number | null
-          com_new_const_assess: number | null
-          dist_city: string | null
-          dist_college: string | null
-          dist_school: string | null
-          dist_tif: string | null
-          land_use: string | null
-          neighborhood: string | null
-          occupancy: string | null
-          owner_address_1: string | null
-          owner_address_2: string | null
-          owner_city: string | null
-          owner_name: string | null
-          owner_state: string | null
-          owner_zip: string | null
-          parcel_number: string
-          prefix_directional: string | null
-          prop_class: string | null
-          report_timestamp: string | null
-          res_acres: number | null
-          res_bldg: number | null
-          res_bldg_assess: number | null
-          res_land: number | null
-          res_land_assess: number | null
-          res_new_const: number | null
-          res_new_const_assess: number | null
-          section: string | null
-          site_street_name: string | null
-          site_street_number: string | null
-          site_zip_code: string | null
-          tax_status: string | null
-          taxcode: string | null
-          use_code: string | null
-          working_improve_value: number | null
-          working_land_value: number | null
-          working_total_value: number | null
-          year: number
-        }
-        Insert: {
-          agr_bldg?: number | null
-          agr_bldg_assess?: number | null
-          agr_land?: number | null
-          agr_land_assess?: number | null
-          agr_new_const?: number | null
-          agr_new_const_assess?: number | null
-          appraised_total?: number | null
-          appraiser_id?: number | null
-          area?: number | null
-          assessed_total?: number | null
-          com_bldg?: number | null
-          com_bldg_assess?: number | null
-          com_land?: number | null
-          com_land_assess?: number | null
-          com_new_const?: number | null
-          com_new_const_assess?: number | null
-          dist_city?: string | null
-          dist_college?: string | null
-          dist_school?: string | null
-          dist_tif?: string | null
-          land_use?: string | null
-          neighborhood?: string | null
-          occupancy?: string | null
-          owner_address_1?: string | null
-          owner_address_2?: string | null
-          owner_city?: string | null
-          owner_name?: string | null
-          owner_state?: string | null
-          owner_zip?: string | null
-          parcel_number: string
-          prefix_directional?: string | null
-          prop_class?: string | null
-          report_timestamp?: string | null
-          res_acres?: number | null
-          res_bldg?: number | null
-          res_bldg_assess?: number | null
-          res_land?: number | null
-          res_land_assess?: number | null
-          res_new_const?: number | null
-          res_new_const_assess?: number | null
-          section?: string | null
-          site_street_name?: string | null
-          site_street_number?: string | null
-          site_zip_code?: string | null
-          tax_status?: string | null
-          taxcode?: string | null
-          use_code?: string | null
-          working_improve_value?: number | null
-          working_land_value?: number | null
-          working_total_value?: number | null
-          year: number
-        }
-        Update: {
-          agr_bldg?: number | null
-          agr_bldg_assess?: number | null
-          agr_land?: number | null
-          agr_land_assess?: number | null
-          agr_new_const?: number | null
-          agr_new_const_assess?: number | null
-          appraised_total?: number | null
-          appraiser_id?: number | null
-          area?: number | null
-          assessed_total?: number | null
-          com_bldg?: number | null
-          com_bldg_assess?: number | null
-          com_land?: number | null
-          com_land_assess?: number | null
-          com_new_const?: number | null
-          com_new_const_assess?: number | null
-          dist_city?: string | null
-          dist_college?: string | null
-          dist_school?: string | null
-          dist_tif?: string | null
-          land_use?: string | null
-          neighborhood?: string | null
-          occupancy?: string | null
-          owner_address_1?: string | null
-          owner_address_2?: string | null
-          owner_city?: string | null
-          owner_name?: string | null
-          owner_state?: string | null
-          owner_zip?: string | null
-          parcel_number?: string
-          prefix_directional?: string | null
-          prop_class?: string | null
-          report_timestamp?: string | null
-          res_acres?: number | null
-          res_bldg?: number | null
-          res_bldg_assess?: number | null
-          res_land?: number | null
-          res_land_assess?: number | null
-          res_new_const?: number | null
-          res_new_const_assess?: number | null
-          section?: string | null
-          site_street_name?: string | null
-          site_street_number?: string | null
-          site_zip_code?: string | null
-          tax_status?: string | null
-          taxcode?: string | null
-          use_code?: string | null
-          working_improve_value?: number | null
-          working_land_value?: number | null
-          working_total_value?: number | null
-          year?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_year_appraiser_id_fkey"
-            columns: ["appraiser_id"]
-            isOneToOne: false
-            referencedRelation: "appraisers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       parcels: {
         Row: {
           created_at: string | null
@@ -2252,174 +1729,6 @@ export type Database = {
           },
         ]
       }
-      prcl: {
-        Row: {
-          abatementendyear: number | null
-          abatementstartyear: number | null
-          abatementtype: string | null
-          apragrimprove: number | null
-          apragrland: number | null
-          aprcomimprove: number | null
-          aprcomland: number | null
-          aprexemptimprove: number | null
-          aprexemptland: number | null
-          aprland: number | null
-          aprresimprove: number | null
-          aprresland: number | null
-          asdagrimprove: number | null
-          asdagrland: number | null
-          asdcomimprove: number | null
-          asdcomland: number | null
-          asdresimprove: number | null
-          asdresland: number | null
-          asdtotal: number | null
-          asmtappealnum: number | null
-          asmtappealtype: string | null
-          asmtappealyear: number | null
-          asrclasscode: number | null
-          asrlanduse1: string | null
-          asrnbrhd: number | null
-          asrparcelid: number
-          cdalanduse1: string | null
-          condominium: boolean | null
-          highaddrnum: number | null
-          isabatedproperty: boolean | null
-          landarea: number | null
-          lowaddrnum: number | null
-          nbrhd: number | null
-          nbrofapts: number | null
-          nbrofbldgscom: number | null
-          nbrofbldgsres: number | null
-          nbrofunits: number | null
-          ownername: string | null
-          precinct20: number | null
-          propertyclasscode: number | null
-          redevphase: string | null
-          redevphase2: string | null
-          redevyearend: number | null
-          redevyearend2: number | null
-          specbusdist: string | null
-          stname: string | null
-          stpredir: string | null
-          sttype: string | null
-          tifdist: string | null
-          vacantlot: boolean | null
-          ward20: number | null
-          zip: string | null
-          zoning: string | null
-        }
-        Insert: {
-          abatementendyear?: number | null
-          abatementstartyear?: number | null
-          abatementtype?: string | null
-          apragrimprove?: number | null
-          apragrland?: number | null
-          aprcomimprove?: number | null
-          aprcomland?: number | null
-          aprexemptimprove?: number | null
-          aprexemptland?: number | null
-          aprland?: number | null
-          aprresimprove?: number | null
-          aprresland?: number | null
-          asdagrimprove?: number | null
-          asdagrland?: number | null
-          asdcomimprove?: number | null
-          asdcomland?: number | null
-          asdresimprove?: number | null
-          asdresland?: number | null
-          asdtotal?: number | null
-          asmtappealnum?: number | null
-          asmtappealtype?: string | null
-          asmtappealyear?: number | null
-          asrclasscode?: number | null
-          asrlanduse1?: string | null
-          asrnbrhd?: number | null
-          asrparcelid: number
-          cdalanduse1?: string | null
-          condominium?: boolean | null
-          highaddrnum?: number | null
-          isabatedproperty?: boolean | null
-          landarea?: number | null
-          lowaddrnum?: number | null
-          nbrhd?: number | null
-          nbrofapts?: number | null
-          nbrofbldgscom?: number | null
-          nbrofbldgsres?: number | null
-          nbrofunits?: number | null
-          ownername?: string | null
-          precinct20?: number | null
-          propertyclasscode?: number | null
-          redevphase?: string | null
-          redevphase2?: string | null
-          redevyearend?: number | null
-          redevyearend2?: number | null
-          specbusdist?: string | null
-          stname?: string | null
-          stpredir?: string | null
-          sttype?: string | null
-          tifdist?: string | null
-          vacantlot?: boolean | null
-          ward20?: number | null
-          zip?: string | null
-          zoning?: string | null
-        }
-        Update: {
-          abatementendyear?: number | null
-          abatementstartyear?: number | null
-          abatementtype?: string | null
-          apragrimprove?: number | null
-          apragrland?: number | null
-          aprcomimprove?: number | null
-          aprcomland?: number | null
-          aprexemptimprove?: number | null
-          aprexemptland?: number | null
-          aprland?: number | null
-          aprresimprove?: number | null
-          aprresland?: number | null
-          asdagrimprove?: number | null
-          asdagrland?: number | null
-          asdcomimprove?: number | null
-          asdcomland?: number | null
-          asdresimprove?: number | null
-          asdresland?: number | null
-          asdtotal?: number | null
-          asmtappealnum?: number | null
-          asmtappealtype?: string | null
-          asmtappealyear?: number | null
-          asrclasscode?: number | null
-          asrlanduse1?: string | null
-          asrnbrhd?: number | null
-          asrparcelid?: number
-          cdalanduse1?: string | null
-          condominium?: boolean | null
-          highaddrnum?: number | null
-          isabatedproperty?: boolean | null
-          landarea?: number | null
-          lowaddrnum?: number | null
-          nbrhd?: number | null
-          nbrofapts?: number | null
-          nbrofbldgscom?: number | null
-          nbrofbldgsres?: number | null
-          nbrofunits?: number | null
-          ownername?: string | null
-          precinct20?: number | null
-          propertyclasscode?: number | null
-          redevphase?: string | null
-          redevphase2?: string | null
-          redevyearend?: number | null
-          redevyearend2?: number | null
-          specbusdist?: string | null
-          stname?: string | null
-          stpredir?: string | null
-          sttype?: string | null
-          tifdist?: string | null
-          vacantlot?: boolean | null
-          ward20?: number | null
-          zip?: string | null
-          zoning?: string | null
-        }
-        Relationships: []
-      }
       report_dates: {
         Row: {
           id: number
@@ -2456,132 +1765,6 @@ export type Database = {
           column_name?: string | null
           id?: number
           table_name?: string | null
-        }
-        Relationships: []
-      }
-      res_structures: {
-        Row: {
-          actual_value: number | null
-          additions: number | null
-          adjustments: number | null
-          base_fctr_ttl: number | null
-          base_value: number | null
-          cdu_adjustment_cndtn: string | null
-          condition: string | null
-          eff_year_build: number | null
-          grade_fctr_qlty: string | null
-          id: number
-          land_value: number | null
-          multiplier_fctr: number | null
-          multiplier_value: number | null
-          neighborhood_code: string | null
-          oby_rcn_value: number | null
-          oby_rcnld_value: number | null
-          occupancy: number | null
-          override_value: number | null
-          parcel_number: string | null
-          property_group: number | null
-          prorated_value: number | null
-          quality: string | null
-          report_date: string | null
-          struct_rcn_value: number | null
-          struct_rcnld_value: number | null
-          structure_name: string | null
-          year: number | null
-          year_built: number | null
-        }
-        Insert: {
-          actual_value?: number | null
-          additions?: number | null
-          adjustments?: number | null
-          base_fctr_ttl?: number | null
-          base_value?: number | null
-          cdu_adjustment_cndtn?: string | null
-          condition?: string | null
-          eff_year_build?: number | null
-          grade_fctr_qlty?: string | null
-          id?: number
-          land_value?: number | null
-          multiplier_fctr?: number | null
-          multiplier_value?: number | null
-          neighborhood_code?: string | null
-          oby_rcn_value?: number | null
-          oby_rcnld_value?: number | null
-          occupancy?: number | null
-          override_value?: number | null
-          parcel_number?: string | null
-          property_group?: number | null
-          prorated_value?: number | null
-          quality?: string | null
-          report_date?: string | null
-          struct_rcn_value?: number | null
-          struct_rcnld_value?: number | null
-          structure_name?: string | null
-          year?: number | null
-          year_built?: number | null
-        }
-        Update: {
-          actual_value?: number | null
-          additions?: number | null
-          adjustments?: number | null
-          base_fctr_ttl?: number | null
-          base_value?: number | null
-          cdu_adjustment_cndtn?: string | null
-          condition?: string | null
-          eff_year_build?: number | null
-          grade_fctr_qlty?: string | null
-          id?: number
-          land_value?: number | null
-          multiplier_fctr?: number | null
-          multiplier_value?: number | null
-          neighborhood_code?: string | null
-          oby_rcn_value?: number | null
-          oby_rcnld_value?: number | null
-          occupancy?: number | null
-          override_value?: number | null
-          parcel_number?: string | null
-          property_group?: number | null
-          prorated_value?: number | null
-          quality?: string | null
-          report_date?: string | null
-          struct_rcn_value?: number | null
-          struct_rcnld_value?: number | null
-          structure_name?: string | null
-          year?: number | null
-          year_built?: number | null
-        }
-        Relationships: []
-      }
-      sales_master: {
-        Row: {
-          date_of_sale: string | null
-          document_number: number
-          field_review_date: string | null
-          id: number
-          net_selling_price: number | null
-          report_timestamp: string | null
-          sale_type: string | null
-          sale_year: number | null
-        }
-        Insert: {
-          date_of_sale?: string | null
-          document_number: number
-          field_review_date?: string | null
-          id?: number
-          net_selling_price?: number | null
-          report_timestamp?: string | null
-          sale_type?: string | null
-          sale_year?: number | null
-        }
-        Update: {
-          date_of_sale?: string | null
-          document_number?: number
-          field_review_date?: string | null
-          id?: number
-          net_selling_price?: number | null
-          report_timestamp?: string | null
-          sale_type?: string | null
-          sale_year?: number | null
         }
         Relationships: []
       }
@@ -2769,15 +1952,7 @@ export type Database = {
           submission_type?: string | null
           year?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "senior_tax_credits_parcel_number_fkey"
-            columns: ["parcel_number"]
-            isOneToOne: true
-            referencedRelation: "parcel_reviews_2025"
-            referencedColumns: ["parcel_number"]
-          },
-        ]
+        Relationships: []
       }
       site_address_master: {
         Row: {
@@ -2876,153 +2051,6 @@ export type Database = {
           id?: number
         }
         Relationships: []
-      }
-      test_comparables: {
-        Row: {
-          address: string | null
-          adjusted_sale_price: number | null
-          cdu: string | null
-          cdu_adjustment: number | null
-          cost_group: string | null
-          cost_group_adjustment: number | null
-          date_of_sale: string | null
-          garage_area: number | null
-          garage_area_adjustment: number | null
-          gla: number | null
-          gla_adjustment: number | null
-          gower_dist: number | null
-          grade: string | null
-          land_use: string | null
-          land_use_adjustment: number | null
-          lat: number | null
-          lon: number | null
-          miles_distance: number | null
-          neighborhood: number | null
-          neighborhood_group: string | null
-          neighborhood_group_adjustment: number | null
-          net_selling_price: number | null
-          parcel_id: number | null
-          sale_id: number | null
-          story: number | null
-          story_adjustment: number | null
-          subject_address: string | null
-          subject_appraised_total: number | null
-          subject_cdu: string | null
-          subject_cost_group: string | null
-          subject_garage_area: number | null
-          subject_gla: number | null
-          subject_land_use: string | null
-          subject_lat: number | null
-          subject_lon: number | null
-          subject_neighborhood_group: string | null
-          subject_parcel: number | null
-          subject_story: number | null
-          subject_year_built: number | null
-          year_built: number | null
-          year_built_adjustment: number | null
-        }
-        Insert: {
-          address?: string | null
-          adjusted_sale_price?: number | null
-          cdu?: string | null
-          cdu_adjustment?: number | null
-          cost_group?: string | null
-          cost_group_adjustment?: number | null
-          date_of_sale?: string | null
-          garage_area?: number | null
-          garage_area_adjustment?: number | null
-          gla?: number | null
-          gla_adjustment?: number | null
-          gower_dist?: number | null
-          grade?: string | null
-          land_use?: string | null
-          land_use_adjustment?: number | null
-          lat?: number | null
-          lon?: number | null
-          miles_distance?: number | null
-          neighborhood?: number | null
-          neighborhood_group?: string | null
-          neighborhood_group_adjustment?: number | null
-          net_selling_price?: number | null
-          parcel_id?: number | null
-          sale_id?: number | null
-          story?: number | null
-          story_adjustment?: number | null
-          subject_address?: string | null
-          subject_appraised_total?: number | null
-          subject_cdu?: string | null
-          subject_cost_group?: string | null
-          subject_garage_area?: number | null
-          subject_gla?: number | null
-          subject_land_use?: string | null
-          subject_lat?: number | null
-          subject_lon?: number | null
-          subject_neighborhood_group?: string | null
-          subject_parcel?: number | null
-          subject_story?: number | null
-          subject_year_built?: number | null
-          year_built?: number | null
-          year_built_adjustment?: number | null
-        }
-        Update: {
-          address?: string | null
-          adjusted_sale_price?: number | null
-          cdu?: string | null
-          cdu_adjustment?: number | null
-          cost_group?: string | null
-          cost_group_adjustment?: number | null
-          date_of_sale?: string | null
-          garage_area?: number | null
-          garage_area_adjustment?: number | null
-          gla?: number | null
-          gla_adjustment?: number | null
-          gower_dist?: number | null
-          grade?: string | null
-          land_use?: string | null
-          land_use_adjustment?: number | null
-          lat?: number | null
-          lon?: number | null
-          miles_distance?: number | null
-          neighborhood?: number | null
-          neighborhood_group?: string | null
-          neighborhood_group_adjustment?: number | null
-          net_selling_price?: number | null
-          parcel_id?: number | null
-          sale_id?: number | null
-          story?: number | null
-          story_adjustment?: number | null
-          subject_address?: string | null
-          subject_appraised_total?: number | null
-          subject_cdu?: string | null
-          subject_cost_group?: string | null
-          subject_garage_area?: number | null
-          subject_gla?: number | null
-          subject_land_use?: string | null
-          subject_lat?: number | null
-          subject_lon?: number | null
-          subject_neighborhood_group?: string | null
-          subject_parcel?: number | null
-          subject_story?: number | null
-          subject_year_built?: number | null
-          year_built?: number | null
-          year_built_adjustment?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "test_comparables_parcel_id_fkey"
-            columns: ["parcel_id"]
-            isOneToOne: false
-            referencedRelation: "test_parcels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_comparables_subject_parcel_fkey"
-            columns: ["subject_parcel"]
-            isOneToOne: false
-            referencedRelation: "test_parcels"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       test_conditions: {
         Row: {
@@ -4166,16 +3194,6 @@ export type Database = {
       }
     }
     Functions: {
-      comp_sales_linreg_madlib: {
-        Args: { p_parcel_id: number; p_top_k?: number; p_years?: number }
-        Returns: {
-          coefficient: number
-          feature_name: string
-          num_rows: number
-          predicted_price: number
-          r2: number
-        }[]
-      }
       compare_appraised_total: {
         Args: { p_end_year: number; p_start_year: number }
         Returns: {
@@ -4586,6 +3604,47 @@ export type Database = {
           street: string
           structures: Json
           value_row: Json
+        }[]
+      }
+      get_parcel_features: {
+        Args: {
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          postcode: string
+          retired_at: string
+          street: string
+          structure_count: number
+          structures: Json
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+          values_per_sqft_building_total: number
+          values_per_sqft_finished: number
+          values_per_sqft_land: number
+          values_per_unit: number
         }[]
       }
       get_parcel_features_as_of: {
@@ -5190,20 +4249,13 @@ export type Database = {
           village: string | null
         }[]
       }
-      search_parcels: {
+      search_parcels_by_prefix: {
         Args: { active?: boolean; prefix: string }
         Returns: {
           addresses: Json[]
-          appraised_total: number
-          appraiser: string
-          appraiser_email: string
-          appraiser_phone: string
-          land_use: string
           names: string[]
-          neighborhood: string
-          parcel: string
-          prop_class: string
-          retired: string
+          parcel_number: string
+          retired_at: string
         }[]
       }
       search_site_address_master: {

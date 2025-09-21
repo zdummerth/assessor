@@ -316,36 +316,3 @@ export const signOutAction = async () => {
   await supabase.auth.signOut();
   return redirect("/login");
 };
-
-export const updateDataCollectionNoteAction = async (
-  prevState: any,
-  formData: FormData
-) => {
-  const note = formData.get("note")?.toString() || null;
-  const parcelNumber = formData.get("parcel_number")?.toString() || null;
-
-  console.log("prevState in action", prevState);
-  console.log("note in action", note);
-  console.log("parcelNumber in action", parcelNumber);
-
-  if (!parcelNumber) {
-    return { error: "Parcel number is required" };
-  }
-  // get current timestamp
-  const currentTimestamp = new Date().toISOString();
-  const supabase = await createClient();
-  const { error } = await supabase.from("parcel_reviews_2025").upsert({
-    data_collection: note,
-    field_reviewed: currentTimestamp,
-    parcel_number: parcelNumber,
-  });
-
-  if (error) {
-    return { error };
-  }
-  revalidatePath("/appraisers");
-  return {
-    success: true,
-    message: "Note updated successfully",
-  };
-};

@@ -227,20 +227,6 @@ export async function getFilteredData({
   }
 }
 
-export async function getSales(
-  filters: SalesFilters,
-  parcelFilters: ParcelYearFilters
-) {
-  const supabase = await createClient();
-  let query = supabase.from("sales_master").select("*");
-  return query;
-  // let filteredQuery = applySalesFiltersToQuery(query, filters);
-  // return await getFilteredData({
-  //   filters,
-  //   table: "get_sales_by_parcel_data",
-  // });
-}
-
 export const getPagesCount = async (
   filters: ParcelYearFilters = {},
   table?: string
