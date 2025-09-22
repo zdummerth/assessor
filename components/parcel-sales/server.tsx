@@ -257,6 +257,5 @@ export default async function SalesWithStructuresCardsServer({
   // Sort by newest sale first
   cards.sort((a, b) => +new Date(b.sale_date) - +new Date(a.sale_date));
 
-  console.log("Sales cards:", cards);
   return <ClientSalesWithStructuresCards cards={cards} className={className} />;
 }

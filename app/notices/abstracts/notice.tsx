@@ -3,11 +3,32 @@
 import React from "react";
 import { type AbstractFormData } from "./shared";
 
-function Field({ label, value }: { label: string; value: string | undefined }) {
+function normalizeMultiline(v?: string | null) {
+  // Convert Windows newlines to '\n' and unescape literal "\n" if present
+  const s = (v ?? "").replace(/\r\n?/g, "\n").replace(/\\n/g, "\n");
+  return s;
+}
+
+function Field({
+  label,
+  value,
+  multiline = false,
+}: {
+  label: string;
+  value: string | undefined | null;
+  multiline?: boolean;
+}) {
   return (
     <div className="space-y-1 min-w-0">
       <p className="text-xs font-semibold uppercase text-gray-700">{label}</p>
-      <div className="text-sm break-words">{value ?? ""}</div>
+      <div
+        className={[
+          "text-sm break-words",
+          multiline ? "whitespace-pre-line" : "",
+        ].join(" ")}
+      >
+        {multiline ? normalizeMultiline(value) : (value ?? "")}
+      </div>
     </div>
   );
 }
@@ -32,8 +53,8 @@ export default function AbstractNotice({
 
       <div className="space-y-1">
         <Field label="TO" value={formData.to} />
-        <div className="text-sm break-words pl-0">
-          {formData.to_address ?? ""}
+        <div className="text-sm break-words whitespace-pre-wrap pl-0">
+          {normalizeMultiline(formData.to_address)}
         </div>
       </div>
 
@@ -44,7 +65,11 @@ export default function AbstractNotice({
       </div>
 
       <div>
-        <Field label="LEGAL DESCRIPTION" value={formData.legal_description} />
+        <Field
+          label="LEGAL DESCRIPTION"
+          value={formData.legal_description}
+          multiline
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-4">

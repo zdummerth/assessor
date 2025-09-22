@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import GowerCompsClient from "./client";
+import { summarizeStructuresArrayFlat } from "@/lib/stats";
 
 export default async function ParcelCompsClient({
   parcelId,
@@ -35,6 +36,9 @@ export default async function ParcelCompsClient({
   }
 
   const p = data;
+
+  // const structureSummary = summarizeStructuresArrayFlat(p.structures);
+  // console.log({ structureSummary });
 
   return <GowerCompsClient subject={p} />;
 }
