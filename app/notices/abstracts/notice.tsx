@@ -52,7 +52,7 @@ export default function AbstractNotice({
       </div>
 
       <div className="space-y-1">
-        <Field label="TO" value={formData.to} />
+        <Field label="TO" value={formData.to} multiline />
         <div className="text-sm break-words whitespace-pre-wrap pl-0">
           {normalizeMultiline(formData.to_address)}
         </div>
