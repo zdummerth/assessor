@@ -103,12 +103,8 @@ export default function AbstractPrinter() {
               <div
                 key={i}
                 className={[
-                  // prevent page breaks inside this notice when printing
                   "print:break-inside-avoid",
                   "print:[page-break-inside:avoid]",
-                  // if you want each notice to start on a new page:
-                  // "print:break-after-page",
-                  // on screen, keep your divider if you like
                   i < rows.length - 1 ? "mb-4 border-b-2 border-black" : "",
                 ].join(" ")}
               >

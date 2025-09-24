@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Notice Uploader & Printer (Plain HTML + JS)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --border: #111;
+        --muted: #6b7280;
+        --danger: #b91c1c;
+        --bg: #ffffff;
+        --text: #111827;
+      }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          "Helvetica Neue",
+          "Noto Sans",
+          Arial,
+          "Apple Color Emoji",
+          "Segoe UI Emoji";
+        margin: 0;
+        padding: 0;
+        line-height: 1.4;
+      }
+      .container {
+        max-width: 900px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin: 0 0 12px;
+      }
+      .controls {
+        display: grid;
+        gap: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .controls label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 6px;
+      }
+      input[type="file"] {
+        padding: 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .help {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin: 4px 0 0;
+      }
+      .error {
+        color: var(--danger);
+        font-size: 0.95rem;
+        margin-top: 4px;
+      }
+      .required-headers {
+        margin-top: 8px;
+        font-size: 0.9rem;
+      }
+      .required-headers ul {
+        margin: 6px 0 0 20px;
+      }
+      .btn-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #2563eb;
+        color: white;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* Notice layout */
+      .notices {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      .notice-wrap {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .notice {
+        border: 1px solid var(--border);
+        padding: 30px;
+        padding-bottom: 60px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+      .grid-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .field {
+        min-width: 0;
+      }
+      .field-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #374151;
+        margin: 0 0 2px;
+      }
+      .field-value {
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+        white-space: normal;
+        font-size: 0.95rem;
+      }
+      .field-value.pre {
+        white-space: pre-line;
+      }
+
+      /* Print helpers */
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: white;
+        }
+        .container {
+          max-width: 900px;
+          margin: 0 0 0 80px;
+          padding: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="no-print">Notice Uploader & Printer</h1>
+
+      <div class="controls no-print">
+        <div>
+          <label for="tsv-input">Upload TSV or XLSX file</label>
+          <input id="tsv-input" type="file" accept=".tsv,.txt,.xlsx,.xls" />
+          <p id="error" class="error" aria-live="polite"></p>
+          <p class="help">
+            The first row must contain the required column headers
+            (case-insensitive). For Excel, the first sheet is used.
+          </p>
+        </div>
+
+        <div class="required-headers">
+          <div class="help">Required headers (from file):</div>
+          <ul id="required-list"></ul>
+        </div>
+
+        <div class="btn-row">
+          <button id="print-btn" class="btn btn-primary" disabled>Print</button>
+          <span id="row-count" class="help"></span>
+        </div>
+      </div>
+
+      <div id="notices" class="notices"></div>
+    </div>
+
+    <!-- SheetJS (for parsing .xlsx/.xls in the browser) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.20.2/dist/xlsx.full.min.js"></script>
+
+    <script>
+      // ----- Configuration (mirrors your DISPLAY_ORDER & form fields) -----
+      const DISPLAY_ORDER = [
+        { raw: "DATE FILED", key: "date_filed" },
+        { raw: "DAILY NO", key: "daily_no" },
+        { raw: "TYPE OF CONVEYANCE", key: "type_of_conveyance" },
+        { raw: "DATE OF DEED", key: "date_of_deed" },
+        { raw: "FROM", key: "from" },
+        { raw: "TO", key: "to" },
+        { raw: "TO ADDRESS", key: "to_address" },
+        { raw: "CONSIDERATION", key: "consideration" },
+        { raw: "STAMPS", key: "stamps" },
+        { raw: "CITY BLOCK", key: "city_block" },
+        { raw: "LEGAL DESCRIPTION", key: "legal_description" },
+      ];
+
+      // For the "card" rendering labels:
+      const FIELD_LABELS = {
+        date_filed: "DATE FILED",
+        daily_no: "DAILY NUMBER",
+        type_of_conveyance: "TYPE OF CONVEYANCE",
+        date_of_deed: "DATE OF DEED",
+        from: "FROM",
+        to: "TO",
+        to_address: "TO ADDRESS",
+        consideration: "CONSIDERATION",
+        stamps: "STAMPS",
+        city_block: "CITY BLOCK",
+        legal_description: "LEGAL DESCRIPTION",
+      };
+
+      // ----- DOM Elements -----
+      const inputEl = document.getElementById("tsv-input");
+      const errorEl = document.getElementById("error");
+      const noticesEl = document.getElementById("notices");
+      const requiredListEl = document.getElementById("required-list");
+      const printBtn = document.getElementById("print-btn");
+      const rowCountEl = document.getElementById("row-count");
+
+      // Populate required headers list
+      function renderRequiredHeaders() {
+        requiredListEl.innerHTML = "";
+        DISPLAY_ORDER.forEach(({ raw }) => {
+          const li = document.createElement("li");
+          li.textContent = raw;
+          requiredListEl.appendChild(li);
+        });
+      }
+      renderRequiredHeaders();
+
+      // Utility: normalize multiline text
+      function normalizeMultiline(v) {
+        const s = String(v ?? "");
+        return s.replace(/\r\n?/g, "\n").replace(/\\n/g, "\n");
+      }
+
+      // Build an individual field block
+      function renderField(label, value, { multiline = false } = {}) {
+        const wrap = document.createElement("div");
+        wrap.className = "field";
+
+        const l = document.createElement("p");
+        l.className = "field-label";
+        l.textContent = label;
+
+        const v = document.createElement("div");
+        v.className = "field-value" + (multiline ? " pre" : "");
+        v.textContent = multiline ? normalizeMultiline(value) : (value ?? "");
+
+        wrap.appendChild(l);
+        wrap.appendChild(v);
+        return wrap;
+      }
+
+      // Build a single notice card (mirrors your AbstractNotice layout)
+      function renderNoticeCard(formData) {
+        const outer = document.createElement("div");
+        outer.className = "notice-wrap";
+
+        const card = document.createElement("div");
+        card.className = "notice";
+
+        // Row 1 (4 cols)
+        const row1 = document.createElement("div");
+        row1.className = "grid grid-4";
+        row1.appendChild(
+          renderField(FIELD_LABELS.date_filed, formData.date_filed)
+        );
+        row1.appendChild(renderField(FIELD_LABELS.daily_no, formData.daily_no));
+        row1.appendChild(
+          renderField(
+            FIELD_LABELS.type_of_conveyance,
+            formData.type_of_conveyance
+          )
+        );
+        row1.appendChild(
+          renderField(FIELD_LABELS.date_of_deed, formData.date_of_deed)
+        );
+
+        // FROM
+        const fromRow = document.createElement("div");
+        fromRow.appendChild(renderField(FIELD_LABELS.from, formData.from));
+
+        // TO + TO ADDRESS
+        const toWrap = document.createElement("div");
+        toWrap.appendChild(
+          renderField(FIELD_LABELS.to, formData.to, { multiline: true })
+        );
+        const toAddr = document.createElement("div");
+        toAddr.className = "field-value pre";
+        toAddr.style.paddingLeft = "0";
+        toAddr.textContent = normalizeMultiline(formData.to_address);
+        toWrap.appendChild(toAddr);
+
+        // Row 2 (3 cols)
+        const row2 = document.createElement("div");
+        row2.className = "grid grid-3";
+        row2.appendChild(
+          renderField(FIELD_LABELS.consideration, formData.consideration)
+        );
+        row2.appendChild(renderField(FIELD_LABELS.stamps, formData.stamps));
+        row2.appendChild(
+          renderField(FIELD_LABELS.city_block, formData.city_block)
+        );
+
+        // LEGAL DESCRIPTION (multiline)
+        const legal = document.createElement("div");
+        legal.appendChild(
+          renderField(
+            FIELD_LABELS.legal_description,
+            formData.legal_description,
+            { multiline: true }
+          )
+        );
+
+        // Assemble card
+        card.appendChild(row1);
+        card.appendChild(fromRow);
+        card.appendChild(toWrap);
+        card.appendChild(row2);
+        card.appendChild(legal);
+
+        outer.appendChild(card);
+        return outer;
+      }
+
+      // --- Shared row parsing given a header row + data rows (2D array) ---
+      function parseRows2D(rows2D) {
+        if (!rows2D || rows2D.length === 0) {
+          throw new Error("The file is empty.");
+        }
+        const headerRow = (rows2D[0] || []).map((h) =>
+          String(h == null ? "" : h).trim()
+        );
+        const normalized = headerRow.map((h) => h.toUpperCase());
+
+        // Validate required headers exist
+        const requiredRawHeaders = DISPLAY_ORDER.map((d) => d.raw);
+        const missing = requiredRawHeaders.filter(
+          (raw) => !normalized.includes(raw)
+        );
+        if (missing.length) {
+          throw new Error(`Missing required column(s): ${missing.join(", ")}`);
+        }
+
+        // Build header index map
+        const idx = {};
+        normalized.forEach((h, i) => (idx[h] = i));
+
+        // Parse data rows
+        const data = rows2D.slice(1).map((row) => {
+          const cols = (row || []).map((v) =>
+            v == null ? "" : String(v).trim()
+          );
+          const obj = {};
+          for (const { raw, key } of DISPLAY_ORDER) {
+            const i = idx[raw];
+            obj[key] = i != null ? (cols[i] ?? "") : "";
+          }
+          return obj;
+        });
+
+        // Keep rows with any non-empty value
+        return data.filter((r) => Object.values(r).some((v) => v !== ""));
+      }
+
+      // Parse TSV text into 2D rows, then into objects
+      function parseTSV(text) {
+        const lines = String(text || "").split(/\r?\n/);
+        // keep empty final line out
+        const filtered = lines.filter(
+          (ln, i) => !(i === lines.length - 1 && ln.trim() === "")
+        );
+        if (filtered.length === 0) throw new Error("The TSV file is empty.");
+        const rows2D = filtered.map((line) => line.split("\t"));
+        return parseRows2D(rows2D);
+      }
+
+      // Parse XLSX/XLS file using SheetJS -> rows2D -> objects
+      async function parseXLSX(file) {
+        const ab = await file.arrayBuffer();
+        const wb = XLSX.read(ab, { type: "array" });
+        const firstSheetName = wb.SheetNames[0];
+        if (!firstSheetName) throw new Error("No sheets found in workbook.");
+        const sheet = wb.Sheets[firstSheetName];
+        const rows2D = XLSX.utils.sheet_to_json(sheet, {
+          header: 1,
+          raw: true,
+        });
+        return parseRows2D(rows2D);
+      }
+
+      // Render notices list
+      function renderNotices(rows) {
+        noticesEl.innerHTML = "";
+        rows.forEach((r) => noticesEl.appendChild(renderNoticeCard(r)));
+      }
+
+      // File handling (TSV or XLSX)
+      inputEl.addEventListener("change", async (e) => {
+        errorEl.textContent = "";
+        noticesEl.innerHTML = "";
+        rowCountEl.textContent = "";
+        printBtn.disabled = true;
+
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const name = (file.name || "").toLowerCase();
+        const isExcel =
+          /\.xlsx$/.test(name) ||
+          /\.xls$/.test(name) ||
+          /sheet/.test(file.type);
+
+        try {
+          let rows;
+          if (isExcel) {
+            rows = await parseXLSX(file);
+          } else {
+            // TSV / TXT fallback
+            const text = await file.text();
+            rows = parseTSV(text);
+          }
+
+          renderNotices(rows);
+          rowCountEl.textContent = rows.length
+            ? `${rows.length} row(s) ready`
+            : "";
+          printBtn.disabled = rows.length === 0;
+        } catch (err) {
+          errorEl.textContent =
+            err && err.message ? err.message : "Failed to parse the file.";
+        }
+      });
+
+      // Print
+      printBtn.addEventListener("click", () => {
+        window.print();
+      });
+    </script>
+  </body>
+</html>

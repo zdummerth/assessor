@@ -305,6 +305,7 @@ export default function SoldParcelRatiosFeaturesStats() {
             start_date={startDate || undefined}
             end_date={endDate || undefined}
             land_uses={selectedLandUses.length ? selectedLandUses : undefined}
+            valid_only={false}
           />
         ) : tab === "raw" ? (
           <RawSalesView rows={rows} viewMode={viewMode} />

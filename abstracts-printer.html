@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Abstract Uploader & Printer (Plain HTML + JS)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --border: #111;
+        --muted: #6b7280;
+        --danger: #b91c1c;
+        --bg: #ffffff;
+        --text: #111827;
+      }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          "Helvetica Neue",
+          "Noto Sans",
+          Arial,
+          "Apple Color Emoji",
+          "Segoe UI Emoji";
+        margin: 0;
+        padding: 0;
+        line-height: 1.4;
+      }
+
+      /* Page margins per side (odd/right vs even/left) */
+      @page :right {
+        margin-top: 0.75in;
+        margin-bottom: 0.75in;
+        margin-left: 1.2in;
+        margin-right: 0.75in;
+      }
+      @page :left {
+        margin-top: 0.75in;
+        margin-bottom: 0.55in;
+        margin-left: 0.75in;
+        margin-right: 1.2in;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin: 0 0 12px;
+      }
+      .controls {
+        display: grid;
+        gap: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .controls label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 6px;
+      }
+      input[type="file"],
+      input[type="text"] {
+        padding: 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .help {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin: 4px 0 0;
+      }
+      .error {
+        color: var(--danger);
+        font-size: 0.95rem;
+        margin-top: 4px;
+      }
+      .required-headers {
+        margin-top: 8px;
+        font-size: 0.9rem;
+      }
+      .required-headers ul {
+        margin: 6px 0 0 20px;
+      }
+      .btn-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #2563eb;
+        color: white;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* Notice layout */
+      .notices {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      .notice-wrap {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .notice {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 60px;
+        font-size: 0.95rem;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+      .grid-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .field {
+        min-width: 0;
+      }
+      .field-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        margin: 0 0 2px;
+      }
+      .field-value {
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+        white-space: normal;
+        font-weight: 600;
+      }
+      .field-value.pre {
+        white-space: pre-line;
+      }
+
+      /* Print helpers */
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: white;
+        }
+        .container {
+          max-width: 900px;
+          margin: 0;
+          padding: 0;
+        }
+      }
+    </style>
+
+    <!-- JS writes page headers here based on the Book Title input -->
+    <style id="dynamic-page-style"></style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="no-print">Abstract Uploader & Printer</h1>
+
+      <div class="controls no-print">
+        <div>
+          <label for="book-input">Book Number</label>
+          <input id="book-input" type="text" placeholder="Enter book number" />
+          <p class="help">
+            This book number prints on every page as “Book Number – Page
+            Number”. Odd pages show it on the top-right; even pages on the
+            top-left.
+          </p>
+        </div>
+
+        <div>
+          <label for="tsv-input">Upload TSV file</label>
+          <input id="tsv-input" type="file" accept=".tsv,.txt" />
+          <p id="error" class="error" aria-live="polite"></p>
+          <p class="help">
+            The first row must contain the required column headers
+            (case-insensitive).
+          </p>
+        </div>
+
+        <div class="required-headers">
+          <div class="help">Required headers (from file):</div>
+          <ul id="required-list"></ul>
+        </div>
+
+        <div class="btn-row">
+          <button id="print-btn" class="btn btn-primary" disabled>Print</button>
+          <span id="row-count" class="help"></span>
+        </div>
+      </div>
+
+      <div
+        class="instructions no-print"
+        style="
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          padding: 16px;
+          margin: 16px 0;
+        "
+      >
+        <h2 style="margin: 0 0 8px; font-size: 1rem">Instructions</h2>
+        <ol style="margin: 0; padding-left: 1.25rem">
+          <li style="margin: 6px 0">
+            Use <strong>Google Sheets</strong> or
+            <strong>Microsoft Excel</strong> to enter your data. The column
+            names in the header row must match the names shown in the
+            <em>Required headers</em> list (case-insensitive; order doesn’t
+            matter; extra columns are ignored).
+          </li>
+          <li style="margin: 6px 0">
+            Enter your rows. Tip: use line breaks inside cells with
+            <code>\n</code> if you want them to print on separate lines.
+          </li>
+          <li style="margin: 6px 0">
+            Export your sheet:
+            <ul style="margin: 6px 0 0 1rem">
+              <li>
+                <strong>Google Sheets</strong> →
+                <em>File → Download → Tab-separated values (.tsv)</em>
+              </li>
+              <li>
+                <strong>Microsoft Excel</strong> →
+                <em
+                  >File → Save As / Export → Save as type:
+                  <strong>Text (Tab delimited)</strong> (*.txt)</em
+                >
+              </li>
+            </ul>
+          </li>
+          <li style="margin: 6px 0">
+            Set the <strong>Book number</strong> above. It will print as “Book
+            Number – Page Number”, on the top-right of odd pages and top-left of
+            even pages.
+          </li>
+          <li style="margin: 6px 0">
+            Upload the <code>.tsv</code> (preferred) or tab-delimited
+            <code>.txt</code> file above, then click <strong>Print</strong>.
+          </li>
+        </ol>
+        <p class="help" style="margin-top: 8px">
+          Supported file types: <code>.tsv</code> and tab-delimited
+          <code>.txt</code>.
+        </p>
+      </div>
+
+      <div id="notices" class="notices"></div>
+    </div>
+
+    <script>
+      // ----- Configuration (mirrors your DISPLAY_ORDER & form fields) -----
+      const DISPLAY_ORDER = [
+        { raw: "DATE FILED", key: "date_filed" },
+        { raw: "DAILY NO", key: "daily_no" },
+        { raw: "TYPE OF CONVEYANCE", key: "type_of_conveyance" },
+        { raw: "DATE OF DEED", key: "date_of_deed" },
+        { raw: "FROM", key: "from" },
+        { raw: "TO", key: "to" },
+        { raw: "TO ADDRESS", key: "to_address" },
+        { raw: "CONSIDERATION", key: "consideration" },
+        { raw: "STAMPS", key: "stamps" },
+        { raw: "CITY BLOCK", key: "city_block" },
+        { raw: "LEGAL DESCRIPTION", key: "legal_description" },
+      ];
+
+      const FIELD_LABELS = {
+        date_filed: "DATE FILED",
+        daily_no: "DAILY NUMBER",
+        type_of_conveyance: "TYPE OF CONVEYANCE",
+        date_of_deed: "DATE OF DEED",
+        from: "FROM",
+        to: "TO",
+        to_address: "TO ADDRESS",
+        consideration: "CONSIDERATION",
+        stamps: "STAMPS",
+        city_block: "CITY BLOCK",
+        legal_description: "LEGAL DESCRIPTION",
+      };
+
+      const inputEl = document.getElementById("tsv-input");
+      const errorEl = document.getElementById("error");
+      const noticesEl = document.getElementById("notices");
+      const requiredListEl = document.getElementById("required-list");
+      const printBtn = document.getElementById("print-btn");
+      const rowCountEl = document.getElementById("row-count");
+      const dynamicStyleEl = document.getElementById("dynamic-page-style");
+      const bookInput = document.getElementById("book-input");
+
+      // Populate required headers list
+      (function renderRequiredHeaders() {
+        requiredListEl.innerHTML = "";
+        DISPLAY_ORDER.forEach(({ raw }) => {
+          const li = document.createElement("li");
+          li.textContent = raw;
+          requiredListEl.appendChild(li);
+        });
+      })();
+
+      // Escape for CSS string
+      function cssString(s) {
+        return String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      }
+
+      // Set page headers:
+      // Odd (right) pages: top-right "Title – Page N"
+      // Even (left) pages: top-left  "Title – Page N"
+      function setBookHeaderTitle(title) {
+        const safe = cssString(title || "Book");
+        dynamicStyleEl.textContent = `
+          @page :right {
+            @top-right { content: "${safe} - " counter(page); }
+            @top-left  { content: none; }
+          }
+          @page :left {
+            @top-left  { content: "${safe} - " counter(page); }
+            @top-right { content: none; }
+          }
+        `.trim();
+      }
+
+      // Initialize header from current input value
+      setBookHeaderTitle(bookInput.value);
+      bookInput.addEventListener("input", (e) => {
+        setBookHeaderTitle(e.target.value);
+      });
+
+      // --- TSV parsing that preserves quotes but removes doubled/wrapping quotes ---
+      function unescapeTSVValue(v) {
+        if (v == null) return "";
+        let s = String(v);
+        s = s.replace(/\r\n?/g, "\n");
+        if (s.length >= 2 && s.startsWith('"') && s.endsWith('"')) {
+          s = s.slice(1, -1).replace(/""/g, '"');
+        }
+        return s;
+      }
+
+      function parseTSV(text) {
+        const lines = String(text || "").split(/\r?\n/);
+        const filtered = lines.filter(
+          (ln, i) => !(i === lines.length - 1 && ln.trim() === "")
+        );
+        if (filtered.length === 0) throw new Error("The TSV file is empty.");
+
+        const rawHeaders = filtered[0]
+          .split("\t")
+          .map((h) => unescapeTSVValue(h).trim());
+        const normalized = rawHeaders.map((h) => h.toUpperCase());
+
+        const requiredRawHeaders = DISPLAY_ORDER.map((d) => d.raw);
+        const missing = requiredRawHeaders.filter(
+          (raw) => !normalized.includes(raw)
+        );
+        if (missing.length)
+          throw new Error(`Missing required column(s): ${missing.join(", ")}`);
+
+        const idx = {};
+        normalized.forEach((h, i) => (idx[h] = i));
+
+        const rows = filtered.slice(1).map((line) => {
+          const cols = line.split("\t").map((v) => unescapeTSVValue(v).trim());
+          const obj = {};
+          for (const { raw, key } of DISPLAY_ORDER) {
+            const i = idx[raw];
+            obj[key] = i != null ? (cols[i] ?? "") : "";
+          }
+          return obj;
+        });
+
+        return rows.filter((r) => Object.values(r).some((v) => v !== ""));
+      }
+
+      function normalizeMultiline(v) {
+        const s = String(v ?? "");
+        return s.replace(/\r\n?/g, "\n").replace(/\\n/g, "\n");
+      }
+
+      function renderField(label, value, { multiline = false } = {}) {
+        const wrap = document.createElement("div");
+        wrap.className = "field";
+        const l = document.createElement("p");
+        l.className = "field-label";
+        l.textContent = label;
+        const v = document.createElement("div");
+        v.className = "field-value" + (multiline ? " pre" : "");
+        v.textContent = multiline ? normalizeMultiline(value) : (value ?? "");
+        wrap.append(l, v);
+        return wrap;
+      }
+
+      function renderNoticeCard(formData) {
+        const outer = document.createElement("div");
+        outer.className = "notice-wrap";
+        const card = document.createElement("div");
+        card.className = "notice";
+
+        const row1 = document.createElement("div");
+        row1.className = "grid grid-4";
+        row1.append(
+          renderField(FIELD_LABELS.date_filed, formData.date_filed),
+          renderField(FIELD_LABELS.daily_no, formData.daily_no),
+          renderField(
+            FIELD_LABELS.type_of_conveyance,
+            formData.type_of_conveyance
+          ),
+          renderField(FIELD_LABELS.date_of_deed, formData.date_of_deed)
+        );
+
+        const fromRow = document.createElement("div");
+        fromRow.append(renderField(FIELD_LABELS.from, formData.from));
+
+        const toWrap = document.createElement("div");
+        toWrap.append(
+          renderField(FIELD_LABELS.to, formData.to, { multiline: true })
+        );
+        const toAddr = document.createElement("div");
+        toAddr.className = "field-value pre";
+        toAddr.style.paddingLeft = "0";
+        toAddr.textContent = normalizeMultiline(formData.to_address);
+        toWrap.appendChild(toAddr);
+
+        const row2 = document.createElement("div");
+        row2.className = "grid grid-3";
+        row2.append(
+          renderField(FIELD_LABELS.consideration, formData.consideration),
+          renderField(FIELD_LABELS.stamps, formData.stamps),
+          renderField(FIELD_LABELS.city_block, formData.city_block)
+        );
+
+        const legal = document.createElement("div");
+        legal.append(
+          renderField(
+            FIELD_LABELS.legal_description,
+            formData.legal_description,
+            { multiline: true }
+          )
+        );
+
+        card.append(row1, fromRow, toWrap, row2, legal);
+        outer.appendChild(card);
+        return outer;
+      }
+
+      function renderNotices(rows) {
+        noticesEl.innerHTML = "";
+        rows.forEach((r) => noticesEl.appendChild(renderNoticeCard(r)));
+      }
+
+      // File handling
+      inputEl.addEventListener("change", (e) => {
+        errorEl.textContent = "";
+        noticesEl.innerHTML = "";
+        rowCountEl.textContent = "";
+        printBtn.disabled = true;
+
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const text = String(reader.result ?? "");
+            const rows = parseTSV(text);
+            renderNotices(rows);
+            rowCountEl.textContent = rows.length
+              ? `${rows.length} row(s) ready`
+              : "";
+            printBtn.disabled = rows.length === 0;
+          } catch (err) {
+            errorEl.textContent =
+              err && err.message ? err.message : "Failed to parse the file.";
+          }
+        };
+        reader.onerror = () => {
+          errorEl.textContent = "Could not read the file.";
+        };
+        reader.readAsText(file);
+      });
+
+      // Print
+      printBtn.addEventListener("click", () => {
+        window.print();
+      });
+    </script>
+  </body>
+</html>
