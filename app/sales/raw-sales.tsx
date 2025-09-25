@@ -23,6 +23,8 @@ import {
 type RawViewProps = {
   rows: RawRow[];
   viewMode: ViewMode; // "table" | "cards"
+  isLoading?: boolean;
+  error?: Error | null;
 };
 
 // Add sort keys for new numeric fields you care about
@@ -346,7 +348,12 @@ function Th({
   );
 }
 
-export default function RawSalesView({ rows, viewMode }: RawViewProps) {
+export default function RawSalesView({
+  rows,
+  viewMode,
+  isLoading,
+  error,
+}: RawViewProps) {
   const [sortKey, setSortKey] = useState<RawSortKey>("sale_date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
@@ -466,13 +473,23 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
                   })}
                 </tr>
               ))}
-              {totalCount === 0 && (
+              {isLoading && (
                 <tr>
                   <td
-                    className="px-3 py-4 text-sm text-gray-500"
                     colSpan={DB_COLUMNS.length}
+                    className="animate-pulse p-4 m-4"
                   >
-                    No rows to display.
+                    Loading...
+                  </td>
+                </tr>
+              )}
+              {error && (
+                <tr>
+                  <td
+                    colSpan={DB_COLUMNS.length}
+                    className="px-3 py-4 text-sm text-gray-500"
+                  >
+                    {error.message}
                   </td>
                 </tr>
               )}
@@ -514,6 +531,10 @@ export default function RawSalesView({ rows, viewMode }: RawViewProps) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {isLoading && <div className="animate-pulse p-4 m-4">Loading...</div>}
+        {error && (
+          <div className="px-3 py-4 text-sm text-gray-500">{error.message}</div>
+        )}
         {pageRows.map((r, i) => {
           const any = r as AnyRow;
           const addr = [any.house_number, any.street].filter(Boolean).join(" ");
