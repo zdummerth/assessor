@@ -251,7 +251,7 @@ function GroupedSummary(props: {
       </div>
 
       {loading && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-1">
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={`card-sk-${i}`}
@@ -274,10 +274,10 @@ function GroupedSummary(props: {
       )}
 
       {!loading && groups.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1">
           {sortGroupSummaries(groups, sortKey, sortDir).map((g, i) => {
             const vals = g.values ?? [];
-            //@ts-expect-error js
+            // @ts-expect-error js
             const chartData = [["x"], ...vals.map((v) => [v])];
             const title =
               groupBy.length === 0
@@ -346,7 +346,6 @@ function SaleSummaries(props: {
   const { sortKey, sortDir, indicator, onSort, setSortKey, setSortDir } =
     useSort();
 
-  // Adjust this if your row uses a different key for the code
   const getRowCode = (r: any) =>
     String(r?.land_use_code ?? r?.land_use_code_id ?? r?.land_use ?? "");
 
@@ -406,6 +405,7 @@ function SaleSummaries(props: {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
+      {/* Sidebar (these are the "rest of filters" for this tab) */}
       <aside className="space-y-4">
         {!props.validOnly && (
           <div className="text-sm px-3 py-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-900">
@@ -479,7 +479,8 @@ function SaleSummaries(props: {
         </button>
       </aside>
 
-      <section className="min-w-0">
+      {/* Content */}
+      <section className="min-h-0">
         <GroupedSummary
           label="Sale Price"
           groups={groups}
@@ -507,7 +508,6 @@ function RatioSummaries(props: {
   const [withinSet, setWithinSet] = useState<string[]>([]);
   const [trim, setTrim] = useState<TrimChoice>("1.5");
   const [groupBy, setGroupBy] = useState<string[]>([]);
-
   const { sortKey, sortDir, indicator, onSort, setSortKey, setSortDir } =
     useSort();
 
@@ -517,7 +517,6 @@ function RatioSummaries(props: {
   const filteredRows = useMemo(() => {
     const allowed = new Set(props.setOptions);
     const chosen = withinSet.length ? new Set(withinSet) : null;
-
     return (props.rows ?? []).filter((r) => {
       const c = getRowCode(r);
       if (!allowed.has(c)) return false;
@@ -570,6 +569,7 @@ function RatioSummaries(props: {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
+      {/* Sidebar (rest of filters for this tab) */}
       <aside className="space-y-4">
         {!props.validOnly && (
           <div className="text-sm px-3 py-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-900">
@@ -643,7 +643,8 @@ function RatioSummaries(props: {
         </button>
       </aside>
 
-      <section className="min-w-0">
+      {/* Content */}
+      <section className="min-h-0">
         <GroupedSummary
           label="Ratio"
           groups={groups}
@@ -663,7 +664,7 @@ function RatioSummaries(props: {
 }
 
 // ===============================
-// Main: owns dates, validOnly, land-use set, fetches once, passes rows down
+// Main: top-bar + sidebar + scrollable content
 // ===============================
 export default function SoldParcelRatiosFeaturesStats() {
   const [tab, setTab] = useState<Tab>("raw");
@@ -677,7 +678,7 @@ export default function SoldParcelRatiosFeaturesStats() {
   const [setKey, setSetKey] = useState<LuSet>("residential");
   const activeSetOptions = useMemo(() => setCodes(setKey), [setKey]);
 
-  // One fetch here, narrowed by the selected land-use set (children will further filter client-side)
+  // Fetch rows (by active land-use set)
   const {
     data: raw,
     isLoading,
@@ -687,7 +688,7 @@ export default function SoldParcelRatiosFeaturesStats() {
     end_date: endDate || undefined,
     as_of_date: asOfDate || undefined,
     valid_only: validOnly,
-    land_uses: activeSetOptions, // fetch only the parent-selected set
+    land_uses: activeSetOptions,
   });
 
   const rows = useMemo(
@@ -711,49 +712,12 @@ export default function SoldParcelRatiosFeaturesStats() {
   };
 
   return (
-    <div className="space-y-4 p-4">
-      {/* Top controls */}
-      <div className="flex items-center justify-between flex-wrap gap-3 mt-2">
-        <div className="flex items-end gap-3 flex-wrap">
-          <div className="space-y-1">
-            <label className="text-xs block">Start date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border rounded px-2 py-1 text-sm"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs block">End date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="border rounded px-2 py-1 text-sm"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs block">As-of date</label>
-            <input
-              type="date"
-              value={asOfDate}
-              onChange={(e) => setAsOfDate(e.target.value)}
-              className="border rounded px-2 py-1 text-sm"
-            />
-          </div>
-
-          <label className="flex items-center gap-2 text-sm ml-2">
-            <input
-              type="checkbox"
-              checked={validOnly}
-              onChange={(e) => setValidOnly(e.target.checked)}
-            />
-            Valid only
-          </label>
-
-          {/* Land-use set tabs */}
-          <div className="inline-flex rounded border p-1 ml-2">
+    <div className="flex h-[100dvh] min-h-0 flex-col">
+      {/* === TOP BAR: Set + Tab + View Mode === */}
+      <div className="sticky top-0 z-30 w-full border-b bg-background/80 backdrop-blur">
+        <div className="flex items-center justify-between gap-3 p-3">
+          {/* Land-use set */}
+          <div className="inline-flex rounded border p-1">
             {(["residential", "other", "lots"] as LuSet[]).map((k) => (
               <button
                 key={k}
@@ -771,46 +735,36 @@ export default function SoldParcelRatiosFeaturesStats() {
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Tabs + View */}
-        <div className="flex items-center gap-2">
+          {/* Tabs */}
           <div className="inline-flex rounded border p-1">
-            <button
-              type="button"
-              onClick={() => setTab("raw")}
-              className={`px-3 py-1.5 text-sm rounded-md ${tab === "raw" ? "bg-gray-900 text-white" : ""}`}
-            >
-              Sales
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("multi")}
-              className={`px-3 py-1.5 text-sm rounded-md ${tab === "multi" ? "bg-gray-900 text-white" : ""}`}
-            >
-              Multi-Parcel Sales
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("sale_price")}
-              className={`px-3 py-1.5 text-sm rounded-md ${tab === "sale_price" ? "bg-gray-900 text-white" : ""}`}
-            >
-              Sale Summaries
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("ratio")}
-              className={`px-3 py-1.5 text-sm rounded-md ${tab === "ratio" ? "bg-gray-900 text-white" : ""}`}
-            >
-              Ratio Summaries
-            </button>
+            {[
+              { id: "raw", label: "Sales" },
+              { id: "multi", label: "Multi-Parcel Sales" },
+              { id: "sale_price", label: "Sale Summaries" },
+              { id: "ratio", label: "Ratio Summaries" },
+            ].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id as Tab)}
+                className={`px-3 py-1.5 text-sm rounded-md ${
+                  tab === (t.id as Tab) ? "bg-gray-900 text-white" : ""
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
           </div>
 
+          {/* View mode */}
           <div className="inline-flex rounded border p-1">
             <button
               type="button"
               onClick={() => setViewMode("table")}
-              className={`px-3 py-1.5 text-sm rounded-md ${viewMode === "table" ? "bg-gray-900 text-white" : ""}`}
+              className={`px-3 py-1.5 text-sm rounded-md ${
+                viewMode === "table" ? "bg-gray-900 text-white" : ""
+              }`}
               title={tab === "raw" ? "Raw sales table" : "Show stats table"}
             >
               Table
@@ -818,7 +772,9 @@ export default function SoldParcelRatiosFeaturesStats() {
             <button
               type="button"
               onClick={() => setViewMode("cards")}
-              className={`px-3 py-1.5 text-sm rounded-md ${viewMode === "cards" ? "bg-gray-900 text-white" : ""}`}
+              className={`px-3 py-1.5 text-sm rounded-md ${
+                viewMode === "cards" ? "bg-gray-900 text-white" : ""
+              }`}
               title={
                 tab === "raw" ? "Raw sales cards" : "Show cards with histograms"
               }
@@ -829,60 +785,116 @@ export default function SoldParcelRatiosFeaturesStats() {
         </div>
       </div>
 
-      {/* Error banner for fetch */}
-      {error && (
-        <div className="text-sm px-3 py-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-900">
-          {String(error)}
-        </div>
-      )}
+      {/* === BODY: Sidebar (left) + Scrollable content (right) === */}
+      <div className="grid flex-1 min-h-0 gap-4 p-4 lg:grid-cols-[320px,1fr]">
+        {/* LEFT SIDEBAR: global filters */}
+        <aside className="min-h-0 overflow-auto pr-1 space-y-4">
+          <div className="rounded border p-3 space-y-3">
+            <div className="text-xs font-semibold text-gray-600">Filters</div>
 
-      {/* Body */}
-      {tab === "multi" ? (
-        <MultiParcelSalesCards
-          start_date={startDate || undefined}
-          end_date={endDate || undefined}
-          land_uses={activeSetOptions}
-          valid_only={validOnly}
-        />
-      ) : tab === "raw" ? (
-        <div className="space-y-2">
-          {!validOnly && (
-            <div className="text-sm px-3 py-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-900">
-              Warning: <span className="font-medium">Valid only</span> is off.
-              Results may include outliers or invalid sales.
+            <div className="space-y-1">
+              <label className="text-xs block">Start date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="border rounded px-2 py-1 text-sm w-full"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs block">End date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="border rounded px-2 py-1 text-sm w-full"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs block">As-of date</label>
+              <input
+                type="date"
+                value={asOfDate}
+                onChange={(e) => setAsOfDate(e.target.value)}
+                className="border rounded px-2 py-1 text-sm w-full"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={validOnly}
+                onChange={(e) => setValidOnly(e.target.checked)}
+              />
+              Valid only
+            </label>
+
+            {tab === "raw" && (
+              <button
+                type="button"
+                onClick={exportRawCsv}
+                className="w-full px-3 py-1.5 text-sm rounded border"
+              >
+                Export CSV
+              </button>
+            )}
+          </div>
+
+          {/* Optional fetch error display in sidebar */}
+          {error && (
+            <div className="rounded-md border border-yellow-300 bg-yellow-50 text-yellow-900 p-3 text-sm">
+              {String(error)}
             </div>
           )}
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={exportRawCsv}
-              className="px-3 py-1.5 text-sm rounded border"
-            >
-              Export CSV
-            </button>
+        </aside>
+
+        {/* RIGHT: scrollable content area */}
+        <section className="min-h-0 overflow-hidden">
+          <div className="h-full min-h-0 max-h-[80vh] overflow-auto">
+            {tab === "multi" ? (
+              <MultiParcelSalesCards
+                start_date={startDate || undefined}
+                end_date={endDate || undefined}
+                land_uses={activeSetOptions}
+                valid_only={validOnly}
+              />
+            ) : tab === "raw" ? (
+              <div className="space-y-2">
+                {!validOnly && (
+                  <div className="text-sm px-3 py-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-900">
+                    Warning: <span className="font-medium">Valid only</span> is
+                    off. Results may include outliers or invalid sales.
+                  </div>
+                )}
+                {/* RawSalesView renders its own pagination controls.
+                    Make its header sticky (see note below). */}
+                <RawSalesView
+                  rows={rows}
+                  viewMode={viewMode}
+                  isLoading={isLoading}
+                  error={error}
+                />
+              </div>
+            ) : tab === "sale_price" ? (
+              <SaleSummaries
+                rows={rows}
+                setOptions={activeSetOptions}
+                validOnly={validOnly}
+                viewMode={viewMode}
+              />
+            ) : (
+              <RatioSummaries
+                rows={rows}
+                setOptions={activeSetOptions}
+                validOnly={validOnly}
+                viewMode={viewMode}
+              />
+            )}
           </div>
-          <RawSalesView
-            rows={rows}
-            viewMode={viewMode}
-            isLoading={isLoading}
-            error={error}
-          />
-        </div>
-      ) : tab === "sale_price" ? (
-        <SaleSummaries
-          rows={rows}
-          setOptions={activeSetOptions}
-          validOnly={validOnly}
-          viewMode={viewMode}
-        />
-      ) : (
-        <RatioSummaries
-          rows={rows}
-          setOptions={activeSetOptions}
-          validOnly={validOnly}
-          viewMode={viewMode}
-        />
-      )}
+        </section>
+      </div>
     </div>
   );
 }

@@ -427,7 +427,9 @@ export default function RawSalesView({
         <div className="px-3 py-2 border-b text-sm font-medium">
           Raw Sales (table)
         </div>
-        <div className="px-3 py-2">{HeaderBar}</div>
+        <div className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur px-3 py-2">
+          {HeaderBar}
+        </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-[1100px] w-full text-sm">
@@ -504,8 +506,10 @@ export default function RawSalesView({
 
   // ===== CARD VIEW (compact + dialog for full details) =====
   return (
-    <div className="space-y-3">
-      <div>{HeaderBar}</div>
+    <div className="space-y-3 relative">
+      <div className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur px-3 py-2">
+        {HeaderBar}
+      </div>
 
       <div className="flex items-center gap-2 text-sm">
         <label className="text-gray-600">Sort by</label>
