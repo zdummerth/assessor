@@ -1,13 +1,51 @@
+// app/components/ParcelDetails.tsx
 import { createClient } from "@/utils/supabase/server";
 import type { Tables } from "@/database-types";
 import { SearchX } from "lucide-react";
-import ParcelNumber from "@/components/ui/parcel-number-updated";
-import { Info } from "@/components/ui/lib";
 import FormattedDate from "@/components/ui/formatted-date";
-import ParcelAddressClient from "./address-client";
-import ParcelLandUsesClient from "./land-use-client";
+import ParcelDetailsCardClient from "./details-card-client";
 
 type Parcel = Tables<"test_parcels">;
+
+type AnyAddress = {
+  id?: number | string | null;
+  housenumber?: string | number | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postcode?: string | number | null;
+  full_address?: string | null;
+  effective_date?: string | null;
+  updated_at?: string | null;
+  created_at?: string | null;
+};
+
+type AnyLandUse = {
+  id?: number | string | null;
+  land_use?: string | null;
+  effective_date?: string | null;
+  end_date?: string | null;
+  created_at?: string | null;
+};
+
+type ParcelNeighborhoodRow = {
+  id: number;
+  parcel_id: number;
+  neighborhood_id: number;
+  effective_date: string;
+  end_date: string | null;
+  created_at: string | null;
+  neighborhoods?: {
+    id: number;
+    name: string | null;
+    neighborhood: number | null;
+    set_id: number | null;
+    neighborhood_sets?: {
+      id: number;
+      name: string;
+    } | null;
+  } | null;
+};
 
 export default async function ParcelDetails({
   parcelId,
@@ -26,17 +64,26 @@ export default async function ParcelDetails({
       `
       *,
       test_parcel_land_uses(*),
-      test_parcel_addresses(*, test_geocoded_addresses(*))
+      test_parcel_addresses(*, test_geocoded_addresses(*)),
+      test_parcel_neighborhoods(
+        *,
+        neighborhoods(
+          *,
+          neighborhood_sets(*)
+        )
+      )
     `
     )
     .eq("id", parcelId)
     .single();
 
   if (error) {
-    console.error("ServerParcelSnapshot error:", error);
+    console.error("ParcelDetails error:", error);
     return (
       <section className={`rounded-lg border p-4 ${className}`}>
-        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+        {title && (
+          <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+        )}
         <div className="mt-3 flex items-center gap-2 text-sm text-red-700">
           <SearchX className="w-4 h-4" />
           <span>Failed to load parcel: {error.message}</span>
@@ -48,31 +95,29 @@ export default async function ParcelDetails({
   if (!data) {
     return (
       <section className={`rounded-lg border bg-white p-4 ${className}`}>
-        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+        {title && (
+          <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+        )}
         <div className="mt-3 text-sm text-gray-600">Parcel not found.</div>
       </section>
     );
   }
 
   // Normalize land uses
-  const landUses = Array.isArray((data as any).test_parcel_land_uses)
+  const landUses: AnyLandUse[] = Array.isArray(
+    (data as any).test_parcel_land_uses
+  )
     ? (data as any).test_parcel_land_uses
     : [];
 
-  // Flatten nested addresses -> array your ParcelAddressClient can sort/display
-  type AnyAddress = {
-    id?: number | string | null;
-    housenumber?: string | number | null;
-    street?: string | null;
-    city?: string | null;
-    state?: string | null;
-    postcode?: string | number | null;
-    full_address?: string | null;
-    effective_date?: string | null;
-    updated_at?: string | null;
-    created_at?: string | null;
-  };
+  // Normalize neighborhoods
+  const neighborhoods: ParcelNeighborhoodRow[] = Array.isArray(
+    (data as any).test_parcel_neighborhoods
+  )
+    ? (data as any).test_parcel_neighborhoods
+    : [];
 
+  // Flatten/normalize addresses
   const addrRows: any[] = Array.isArray((data as any).test_parcel_addresses)
     ? (data as any).test_parcel_addresses
     : [];
@@ -80,8 +125,6 @@ export default async function ParcelDetails({
   const addresses: AnyAddress[] = addrRows.flatMap((row) => {
     const geos = row?.test_geocoded_addresses;
     const geoList = Array.isArray(geos) ? geos : geos ? [geos] : [];
-
-    // If we have geocoded addresses, map those; else fallback to raw address fields if present
     if (geoList.length > 0) {
       return geoList.map((ga: any) => ({
         id: ga?.id ?? row?.id,
@@ -96,8 +139,6 @@ export default async function ParcelDetails({
         created_at: ga?.created_at ?? row?.created_at ?? null,
       }));
     }
-
-    // Fallback (if geocoded not present)
     return [
       {
         id: row?.id,
@@ -114,7 +155,7 @@ export default async function ParcelDetails({
         effective_date: row?.effective_date ?? null,
         updated_at: row?.updated_at ?? null,
         created_at: row?.created_at ?? null,
-      } as AnyAddress,
+      } satisfies AnyAddress,
     ];
   });
 
@@ -122,37 +163,22 @@ export default async function ParcelDetails({
 
   return (
     <section className={className}>
-      {title && <h3 className="text-sm font-semibold">{title}</h3>}
+      {title && <h3 className="text-sm font-semibold mb-2">{title}</h3>}
+      {parcel.retired_at && (
+        <p className="mb-2 text-xs text-red-700">
+          Retired: <FormattedDate date={parcel.retired_at} />
+        </p>
+      )}
 
-      {/* Top grid: basics, address list, land uses */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="flex flex-col border rounded p-2">
-          <Info
-            label="Parcel ID"
-            value={
-              <ParcelNumber
-                id={parcel.id}
-                block={parcel.block}
-                lot={parcel.lot}
-                ext={parcel.ext}
-              />
-            }
-          />
-          {parcel.retired_at && (
-            <p className="mt-2 bg-red-100 text-red-800">
-              Retired: <FormattedDate date={parcel.retired_at} />
-            </p>
-          )}
-        </div>
-
-        <div className="border rounded p-2">
-          <ParcelAddressClient addresses={addresses} />
-        </div>
-
-        <div className="border rounded p-2">
-          <ParcelLandUsesClient landUses={landUses} />
-        </div>
-      </div>
+      <ParcelDetailsCardClient
+        parcelId={parcel.id}
+        block={parcel.block}
+        lot={parcel.lot}
+        ext={parcel.ext}
+        addresses={addresses}
+        landUses={landUses}
+        neighborhoods={neighborhoods}
+      />
     </section>
   );
 }

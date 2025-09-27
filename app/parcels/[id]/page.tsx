@@ -9,7 +9,6 @@ import ParcelCompsClient from "@/components/parcel-comps-client/server";
 import ServerParcelFieldReviews from "./field-reviews/server";
 import ParcelDetails from "./details/server";
 import ServerParcelValues from "./values/server";
-import ServerParcelNeighborhoods from "./neighborhoods/server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -79,9 +78,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <Suspense fallback={<div>Loading parcel snapshot...</div>}>
             <ParcelDetails parcelId={parcel.id} />
           </Suspense>
-          <Suspense fallback={<div>Loading neighborhoods...</div>}>
-            <ServerParcelNeighborhoods parcelId={parcel.id} className="" />
-          </Suspense>
+
           <Suspense fallback={<div>Loading parcel values...</div>}>
             <ServerParcelValues
               parcelId={parcel.id}
