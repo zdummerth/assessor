@@ -30,7 +30,7 @@ const CopyToClipboard = ({ text }: { text: string }) => {
           </span>
         </div>
       ) : (
-        <Clipboard size={14} className="hover:text-blue-500" />
+        <Clipboard size={12} className="hover:text-blue-500" />
       )}
     </button>
   );

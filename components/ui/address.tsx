@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 type Props = {
   address: string;
   fullAddress?: string;
+  showButtons?: boolean;
 };
 
 const SUFFIX_MAP: Record<string, string> = {
@@ -48,7 +49,7 @@ function normalizeAddress(input: string | undefined) {
   );
 }
 
-export default function Address({ address, fullAddress }: Props) {
+export default function Address({ address, fullAddress, showButtons }: Props) {
   // console.log("Rendering Address with:", { address, fullAddress });
   const normalizedAddress = normalizeAddress(address);
   // If fullAddress is provided, normalize that for copy/map as well; otherwise use normalized display address
@@ -59,16 +60,23 @@ export default function Address({ address, fullAddress }: Props) {
   return (
     <div className="flex items-center gap-4">
       <p className="">{normalizedAddress}</p>
-      <div className="flex gap-2">
-        <a
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(copy)}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <MapPin size={18} className="hover:text-blue-500 transition-colors" />
-        </a>
-      </div>
-      <CopyToClipboard text={copy} />
+      {showButtons && (
+        <>
+          <div className="flex gap-2">
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(copy)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MapPin
+                size={12}
+                className="hover:text-blue-500 transition-colors"
+              />
+            </a>
+          </div>
+          <CopyToClipboard text={copy} />
+        </>
+      )}
     </div>
   );
 }
