@@ -1,43 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
-import { useModal } from "@/components/ui/modal-context";
-import Modal from "@/components/ui/modal";
+import React, { useMemo, useState } from "react";
 import NoticeHeader from "../header";
 import FormattedDate from "@/components/ui/formatted-date";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export default function Notice() {
-  const { currentModalId, openModal, closeModal } = useModal();
-  const modalId = `edit-hearing-form`;
-  const isOpen = currentModalId === modalId;
-
-  const initialFormData = {
-    parcel_number: "",
-    owner_name: "",
-    address_1: "",
-    address_2: "",
-    city: "",
-    state: "",
-    zip: "",
-    site_address: "",
-    appeal_number: "",
-    hearing_date: "",
-    hearing_time: "",
-    room: "Kennedy Hearing Room 208",
-  };
+  const initialFormData = useMemo(
+    () => ({
+      parcel_number: "",
+      owner_name: "",
+      address_1: "",
+      address_2: "",
+      city: "",
+      state: "",
+      zip: "",
+      site_address: "",
+      appeal_number: "",
+      hearing_date: "",
+      hearing_time: "",
+      room: "Kennedy Hearing Room 208",
+    }),
+    []
+  );
 
   const [formData, setFormData] = useState(initialFormData);
 
-  // Compare formData with initialFormData
-  const hasChanges =
-    JSON.stringify(formData) !== JSON.stringify(initialFormData);
+  const hasChanges = useMemo(
+    () => JSON.stringify(formData) !== JSON.stringify(initialFormData),
+    [formData, initialFormData]
+  );
 
   const currentTimestampString = new Date().toLocaleString("en-US", {
     timeZone: "America/Chicago",
   });
 
   const hearingTimestamp = new Date(
-    formData.hearing_date + " " + formData.hearing_time
+    `${formData.hearing_date} ${formData.hearing_time}`
   ).toLocaleString("en-US", {
     timeZone: "America/Chicago",
   });
@@ -54,162 +64,165 @@ export default function Notice() {
   return (
     <div className="w-[90%] mx-auto print:break-after-page border p-8 print:p-0 print:mt-4 print:border-none print:bg-white print:text-black">
       {hasChanges && (
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setFormData(initialFormData)}
-          className="mt-2 px-4 py-2 bg-gray-300 text-sm rounded hover:bg-gray-400 print:hidden"
+          className="mt-2 print:hidden"
         >
           Reset
-        </button>
+        </Button>
       )}
 
       <div className="flex justify-end mb-4">
-        <button
-          onClick={() => openModal(modalId)}
-          className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 print:hidden"
-        >
-          Edit Info
-        </button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="print:hidden">Edit Info</Button>
+          </DialogTrigger>
+
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Property Info</DialogTitle>
+            </DialogHeader>
+
+            <div className="grid gap-3">
+              <div className="grid gap-1.5">
+                <Label htmlFor="owner_name">Owner Name</Label>
+                <Input
+                  id="owner_name"
+                  value={formData.owner_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, owner_name: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="address_1">Address 1</Label>
+                <Input
+                  id="address_1"
+                  value={formData.address_1}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address_1: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="address_2">Address 2</Label>
+                <Input
+                  id="address_2"
+                  value={formData.address_2}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address_2: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid gap-1.5 sm:grid-cols-3 sm:gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) =>
+                      setFormData({ ...formData, city: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    value={formData.state}
+                    onChange={(e) =>
+                      setFormData({ ...formData, state: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="zip">ZIP Code</Label>
+                  <Input
+                    id="zip"
+                    value={formData.zip}
+                    onChange={(e) =>
+                      setFormData({ ...formData, zip: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-1.5 sm:grid-cols-2 sm:gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="parcel_number">Parcel Number</Label>
+                  <Input
+                    id="parcel_number"
+                    value={formData.parcel_number}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        parcel_number: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="grid gap-1.5">
+                  <Label htmlFor="site_address">Site Address</Label>
+                  <Input
+                    id="site_address"
+                    value={formData.site_address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, site_address: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-1.5 sm:grid-cols-3 sm:gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="hearing_date">Hearing Date</Label>
+                  <Input
+                    id="hearing_date"
+                    type="date"
+                    value={formData.hearing_date}
+                    onChange={(e) =>
+                      setFormData({ ...formData, hearing_date: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="hearing_time">Hearing Time</Label>
+                  <Input
+                    id="hearing_time"
+                    type="time"
+                    value={formData.hearing_time}
+                    onChange={(e) =>
+                      setFormData({ ...formData, hearing_time: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="room">Room</Label>
+                  <Input
+                    id="room"
+                    value={formData.room}
+                    onChange={(e) =>
+                      setFormData({ ...formData, room: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button>Save</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Modal for editing form data */}
-      <Modal open={isOpen} onClose={closeModal}>
-        <div className="p-6 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-center">
-            Edit Property Info
-          </h2>
-
-          <label className="text-sm">
-            Owner Name
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.owner_name}
-              onChange={(e) =>
-                setFormData({ ...formData, owner_name: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Address 1
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.address_1}
-              onChange={(e) =>
-                setFormData({ ...formData, address_1: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Address 2
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.address_2}
-              onChange={(e) =>
-                setFormData({ ...formData, address_2: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            City
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.city}
-              onChange={(e) =>
-                setFormData({ ...formData, city: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            State
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.state}
-              onChange={(e) =>
-                setFormData({ ...formData, state: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            ZIP Code
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.zip}
-              onChange={(e) =>
-                setFormData({ ...formData, zip: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Parcel Number
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.parcel_number}
-              onChange={(e) =>
-                setFormData({ ...formData, parcel_number: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Site Address
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.site_address}
-              onChange={(e) =>
-                setFormData({ ...formData, site_address: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Hearing Date
-            <input
-              type="date"
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.hearing_date}
-              onChange={(e) =>
-                setFormData({ ...formData, hearing_date: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Hearing Time
-            <input
-              type="time"
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.hearing_time}
-              onChange={(e) =>
-                setFormData({ ...formData, hearing_time: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Room
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              type="text"
-              value={formData.room}
-              onChange={(e) =>
-                setFormData({ ...formData, room: e.target.value })
-              }
-            />
-          </label>
-
-          <button
-            onClick={closeModal}
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Save
-          </button>
-        </div>
-      </Modal>
 
       {/* Header and seal */}
       <NoticeHeader
@@ -250,7 +263,6 @@ export default function Notice() {
               <div>City Hall, 1200 Market Street</div>
               <div>St. Louis, MO 63103</div>
             </div>
-            <div></div>
             <p className="mb-4">
               Please sign in at the receptionist's desk upon arrival as all
               appeals will be heard in the order of appearance.

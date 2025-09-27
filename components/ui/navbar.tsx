@@ -1,7 +1,5 @@
 import NavClient from "./navclient";
 import AuthButton from "../header-auth";
-import Link from "next/link";
-import { Search } from "lucide-react";
 import SearchDialog from "../search-dialogue";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 

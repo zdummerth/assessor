@@ -1,33 +1,45 @@
 "use client";
 
-import React, { useState } from "react";
-import { useModal } from "@/components/ui/modal-context";
-import Modal from "@/components/ui/modal";
+import React, { useMemo, useState } from "react";
 import NoticeHeader from "../header";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
-export default function Notice({ data }: { data: any }) {
-  const { currentModalId, openModal, closeModal } = useModal();
-  const modalId = `edit-${data.parcel_number}`;
-  const isOpen = currentModalId === modalId;
+type NoticeProps = { data: any };
 
-  const initialFormData = {
-    parcel_number: data.parcel_number,
-    appraised_total: data.appraised_total,
-    owner_name: data.owner_name,
-    address_1: data.owner_address_1,
-    address_2: data.owner_address_2 || "",
-    city: data.owner_city,
-    state: data.owner_state,
-    zip: data.owner_zip,
-    site_address:
-      `${data.site_street_number || ""} ${data.prefix_directional || ""} ${data.site_street_name || ""} ${data.site_zip_code || ""}`.trim(),
-  };
+export default function Notice({ data }: NoticeProps) {
+  const initialFormData = useMemo(
+    () => ({
+      parcel_number: data.parcel_number,
+      appraised_total: data.appraised_total,
+      owner_name: data.owner_name,
+      address_1: data.owner_address_1,
+      address_2: data.owner_address_2 || "",
+      city: data.owner_city,
+      state: data.owner_state,
+      zip: data.owner_zip,
+      site_address:
+        `${data.site_street_number || ""} ${data.prefix_directional || ""} ${data.site_street_name || ""} ${data.site_zip_code || ""}`.trim(),
+    }),
+    [data]
+  );
 
   const [formData, setFormData] = useState(initialFormData);
 
-  // Compare formData with initialFormData
-  const hasChanges =
-    JSON.stringify(formData) !== JSON.stringify(initialFormData);
+  const hasChanges = useMemo(
+    () => JSON.stringify(formData) !== JSON.stringify(initialFormData),
+    [formData, initialFormData]
+  );
 
   const currentTimestampString = new Date().toLocaleString("en-US", {
     timeZone: "America/Chicago",
@@ -36,141 +48,151 @@ export default function Notice({ data }: { data: any }) {
   return (
     <div className="w-[90%] mx-auto print:break-after-page border p-8 print:p-0 print:mt-4 print:border-none print:bg-white print:text-black">
       {hasChanges && (
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setFormData(initialFormData)}
-          className="mt-2 px-4 py-2 bg-gray-300 text-sm rounded hover:bg-gray-400 print:hidden"
+          className="mt-2 print:hidden"
         >
           Reset
-        </button>
+        </Button>
       )}
 
       <div className="flex justify-end mb-4">
-        <button
-          onClick={() => openModal(modalId)}
-          className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 print:hidden"
-        >
-          Edit Info
-        </button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="print:hidden">Edit Info</Button>
+          </DialogTrigger>
+
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Property Info</DialogTitle>
+            </DialogHeader>
+
+            <div className="grid gap-3">
+              <div className="grid gap-1.5">
+                <Label htmlFor="owner_name">Owner Name</Label>
+                <Input
+                  id="owner_name"
+                  value={formData.owner_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, owner_name: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="address_1">Address 1</Label>
+                <Input
+                  id="address_1"
+                  value={formData.address_1}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address_1: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="address_2">Address 2</Label>
+                <Input
+                  id="address_2"
+                  value={formData.address_2}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address_2: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid gap-1.5 sm:grid-cols-3 sm:gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) =>
+                      setFormData({ ...formData, city: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    value={formData.state}
+                    onChange={(e) =>
+                      setFormData({ ...formData, state: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="zip">ZIP Code</Label>
+                  <Input
+                    id="zip"
+                    value={formData.zip}
+                    onChange={(e) =>
+                      setFormData({ ...formData, zip: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-1.5 sm:grid-cols-2 sm:gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="parcel_number">Parcel Number</Label>
+                  <Input
+                    id="parcel_number"
+                    value={formData.parcel_number}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        parcel_number: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="grid gap-1.5">
+                  <Label htmlFor="appraised_total">Appraised Value</Label>
+                  <Input
+                    id="appraised_total"
+                    type="number"
+                    inputMode="numeric"
+                    value={formData.appraised_total}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        appraised_total:
+                          e.target.value === ""
+                            ? 0
+                            : Number.isNaN(Number(e.target.value))
+                              ? formData.appraised_total
+                              : Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="site_address">Site Address</Label>
+                <Input
+                  id="site_address"
+                  value={formData.site_address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, site_address: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button>Save</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Modal for editing form data */}
-      <Modal open={isOpen} onClose={closeModal}>
-        <div className="p-6 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-center">
-            Edit Property Info
-          </h2>
-
-          <label className="text-sm">
-            Owner Name
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.owner_name}
-              onChange={(e) =>
-                setFormData({ ...formData, owner_name: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Address 1
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.address_1}
-              onChange={(e) =>
-                setFormData({ ...formData, address_1: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Address 2
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.address_2}
-              onChange={(e) =>
-                setFormData({ ...formData, address_2: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            City
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.city}
-              onChange={(e) =>
-                setFormData({ ...formData, city: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            State
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.state}
-              onChange={(e) =>
-                setFormData({ ...formData, state: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            ZIP Code
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.zip}
-              onChange={(e) =>
-                setFormData({ ...formData, zip: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Parcel Number
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.parcel_number}
-              onChange={(e) =>
-                setFormData({ ...formData, parcel_number: e.target.value })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Appraised Value
-            <input
-              type="number"
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.appraised_total}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  appraised_total: parseFloat(e.target.value),
-                })
-              }
-            />
-          </label>
-
-          <label className="text-sm">
-            Site Address
-            <input
-              className="w-full border px-2 py-1 mt-1 rounded"
-              value={formData.site_address}
-              onChange={(e) =>
-                setFormData({ ...formData, site_address: e.target.value })
-              }
-            />
-          </label>
-
-          <button
-            onClick={closeModal}
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Save
-          </button>
-        </div>
-      </Modal>
 
       {/* Header and seal */}
       <NoticeHeader

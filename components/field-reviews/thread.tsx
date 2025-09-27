@@ -5,14 +5,19 @@ import { useMemo, useState, useEffect } from "react";
 import { useActionState } from "react";
 import { addReviewNote, deleteReviewNotes, addReviewStatus } from "./actions";
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  DialogTitle,
-} from "@headlessui/react";
 import UploadReviewImagesModal from "./upload-images";
 import ReviewImagesGrid from "./images-editor";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 type NoteRow = {
   id: number;
@@ -74,8 +79,6 @@ export default function ReviewThreadModal({
   revalidatePath?: string;
   title?: string;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-
   const [addStatusState, addStatusAction, addingStatus] = useActionState(
     addReviewStatus,
     initialState
@@ -133,231 +136,222 @@ export default function ReviewThreadModal({
   const [showHistory, setShowHistory] = useState(false);
 
   return (
-    <>
-      <span onClick={() => setIsOpen(true)}>
-        {trigger ?? (
-          <button className="px-2 py-1 rounded border text-xs">Open</button>
+    <Dialog>
+      <DialogTrigger asChild>
+        {trigger ? (
+          // Use caller-provided trigger
+          <span className="inline-block">{trigger}</span>
+        ) : (
+          <Button variant="outline" size="sm">
+            Open
+          </Button>
         )}
-      </span>
+      </DialogTrigger>
 
-      <Dialog open={isOpen} onClose={setIsOpen} className="relative z-50">
-        <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm" />
+      <DialogContent className="w-full max-w-4xl max-h-[95vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            <span>{title}</span>
+            <UploadReviewImagesModal
+              reviewId={reviewId}
+              revalidatePath={revalidatePath}
+              buttonLabel="Images"
+              title="Upload Images"
+            />
+          </DialogTitle>
+        </DialogHeader>
 
-        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-          <DialogPanel className="w-full max-h-[95vh] overflow-y-auto max-w-4xl space-y-4 border bg-white p-6 md:p-8 rounded-xl shadow-lg">
-            <DialogTitle className="text-base font-semibold flex items-center justify-between">
-              <div>{title}</div>
-              <UploadReviewImagesModal
-                reviewId={reviewId}
-                revalidatePath={revalidatePath}
-                buttonLabel="Images"
-                title="Upload Images"
-              />
-            </DialogTitle>
+        {/* ===== IMAGES (from server) ===== */}
+        {images.length > 0 && (
+          <ReviewImagesGrid
+            images={images}
+            revalidatePath={revalidatePath}
+            className="space-y-2"
+          />
+        )}
 
-            {/* ===== IMAGES (from server) ===== */}
-            {images.length > 0 && (
-              <ReviewImagesGrid
-                images={images}
-                revalidatePath={revalidatePath}
-                className="space-y-2"
+        {/* ===== STATUSES ===== */}
+        <div className="space-y-3 text-sm">
+          <form action={addStatusAction} className="flex items-end gap-2">
+            <input type="hidden" name="review_id" value={reviewId} />
+            {revalidatePath && (
+              <input
+                type="hidden"
+                name="revalidate_path"
+                value={revalidatePath}
               />
             )}
-
-            {/* ===== STATUSES ===== */}
-            <div className="space-y-3 text-sm">
-              <form action={addStatusAction} className="flex items-end gap-2">
-                <input type="hidden" name="review_id" value={reviewId} />
-                {revalidatePath && (
-                  <input
-                    type="hidden"
-                    name="revalidate_path"
-                    value={revalidatePath}
-                  />
-                )}
-                <div className="flex-1">
-                  <label className="mb-1 block text-xs text-gray-600">
-                    New Status
-                  </label>
-                  <select
-                    name="status"
-                    required
-                    defaultValue=""
-                    className="border rounded px-3 py-2 w-full"
-                  >
-                    <option value="" disabled>
-                      — Select —
-                    </option>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-3 h-10 rounded"
-                  aria-busy={addingStatus}
-                  disabled={addingStatus}
-                >
-                  {addingStatus ? "Adding…" : "Add"}
-                </button>
-              </form>
-
-              {latestStatus ? (
-                <div className="rounded border bg-white p-3">
-                  <div className="font-medium">{latestStatus.status}</div>
-                  <div className="text-[11px] text-gray-500 mt-1">
-                    {fmtShortDateTime(latestStatus.created_at)}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-gray-500">No statuses yet.</div>
-              )}
-
-              {olderStatuses.length > 0 && (
-                <div className="rounded border bg-gray-50">
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium"
-                    onClick={() => setShowHistory((v) => !v)}
-                  >
-                    <span>
-                      {showHistory
-                        ? "Hide status history"
-                        : `Show status history (${olderStatuses.length})`}
-                    </span>
-                    {showHistory ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
-
-                  {showHistory && (
-                    <ul className="divide-y">
-                      {olderStatuses.map((s) => (
-                        <li key={s.id} className="px-3 py-2">
-                          <div className="font-medium">{s.status}</div>
-                          <div className="text-[11px] text-gray-500">
-                            {fmtShortDateTime(s.created_at)}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* ===== NEW NOTE INPUT ===== */}
-            <div className="space-y-2 text-sm">
-              <div className="text-xs font-semibold text-gray-700">
-                Add Note
-              </div>
-              <form action={addNoteAction} className="flex items-end gap-2">
-                <input type="hidden" name="review_id" value={reviewId} />
-                {revalidatePath && (
-                  <input
-                    type="hidden"
-                    name="revalidate_path"
-                    value={revalidatePath}
-                  />
-                )}
-                <div className="flex-1">
-                  <textarea
-                    name="note"
-                    rows={3}
-                    placeholder="Write a note…"
-                    className="border rounded px-3 py-2 w-full"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-green-600 text-white px-3 h-10 rounded"
-                  aria-busy={addingNote}
-                  disabled={addingNote}
-                >
-                  {addingNote ? "Saving…" : "Save"}
-                </button>
-              </form>
-            </div>
-
-            {/* ===== NOTES ===== */}
-            <div className="space-y-2 text-sm">
-              <div className="text-xs font-semibold text-gray-700">Notes</div>
-              {notes.length === 0 ? (
-                <div className="text-gray-500">No notes yet.</div>
-              ) : (
-                <div className="space-y-2">
-                  {notes.map((n) => {
-                    const busy = deletingNotes && deletingNoteId === n.id;
-                    return (
-                      <div
-                        key={n.id}
-                        className="rounded border bg-white shadow-sm p-3"
-                      >
-                        <div className="whitespace-pre-wrap">{n.note}</div>
-                        <div className="mt-1 text-[11px] text-gray-500">
-                          {fmtShortDateTime(n.created_at)}
-                        </div>
-                        <div className="mt-2">
-                          <form action={delNotesAction}>
-                            <input
-                              type="hidden"
-                              name="ids_json"
-                              value={JSON.stringify([n.id])}
-                            />
-                            {revalidatePath && (
-                              <input
-                                type="hidden"
-                                name="revalidate_path"
-                                value={revalidatePath}
-                              />
-                            )}
-                            <button
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded border text-red-700 hover:bg-red-50 text-xs disabled:opacity-60"
-                              aria-busy={busy}
-                              disabled={busy}
-                              title="Delete note"
-                              onClick={() => setDeletingNoteId(n.id)}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                              {busy ? "Deleting…" : "Delete"}
-                            </button>
-                          </form>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="pt-2 flex items-center justify-end">
-              <button
-                className="px-4 py-2 rounded border"
-                onClick={() => setIsOpen(false)}
+            <div className="flex-1">
+              <label className="mb-1 block text-xs text-gray-600">
+                New Status
+              </label>
+              <select
+                name="status"
+                required
+                defaultValue=""
+                className="border rounded px-3 py-2 w-full"
               >
-                Close
-              </button>
+                <option value="" disabled>
+                  — Select —
+                </option>
+                {STATUS_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
             </div>
+            <Button
+              type="submit"
+              aria-busy={addingStatus}
+              disabled={addingStatus}
+            >
+              {addingStatus ? "Adding…" : "Add"}
+            </Button>
+          </form>
 
-            {(addStatusState.error ||
-              addNoteState.error ||
-              delNotesState.error) && (
-              <div className="text-red-600 text-xs">
-                {addStatusState.error ||
-                  addNoteState.error ||
-                  delNotesState.error}
+          {latestStatus ? (
+            <div className="rounded border bg-white p-3">
+              <div className="font-medium">{latestStatus.status}</div>
+              <div className="text-[11px] text-gray-500 mt-1">
+                {fmtShortDateTime(latestStatus.created_at)}
               </div>
-            )}
-          </DialogPanel>
+            </div>
+          ) : (
+            <div className="text-gray-500">No statuses yet.</div>
+          )}
+
+          {olderStatuses.length > 0 && (
+            <div className="rounded border bg-gray-50">
+              <button
+                type="button"
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium"
+                onClick={() => setShowHistory((v) => !v)}
+              >
+                <span>
+                  {showHistory
+                    ? "Hide status history"
+                    : `Show status history (${olderStatuses.length})`}
+                </span>
+                {showHistory ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
+
+              {showHistory && (
+                <ul className="divide-y">
+                  {olderStatuses.map((s) => (
+                    <li key={s.id} className="px-3 py-2">
+                      <div className="font-medium">{s.status}</div>
+                      <div className="text-[11px] text-gray-500">
+                        {fmtShortDateTime(s.created_at)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
-      </Dialog>
-    </>
+
+        {/* ===== NEW NOTE INPUT ===== */}
+        <div className="space-y-2 text-sm">
+          <div className="text-xs font-semibold text-gray-700">Add Note</div>
+          <form action={addNoteAction} className="flex items-end gap-2">
+            <input type="hidden" name="review_id" value={reviewId} />
+            {revalidatePath && (
+              <input
+                type="hidden"
+                name="revalidate_path"
+                value={revalidatePath}
+              />
+            )}
+            <div className="flex-1">
+              <textarea
+                name="note"
+                rows={3}
+                placeholder="Write a note…"
+                className="border rounded px-3 py-2 w-full"
+                required
+              />
+            </div>
+            <Button type="submit" aria-busy={addingNote} disabled={addingNote}>
+              {addingNote ? "Saving…" : "Save"}
+            </Button>
+          </form>
+        </div>
+
+        {/* ===== NOTES ===== */}
+        <div className="space-y-2 text-sm">
+          <div className="text-xs font-semibold text-gray-700">Notes</div>
+          {notes.length === 0 ? (
+            <div className="text-gray-500">No notes yet.</div>
+          ) : (
+            <div className="space-y-2">
+              {notes.map((n) => {
+                const busy = deletingNotes && deletingNoteId === n.id;
+                return (
+                  <div
+                    key={n.id}
+                    className="rounded border bg-white shadow-sm p-3"
+                  >
+                    <div className="whitespace-pre-wrap">{n.note}</div>
+                    <div className="mt-1 text-[11px] text-gray-500">
+                      {fmtShortDateTime(n.created_at)}
+                    </div>
+                    <div className="mt-2">
+                      <form action={delNotesAction}>
+                        <input
+                          type="hidden"
+                          name="ids_json"
+                          value={JSON.stringify([n.id])}
+                        />
+                        {revalidatePath && (
+                          <input
+                            type="hidden"
+                            name="revalidate_path"
+                            value={revalidatePath}
+                          />
+                        )}
+                        <Button
+                          variant="outline"
+                          className="inline-flex items-center gap-1 text-red-700 hover:bg-red-50 text-xs"
+                          aria-busy={busy}
+                          disabled={busy}
+                          title="Delete note"
+                          onClick={() => setDeletingNoteId(n.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          {busy ? "Deleting…" : "Delete"}
+                        </Button>
+                      </form>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {(addStatusState.error ||
+          addNoteState.error ||
+          delNotesState.error) && (
+          <div
+            role="alert"
+            className="text-red-600 text-xs rounded border border-red-200 bg-red-50 px-3 py-2"
+          >
+            {addStatusState.error || addNoteState.error || delNotesState.error}
+          </div>
+        )}
+
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Close</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

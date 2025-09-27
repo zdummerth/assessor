@@ -1,9 +1,19 @@
+// app/components/ClientParcelStructures.tsx
 "use client";
 
 import React, { useMemo, useState } from "react";
 import { Tables } from "@/database-types";
 import ConditionsCRUDModal from "../structures/conditions-crud-modal";
-import Modal from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 type Parcel = Tables<"test_parcels">;
 
@@ -70,7 +80,6 @@ export default function ClientParcelStructures({
     return <p className="text-gray-500">No structure data found.</p>;
   }
 
-  const [openId, setOpenId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(true);
 
   // Per-structure card data
@@ -131,12 +140,13 @@ export default function ClientParcelStructures({
         <div className="rounded border bg-gray-50 p-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Structures Summary</h3>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShowDetails((v) => !v)}
-              className="text-sm rounded px-3 py-1 bg-white border hover:bg-gray-100"
             >
               {showDetails ? "Hide Details" : "Show Details"}
-            </button>
+            </Button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
             <div className="rounded border bg-white p-3">
@@ -233,168 +243,159 @@ export default function ClientParcelStructures({
                     conditions={c.raw.test_conditions}
                     revalidatePath={`/test/parcels/${parcel.id}`}
                   />
-                  <button
-                    onClick={() => setOpenId(c.id)}
-                    className="text-sm px-3 py-1.5 hover:bg-gray-50"
-                  >
-                    Details
-                  </button>
+
+                  {/* Details dialog using shadcn/ui */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="px-3">
+                        Details
+                      </Button>
+                    </DialogTrigger>
+
+                    <DialogContent className="w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>{`Structure #${c.id} — Full Details`}</DialogTitle>
+                      </DialogHeader>
+
+                      <StructureDetailContent structure={c.raw} />
+
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Close</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
-
-      {/* Modal: render once and hydrate with selected structure */}
-      {openId != null && (
-        <DetailModal
-          structure={data.find((s) => s.id === openId)!}
-          onClose={() => setOpenId(null)}
-        />
-      )}
     </div>
   );
 }
 
-function DetailModal({
-  structure,
-  onClose,
-}: {
-  structure: Structure;
-  onClose: () => void;
-}) {
+function StructureDetailContent({ structure }: { structure: Structure }) {
   const lc = latestCondition(structure);
   const living = sumFinishedLiving(structure);
   const sections = structure.test_structure_sections ?? [];
   const conditions = structure.test_conditions ?? [];
 
   return (
-    <Modal
-      open={true}
-      onClose={onClose}
-      title={`Structure #${structure.id} — Full Details`}
-    >
-      <div className="space-y-4">
-        {/* Summary panel */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="rounded border p-3 space-y-2">
-            <h4 className="font-semibold">Attributes</h4>
-            <dl className="grid grid-cols-2 gap-y-1">
-              <dt className="text-gray-500">Year Built</dt>
-              <dd className="font-medium">{structure.year_built ?? "—"}</dd>
+    <div className="space-y-4">
+      {/* Summary panel */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="rounded border p-3 space-y-2">
+          <h4 className="font-semibold">Attributes</h4>
+          <dl className="grid grid-cols-2 gap-y-1">
+            <dt className="text-gray-500">Year Built</dt>
+            <dd className="font-medium">{structure.year_built ?? "—"}</dd>
 
-              <dt className="text-gray-500">Material</dt>
-              <dd className="font-medium">{structure.material ?? "—"}</dd>
+            <dt className="text-gray-500">Material</dt>
+            <dd className="font-medium">{structure.material ?? "—"}</dd>
 
-              <dt className="text-gray-500">Bedrooms</dt>
-              <dd className="font-medium">{structure.bedrooms ?? "—"}</dd>
+            <dt className="text-gray-500">Bedrooms</dt>
+            <dd className="font-medium">{structure.bedrooms ?? "—"}</dd>
 
-              <dt className="text-gray-500">Full Baths</dt>
-              <dd className="font-medium">{structure.full_bathrooms ?? "—"}</dd>
+            <dt className="text-gray-500">Full Baths</dt>
+            <dd className="font-medium">{structure.full_bathrooms ?? "—"}</dd>
 
-              <dt className="text-gray-500">Half Baths</dt>
-              <dd className="font-medium">{structure.half_bathrooms ?? "—"}</dd>
+            <dt className="text-gray-500">Half Baths</dt>
+            <dd className="font-medium">{structure.half_bathrooms ?? "—"}</dd>
 
-              <dt className="text-gray-500">Finished Living</dt>
-              <dd className="font-medium">
-                {living != null ? `${fmtNum(living)} ft²` : "—"}
-              </dd>
+            <dt className="text-gray-500">Finished Living</dt>
+            <dd className="font-medium">
+              {living != null ? `${fmtNum(living)} ft²` : "—"}
+            </dd>
 
-              <dt className="text-gray-500">Latest Condition</dt>
-              <dd className="font-medium">
-                {lc?.condition ?? "—"}
-                {lc?.effective_date && (
-                  <span className="text-xs text-gray-500 ml-2">
-                    ({fmtDate(lc.effective_date)})
-                  </span>
-                )}
-              </dd>
-            </dl>
-          </div>
-        </div>
-
-        {/* Sections table */}
-        <div className="rounded border overflow-auto">
-          <table className="min-w-[700px] w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr className="text-left">
-                <th className="p-2">Section</th>
-                <th className="p-2">Finished (ft²)</th>
-                <th className="p-2">Unfinished (ft²)</th>
-                <th className="p-2">Total (ft²)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {sections.length === 0 ? (
-                <tr>
-                  <td className="p-2 text-gray-500" colSpan={4}>
-                    No sections found.
-                  </td>
-                </tr>
-              ) : (
-                sections.map((s) => {
-                  const fin = s.finished_area ?? 0;
-                  const unfin = s.unfinished_area ?? 0;
-                  return (
-                    <tr key={s.id}>
-                      <td className="p-2 font-medium">{s.type}</td>
-                      <td className="p-2">{fmtNum(fin)}</td>
-                      <td className="p-2">{fmtNum(unfin)}</td>
-                      <td className="p-2">{fmtNum(fin + unfin)}</td>
-                    </tr>
-                  );
-                })
+            <dt className="text-gray-500">Latest Condition</dt>
+            <dd className="font-medium">
+              {lc?.condition ?? "—"}
+              {lc?.effective_date && (
+                <span className="text-xs text-gray-500 ml-2">
+                  ({fmtDate(lc.effective_date)})
+                </span>
               )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Conditions history */}
-        <div className="rounded border overflow-auto">
-          <table className="min-w-[600px] w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr className="text-left">
-                <th className="p-2">Condition</th>
-                <th className="p-2">Effective Date</th>
-                <th className="p-2">Created</th>
-                <th className="p-2">ID</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {conditions.length === 0 ? (
-                <tr>
-                  <td className="p-2 text-gray-500" colSpan={4}>
-                    No condition records.
-                  </td>
-                </tr>
-              ) : (
-                [...conditions]
-                  .sort((a, b) => {
-                    const ad = new Date(a.effective_date).getTime();
-                    const bd = new Date(b.effective_date).getTime();
-                    if (bd !== ad) return bd - ad;
-                    return (b.id ?? 0) - (a.id ?? 0);
-                  })
-                  .map((c) => (
-                    <tr key={c.id}>
-                      <td className="p-2 font-medium">{c.condition}</td>
-                      <td className="p-2">{fmtDate(c.effective_date)}</td>
-                      <td className="p-2">{fmtDate(c.created_at ?? null)}</td>
-                      <td className="p-2">{c.id}</td>
-                    </tr>
-                  ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="pt-2 flex items-center justify-end">
-          <button className="px-4 py-2 rounded border" onClick={onClose}>
-            Close
-          </button>
+            </dd>
+          </dl>
         </div>
       </div>
-    </Modal>
+
+      {/* Sections table */}
+      <div className="rounded border overflow-auto">
+        <table className="min-w-[700px] w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr className="text-left">
+              <th className="p-2">Section</th>
+              <th className="p-2">Finished (ft²)</th>
+              <th className="p-2">Unfinished (ft²)</th>
+              <th className="p-2">Total (ft²)</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {sections.length === 0 ? (
+              <tr>
+                <td className="p-2 text-gray-500" colSpan={4}>
+                  No sections found.
+                </td>
+              </tr>
+            ) : (
+              sections.map((s) => {
+                const fin = s.finished_area ?? 0;
+                const unfin = s.unfinished_area ?? 0;
+                return (
+                  <tr key={s.id}>
+                    <td className="p-2 font-medium">{s.type}</td>
+                    <td className="p-2">{fmtNum(fin)}</td>
+                    <td className="p-2">{fmtNum(unfin)}</td>
+                    <td className="p-2">{fmtNum(fin + unfin)}</td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Conditions history */}
+      <div className="rounded border overflow-auto">
+        <table className="min-w-[600px] w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr className="text-left">
+              <th className="p-2">Condition</th>
+              <th className="p-2">Effective Date</th>
+              <th className="p-2">Created</th>
+              <th className="p-2">ID</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {conditions.length === 0 ? (
+              <tr>
+                <td className="p-2 text-gray-500" colSpan={4}>
+                  No condition records.
+                </td>
+              </tr>
+            ) : (
+              [...conditions]
+                .sort((a, b) => {
+                  const ad = new Date(a.effective_date).getTime();
+                  const bd = new Date(b.effective_date).getTime();
+                  if (bd !== ad) return bd - ad;
+                  return (b.id ?? 0) - (a.id ?? 0);
+                })
+                .map((c) => (
+                  <tr key={c.id}>
+                    <td className="p-2 font-medium">{c.condition}</td>
+                    <td className="p-2">{fmtDate(c.effective_date)}</td>
+                    <td className="p-2">{fmtDate(c.created_at ?? null)}</td>
+                    <td className="p-2">{c.id}</td>
+                  </tr>
+                ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

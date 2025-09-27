@@ -2,7 +2,6 @@
 import { uploadImages } from "@/app/actions";
 import { useActionState } from "react";
 import { useEffect, useState, useRef, ChangeEvent } from "react";
-import { useToast } from "@/context/ToastContext";
 
 const initialState = { error: "", success: "" };
 
@@ -10,27 +9,18 @@ const UploadImages = ({ parcel_id }: { parcel_id: number }) => {
   const [state, action, pending] = useActionState(uploadImages, initialState);
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
+  // Clear selected files on success
   useEffect(() => {
-    if (state.error) {
-      toast({
-        title: state.error,
-        variant: "error",
-        duration: 8000,
-      });
-    }
-    if (state.success) {
-      setFiles([]);
-    }
-  }, [state, toast]);
+    if (state.success) setFiles([]);
+  }, [state.success]);
 
   const handleSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) setFiles(Array.from(e.target.files));
   };
 
   return (
-    <form action={action} className="max-w-md w-full">
+    <form action={action} className="max-w-md w-full space-y-2">
       <input
         ref={fileInputRef}
         type="file"
@@ -81,7 +71,7 @@ const UploadImages = ({ parcel_id }: { parcel_id: number }) => {
       </div>
 
       {files.length > 0 && (
-        <ul className="bg-gray-50 p-2 rounded space-y-1 text-sm text-gray-700 mt-2">
+        <ul className="bg-gray-50 p-2 rounded space-y-1 text-sm text-gray-700">
           {files.map((file) => (
             <li key={file.name + file.size} className="truncate">
               {file.name} &mdash; {(file.size / 1024).toFixed(1)} KB
@@ -89,6 +79,25 @@ const UploadImages = ({ parcel_id }: { parcel_id: number }) => {
           ))}
         </ul>
       )}
+
+      {/* Inline status messages */}
+      {state.error ? (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+        >
+          {state.error || "Upload failed."}
+        </div>
+      ) : state.success ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800"
+        >
+          {state.success || "Upload complete."}
+        </div>
+      ) : null}
 
       <input type="hidden" name="parcel_id" value={parcel_id} />
     </form>

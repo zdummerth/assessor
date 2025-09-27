@@ -1,10 +1,19 @@
 "use client";
 
 import React from "react";
-import Modal from "@/components/ui/modal";
-import DeleteFile from "./delete";
 import { Trash } from "lucide-react";
-import { useModal } from "@/components/ui/modal-context";
+import DeleteFile from "./delete";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface DeleteFileModalProps {
   bucket: string;
@@ -15,35 +24,37 @@ export default function DeleteParcelImageModal({
   bucket,
   path,
 }: DeleteFileModalProps) {
-  const { currentModalId, openModal, closeModal } = useModal();
-  const modalId = `delete-file-${bucket}-${path}`;
-  const isOpen = currentModalId === modalId;
-
   return (
-    <div className="w-full">
-      <button
-        onClick={() => openModal(modalId)}
-        className={`${currentModalId ? "hidden" : ""}`}
-        title="Delete Parcel Image"
-      >
-        <Trash className="w-4 h-4" />
-      </button>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Delete Parcel Image"
+          aria-label="Delete Parcel Image"
+        >
+          <Trash className="w-4 h-4" />
+        </Button>
+      </DialogTrigger>
 
-      <Modal open={isOpen} onClose={closeModal}>
-        <div className="flex flex-col items-center gap-4 p-6">
-          <p className="font-semibold">Delete "{path}"?</p>
-          <p>This action cannot be undone.</p>
-          <div className="flex space-x-4">
-            <button
-              onClick={closeModal}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-            <DeleteFile bucket={bucket} path={path} />
-          </div>
-        </div>
-      </Modal>
-    </div>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Delete this file?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. You’re about to permanently delete:
+            <br />
+            <code className="text-sm">{path}</code>
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="gap-2 sm:gap-3">
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+
+          <DeleteFile bucket={bucket} path={path} />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

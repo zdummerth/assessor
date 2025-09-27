@@ -2,7 +2,6 @@
 
 import FormattedDate from "@/components/ui/formatted-date";
 import NoticeHeader from "../header";
-import { FileQuestion } from "lucide-react";
 
 type Hearing = {
   parcel_number: string;

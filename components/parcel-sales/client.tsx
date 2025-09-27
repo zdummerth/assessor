@@ -1,15 +1,19 @@
 // app/components/ClientSalesWithStructuresCards.tsx
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  DialogTitle,
-} from "@headlessui/react";
+import { useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Info } from "../ui/lib";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 function fmtUSD(n?: number | null) {
   if (n == null) return "—";
@@ -57,7 +61,7 @@ export type SaleCard = {
   sale_date: string;
   sale_price: number | null;
   sale_type: string | null;
-  isValid?: boolean | null; // NEW
+  isValid?: boolean | null;
   summary: {
     building_count: number;
     finished_area: number;
@@ -76,14 +80,14 @@ export default function ClientSalesWithStructuresCards({
   title?: string;
   className?: string;
 }) {
-  const [open, setOpen] = useState(false);
-
-  const sorted = useMemo(() => {
-    return [...cards].sort(
-      (a, b) =>
-        new Date(b.sale_date).getTime() - new Date(a.sale_date).getTime()
-    );
-  }, [cards]);
+  const sorted = useMemo(
+    () =>
+      [...cards].sort(
+        (a, b) =>
+          new Date(b.sale_date).getTime() - new Date(a.sale_date).getTime()
+      ),
+    [cards]
+  );
 
   if (sorted.length === 0) {
     return <div className={className}>No sales found.</div>;
@@ -113,42 +117,38 @@ export default function ClientSalesWithStructuresCards({
           <Info label="Sale Type" value={mostRecent.sale_type ?? "—"} />
         </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="text-sm hover:bg-gray-50"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
-      </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              title="View all sales"
+              aria-label="View all sales"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
 
-      {/* All sales dialog */}
-      <Dialog open={open} onClose={setOpen} className="relative z-50">
-        <DialogBackdrop className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="w-full max-w-5xl rounded-xl border bg-white p-6">
-            <DialogTitle className="text-sm font-semibold text-gray-800">
-              All Sales — Full Details
-            </DialogTitle>
+          {/* All sales dialog */}
+          <DialogContent className="w-full max-w-5xl">
+            <DialogHeader>
+              <DialogTitle>All Sales — Full Details</DialogTitle>
+            </DialogHeader>
 
-            <div className="mt-3 space-y-6">
+            <div className="mt-3 space-y-6 max-h-[70vh] overflow-y-auto">
               {sorted.map((card) => (
                 <SaleDetails key={card.key} card={card} />
               ))}
             </div>
 
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="px-4 py-2 rounded border text-sm hover:bg-gray-50"
-              >
-                Close
-              </button>
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Close</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </section>
   );
 }

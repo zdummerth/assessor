@@ -1,16 +1,20 @@
 // app/components/ClientScoresLite.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { FeatureBreakdown, ScoreRow } from "./server";
 import { Plus } from "lucide-react";
+import { Info } from "../ui/lib";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogBackdrop,
-  DialogPanel,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
-} from "@headlessui/react";
-import { Info } from "../ui/lib";
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 function fmtUSD(n?: number | null) {
   if (n == null || Number.isNaN(Number(n))) return "—";
@@ -45,8 +49,6 @@ export default function ClientScoresLite({
   className?: string;
   title?: string;
 }) {
-  const [openIdx, setOpenIdx] = useState<number | null>(null);
-
   const cards = useMemo(
     () =>
       rows.map((r, idx) => ({
@@ -70,55 +72,44 @@ export default function ClientScoresLite({
         gap-4`}
       >
         {cards.map((c) => (
-          <div
-            key={c.key}
-            className="flex items-start gap-4 border rounded p-2 justify-between"
-          >
-            <Info label="Predicted Price" value={fmtUSD(c.y_pred)} />
-            <button
-              onClick={() => setOpenIdx(0)}
-              className="hover:bg-gray-50 print:hidden"
-              aria-label="Open model estimate details"
-              title="Open model estimate details"
-            >
-              <Plus className="inline w-4 h-4 mr-1" />
-            </button>
-          </div>
+          <ScoreCard key={c.key} y_pred={c.y_pred} contribs={c.contribs} />
         ))}
       </div>
-
-      {openIdx != null && (
-        <DetailsDialog
-          y_pred={cards[openIdx].y_pred}
-          contribs={cards[openIdx].contribs}
-          onClose={() => setOpenIdx(null)}
-        />
-      )}
     </div>
   );
 }
 
-function DetailsDialog({
+function ScoreCard({
   y_pred,
   contribs,
-  onClose,
 }: {
   y_pred: number | null;
   contribs: Array<{ term: string; coef: number; x: number; contrib: number }>;
-  onClose: () => void;
 }) {
-  const count = contribs.length;
-
   return (
-    <Dialog open={true} onClose={onClose} className="relative z-50">
-      <DialogBackdrop className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-        <DialogPanel className="w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-xl border bg-white p-6">
-          <DialogTitle className="text-sm font-semibold text-gray-800">
-            Model Estimate — Details
-          </DialogTitle>
+    <div className="flex items-start gap-4 border rounded p-2 justify-between">
+      <Info label="Predicted Price" value={fmtUSD(y_pred)} />
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="print:hidden"
+            aria-label="Open model estimate details"
+            title="Open model estimate details"
+          >
+            <Plus className="inline w-4 h-4" />
+          </Button>
+        </DialogTrigger>
 
-          <div className="mt-4 space-y-4">
+        <DialogContent className="w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-sm">
+              Model Estimate — Details
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
             <div className="rounded border p-3">
               <div className="text-sm text-gray-600">Predicted Price</div>
               <div className="text-2xl font-semibold">{fmtUSD(y_pred)}</div>
@@ -126,9 +117,11 @@ function DetailsDialog({
 
             <div className="rounded border overflow-auto">
               <div className="p-2 text-sm font-medium">
-                Feature breakdown{count ? ` (${count})` : ""}
+                Feature breakdown
+                {contribs.length ? ` (${contribs.length})` : ""}
               </div>
-              {!count ? (
+
+              {!contribs.length ? (
                 <div className="p-3 text-sm text-gray-500">
                   No contributing features.
                 </div>
@@ -162,17 +155,14 @@ function DetailsDialog({
               )}
             </div>
 
-            <div className="pt-2 flex items-center justify-end">
-              <button
-                className="px-4 py-2 rounded border hover:bg-gray-50"
-                onClick={onClose}
-              >
-                Close
-              </button>
-            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Close</Button>
+              </DialogClose>
+            </DialogFooter>
           </div>
-        </DialogPanel>
-      </div>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

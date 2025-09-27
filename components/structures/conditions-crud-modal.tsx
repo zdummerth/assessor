@@ -2,9 +2,16 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { Trash2, Settings2 } from "lucide-react";
-import { useModal } from "@/components/ui/modal-context";
-import Modal from "@/components/ui/modal";
-import { useToast } from "@/context/ToastContext";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 // server actions
 import {
@@ -48,15 +55,6 @@ export default function ConditionsCRUDModal({
   buttonLabel = "Edit Conditions",
   modalTitle = "Conditions",
 }: Props) {
-  const { currentModalId, openModal, closeModal } = useModal();
-  const modalId = useMemo(
-    () => `conditions-crud-${structureId}`,
-    [structureId]
-  );
-  const isOpen = currentModalId === modalId;
-
-  const { toast } = useToast();
-
   // selection
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const toggleSelect = (id: number) =>
@@ -84,7 +82,7 @@ export default function ConditionsCRUDModal({
     initialState
   );
 
-  // IMPORTANT: separate bulk hooks so only one button shows loading
+  // separate bulk hooks so only one button shows loading
   const [bulkCondState, bulkConditionAction, bulkingCondition] = useActionState(
     bulkUpdateConditions,
     initialState
@@ -94,42 +92,47 @@ export default function ConditionsCRUDModal({
     initialState
   );
 
+  // Reset bits on success (no toasts; we’ll show inline messages)
   useEffect(() => {
-    for (const st of [createState, deleteState, bulkCondState, bulkDateState]) {
-      if (st.error)
-        toast({
-          title: "Unable to save condition",
-          variant: "error",
-          duration: 8000,
-        });
-      if (st.success) {
-        toast({
-          title: "Action successful",
-          variant: "success",
-          duration: 2500,
-        });
-        setSelectedIds(new Set()); // clear selection
-        setBulkCondition("");
-        setBulkDate("");
-      }
+    if (
+      createState.success ||
+      deleteState.success ||
+      bulkCondState.success ||
+      bulkDateState.success
+    ) {
+      setSelectedIds(new Set()); // clear selection
+      setBulkCondition("");
+      setBulkDate("");
     }
-  }, [createState, deleteState, bulkCondState, bulkDateState, toast]);
+  }, [
+    createState.success,
+    deleteState.success,
+    bulkCondState.success,
+    bulkDateState.success,
+  ]);
 
   const isBusy = creating || deleting || bulkingCondition || bulkingDate;
 
   return (
-    <div>
-      <button
-        onClick={() => openModal(modalId)}
-        className="inline-flex items-center gap-2 text-sm hover:text-blue-700"
-      >
-        <Settings2 className="w-4 h-4" />
-        <span>{buttonLabel}</span>
-      </button>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="inline-flex items-center gap-2"
+        >
+          <Settings2 className="w-4 h-4" />
+          <span>{buttonLabel}</span>
+        </Button>
+      </DialogTrigger>
 
-      <Modal open={isOpen} onClose={closeModal} title={modalTitle}>
+      <DialogContent className="max-w-4xl">
+        <DialogHeader>
+          <DialogTitle>{modalTitle}</DialogTitle>
+        </DialogHeader>
+
         <div className="p-2 text-sm text-gray-800 space-y-3">
-          {/* ROW 1: New condition (always visible, single line, fixed heights) */}
+          {/* ROW 1: New condition */}
           <form
             action={createAction}
             className="border rounded p-2 bg-gray-50 flex flex-wrap items-end gap-2"
@@ -174,23 +177,19 @@ export default function ConditionsCRUDModal({
 
             <div className="flex-1" />
 
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-4 h-10 rounded w-28"
-              aria-busy={creating}
-            >
+            <Button type="submit" className="w-28" aria-busy={creating}>
               {creating ? "Saving…" : "Add"}
-            </button>
+            </Button>
           </form>
 
-          {/* ROW 2: Bulk controls + Delete (single row) */}
+          <InlineStatus state={createState} />
+
+          {/* ROW 2: Bulk controls + Delete */}
           <div className="flex flex-wrap items-end gap-3">
             {/* Bulk Condition */}
             <form
               action={bulkConditionAction}
-              className={`flex items-end gap-2 ${
-                nothingSelected ? "opacity-50" : ""
-              }`}
+              className={`flex items-end gap-2 ${nothingSelected ? "opacity-50" : ""}`}
             >
               <input type="hidden" name="mode" value="condition" />
               <input
@@ -228,22 +227,22 @@ export default function ConditionsCRUDModal({
                 </select>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="bg-blue-600 text-white px-2 h-10 rounded w-20"
+                className="w-20"
                 disabled={nothingSelected || bulkingCondition || !bulkCondition}
                 aria-busy={bulkingCondition}
               >
                 {bulkingCondition ? "Applying…" : "Apply"}
-              </button>
+              </Button>
             </form>
+
+            <InlineStatus state={bulkCondState} />
 
             {/* Bulk Effective Date */}
             <form
               action={bulkDateAction}
-              className={`flex items-end gap-2 ${
-                nothingSelected ? "opacity-50" : ""
-              }`}
+              className={`flex items-end gap-2 ${nothingSelected ? "opacity-50" : ""}`}
             >
               <input type="hidden" name="mode" value="effective_date" />
               <input
@@ -273,15 +272,17 @@ export default function ConditionsCRUDModal({
                 />
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="bg-blue-600 text-white px-2 h-10 rounded w-20"
+                className="w-20"
                 disabled={nothingSelected || bulkingDate || !bulkDate}
                 aria-busy={bulkingDate}
               >
                 {bulkingDate ? "Applying…" : "Apply"}
-              </button>
+              </Button>
             </form>
+
+            <InlineStatus state={bulkDateState} />
 
             {/* Delete selected */}
             <form action={deleteAction} className="flex items-end gap-2">
@@ -299,18 +300,21 @@ export default function ConditionsCRUDModal({
                 />
               )}
 
-              <button
+              <Button
+                variant="outline"
+                className="inline-flex items-center gap-2 w-32 justify-center text-red-700 hover:bg-red-50"
                 disabled={nothingSelected || deleting}
-                className="inline-flex items-center gap-2 px-2 h-10 rounded border text-red-700 hover:bg-red-50 disabled:opacity-50 w-32 justify-center"
                 aria-busy={deleting}
               >
                 <Trash2 className="w-4 h-4" />
                 {deleting ? "Deleting…" : "Delete"}
-              </button>
+              </Button>
             </form>
           </div>
 
-          {/* TABLE (fixed layout to reduce jitter) */}
+          <InlineStatus state={deleteState} />
+
+          {/* TABLE */}
           <div className="overflow-auto border rounded">
             <table className="min-w-full text-sm table-fixed">
               <thead className="bg-gray-100">
@@ -359,18 +363,46 @@ export default function ConditionsCRUDModal({
             </table>
           </div>
 
-          {/* FOOTER */}
-          <div className="pt-2 flex items-center justify-end gap-2">
-            <button
-              className="px-4 py-2 rounded border"
-              onClick={closeModal}
-              disabled={isBusy}
-            >
-              Close
-            </button>
-          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" disabled={isBusy}>
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
         </div>
-      </Modal>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
+}
+
+/** Inline status helper (success/error) */
+function InlineStatus({
+  state,
+}: {
+  state: { error?: string; success?: string };
+}) {
+  if (state?.error) {
+    return (
+      <div
+        role="alert"
+        aria-live="polite"
+        className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+      >
+        {state.error || "Something went wrong."}
+      </div>
+    );
+  }
+  if (state?.success) {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800"
+      >
+        {state.success || "Saved successfully."}
+      </div>
+    );
+  }
+  return null;
 }

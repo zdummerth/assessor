@@ -2,10 +2,17 @@
 
 import React from "react";
 import { Tables } from "@/database-types";
-import { useModal } from "@/components/ui/modal-context";
-import Modal from "@/components/ui/modal";
 import { History } from "lucide-react";
 import FormattedDate from "../ui/formatted-date";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type Parcel = Tables<"test_parcels">;
 
@@ -24,10 +31,6 @@ export default function LandUseHistoryModal({
   parcel: Parcel;
   rows: LandUseRow[];
 }) {
-  const { currentModalId, openModal, closeModal } = useModal();
-  const modalId = `land-use-history-${parcel.id}`;
-  const isOpen = currentModalId === modalId;
-
   const sorted = [...rows].sort(
     (a, b) =>
       new Date(b.effective_date || "1970-01-01").getTime() -
@@ -35,16 +38,25 @@ export default function LandUseHistoryModal({
   );
 
   return (
-    <div>
-      <button
-        onClick={() => openModal(modalId)}
-        className="hover:text-blue-700"
-      >
-        <History className="w-4 h-4" />
-      </button>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Land Use History"
+          aria-label="Land Use History"
+        >
+          <History className="w-4 h-4" />
+        </Button>
+      </DialogTrigger>
 
-      <Modal open={isOpen} onClose={closeModal} title="Land Use History">
-        <div className="p-2 text-sm text-gray-800 space-y-3">
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Land Use History</DialogTitle>
+          <DialogDescription>Parcel #{parcel.id}</DialogDescription>
+        </DialogHeader>
+
+        <div className="p-2 text-sm text-gray-800 space-y-3 max-h-[70vh] overflow-y-auto">
           {sorted.map((r) => (
             <div key={r.id} className="border-b pb-2">
               <div className="flex justify-between font-medium">
@@ -64,7 +76,7 @@ export default function LandUseHistoryModal({
             </div>
           ))}
         </div>
-      </Modal>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

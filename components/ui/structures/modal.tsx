@@ -1,76 +1,84 @@
 "use client";
-import React, { useState } from "react";
-import Modal from "@/components/ui/modal";
+import React from "react";
 import Address from "@/components/ui/address";
 import StructureDetail from "@/components/ui/structures/detail";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+type Structure = any;
 
 const StructureModal = ({
   structures,
   address,
   parcelNumber,
 }: {
-  structures: any;
+  structures: Structure[];
   address: string;
   parcelNumber: string;
 }) => {
-  const [modalOpen, setModalOpen] = useState(false);
-
   // summarize the structures data
-  const summarizedStructures = structures.reduce(
-    (acc: any, structure: any) => {
-      acc.total_area += structure.total_area || 0;
-      acc.gla += structure.gla || 0;
+  const summarized = (structures ?? []).reduce(
+    (acc: { total_area: number; gla: number }, s: any) => {
+      acc.total_area += s.total_area || 0;
+      acc.gla += s.gla || 0;
       return acc;
     },
     { total_area: 0, gla: 0 }
   );
 
-  // Check if structures is empty or undefined
-  if (!structures || structures.length === 0) {
-    return (
-      <div className="w-full">
-        <button
-          onClick={() => setModalOpen(true)}
-          disabled
-          className="px-4 py-2 bg-zinc-700 text-white w-full hover:bg-zinc-600 rounded-md"
-        >
-          No Structures
-        </button>
-      </div>
-    );
-  }
+  const hasStructures = Array.isArray(structures) && structures.length > 0;
 
   return (
     <div className="w-full">
-      <button
-        onClick={() => setModalOpen(true)}
-        className="px-4 py-2 bg-zinc-700 text-white rounded w-full hover:bg-zinc-600 rounded-md"
-      >
-        {`${summarizedStructures?.gla.toLocaleString() || "0"} sqft GLA`}
-        {structures && (
-          <span className="text-sm text-gray-200 ml-2">
-            {structures.length} Structure{structures.length > 1 ? "s" : ""}
-          </span>
-        )}
-      </button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button
+            className="w-full"
+            variant="secondary"
+            disabled={!hasStructures}
+            title={hasStructures ? "View structures" : "No structures"}
+          >
+            {hasStructures
+              ? `${summarized.gla.toLocaleString()} sqft GLA`
+              : "No Structures"}
+            {hasStructures && (
+              <span className="text-sm text-muted-foreground ml-2">
+                {structures.length} Structure{structures.length > 1 ? "s" : ""}
+              </span>
+            )}
+          </Button>
+        </DialogTrigger>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        {structures?.length > 0 && (
-          <div className="flex flex-col items-center gap-2 w-full mt-6">
-            <Address address={address} />
-            <p className="text-sm mt-2 mb-4">{parcelNumber}</p>
-            <p>Structures</p>
-            {structures.map((structure: any, index: number) => {
-              return (
-                <StructureDetail
-                  key={structure.parcel_number + index}
-                  structure={structure}
-                />
-              );
-            })}
-          </div>
-        )}
-      </Modal>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Structures</DialogTitle>
+          </DialogHeader>
+
+          {hasStructures && (
+            <div className="flex flex-col items-center gap-2 w-full mt-2">
+              <Address address={address} />
+              <p className="text-sm mt-1 mb-3">{parcelNumber}</p>
+
+              <div className="w-full space-y-4">
+                {structures.map((structure: any, index: number) => (
+                  <StructureDetail
+                    key={
+                      (structure?.parcel_number ?? parcelNumber) + "-" + index
+                    }
+                    structure={structure}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

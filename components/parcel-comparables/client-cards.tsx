@@ -1,9 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Modal from "@/components/ui/modal";
+import { useMemo } from "react";
 import ParcelNumber from "../ui/parcel-number-updated";
 import { Database } from "@/database-types";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 type Comps = Database["public"]["Functions"]["find_comps"]["Returns"];
 
@@ -39,8 +48,6 @@ export default function CompsCardList({
   rows: Comps;
   className?: string;
 }) {
-  const [open, setOpen] = useState(false);
-
   const cards = useMemo(
     () =>
       (rows ?? []).map((r) => {
@@ -51,7 +58,6 @@ export default function CompsCardList({
           block: r.comp_block,
           lot: r.comp_lot,
           ext: r.comp_ext,
-          // Construct
           address:
             r.house_number && r.street
               ? `${r.house_number} ${r.street} ${r.postcode ?? ""}`.trim()
@@ -81,13 +87,99 @@ export default function CompsCardList({
           <span className="text-xs text-gray-500">
             {rows?.length ? `${rows.length} results` : "No results"}
           </span>
+
           {!!rows?.length && (
-            <button
-              onClick={() => setOpen(true)}
-              className="text-sm px-3 py-1.5 rounded border hover:bg-gray-50"
-            >
-              View full table
-            </button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="px-3">
+                  View full table
+                </Button>
+              </DialogTrigger>
+
+              <DialogContent className="max-w-[95vw] sm:max-w-5xl">
+                <DialogHeader>
+                  <DialogTitle>Comparable Sales (Full Table)</DialogTitle>
+                </DialogHeader>
+
+                <div className="overflow-auto rounded border">
+                  <table className="min-w-[1000px] w-full text-sm">
+                    <thead className="sticky top-0 bg-gray-50 z-20">
+                      <tr className="text-left">
+                        <th className="p-2 sticky left-0 z-30 bg-gray-50 border-r">
+                          Parcel / Area
+                        </th>
+                        <th className="p-2">Sale Date</th>
+                        <th className="p-2">Sale Price</th>
+                        <th className="p-2">Price/SqFt</th>
+                        <th className="p-2">Gower</th>
+                        <th className="p-2">Miles</th>
+                        <th className="p-2">Avg Yr Built</th>
+                        <th className="p-2">Land Use</th>
+                        <th className="p-2">District</th>
+                        <th className="p-2">Structures</th>
+                        <th className="p-2">Finished</th>
+                        <th className="p-2">Unfinished</th>
+                        <th className="p-2">Avg Condition</th>
+                        <th className="p-2">Sale Type</th>
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y">
+                      {rows?.map((r) => (
+                        <tr
+                          key={`${r.parcel_id}-${r.sale_date ?? "na"}`}
+                          className="align-top"
+                        >
+                          <td className="p-2 sticky left-0 z-20 bg-white border-r min-w-[240px]">
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                Parcel #{r.parcel_id}
+                              </span>
+                              <span className="text-xs text-gray-600 truncate">
+                                {r.district ?? "—"}{" "}
+                                {r.land_use ? `• ${r.land_use}` : ""}
+                              </span>
+                            </div>
+                          </td>
+
+                          <td className="p-2">{fmtDate(r.sale_date)}</td>
+                          <td className="p-2">{fmtUSD(r.sale_price)}</td>
+                          <td className="p-2">
+                            {r.price_per_sqft == null
+                              ? "—"
+                              : `$${Number(r.price_per_sqft).toFixed(2)}`}
+                          </td>
+                          <td className="p-2">{fmtGower(r.gower_distance)}</td>
+                          <td className="p-2">{fmtMiles(r.distance_miles)}</td>
+                          <td className="p-2">{r.avg_year_built ?? "—"}</td>
+                          <td className="p-2">{r.land_use ?? "—"}</td>
+                          <td className="p-2">{r.district ?? "—"}</td>
+                          <td className="p-2">{fmtNum(r.structure_count)}</td>
+                          <td className="p-2">
+                            {fmtNum(r.total_finished_area)}
+                          </td>
+                          <td className="p-2">
+                            {fmtNum(r.total_unfinished_area)}
+                          </td>
+                          <td className="p-2">
+                            {r.avg_condition == null
+                              ? "—"
+                              : Number(r.avg_condition).toFixed(2)}
+                          </td>
+                          <td className="p-2">{r.sale_type ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
@@ -159,90 +251,6 @@ export default function CompsCardList({
           ))}
         </div>
       )}
-
-      {/* Modal: Full table view */}
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Comparable Sales (Full Table)"
-      >
-        <div className="overflow-auto rounded border">
-          <table className="min-w-[1000px] w-full text-sm">
-            <thead className="sticky top-0 bg-gray-50 z-20">
-              <tr className="text-left">
-                {/* Frozen first column */}
-                <th className="p-2 sticky left-0 z-30 bg-gray-50 border-r">
-                  Parcel / Area
-                </th>
-                <th className="p-2">Sale Date</th>
-                <th className="p-2">Sale Price</th>
-                <th className="p-2">Price/SqFt</th>
-                <th className="p-2">Gower</th>
-                <th className="p-2">Miles</th>
-                <th className="p-2">Avg Yr Built</th>
-                <th className="p-2">Land Use</th>
-                <th className="p-2">District</th>
-                <th className="p-2">Structures</th>
-                <th className="p-2">Finished</th>
-                <th className="p-2">Unfinished</th>
-                <th className="p-2">Avg Condition</th>
-                <th className="p-2">Sale Type</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y">
-              {rows.map((r) => (
-                <tr
-                  key={`${r.parcel_id}-${r.sale_date ?? "na"}`}
-                  className="align-top"
-                >
-                  {/* Frozen cell */}
-                  <td className="p-2 sticky left-0 z-20 bg-white border-r min-w-[240px]">
-                    <div className="flex flex-col">
-                      <span className="font-medium">Parcel #{r.parcel_id}</span>
-                      <span className="text-xs text-gray-600 truncate">
-                        {r.district ?? "—"}{" "}
-                        {r.land_use ? `• ${r.land_use}` : ""}
-                      </span>
-                    </div>
-                  </td>
-
-                  <td className="p-2">{fmtDate(r.sale_date)}</td>
-                  <td className="p-2">{fmtUSD(r.sale_price)}</td>
-                  <td className="p-2">
-                    {r.price_per_sqft == null
-                      ? "—"
-                      : `$${Number(r.price_per_sqft).toFixed(2)}`}
-                  </td>
-                  <td className="p-2">{fmtGower(r.gower_distance)}</td>
-                  <td className="p-2">{fmtMiles(r.distance_miles)}</td>
-                  <td className="p-2">{r.avg_year_built ?? "—"}</td>
-                  <td className="p-2">{r.land_use ?? "—"}</td>
-                  <td className="p-2">{r.district ?? "—"}</td>
-                  <td className="p-2">{fmtNum(r.structure_count)}</td>
-                  <td className="p-2">{fmtNum(r.total_finished_area)}</td>
-                  <td className="p-2">{fmtNum(r.total_unfinished_area)}</td>
-                  <td className="p-2">
-                    {r.avg_condition == null
-                      ? "—"
-                      : Number(r.avg_condition).toFixed(2)}
-                  </td>
-                  <td className="p-2">{r.sale_type ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="pt-2 flex items-center justify-end">
-          <button
-            className="px-4 py-2 rounded border"
-            onClick={() => setOpen(false)}
-          >
-            Close
-          </button>
-        </div>
-      </Modal>
     </div>
   );
 }

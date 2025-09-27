@@ -1,8 +1,7 @@
 "use client";
 import { fileUploadAction } from "@/app/actions";
 import { useActionState } from "react";
-import { useEffect, useState, useRef, ChangeEvent } from "react";
-import { useToast } from "@/context/ToastContext";
+import { useState, useRef, ChangeEvent } from "react";
 
 const initialState = { error: "", success: "" };
 
@@ -13,17 +12,6 @@ const UploadFile = ({ bucket, path }: { bucket: string; path: string }) => {
   );
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (state.error) {
-      toast({ description: state.error, variant: "error", duration: 10000 });
-    }
-    if (state.success) {
-      toast({ description: state.success, variant: "success", duration: 5000 });
-      setFiles([]);
-    }
-  }, [state, toast]);
 
   const handleSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) setFiles(Array.from(e.target.files));
