@@ -3,6 +3,7 @@
 
 import React from "react";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
+import Address from "@/components/ui/address";
 
 import type { ParcelValueFeatureRow } from "@/lib/client-queries";
 
@@ -102,7 +103,7 @@ export default function ParcelTable(props: {
 }) {
   // Display ALL fields from the function:
   const columns: Array<{
-    key: keyof ParcelValueFeatureRow | "_parcel_compound";
+    key: keyof ParcelValueFeatureRow | "_parcel_compound" | "_address";
     label: string;
     align?: "left" | "right";
     sortable?: boolean;
@@ -122,6 +123,16 @@ export default function ParcelTable(props: {
         />
       ),
     },
+    {
+      key: "_address",
+      label: "Address",
+      sortable: false,
+      render: (row) => (
+        <Address
+          address={`${row.house_number ?? ""} ${row.street ?? ""} ${row.postcode ?? ""}`.trim()}
+        />
+      ),
+    },
 
     {
       //@ts-expect-error d
@@ -132,7 +143,15 @@ export default function ParcelTable(props: {
         row.retired_at ? new Date(row.retired_at as any).toLocaleString() : "—",
     },
 
-    // Values (as-of)
+    // LU & geo
+    { key: "land_use", label: "Land Use" },
+    {
+      key: "neighborhoods_at_as_of",
+      label: "Neighborhoods",
+      sortable: false,
+      render: (row) => <NeighborhoodChips value={row.neighborhoods_at_as_of} />,
+    },
+
     { key: "value_year", label: "Value Year", align: "right" },
     {
       key: "date_of_assessment",
@@ -226,25 +245,10 @@ export default function ParcelTable(props: {
       render: (row) =>
         row.values_per_unit == null ? "—" : fmtNum(row.values_per_unit, 0),
     },
-
-    // LU & geo
-    { key: "land_use", label: "Land Use" },
-    { key: "lat", label: "Lat", align: "right" },
-    { key: "lon", label: "Lon", align: "right" },
-    { key: "district", label: "District" },
-    {
-      key: "neighborhoods_at_as_of",
-      label: "Neighborhoods (as-of)",
-      sortable: false,
-      render: (row) => <NeighborhoodChips value={row.neighborhoods_at_as_of} />,
-    },
-    { key: "house_number", label: "No." },
-    { key: "street", label: "Street" },
-    { key: "postcode", label: "Postcode" },
   ];
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-white">
+    <div className="">
       <table className="min-w-full text-sm">
         <thead className="bg-gray-50">
           <tr>

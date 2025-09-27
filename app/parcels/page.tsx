@@ -1,7 +1,7 @@
 // app/(whatever)/ParcelFeaturesBrowser.tsx
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   useParcelValueFeatures,
   useLandUseOptions,
@@ -13,10 +13,41 @@ import PaginationToolbar from "./features/pagination";
 import ParcelTable from "./features/table";
 import StructuresDialog from "./features/structure-dialogue";
 
+// NEW: land-use sets JSON
+import luSets from "@/lib/land_use_arrays.json";
+
 const NUM = (n: number | string | null | undefined) =>
   Number.isFinite(Number(n)) ? Number(n) : undefined;
 
+// ---- Build the 3 sets from JSON (same grouping as before) ----
+const residential = (luSets as any).residential as number[];
+const commercial = (luSets as any).commercial as number[];
+const industrial = (luSets as any).agriculture as number[]; // matches prior code
+const lots = (luSets as any).lots as number[];
+const single_family = (luSets as any).single_family as number[];
+const condo = (luSets as any).condo as number[];
+
+const all_residential = [...residential, ...single_family, ...condo];
+const all_other = [...commercial, ...industrial];
+const all_lots = lots;
+
+type LuSet = "residential" | "other" | "lots";
+const setCodes = (setKey: LuSet): string[] => {
+  switch (setKey) {
+    case "residential":
+      return all_residential.map(String);
+    case "other":
+      return all_other.map(String);
+    case "lots":
+      return all_lots.map(String);
+  }
+};
+
 export default function ParcelFeaturesBrowser() {
+  // --- land use SET state (NEW) ---
+  const [setKey, setSetKey] = useState<LuSet>("residential");
+  const activeSetOptions = useMemo(() => setCodes(setKey), [setKey]);
+
   // --- filters state ---
   const [asOfDate, setAsOfDate] = useState<string>("");
   const [selectedLandUses, setSelectedLandUses] = useState<string[]>([]);
@@ -46,7 +77,6 @@ export default function ParcelFeaturesBrowser() {
     error: nbError,
   } = useNeighborhoods();
 
-  console.log({ landUseOptions, neighborhoodOptions });
   const formattedNeighborhoodOptions = useMemo(
     () =>
       neighborhoodOptions.map((n) => ({
@@ -59,6 +89,30 @@ export default function ParcelFeaturesBrowser() {
   );
 
   const resetToFirst = () => setPage(1);
+
+  // When the active SET changes, clamp any selected LUs to that set and reset page.
+  useEffect(() => {
+    setSelectedLandUses((prev) =>
+      prev.filter((c) => activeSetOptions.includes(String(c)))
+    );
+    setPage(1);
+  }, [setKey, activeSetOptions]);
+
+  // Filter the LU options shown in the sidebar to the active set (if options are strings).
+  // If your landUseOptions are objects, adapt the predicate accordingly.
+  const landUseOptionsWithinSet = useMemo(() => {
+    if (!Array.isArray(landUseOptions)) return landUseOptions;
+    // Try to support either string[] or {value,label}[]
+    if (landUseOptions.length && typeof landUseOptions[0] === "string") {
+      return (landUseOptions as string[]).filter((code) =>
+        activeSetOptions.includes(String(code))
+      );
+    }
+    return landUseOptions.filter((o) =>
+      //@ts-expect-error d
+      activeSetOptions.includes(String(o?.value ?? o))
+    );
+  }, [landUseOptions, activeSetOptions]);
 
   const hookOpts = useMemo(() => {
     const filters: any = {};
@@ -86,9 +140,17 @@ export default function ParcelFeaturesBrowser() {
     if (Object.keys(gte).length) filters.gte = gte;
     if (Object.keys(lte).length) filters.lte = lte;
 
+    // IMPORTANT: If no explicit LUs selected, default to the active SET
+    const land_uses =
+      selectedLandUses.length > 0
+        ? selectedLandUses
+        : activeSetOptions.length > 0
+          ? activeSetOptions
+          : undefined;
+
     return {
       as_of_date: asOfDate || undefined,
-      land_uses: selectedLandUses.length ? selectedLandUses : undefined,
+      land_uses,
       neighborhoods: selectedNeighborhoods.length
         ? selectedNeighborhoods
         : undefined,
@@ -109,6 +171,7 @@ export default function ParcelFeaturesBrowser() {
     tfaMax,
     cvMin,
     cvMax,
+    activeSetOptions,
   ]);
 
   const { data, meta, isLoading, error } = useParcelValueFeatures(hookOpts);
@@ -153,8 +216,30 @@ export default function ParcelFeaturesBrowser() {
   };
 
   return (
-    <div className="lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-6">
+    <div className="lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-6 p-4">
       <aside className="mb-4 lg:mb-0">
+        {/* NEW: Land-use Set Tabs */}
+        <div className="mb-3">
+          <div className="inline-flex rounded border p-1">
+            {(["residential", "other", "lots"] as LuSet[]).map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setSetKey(k)}
+                className={`px-3 py-1.5 text-sm rounded-md ${
+                  setKey === k ? "bg-gray-900 text-white" : ""
+                }`}
+              >
+                {k === "residential"
+                  ? "Residential"
+                  : k === "other"
+                    ? "Other"
+                    : "Lots"}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <FiltersSidebar
           // values
           asOfDate={asOfDate}
@@ -198,8 +283,8 @@ export default function ParcelFeaturesBrowser() {
             setCvMax(v);
             resetToFirst();
           }}
-          // options
-          landUseOptions={landUseOptions}
+          // options (land uses constrained to active set)
+          landUseOptions={landUseOptionsWithinSet}
           luLoading={luLoading}
           luError={luError}
           neighborhoodOptions={formattedNeighborhoodOptions}
@@ -229,13 +314,15 @@ export default function ParcelFeaturesBrowser() {
           </div>
         )}
 
-        <ParcelTable
-          rows={data ?? []}
-          isLoading={isLoading}
-          onHeaderClick={toggleSort}
-          sortDirFor={sortDirFor}
-          onOpenStructures={onOpenStructures}
-        />
+        <div className="max-h-[75vh] min-h-[200px] overflow-auto border rounded">
+          <ParcelTable
+            rows={data ?? []}
+            isLoading={isLoading}
+            onHeaderClick={toggleSort}
+            sortDirFor={sortDirFor}
+            onOpenStructures={onOpenStructures}
+          />
+        </div>
       </section>
 
       <StructuresDialog
