@@ -22,7 +22,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const supabase = await createClient();
   const { data, error } = await supabase
-    .rpc("find_parcel_features")
+    .rpc("get_parcel_features")
     .eq("parcel_id", params.id)
     .single();
 

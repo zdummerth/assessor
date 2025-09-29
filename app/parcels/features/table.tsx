@@ -135,11 +135,9 @@ export default function ParcelTable(props: {
     },
 
     {
-      //@ts-expect-error d
       key: "retired_at",
       label: "Retired At",
       render: (row) =>
-        //@ts-expect-error d
         row.retired_at ? new Date(row.retired_at as any).toLocaleString() : "—",
     },
 

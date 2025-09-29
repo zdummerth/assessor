@@ -174,7 +174,6 @@ export default function ParcelFeaturesBrowser() {
   } | null>(null);
 
   const onOpenStructures = (row: ParcelValueFeatureRow) => {
-    // @ts-expect-error upstream payload
     const raw = row.structures ?? [];
     const arr = Array.isArray(raw) ? raw : [];
     setStructuresData({ parcelId: row.parcel_id, structures: arr });

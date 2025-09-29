@@ -10,7 +10,7 @@ import { Database } from "@/database-types";
 
 // ---------- Types ----------
 type FeatureRow =
-  Database["public"]["Functions"]["get_parcel_value_features_asof"]["Returns"][0];
+  Database["public"]["Functions"]["get_parcel_features"]["Returns"][0];
 
 type Candidates =
   Database["public"]["Functions"]["test_get_sold_parcel_ratios_features"]["Returns"];

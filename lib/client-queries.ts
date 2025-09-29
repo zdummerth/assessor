@@ -374,7 +374,7 @@ export function useMultiParcelSales(options?: {
 }
 
 export type ParcelValueFeatureRow =
-  Database["public"]["Functions"]["get_parcel_value_features_asof"]["Returns"][number];
+  Database["public"]["Functions"]["get_parcel_features"]["Returns"][number];
 
 export type ParcelFeaturesMeta = {
   page: number;

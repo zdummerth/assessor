@@ -8,7 +8,7 @@ export default async function ParcelFeatures(props: {
 
   const supabase = await createClient();
   const { data, error } = await supabase
-    .rpc("find_parcel_features")
+    .rpc("get_parcel_features")
     .eq("parcel_id", id)
     .single();
 

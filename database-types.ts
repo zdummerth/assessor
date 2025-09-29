@@ -39,173 +39,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      abatement_parcel_year: {
+      abatement_parcels: {
         Row: {
-          ag_percent_abated: number | null
-          app_ag_base_value: number | null
-          app_com_base_value: number | null
-          app_res_base_value: number | null
-          com_percent_abated: number | null
+          abatement_program_id: number
+          agr_base_assessed: number
+          com_base_assessed: number
+          created_at: string
           id: number
-          parcel_number: string | null
-          program_id: number
-          res_percent_abated: number | null
-          year: number | null
+          parcel_id: number
+          res_base_assessed: number
         }
         Insert: {
-          ag_percent_abated?: number | null
-          app_ag_base_value?: number | null
-          app_com_base_value?: number | null
-          app_res_base_value?: number | null
-          com_percent_abated?: number | null
+          abatement_program_id: number
+          agr_base_assessed?: number
+          com_base_assessed?: number
+          created_at?: string
           id?: number
-          parcel_number?: string | null
-          program_id: number
-          res_percent_abated?: number | null
-          year?: number | null
+          parcel_id: number
+          res_base_assessed?: number
         }
         Update: {
-          ag_percent_abated?: number | null
-          app_ag_base_value?: number | null
-          app_com_base_value?: number | null
-          app_res_base_value?: number | null
-          com_percent_abated?: number | null
+          abatement_program_id?: number
+          agr_base_assessed?: number
+          com_base_assessed?: number
+          created_at?: string
           id?: number
-          parcel_number?: string | null
-          program_id?: number
-          res_percent_abated?: number | null
-          year?: number | null
+          parcel_id?: number
+          res_base_assessed?: number
         }
         Relationships: [
           {
-            foreignKeyName: "abatement_parcel_year_program_id_fkey"
-            columns: ["program_id"]
+            foreignKeyName: "abatement_parcels_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "test_parcels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "abatement_parcels_program_id_fkey"
+            columns: ["abatement_program_id"]
             isOneToOne: false
             referencedRelation: "abatement_programs"
-            referencedColumns: ["name_id"]
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      abatement_phases: {
+        Row: {
+          abatement_program_id: number
+          agr_abated: number
+          com_abated: number
+          created_at: string
+          first_year: number
+          id: number
+          last_year: number
+          phase: number
+          res_abated: number
+        }
+        Insert: {
+          abatement_program_id: number
+          agr_abated: number
+          com_abated: number
+          created_at?: string
+          first_year: number
+          id?: number
+          last_year: number
+          phase: number
+          res_abated: number
+        }
+        Update: {
+          abatement_program_id?: number
+          agr_abated?: number
+          com_abated?: number
+          created_at?: string
+          first_year?: number
+          id?: number
+          last_year?: number
+          phase?: number
+          res_abated?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "abatement_phases_abatement_program_id_fkey"
+            columns: ["abatement_program_id"]
+            isOneToOne: false
+            referencedRelation: "abatement_programs"
+            referencedColumns: ["id"]
           },
         ]
       }
       abatement_programs: {
         Row: {
-          description: string | null
-          name: string | null
-          name_id: number
-          notes: string | null
-          pa_type: string | null
-          scale_type: string | null
-          year_created: number | null
-          year_expires: number | null
-        }
-        Insert: {
-          description?: string | null
-          name?: string | null
-          name_id: number
-          notes?: string | null
-          pa_type?: string | null
-          scale_type?: string | null
-          year_created?: number | null
-          year_expires?: number | null
-        }
-        Update: {
-          description?: string | null
-          name?: string | null
-          name_id?: number
-          notes?: string | null
-          pa_type?: string | null
-          scale_type?: string | null
-          year_created?: number | null
-          year_expires?: number | null
-        }
-        Relationships: []
-      }
-      addresses: {
-        Row: {
-          address: string | null
-          address_line1: string | null
-          address_line2: string | null
-          bbox: string | null
-          category: string | null
-          city: string | null
-          country: string | null
-          distance: number | null
-          district: string | null
-          footway: string | null
-          formatted: string | null
-          hamlet: string | null
-          housenumber: string | null
+          created_at: string
+          first_year: number
           id: number
-          lat: number | null
-          lon: number | null
-          name: string | null
-          old_name: string | null
-          place_id: string | null
-          postcode: string | null
-          result_type: string | null
-          state: string | null
-          state_code: string | null
-          street: string | null
-          suburb: string | null
-          town: string | null
-          village: string | null
+          last_year: number
+          notes: string | null
+          scale_type: string | null
+          type: string | null
         }
         Insert: {
-          address?: string | null
-          address_line1?: string | null
-          address_line2?: string | null
-          bbox?: string | null
-          category?: string | null
-          city?: string | null
-          country?: string | null
-          distance?: number | null
-          district?: string | null
-          footway?: string | null
-          formatted?: string | null
-          hamlet?: string | null
-          housenumber?: string | null
-          id?: number
-          lat?: number | null
-          lon?: number | null
-          name?: string | null
-          old_name?: string | null
-          place_id?: string | null
-          postcode?: string | null
-          result_type?: string | null
-          state?: string | null
-          state_code?: string | null
-          street?: string | null
-          suburb?: string | null
-          town?: string | null
-          village?: string | null
+          created_at?: string
+          first_year: number
+          id: number
+          last_year: number
+          notes?: string | null
+          scale_type?: string | null
+          type?: string | null
         }
         Update: {
-          address?: string | null
-          address_line1?: string | null
-          address_line2?: string | null
-          bbox?: string | null
-          category?: string | null
-          city?: string | null
-          country?: string | null
-          distance?: number | null
-          district?: string | null
-          footway?: string | null
-          formatted?: string | null
-          hamlet?: string | null
-          housenumber?: string | null
+          created_at?: string
+          first_year?: number
           id?: number
-          lat?: number | null
-          lon?: number | null
-          name?: string | null
-          old_name?: string | null
-          place_id?: string | null
-          postcode?: string | null
-          result_type?: string | null
-          state?: string | null
-          state_code?: string | null
-          street?: string | null
-          suburb?: string | null
-          town?: string | null
-          village?: string | null
+          last_year?: number
+          notes?: string | null
+          scale_type?: string | null
+          type?: string | null
         }
         Relationships: []
       }
@@ -336,32 +285,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "parcel_review_appeals_appraiser_id_fkey"
-            columns: ["appraiser_id"]
-            isOneToOne: false
-            referencedRelation: "appraisers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      appraiser_appeal_stats: {
-        Row: {
-          appraiser_id: number
-          count: number | null
-          status: string
-        }
-        Insert: {
-          appraiser_id: number
-          count?: number | null
-          status: string
-        }
-        Update: {
-          appraiser_id?: number
-          count?: number | null
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "appraiser_appeal_stats_appraiser_id_fkey"
             columns: ["appraiser_id"]
             isOneToOne: false
             referencedRelation: "appraisers"
@@ -1445,41 +1368,6 @@ export type Database = {
         }
         Relationships: []
       }
-      parcel_site_addresses: {
-        Row: {
-          address_id: number
-          end_date: string | null
-          id: number
-          is_primary: boolean | null
-          parcel_id: number
-          start_date: string
-        }
-        Insert: {
-          address_id: number
-          end_date?: string | null
-          id?: number
-          is_primary?: boolean | null
-          parcel_id: number
-          start_date: string
-        }
-        Update: {
-          address_id?: number
-          end_date?: string | null
-          id?: number
-          is_primary?: boolean | null
-          parcel_id?: number
-          start_date?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_site_addresses_parcel_id_fkey"
-            columns: ["parcel_id"]
-            isOneToOne: false
-            referencedRelation: "parcels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       parcel_tax_rates: {
         Row: {
           id: number
@@ -1498,49 +1386,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "parcel_tax_rates_parcel_id_fkey"
-            columns: ["parcel_id"]
-            isOneToOne: false
-            referencedRelation: "parcels"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "parcel_tax_rates_rate_year_id_fkey"
             columns: ["rate_year_id"]
             isOneToOne: false
             referencedRelation: "tax_rate_years"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      parcel_value_appeal: {
-        Row: {
-          appeal_number: string | null
-          decision_date: string | null
-          final_value: number | null
-          id: number
-          notes: string | null
-        }
-        Insert: {
-          appeal_number?: string | null
-          decision_date?: string | null
-          final_value?: number | null
-          id: number
-          notes?: string | null
-        }
-        Update: {
-          appeal_number?: string | null
-          decision_date?: string | null
-          final_value?: number | null
-          id?: number
-          notes?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_value_appeal_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "parcel_values"
             referencedColumns: ["id"]
           },
         ]
@@ -1567,15 +1416,7 @@ export type Database = {
           land_value?: number | null
           total_value?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_value_cost_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "parcel_values"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       parcel_value_model: {
         Row: {
@@ -1595,99 +1436,6 @@ export type Database = {
           model_id?: number
           predicted_value?: number
           prediction_date?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_value_model_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "parcel_values"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      parcel_value_sales: {
-        Row: {
-          adjusted_average_price: number | null
-          adjustments: string | null
-          comparable_sales_count: number | null
-          id: number
-          total_value: number | null
-        }
-        Insert: {
-          adjusted_average_price?: number | null
-          adjustments?: string | null
-          comparable_sales_count?: number | null
-          id: number
-          total_value?: number | null
-        }
-        Update: {
-          adjusted_average_price?: number | null
-          adjustments?: string | null
-          comparable_sales_count?: number | null
-          id?: number
-          total_value?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_value_sales_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "parcel_values"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      parcel_values: {
-        Row: {
-          created_at: string | null
-          id: number
-          parcel_id: number
-          value_type: string
-          year: number
-        }
-        Insert: {
-          created_at?: string | null
-          id?: number
-          parcel_id: number
-          value_type: string
-          year: number
-        }
-        Update: {
-          created_at?: string | null
-          id?: number
-          parcel_id?: number
-          value_type?: string
-          year?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "parcel_values_parcel_id_fkey"
-            columns: ["parcel_id"]
-            isOneToOne: false
-            referencedRelation: "parcels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      parcels: {
-        Row: {
-          created_at: string | null
-          id: number
-          parcel_number: string
-          retired_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: number
-          parcel_number: string
-          retired_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: number
-          parcel_number?: string
-          retired_at?: string | null
         }
         Relationships: []
       }
@@ -1852,45 +1600,6 @@ export type Database = {
           },
         ]
       }
-      search_table: {
-        Row: {
-          owner_address2: string | null
-          owner_city: string | null
-          owner_name: string | null
-          owner_state: string | null
-          owner_zip: string | null
-          parcel_number: string
-          search: string | null
-          site_street_name: string | null
-          site_street_number: string | null
-          site_zip_code: string | null
-        }
-        Insert: {
-          owner_address2?: string | null
-          owner_city?: string | null
-          owner_name?: string | null
-          owner_state?: string | null
-          owner_zip?: string | null
-          parcel_number: string
-          search?: string | null
-          site_street_name?: string | null
-          site_street_number?: string | null
-          site_zip_code?: string | null
-        }
-        Update: {
-          owner_address2?: string | null
-          owner_city?: string | null
-          owner_name?: string | null
-          owner_state?: string | null
-          owner_zip?: string | null
-          parcel_number?: string
-          search?: string | null
-          site_street_name?: string | null
-          site_street_number?: string | null
-          site_zip_code?: string | null
-        }
-        Relationships: []
-      }
       search_table_2: {
         Row: {
           created_at: string | null
@@ -1951,33 +1660,6 @@ export type Database = {
           status?: string
           submission_type?: string | null
           year?: number | null
-        }
-        Relationships: []
-      }
-      site_address_master: {
-        Row: {
-          fts: unknown | null
-          house_number: string | null
-          id: string
-          street_name: string | null
-          street_suffix: string | null
-          zip_code: string | null
-        }
-        Insert: {
-          fts?: unknown | null
-          house_number?: string | null
-          id: string
-          street_name?: string | null
-          street_suffix?: string | null
-          zip_code?: string | null
-        }
-        Update: {
-          fts?: unknown | null
-          house_number?: string | null
-          id?: string
-          street_name?: string | null
-          street_suffix?: string | null
-          zip_code?: string | null
         }
         Relationships: []
       }
@@ -2393,13 +2075,6 @@ export type Database = {
             columns: ["child_parcel"]
             isOneToOne: false
             referencedRelation: "test_parcels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_parcel_join_parent_parcel_fkey"
-            columns: ["parent_parcel"]
-            isOneToOne: false
-            referencedRelation: "parcels"
             referencedColumns: ["id"]
           },
         ]
@@ -2869,25 +2544,37 @@ export type Database = {
       }
       test_structure_sections: {
         Row: {
+          construction_end: string | null
+          construction_start: string | null
+          demolition_date: string | null
           finished_area: number | null
           floor_number: number | null
           id: number
+          material: string | null
           structure_id: number
           type: string
           unfinished_area: number | null
         }
         Insert: {
+          construction_end?: string | null
+          construction_start?: string | null
+          demolition_date?: string | null
           finished_area?: number | null
           floor_number?: number | null
           id?: number
+          material?: string | null
           structure_id: number
           type: string
           unfinished_area?: number | null
         }
         Update: {
+          construction_end?: string | null
+          construction_start?: string | null
+          demolition_date?: string | null
           finished_area?: number | null
           floor_number?: number | null
           id?: number
+          material?: string | null
           structure_id?: number
           type?: string
           unfinished_area?: number | null
@@ -3194,57 +2881,6 @@ export type Database = {
       }
     }
     Functions: {
-      compare_appraised_total: {
-        Args: { p_end_year: number; p_start_year: number }
-        Returns: {
-          appraiser_id: number
-          difference: number
-          end_total: number
-          land_use: string
-          neighborhood: string
-          neighborhood_int: number
-          occupancy: string
-          parcel_number: string
-          pct_change: number
-          prefix_directional: string
-          prop_class: string
-          site_street_name: string
-          site_street_number: string
-          site_zip_code: string
-          start_total: number
-          tax_status: string
-        }[]
-      }
-      compare_parcel_to_comp_sale: {
-        Args: {
-          p_comp_sale_id: number
-          p_subject_parcel_id: number
-          p_valid_only?: boolean
-        }
-        Returns: {
-          comp_block: number
-          comp_ext: number
-          comp_land_use: string
-          comp_lot: string
-          comp_parcel_id: number
-          comp_sale_date: string
-          comp_sale_id: number
-          comp_sale_price: number
-          comp_sale_type: string
-          diff_avg_condition: number
-          diff_avg_year_built: number
-          diff_structure_count: number
-          diff_total_finished_area: number
-          diff_total_unfinished_area: number
-          distance_miles: number
-          same_land_use: boolean
-          subject_block: number
-          subject_ext: number
-          subject_land_use: string
-          subject_lot: string
-          subject_parcel_id: number
-        }[]
-      }
       compare_parcel_to_comp_sales: {
         Args: { p_comp_sale_ids: number[]; p_subject_parcel_id: number }
         Returns: {
@@ -3375,237 +3011,6 @@ export type Database = {
           total_unfinished_area: number
         }[]
       }
-      find_comps_gower_with_garages_test_2: {
-        Args: {
-          p_k?: number
-          p_living_area_band?: number
-          p_max_distance_miles?: number
-          p_max_living_area?: number
-          p_min_living_area?: number
-          p_parcel_id: number
-          p_require_same_land_use?: boolean
-          p_weights?: Json
-          p_years?: number
-        }
-        Returns: {
-          buildings_per_material: Json
-          comp_block: number
-          comp_city: string
-          comp_condition_at_sale: string
-          comp_distance_miles: number
-          comp_district: string
-          comp_ext: number
-          comp_house_number: string
-          comp_lat: number
-          comp_lon: number
-          comp_lot: string
-          comp_material: string
-          comp_parcel_id: number
-          comp_postcode: string
-          comp_state: string
-          comp_street: string
-          gower_distance: number
-          sale_date: string
-          sale_id: number
-          sale_price: number
-          total_finished_area: number
-          total_unfinished_area: number
-        }[]
-      }
-      find_comps_multi_parcel: {
-        Args: {
-          p_k?: number
-          p_living_area_band?: number
-          p_max_distance_miles?: number
-          p_max_living_area?: number
-          p_min_living_area?: number
-          p_parcel_ids?: number[]
-          p_require_same_land_use?: boolean
-          p_weights?: Json
-          p_years?: number
-        }
-        Returns: {
-          avg_condition: number
-          avg_year_built: number
-          distance_miles: number
-          district: string
-          gower_distance: number
-          land_use: string
-          lat: number
-          lon: number
-          parcel_ids: number[]
-          price_per_sqft: number
-          sale_date: string
-          sale_price: number
-          sale_type: string
-          structure_count: number
-          subject_features: Json
-          subject_parcel_id: number
-          total_finished_area: number
-          total_unfinished_area: number
-        }[]
-      }
-      find_model_outliers_v1: {
-        Args: {
-          p_include_no_comps?: boolean
-          p_k?: number
-          p_limit?: number
-          p_living_area_band?: number
-          p_max_distance_miles?: number
-          p_max_living_area?: number
-          p_min_living_area?: number
-          p_only_outliers?: boolean
-          p_parcel_ids?: number[]
-          p_run_id?: number
-          p_weights?: Json
-          p_years?: number
-        }
-        Returns: {
-          comp_max_price: number
-          comp_min_price: number
-          comp_n: number
-          comps_json: Json
-          is_outlier: boolean
-          parcel_id: number
-          y_pred: number
-        }[]
-      }
-      find_parcel_features: {
-        Args: { p_as_of_date?: string }
-        Returns: {
-          avg_condition: number
-          avg_year_built: number
-          block: number
-          district: string
-          ext: number
-          house_number: string
-          land_use: string
-          lat: number
-          lon: number
-          lot: string
-          parcel_id: number
-          postcode: string
-          street: string
-          structure_count: number
-          total_finished_area: number
-          total_unfinished_area: number
-        }[]
-      }
-      find_sold_parcel_features: {
-        Args: {
-          p_end_date?: string
-          p_start_date?: string
-          p_valid_only?: boolean
-        }
-        Returns: {
-          avg_condition: number
-          avg_year_built: number
-          block: number
-          district: string
-          ext: number
-          house_number: string
-          land_use: string
-          lat: number
-          lon: number
-          lot: string
-          parcel_id: number
-          postcode: string
-          sale_date: string
-          sale_id: number
-          sale_price: number
-          sale_type: string
-          street: string
-          structure_count: number
-          total_finished_area: number
-          total_unfinished_area: number
-        }[]
-      }
-      get_asdtotal_statistics: {
-        Args:
-          | {
-              p_abatementendyear?: number
-              p_abatementstartyear?: number
-              p_abatementtype?: string
-              p_asrclasscode?: number
-              p_asrlanduse1?: string
-              p_asrnbrhd?: number
-              p_isabatedproperty?: boolean
-              p_nbrhd?: number
-              p_specbusdist?: string
-              p_tifdist?: string
-              p_zip?: string
-              p_zoning?: string
-            }
-          | { p_zip?: string }
-        Returns: {
-          avg_asdtotal: number
-          count_asdtotal: number
-          max_asdtotal: number
-          median_asdtotal: number
-          total_asdtotal: number
-        }[]
-      }
-      get_distinct_values: {
-        Args: { p_column_name: string; p_table_name: string }
-        Returns: {
-          distinct_value: string
-        }[]
-      }
-      get_filtered_stats: {
-        Args: { p_filters: Json }
-        Returns: {
-          avg_asdtotal: number
-          count_asdtotal: number
-          max_asdtotal: number
-          median_asdtotal: number
-          total_asdtotal: number
-        }[]
-      }
-      get_fire_appraisal_comparison: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          appraiser_id: number
-          difference: number
-          end_total: number
-          fire_parcel_number: string
-          land_use: string
-          neighborhood: string
-          neighborhood_int: number
-          occupancy: string
-          p_parcel_number: string
-          pct_change: number
-          prefix_directional: string
-          prop_class: string
-          site_street_name: string
-          site_street_number: string
-          site_zip_code: string
-          start_total: number
-          tax_status: string
-        }[]
-      }
-      get_parcel_feature_inputs_raw: {
-        Args: {
-          p_as_of_date?: string
-          p_land_uses?: number[]
-          p_neighborhoods?: number[]
-        }
-        Returns: {
-          block: number
-          district: string
-          ext: number
-          house_number: string
-          land_use: string
-          lat: number
-          lon: number
-          lot: string
-          neighborhoods: Json
-          parcel_id: number
-          postcode: string
-          street: string
-          structures: Json
-          value_row: Json
-        }[]
-      }
       get_parcel_features: {
         Args: {
           p_as_of_date?: string
@@ -3647,256 +3052,6 @@ export type Database = {
           values_per_unit: number
         }[]
       }
-      get_parcel_features_as_of: {
-        Args: { p_as_of?: string }
-        Returns: {
-          addition_finished_total: number
-          addition_unfinished_total: number
-          attached_garage_area: number
-          attic_finished_total: number
-          attic_unfinished_total: number
-          basement_finished_total: number
-          basement_garage_area: number
-          basement_unfinished_total: number
-          bedrooms: number
-          block: number
-          building_count_total: number
-          carport_area: number
-          category: string
-          city: string
-          condition_at_sale: string
-          crawl_finished_total: number
-          crawl_unfinished_total: number
-          detached_garage_area: number
-          district: string
-          ext: number
-          floor_finished_total: number
-          floor_unfinished_total: number
-          full_bathrooms: number
-          half_bathrooms: number
-          house_number: string
-          land_use: string
-          lat: number
-          living_area_total: number
-          lon: number
-          lot: string
-          material: string
-          material_finished_sqft: Json
-          material_total_sqft: Json
-          material_unfinished_sqft: Json
-          parcel_id: number
-          postcode: string
-          rooms: number
-          state: string
-          street: string
-          structure_id: number
-          type: string
-          year_built: number
-        }[]
-      }
-      get_parcel_features_latest: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          addition_finished_total: number
-          addition_unfinished_total: number
-          attached_garage_area: number
-          attic_finished_total: number
-          attic_unfinished_total: number
-          basement_finished_total: number
-          basement_garage_area: number
-          basement_unfinished_total: number
-          bedrooms: number
-          block: number
-          carport_area: number
-          city: string
-          condition_at_sale: string
-          crawl_finished_total: number
-          crawl_unfinished_total: number
-          detached_garage_area: number
-          district: string
-          ext: number
-          floor_finished_total: number
-          floor_unfinished_total: number
-          full_bathrooms: number
-          half_bathrooms: number
-          house_number: string
-          land_use: string
-          lat: number
-          living_area_total: number
-          lon: number
-          lot: string
-          material: string
-          parcel_id: number
-          postcode: string
-          rooms: number
-          sale_date: string
-          sale_id: number
-          sale_is_valid: boolean
-          sale_price: number
-          sale_type: string
-          state: string
-          street: string
-          year_built: number
-        }[]
-      }
-      get_parcel_value_features_asof: {
-        Args: {
-          p_as_of_date?: string
-          p_land_uses?: number[]
-          p_neighborhoods?: number[]
-          p_parcel_ids?: number[]
-        }
-        Returns: {
-          avg_condition: number
-          avg_year_built: number
-          block: number
-          current_value: number
-          date_of_assessment: string
-          district: string
-          ext: number
-          house_number: string
-          land_area: number
-          land_to_building_area_ratio: number
-          land_use: string
-          lat: number
-          lon: number
-          lot: string
-          neighborhoods_at_as_of: Json
-          parcel_id: number
-          postcode: string
-          street: string
-          structure_count: number
-          total_finished_area: number
-          total_unfinished_area: number
-          total_units: number
-          value_row_id: number
-          value_year: number
-          values_per_sqft_building_total: number
-          values_per_sqft_finished: number
-          values_per_sqft_land: number
-          values_per_unit: number
-        }[]
-      }
-      get_ratio_medians: {
-        Args: {
-          p_as_of_date?: string
-          p_end_date?: string
-          p_group_by?: string[]
-          p_include_raw?: boolean
-          p_land_uses?: string[]
-          p_start_date?: string
-          p_trim_factor?: number
-        }
-        Returns: {
-          avg_ratio: number
-          group_key: string
-          max_ratio: number
-          median_ratio: number
-          min_ratio: number
-          n: number
-          raw_data: Json
-        }[]
-      }
-      get_ratios: {
-        Args: { p_as_of_date: string; p_end_date: string; p_start_date: string }
-        Returns: {
-          current_value: number
-          date_of_assessment: string
-          district: string
-          land_use_asof: string
-          land_use_sale: string
-          parcel_id: number
-          ratio: number
-          sale_date: string
-          sale_id: number
-          sale_price: number
-          sale_type: string
-          value_row_id: number
-          value_year: number
-        }[]
-      }
-      get_sale_features_all: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          addition_finished_total: number
-          addition_unfinished_total: number
-          attached_garage_area: number
-          attic_finished_total: number
-          attic_unfinished_total: number
-          basement_finished_total: number
-          basement_garage_area: number
-          basement_unfinished_total: number
-          bedrooms: number
-          block: number
-          carport_area: number
-          city: string
-          condition_at_sale: string
-          crawl_finished_total: number
-          crawl_unfinished_total: number
-          detached_garage_area: number
-          district: string
-          ext: number
-          floor_finished_total: number
-          floor_unfinished_total: number
-          full_bathrooms: number
-          half_bathrooms: number
-          house_number: string
-          land_use: string
-          lat: number
-          living_area_total: number
-          lon: number
-          lot: string
-          material: string
-          parcel_id: number
-          postcode: string
-          rooms: number
-          sale_date: string
-          sale_id: number
-          sale_is_valid: boolean
-          sale_price: number
-          sale_type: string
-          state: string
-          street: string
-          year_built: number
-        }[]
-      }
-      get_sales: {
-        Args: {
-          condition_values?: string[]
-          neighborhood_values?: string[]
-          occupancy_values?: string[]
-          override_year?: number
-          quality_values?: string[]
-          relative_year_offset?: number
-          structure_name_values?: string[]
-        }
-        Returns: {
-          appraised_sum: number
-          date_of_sale: string
-          document_number: number
-          net_selling_price: number
-          parcel_count: number
-          parcels: Json
-          sale_type: string
-          structure_count: number
-        }[]
-      }
-      get_sales_by_occupancy: {
-        Args: {
-          neighborhood_values?: string[]
-          occupancy_values?: string[]
-          override_year?: number
-          relative_year_offset?: number
-          sale_parcel_type?: string
-        }
-        Returns: {
-          date_of_sale: string
-          net_selling_price: number
-          parcels: Json
-          sale_document_number: number
-          sale_year: number
-        }[]
-      }
       get_sold_parcel_features_multi: {
         Args: {
           p_end_date?: string
@@ -3926,122 +3081,6 @@ export type Database = {
           total_units: number
         }[]
       }
-      get_sold_parcel_ratios_features: {
-        Args: {
-          p_as_of_date?: string
-          p_end_date?: string
-          p_land_uses?: number[]
-          p_start_date?: string
-          p_valid_only?: boolean
-        }
-        Returns: {
-          avg_condition: number
-          avg_year_built: number
-          block: number
-          current_value: number
-          date_of_assessment: string
-          district: string
-          ext: number
-          house_number: string
-          is_valid: boolean
-          land_area: number
-          land_to_building_area_ratio: number
-          land_use: string
-          land_use_asof: string
-          land_use_sale: string
-          lat: number
-          lon: number
-          lot: string
-          parcel_id: number
-          postcode: string
-          price_per_sqft_building_total: number
-          price_per_sqft_finished: number
-          price_per_sqft_land: number
-          price_per_unit: number
-          ratio: number
-          sale_date: string
-          sale_id: number
-          sale_price: number
-          sale_type: string
-          street: string
-          structure_count: number
-          total_finished_area: number
-          total_unfinished_area: number
-          total_units: number
-          value_row_id: number
-          value_year: number
-        }[]
-      }
-      get_sold_parcel_ratios_features_multi: {
-        Args: {
-          p_as_of_date?: string
-          p_end_date?: string
-          p_land_uses?: string[]
-          p_start_date?: string
-          p_valid_only?: boolean
-        }
-        Returns: {
-          avg_condition: number
-          avg_year_built: number
-          current_value: number
-          date_of_assessment: string
-          is_valid: boolean
-          land_area_total: number
-          land_to_building_area_ratio: number
-          parcel_count: number
-          parcels: Json
-          price_per_sqft_building_total: number
-          price_per_sqft_finished: number
-          ratio: number
-          sale_date: string
-          sale_id: number
-          sale_price: number
-          sale_type: string
-          single_parcel_id: number
-          structure_count: number
-          total_finished_area: number
-          total_unfinished_area: number
-          value_row_id: number
-          value_year: number
-        }[]
-      }
-      get_subject_features_for_parcels: {
-        Args: { p_parcel_ids: number[] }
-        Returns: {
-          addition_finished_total: number
-          addition_unfinished_total: number
-          attached_garage_area: number
-          attic_finished_total: number
-          attic_unfinished_total: number
-          basement_finished_total: number
-          basement_garage_area: number
-          basement_unfinished_total: number
-          bedrooms: number
-          carport_area: number
-          city: string
-          condition: string
-          crawl_finished_total: number
-          crawl_unfinished_total: number
-          detached_garage_area: number
-          district: string
-          floor_finished_total: number
-          floor_unfinished_total: number
-          full_bathrooms: number
-          half_bathrooms: number
-          house_number: string
-          land_use: string
-          lat: number
-          lon: number
-          material: string
-          parcel_id: number
-          postcode: string
-          rooms: number
-          state: string
-          street: string
-          subject_living_area: number
-          year_built: number
-        }[]
-      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown
@@ -4069,62 +3108,6 @@ export type Database = {
       load_parcel_site_addresses: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      load_site_addresses: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      reset_parcel_database: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      score_sales_with_model: {
-        Args:
-          | { p_limit?: number; p_parcel_ids?: number[]; p_run_id?: number }
-          | { p_limit?: number; p_run_id?: number }
-        Returns: {
-          addition_finished_total: number
-          addition_unfinished_total: number
-          attached_garage_area: number
-          attic_finished_total: number
-          attic_unfinished_total: number
-          basement_finished_total: number
-          basement_garage_area: number
-          basement_unfinished_total: number
-          bedrooms: number
-          block: number
-          carport_area: number
-          city: string
-          condition_at_sale: string
-          crawl_finished_total: number
-          crawl_unfinished_total: number
-          detached_garage_area: number
-          district: string
-          ext: number
-          floor_finished_total: number
-          floor_unfinished_total: number
-          full_bathrooms: number
-          half_bathrooms: number
-          house_number: string
-          land_use: string
-          lat: number
-          living_area_total: number
-          lon: number
-          lot: string
-          material: string
-          parcel_id: number
-          postcode: string
-          rooms: number
-          sale_date: string
-          sale_id: number
-          sale_is_valid: boolean
-          sale_price: number
-          sale_type: string
-          state: string
-          street: string
-          y_pred: number
-          year_built: number
-        }[]
       }
       score_sales_with_model_with_coeff: {
         Args: { p_limit?: number; p_parcel_ids?: number[]; p_run_id?: number }
@@ -4188,67 +3171,6 @@ export type Database = {
           zip_code: string | null
         }[]
       }
-      search_current_parcels: {
-        Args: { search_text: string }
-        Returns: {
-          owner_address2: string | null
-          owner_city: string | null
-          owner_name: string | null
-          owner_state: string | null
-          owner_zip: string | null
-          parcel_number: string
-          search: string | null
-          site_street_name: string | null
-          site_street_number: string | null
-          site_zip_code: string | null
-        }[]
-      }
-      search_geocoded_addresses_prefix: {
-        Args: { p_prefix: string }
-        Returns: {
-          address_line1: string | null
-          address_line2: string | null
-          attribution: string | null
-          attribution_url: string | null
-          category: string | null
-          city: string | null
-          country: string | null
-          country_code: string | null
-          county: string | null
-          devnet_address: string | null
-          distance: number | null
-          district: string | null
-          footway: string | null
-          formatted: string | null
-          fts_address_line1: unknown | null
-          geocode_id: string | null
-          hamlet: string | null
-          housenumber: string | null
-          iso3166_2: string | null
-          lat: number | null
-          license: string | null
-          lon: number | null
-          match_type: string | null
-          name: string | null
-          old_name: string | null
-          place_id: string
-          plus_code: string | null
-          plus_code_short: string | null
-          postcode: string | null
-          ref: string | null
-          result_type: string | null
-          sourcename: string | null
-          state: string | null
-          state_code: string | null
-          street: string | null
-          suburb: string | null
-          timezone: string | null
-          timezone_abbreviation: string | null
-          timezone_offset: string | null
-          town: string | null
-          village: string | null
-        }[]
-      }
       search_parcels_by_prefix: {
         Args: { active?: boolean; prefix: string }
         Returns: {
@@ -4256,28 +3178,6 @@ export type Database = {
           names: string[]
           parcel_number: string
           retired_at: string
-        }[]
-      }
-      search_site_address_master: {
-        Args: { prefix: string }
-        Returns: {
-          fts: unknown | null
-          house_number: string | null
-          id: string
-          street_name: string | null
-          street_suffix: string | null
-          zip_code: string | null
-        }[]
-      }
-      search_site_address_test: {
-        Args: { prefix: string; year_input: number }
-        Returns: {
-          fts: unknown | null
-          house_number: string | null
-          id: string
-          street_name: string | null
-          street_suffix: string | null
-          zip_code: string | null
         }[]
       }
       search_sold_parcels_by_address_prefix: {
@@ -4306,6 +3206,48 @@ export type Database = {
       show_trgm: {
         Args: { "": string }
         Returns: string[]
+      }
+      test_get_parcel_features: {
+        Args: {
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          postcode: string
+          retired_at: string
+          street: string
+          structure_count: number
+          structures: Json
+          structures_summary: Json
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+          values_per_sqft_building_total: number
+          values_per_sqft_finished: number
+          values_per_sqft_land: number
+          values_per_unit: number
+        }[]
       }
       test_get_sold_parcel_ratios_features: {
         Args: {
@@ -4354,13 +3296,45 @@ export type Database = {
           value_year: number
         }[]
       }
-      train_sale_price_linear: {
-        Args: { in_features: string[]; in_where_clause?: string }
+      testing_get_parcel_features: {
+        Args: {
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+        }
         Returns: {
-          coefficient: number
-          n: number
-          r2: number
-          term: string
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          postcode: string
+          retired_at: string
+          street: string
+          structure_count: number
+          structures: Json
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+          values_per_sqft_building_total: number
+          values_per_sqft_finished: number
+          values_per_sqft_land: number
+          values_per_unit: number
         }[]
       }
     }

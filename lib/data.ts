@@ -169,16 +169,6 @@ export async function getFilteredData({
 
   switch (table) {
     case "get_sales":
-      //@ts-ignore
-      query = supabase.rpc(
-        "get_sales",
-        {
-          occupancy_values: filters.occupancy || undefined,
-        },
-        get_count ? { count: "exact", head: true } : {}
-      );
-      // return await query;
-      filteredQuery = applySalesFiltersToQuery(query, filters);
       break;
     case "search_site_addresses":
       //@ts-ignore
