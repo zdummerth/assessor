@@ -71,6 +71,11 @@ export async function GET(request: NextRequest) {
     const landUsesArg = parseCsvNums(sp.get("land_uses")); // -> p_land_uses
     const neighborhoodsArg = parseCsvNums(sp.get("neighborhoods")); // -> p_neighborhoods
     const parcelIdsArg = parseCsvNums(sp.get("parcel_ids")); // -> p_parcel_ids
+    const isAbated = sp.get("is_abated");
+    if (isAbated && !["0", "1"].includes(isAbated)) {
+      return Response.json({ error: "Invalid is_abated" }, { status: 400 });
+    }
+    const programsArg = parseCsvStrings(sp.get("programs")); // -> p_programs
 
     // ---- Pagination ----
     const page = Math.max(1, Number(sp.get("page") ?? 1));
@@ -106,14 +111,18 @@ export async function GET(request: NextRequest) {
       p_land_uses?: number[];
       p_neighborhoods?: number[];
       p_parcel_ids?: number[];
+      p_is_abated?: boolean;
+      p_programs?: string[];
     } = {};
     if (asOfDate) args.p_as_of_date = asOfDate;
     if (landUsesArg) args.p_land_uses = landUsesArg;
     if (neighborhoodsArg) args.p_neighborhoods = neighborhoodsArg;
     if (parcelIdsArg) args.p_parcel_ids = parcelIdsArg;
+    if (isAbated) args.p_is_abated = isAbated === "1";
+    if (programsArg) args.p_programs = programsArg;
 
     // ---- Base query (use count for pagination metadata if available) ----
-    let query = supabase.rpc("get_parcel_features", args, {
+    let query = supabase.rpc("testing_get_parcel_features_v2", args, {
       count: "exact",
     });
 

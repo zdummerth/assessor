@@ -1,17 +1,32 @@
+// components/features/columns.tsx
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye } from "lucide-react";
+import { Eye, Info } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { ParcelValueFeatureRow } from "@/lib/client-queries";
 import Address from "@/components/ui/address";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
 
-export function makeColumns(
-  onOpenStructures: (row: ParcelValueFeatureRow) => void
-) {
+const money = (n: number, maxFrac = 0) =>
+  Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: maxFrac,
+  }).format(n);
+
+export function makeColumns() {
   const sortKeyFor: Record<string, string> = {
     parcel_id: "parcel_id",
     address: "street",
@@ -115,15 +130,7 @@ export function makeColumns(
       header: "Current Value",
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
-        return (
-          <span className="tabular-nums">
-            {Intl.NumberFormat(undefined, {
-              style: "currency",
-              currency: "USD",
-              maximumFractionDigits: 0,
-            }).format(n)}
-          </span>
-        );
+        return <span className="tabular-nums">{money(n, 0)}</span>;
       },
       sortingFn: "alphanumeric",
     },
@@ -132,15 +139,7 @@ export function makeColumns(
       header: "Value/sf (fin)",
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
-        return (
-          <span className="tabular-nums">
-            {Intl.NumberFormat(undefined, {
-              style: "currency",
-              currency: "USD",
-              maximumFractionDigits: 2,
-            }).format(n)}
-          </span>
-        );
+        return <span className="tabular-nums">{money(n, 2)}</span>;
       },
     },
     {
@@ -148,15 +147,7 @@ export function makeColumns(
       header: "Value/sf (bldg)",
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
-        return (
-          <span className="tabular-nums">
-            {Intl.NumberFormat(undefined, {
-              style: "currency",
-              currency: "USD",
-              maximumFractionDigits: 2,
-            }).format(n)}
-          </span>
-        );
+        return <span className="tabular-nums">{money(n, 2)}</span>;
       },
     },
     {
@@ -174,15 +165,7 @@ export function makeColumns(
       header: "Value/sf (land)",
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
-        return (
-          <span className="tabular-nums">
-            {Intl.NumberFormat(undefined, {
-              style: "currency",
-              currency: "USD",
-              maximumFractionDigits: 2,
-            }).format(n)}
-          </span>
-        );
+        return <span className="tabular-nums">{money(n, 2)}</span>;
       },
     },
     {
@@ -201,21 +184,122 @@ export function makeColumns(
         </span>
       ),
     },
+
+    // --- NEW: Abatements dialog column ---
     {
-      id: "actions",
-      header: "",
+      id: "abatements",
+      header: "Abatements",
       enableSorting: false,
-      cell: ({ row }) => (
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-2"
-          onClick={() => onOpenStructures(row.original)}
-        >
-          <Eye className="size-4" />
-          Structures
-        </Button>
-      ),
+      cell: ({ row }) => {
+        const programs = Array.isArray((row.original as any).abatement)
+          ? ((row.original as any).abatement as any[])
+          : [];
+        if (!programs.length) {
+          return <span className="text-muted-foreground">—</span>;
+        }
+
+        return (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Info className="size-4" />
+                View ({programs.length})
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  Abatements for parcel {row.original.parcel_id}
+                </DialogTitle>
+              </DialogHeader>
+
+              <ScrollArea className="max-h-[60vh] pr-2">
+                <div className="space-y-3">
+                  {programs.map((p: any) => (
+                    <div
+                      key={`${p.program_id}-${p.first_year}-${p.last_year}`}
+                      className="rounded border p-3"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">
+                          Program #{p.program_id}
+                        </span>
+                        {p.type && <Badge variant="secondary">{p.type}</Badge>}
+                        {p.scale_type && (
+                          <Badge variant="secondary">{p.scale_type}</Badge>
+                        )}
+                        {(p.first_year || p.last_year) && (
+                          <Badge variant="secondary">
+                            {p.first_year ?? "—"}–{p.last_year ?? "—"}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Bases */}
+                      {(p.parcel_bases?.agr ??
+                        p.parcel_bases?.com ??
+                        p.parcel_bases?.res) && (
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          Bases: AGR {p.parcel_bases?.agr ?? "—"}, COM{" "}
+                          {p.parcel_bases?.com ?? "—"}, RES{" "}
+                          {p.parcel_bases?.res ?? "—"}
+                        </div>
+                      )}
+
+                      {/* Current phase */}
+                      {p.current_phase ? (
+                        <div className="mt-3">
+                          <div className="text-sm font-medium">
+                            Current Phase
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            φ{p.current_phase.phase} ·{" "}
+                            {p.current_phase.first_year}–
+                            {p.current_phase.last_year} · AGR{" "}
+                            {p.current_phase.agr_abated ?? "—"} · COM{" "}
+                            {p.current_phase.com_abated ?? "—"} · RES{" "}
+                            {p.current_phase.res_abated ?? "—"}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-3 text-sm text-muted-foreground">
+                          No current phase.
+                        </div>
+                      )}
+
+                      {/* All phases */}
+                      {Array.isArray(p.phases) && p.phases.length > 0 && (
+                        <>
+                          <Separator className="my-3" />
+                          <div className="text-sm font-medium">All Phases</div>
+                          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {p.phases.map((ph: any, idx: number) => (
+                              <div
+                                key={ph.phase_id ?? idx}
+                                className="rounded-md border p-2"
+                              >
+                                <div className="font-medium">φ{ph.phase}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {ph.first_year}–{ph.last_year}
+                                </div>
+                                <div className="text-xs">
+                                  AGR {ph.agr_abated ?? "—"} · COM{" "}
+                                  {ph.com_abated ?? "—"} · RES{" "}
+                                  {ph.res_abated ?? "—"}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+        );
+      },
     },
   ];
 

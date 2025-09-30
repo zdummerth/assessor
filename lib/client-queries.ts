@@ -405,6 +405,8 @@ export function useParcelValueFeatures(options?: {
   land_uses?: Array<string | number>;
   neighborhoods?: Array<string | number>;
   parcel_ids?: Array<string | number>;
+  is_abated?: boolean;
+  selectedPrograms?: string[];
   page?: number; // default: 1
   page_size?: number; // default: 50
   sort?: string; // e.g. "value_year,-current_value"
@@ -419,6 +421,10 @@ export function useParcelValueFeatures(options?: {
     params.set("neighborhoods", options.neighborhoods.join(","));
   if (options?.parcel_ids?.length)
     params.set("parcel_ids", options.parcel_ids.join(","));
+  if (typeof options?.is_abated === "boolean")
+    params.set("is_abated", options.is_abated ? "1" : "0");
+  if (options?.selectedPrograms?.length)
+    params.set("programs", options.selectedPrograms.join(","));
   if (options?.page) params.set("page", String(options.page));
   if (options?.page_size) params.set("page_size", String(options.page_size));
   if (options?.sort) params.set("sort", options.sort);

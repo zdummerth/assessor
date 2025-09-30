@@ -1,23 +1,30 @@
 [
   {
-    "material": null,
-    "structure_count": 2,
-    "finished_area_attic": 0,
-    "finished_area_floor": 44850,
-    "total_finished_area": 44850,
-    "sections_count_attic": 0,
-    "sections_count_floor": 9,
-    "total_unfinished_area": 0,
-    "unfinished_area_attic": 0,
-    "unfinished_area_floor": 0,
-    "finished_area_addition": 0,
-    "finished_area_basement": 0,
-    "sections_count_addition": 0,
-    "sections_count_basement": 0,
-    "unfinished_area_addition": 0,
-    "unfinished_area_basement": 0,
-    "finished_area_crawl_space": 0,
-    "sections_count_crawl_space": 0,
-    "unfinished_area_crawl_space": 0
+    "type": "CH99",
+    "phases": [
+      {
+        "phase": 1,
+        "phase_id": 297,
+        "last_year": 2029,
+        "agr_abated": 1,
+        "com_abated": 1,
+        "first_year": 2020,
+        "res_abated": 1
+      }
+    ],
+    "last_year": 2029,
+    "first_year": 2020,
+    "scale_type": "F",
+    "parcel_bases": { "agr": 0, "com": 153900, "res": 155610 },
+    "current_phase": {
+      "phase": 1,
+      "phase_id": 297,
+      "last_year": 2029,
+      "agr_abated": 1,
+      "com_abated": 1,
+      "first_year": 2020,
+      "res_abated": 1
+    },
+    "abatement_program_id": 112
   }
 ]

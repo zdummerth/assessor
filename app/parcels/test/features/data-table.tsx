@@ -1,3 +1,4 @@
+// components/features/DataTable.tsx
 "use client";
 
 import * as React from "react";
@@ -11,6 +12,7 @@ import {
   VisibilityState,
   useReactTable,
 } from "@tanstack/react-table";
+import type { OnChangeFn, Updater } from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -19,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { OnChangeFn, Updater } from "@tanstack/react-table";
 
 type Props<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
@@ -46,7 +47,7 @@ export function DataTable<TData, TValue>({
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  // Accept Updater<SortingState>, resolve to the next value, then mirror to server
+  // Accept Updater<SortingState>, resolve to next value, then mirror to server
   const handleSortingChange: OnChangeFn<SortingState> = (
     updaterOrValue: Updater<SortingState>
   ) => {
@@ -106,6 +107,7 @@ export function DataTable<TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
           {isLoading ? (
             <TableRow>
