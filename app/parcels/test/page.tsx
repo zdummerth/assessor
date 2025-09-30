@@ -232,16 +232,6 @@ export default function ParcelFeaturesBrowser() {
     resetToFirst();
   };
 
-  // cap massive chip lists when defaulting to the set (we only chip explicit selections)
-  const luChips = selectedLandUses.map((v) => ({
-    value: v,
-    label: luLabelMap.get(v) ?? v,
-  }));
-  const nbChips = selectedNeighborhoods.map((v) => ({
-    value: v,
-    label: nbLabelMap.get(v) ?? v,
-  }));
-
   return (
     <div className="p-4 space-y-3">
       {/* Top toolbar: Filters dialog + active chips + quick controls */}
@@ -249,7 +239,7 @@ export default function ParcelFeaturesBrowser() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           {/* Left: Filters button + chips */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2">
               <Dialog open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
@@ -450,27 +440,26 @@ export default function ParcelFeaturesBrowser() {
                 </DialogContent>
               </Dialog>
 
-              {/* Rows per page (quick) */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm">Rows</span>
-                <Select
-                  value={String(pageSize)}
-                  onValueChange={(v) => {
-                    setPageSize(Number(v));
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger className="h-8 w-[90px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[10, 25, 50, 100].map((n) => (
-                      <SelectItem key={n} value={String(n)}>
-                        {n}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <ServerPagination
+                page={page}
+                setPage={setPage}
+                pageSize={pageSize}
+                setPageSize={(n) => {
+                  setPageSize(n);
+                  setPage(1);
+                }}
+                hasMore={meta?.has_more}
+                isLoading={isLoading}
+              />
+              <div className="text-sm text-muted-foreground">
+                {meta?.page_size
+                  ? ` (page ${meta.page} of ${Math.ceil(
+                      (meta.total ?? 0) / meta.page_size
+                    )})`
+                  : ""}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Total parcels: {meta?.total ?? "—"}
               </div>
             </div>
 

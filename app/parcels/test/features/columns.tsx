@@ -105,21 +105,23 @@ export function makeColumns() {
       accessorKey: "land_use",
       header: "Land Use",
       cell: ({ getValue }) => (
-        <div className="min-w-[80px]">{String(getValue() ?? "")}</div>
+        <div className="min-w-[100px]">{String(getValue() ?? "")}</div>
       ),
     },
     {
       accessorKey: "structure_count",
       header: "Structs",
       cell: ({ getValue }) => (
-        <span className="tabular-nums">{getValue() as number}</span>
+        <span className="tabular-nums min-w-[100px]">
+          {getValue() as number}
+        </span>
       ),
     },
     {
       accessorKey: "total_finished_area",
       header: "Finished (sf)",
       cell: ({ getValue }) => (
-        <span className="tabular-nums">
+        <span className="tabular-nums min-w-[140px]">
           {Number(getValue() ?? 0).toLocaleString()}
         </span>
       ),
@@ -130,7 +132,9 @@ export function makeColumns() {
       header: "Current Value",
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
-        return <span className="tabular-nums">{money(n, 0)}</span>;
+        return (
+          <span className="tabular-nums min-w-[140px]">{money(n, 0)}</span>
+        );
       },
       sortingFn: "alphanumeric",
     },
@@ -139,7 +143,9 @@ export function makeColumns() {
       header: "Value/sf (fin)",
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
-        return <span className="tabular-nums">{money(n, 2)}</span>;
+        return (
+          <span className="tabular-nums min-w-[140px]">{money(n, 2)}</span>
+        );
       },
     },
     {
@@ -147,7 +153,9 @@ export function makeColumns() {
       header: "Value/sf (bldg)",
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
-        return <span className="tabular-nums">{money(n, 2)}</span>;
+        return (
+          <span className="tabular-nums min-w-[140px]">{money(n, 2)}</span>
+        );
       },
     },
     {
@@ -165,21 +173,25 @@ export function makeColumns() {
       header: "Value/sf (land)",
       cell: ({ getValue }) => {
         const n = Number(getValue() ?? 0);
-        return <span className="tabular-nums">{money(n, 2)}</span>;
+        return (
+          <span className="tabular-nums min-w-[140px]">{money(n, 2)}</span>
+        );
       },
     },
     {
       accessorKey: "avg_year_built",
       header: "Avg YB",
       cell: ({ getValue }) => (
-        <span className="tabular-nums">{getValue() as number}</span>
+        <span className="tabular-nums min-w-[100px]">
+          {getValue() as number}
+        </span>
       ),
     },
     {
       accessorKey: "avg_condition",
       header: "Avg Cond",
       cell: ({ getValue }) => (
-        <span className="tabular-nums">
+        <span className="tabular-nums min-w-[100px]">
           {Number(getValue() ?? 0).toFixed(1)}
         </span>
       ),
@@ -195,13 +207,17 @@ export function makeColumns() {
           ? ((row.original as any).abatement as any[])
           : [];
         if (!programs.length) {
-          return <span className="text-muted-foreground">—</span>;
+          return <span className="text-muted-foreground min-w-[80px]">—</span>;
         }
 
         return (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 min-w-[80px]"
+              >
                 <Info className="size-4" />
                 View ({programs.length})
               </Button>

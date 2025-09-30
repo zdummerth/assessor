@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
@@ -83,6 +84,12 @@ export function DataTable<TData, TValue>({
     manualSorting: true, // server-driven
   });
 
+  const visibleLeafCols =
+    table.getVisibleLeafColumns().length || columns.length;
+
+  // To minimize layout shift, render a fixed number of placeholder rows while loading.
+  const skeletonRowCount = 25; // match your typical page size
+
   return (
     <div className="rounded-md border overflow-hidden">
       <Table>
@@ -93,7 +100,9 @@ export function DataTable<TData, TValue>({
                 <TableHead
                   key={h.id}
                   className={
-                    h.column.getCanSort() ? "cursor-pointer select-none" : ""
+                    h.column.getCanSort()
+                      ? "cursor-pointer select-none min-w-[120px]"
+                      : "min-w-[120px]"
                   }
                   onClick={h.column.getToggleSortingHandler()}
                 >
@@ -108,16 +117,18 @@ export function DataTable<TData, TValue>({
           ))}
         </TableHeader>
 
-        <TableBody>
+        <TableBody aria-busy={isLoading ? true : undefined}>
           {isLoading ? (
-            <TableRow>
-              <TableCell
-                colSpan={table.getAllLeafColumns().length}
-                className="h-24"
-              >
-                Loading…
-              </TableCell>
-            </TableRow>
+            // Skeleton rows — keep table height stable
+            Array.from({ length: skeletonRowCount }).map((_, i) => (
+              <TableRow key={`sk-${i}`}>
+                {Array.from({ length: visibleLeafCols }).map((__, j) => (
+                  <TableCell key={`skc-${i}-${j}`}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
           ) : table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
@@ -133,10 +144,7 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={table.getAllLeafColumns().length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={visibleLeafCols} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>
