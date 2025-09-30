@@ -1,6 +1,13 @@
 import CopyToClipboard from "@/components/copy-to-clipboard";
 import Link from "next/link";
 
+// export function to format parcel number
+export function formatParcelNumber(block: number, lot: number, ext: number) {
+  const formattedBlock = block.toString().padStart(4, "0");
+  const formattedLot = lot.toString().padStart(3, "0");
+  const formattedExt = ext.toString().padStart(3, "0");
+  return `${formattedBlock}-9-${formattedLot}.${formattedExt}`;
+}
 export default function ParcelNumber({
   block,
   lot,
@@ -16,11 +23,7 @@ export default function ParcelNumber({
   showCopy?: boolean;
   className?: string;
 }) {
-  const formattedBlock = block.toString().padStart(4, "0");
-  const formattedLot = lot.toString().padStart(3, "0");
-  const formattedExt = ext.toString().padStart(3, "0");
-
-  const parcelNumber = `${formattedBlock}-9-${formattedLot}.${formattedExt}`;
+  const parcelNumber = formatParcelNumber(block, lot, ext);
 
   return (
     <section className={className}>

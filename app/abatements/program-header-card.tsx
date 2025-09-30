@@ -12,6 +12,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import FormattedDate from "@/components/ui/formatted-date";
+import PhasesTable from "./phases-table";
 
 type ProgramRow = Tables<"abatement_programs">;
 type PhaseRow = Tables<"abatement_phases">;
@@ -74,20 +76,18 @@ export default function ProgramHeaderCard({
       <CardContent className="space-y-4">
         {/* Quick stats */}
         <div className="grid grid-cols-3 gap-2 text-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
             <span className="text-muted-foreground">Phases</span>
             <span className="font-medium">{phaseCount}</span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
             <span className="text-muted-foreground">Parcels</span>
             <span className="font-medium">{parcelCount}</span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
             <span className="text-muted-foreground">Created</span>
             <span className="font-medium">
-              {new Date(program.created_at).toLocaleString("en-US", {
-                timeZone: "America/Chicago",
-              })}
+              <FormattedDate date={program.created_at} />
             </span>
           </div>
         </div>
@@ -100,15 +100,15 @@ export default function ProgramHeaderCard({
             Base assessed totals (all parcels in this program)
           </div>
           <div className="grid grid-cols-3 gap-2 text-sm">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
               <span className="text-muted-foreground">AGR</span>
               <span className="font-medium">{currency0(totals.agr)}</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
               <span className="text-muted-foreground">COM</span>
               <span className="font-medium">{currency0(totals.com)}</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
               <span className="text-muted-foreground">RES</span>
               <span className="font-medium">{currency0(totals.res)}</span>
             </div>
@@ -116,6 +116,16 @@ export default function ProgramHeaderCard({
         </div>
 
         <Separator />
+
+        {/* Phases */}
+        <div className="space-y-1">
+          <div className="text-xs text-muted-foreground">Phases</div>
+          {phases.length > 0 ? (
+            <PhasesTable phases={phases} />
+          ) : (
+            <p className="text-sm text-muted-foreground">No phases</p>
+          )}
+        </div>
 
         {/* Notes */}
         <div className="space-y-1">

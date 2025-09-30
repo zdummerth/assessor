@@ -1,10 +1,8 @@
-// app/abatements/page.tsx
-import { Suspense } from "react";
+// app/abatements/page.tsx (or wherever your page lives)
 import { createClient } from "@/utils/supabase/server";
 import { Tables } from "@/database-types";
-import ProgramListTable from "./programs-table";
+import AbatementsTabs from "./page-tabs";
 
-// --- local relation types ---
 type ProgramRow = Tables<"abatement_programs">;
 type PhaseRow = Tables<"abatement_phases">;
 type ParcelRow = Tables<"abatement_parcels">;
@@ -41,12 +39,15 @@ export default async function Page() {
   }
 
   const programs = (data ?? []) as ProgramWithRelations[];
+  const allParcels = programs.flatMap(
+    (p) => p.abatement_parcels ?? []
+  ) as (ParcelRow & {
+    test_parcels?: ParcelLite | null;
+  })[];
 
   return (
-    <div className="w-full flex flex-col gap-6 p-4 mb-10 max-w-8xl mx-auto">
-      <Suspense fallback={<div>Loading programs…</div>}>
-        <ProgramListTable programs={programs} />
-      </Suspense>
+    <div className="w-full flex flex-col gap-6 p-4 mb-10 max-w-7xl mx-auto">
+      <AbatementsTabs programs={programs} parcels={allParcels} />
     </div>
   );
 }
