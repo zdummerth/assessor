@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { ParcelValueFeatureRow } from "@/lib/client-queries";
 import Address from "@/components/ui/address";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
-
+import Link from "next/link";
 const money = (n: number, maxFrac = 0) =>
   Intl.NumberFormat(undefined, {
     style: "currency",
@@ -210,6 +210,7 @@ export function makeColumns() {
           return <span className="text-muted-foreground min-w-[80px]">—</span>;
         }
 
+        console.log("programs", programs);
         return (
           <Dialog>
             <DialogTrigger asChild>
@@ -218,8 +219,20 @@ export function makeColumns() {
                 size="sm"
                 className="gap-2 min-w-[80px]"
               >
-                <Info className="size-4" />
-                View ({programs.length})
+                {programs.map((p: any) => (
+                  <div
+                    key={`${p.abatement_program_id}-${p.first_year}-${p.last_year}`}
+                    className="flex gap-2"
+                  >
+                    {p.type && <Badge variant="secondary">{p.type}</Badge>}
+
+                    {(p.first_year || p.last_year) && (
+                      <Badge variant="secondary">
+                        {p.first_year ?? "—"}–{p.last_year ?? "—"}
+                      </Badge>
+                    )}
+                  </div>
+                ))}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -237,9 +250,12 @@ export function makeColumns() {
                       className="rounded border p-3"
                     >
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-medium">
-                          Program #{p.program_id}
-                        </span>
+                        <Link
+                          className="font-medium"
+                          href={`/abatements/${p.abatement_program_id}`}
+                        >
+                          Program #{p.abatement_program_id}
+                        </Link>
                         {p.type && <Badge variant="secondary">{p.type}</Badge>}
                         {p.scale_type && (
                           <Badge variant="secondary">{p.scale_type}</Badge>
@@ -252,15 +268,10 @@ export function makeColumns() {
                       </div>
 
                       {/* Bases */}
-                      {(p.parcel_bases?.agr ??
-                        p.parcel_bases?.com ??
-                        p.parcel_bases?.res) && (
-                        <div className="mt-2 text-sm text-muted-foreground">
-                          Bases: AGR {p.parcel_bases?.agr ?? "—"}, COM{" "}
-                          {p.parcel_bases?.com ?? "—"}, RES{" "}
-                          {p.parcel_bases?.res ?? "—"}
-                        </div>
-                      )}
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        Bases: AGR {p.parcel_bases.agr}, COM{" "}
+                        {p.parcel_bases.com}, RES {p.parcel_bases.res}
+                      </div>
 
                       {/* Current phase */}
                       {p.current_phase ? (
