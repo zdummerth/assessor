@@ -4,6 +4,7 @@
 import * as React from "react";
 import { useMemo, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import Select from "react-select";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,26 +15,21 @@ import {
   DialogContent,
   DialogFooter,
 } from "@/components/ui/dialog";
-
 import {
-  Select,
+  Select as ShadSelect,
   SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-import { MultiSelect } from "@/components/ui/multi-select";
-
 import { useLandUseOptions, useNeighborhoods } from "@/lib/client-queries";
-
 import luSets from "@/lib/land_use_arrays.json";
-import { Filter, X } from "lucide-react";
+import { Filter } from "lucide-react";
 
 type LuSet = "all" | "residential" | "other" | "lots";
 
@@ -48,7 +44,8 @@ const condo = luSets.condo;
 const all_residential = [...residential, ...single_family, ...condo];
 const all_other = [...commercial, ...industrial];
 
-const setCodes = (k: LuSet): string[] => {
+// IMPORTANT: return `null` for "all" so we don't constrain the list
+const setCodes = (k: LuSet): string[] | null => {
   switch (k) {
     case "residential":
       return all_residential.map(String);
@@ -58,7 +55,7 @@ const setCodes = (k: LuSet): string[] => {
       return lotsArr.map(String);
     case "all":
     default:
-      return [];
+      return null;
   }
 };
 
@@ -107,11 +104,14 @@ function useURLState() {
   return { searchParams, setParams, getArray };
 }
 
+// For react-select options
+type RSOption = { value: string; label: string };
+
 export default function FiltersDialog() {
   const { searchParams, setParams, getArray } = useURLState();
 
-  const setKey = searchParams?.get("set") as LuSet | "all";
-
+  // URL-derived values
+  const setKey = ((searchParams?.get("set") as LuSet) ?? "all") as LuSet;
   const asOfDate = searchParams?.get("as_of_date") ?? "";
   const selectedLandUses = getArray("lus");
   const selectedNeighborhoods = getArray("nbhds");
@@ -120,28 +120,30 @@ export default function FiltersDialog() {
   const tfaMax = searchParams?.get("tfa_max") ?? "";
   const cvMin = searchParams?.get("cv_min") ?? "";
   const cvMax = searchParams?.get("cv_max") ?? "";
+  const isAbatedOnly = (searchParams?.get("abated") ?? "") === "1";
 
   // options from hooks
   const { options: landUseOptions } = useLandUseOptions();
   const { options: neighborhoodOptions } = useNeighborhoods();
 
-  // normalize LU options to { value, label } (full set for labels/chips)
-  const allLUOptionsNormalized = useMemo(() => {
+  // normalize Land Use options to react-select { value, label }
+  const allLUOptions: RSOption[] = useMemo(() => {
     const raw = Array.isArray(landUseOptions) ? landUseOptions : [];
-    const values =
-      raw.length && typeof raw[0] === "string"
-        ? (raw as string[])
-        : (raw as any[]).map((o) => o?.value);
-    const labels =
-      raw.length && typeof raw[0] === "string"
-        ? (raw as string[])
-        : (raw as any[]).map((o) =>
-            String((o as any)?.label ?? (o as any)?.value ?? o)
-          );
-    return values.map((v, i) => ({ value: v, label: labels[i] ?? v }));
+    // support either string[] or {value,label}[]
+    if (raw.length && typeof raw[0] === "string") {
+      return (raw as string[]).map((v) => ({
+        value: String(v),
+        label: String(v),
+      }));
+    }
+    return (raw as any[]).map((o) => ({
+      value: String(o?.value ?? o),
+      label: String(o?.label ?? o?.value ?? o),
+    }));
   }, [landUseOptions]);
 
-  const formattedNeighborhoodOptions = useMemo(
+  // Neighborhoods -> react-select { value, label }
+  const nbOptions: RSOption[] = useMemo(
     () =>
       (neighborhoodOptions as any[]).map((n) => ({
         value: String(n.id),
@@ -150,14 +152,14 @@ export default function FiltersDialog() {
     [neighborhoodOptions]
   );
 
+  // constrain LU options by set (null = unconstrained)
   const activeSetOptions = useMemo(() => setCodes(setKey), [setKey]);
 
-  // show all LUs if set === "all"; otherwise constrain for the selector options
-  const landUseOptionsWithinSet = useMemo(() => {
-    if (!activeSetOptions) return allLUOptionsNormalized;
+  const landUseOptionsWithinSet: RSOption[] = useMemo(() => {
+    if (!activeSetOptions) return allLUOptions; // "all" selected
     const allowed = new Set(activeSetOptions.map(String));
-    return allLUOptionsNormalized.filter((o) => allowed.has(o.value));
-  }, [allLUOptionsNormalized, activeSetOptions]);
+    return allLUOptions.filter((o) => allowed.has(o.value));
+  }, [allLUOptions, activeSetOptions]);
 
   // When switching sets (except "all"), clamp selected LUs to allowed
   useEffect(() => {
@@ -167,11 +169,76 @@ export default function FiltersDialog() {
     if (filtered.length !== selectedLandUses.length) {
       setParams({ lus: filtered.length ? filtered.join(",") : null, page: 1 });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setKey]);
+
+  // react-select "value" needs the full option objects
+  const luValue: RSOption[] = useMemo(
+    () =>
+      landUseOptionsWithinSet.filter((o) =>
+        selectedLandUses.includes(String(o.value))
+      ),
+    [landUseOptionsWithinSet, selectedLandUses]
+  );
+
+  const nbValue: RSOption[] = useMemo(
+    () => nbOptions.filter((o) => selectedNeighborhoods.includes(o.value)),
+    [nbOptions, selectedNeighborhoods]
+  );
+
+  // react-select styling to match compact UI
+  const rsStyles = {
+    control: (base: any) => ({
+      ...base,
+      minHeight: 32,
+      height: "auto",
+      borderColor: "hsl(var(--border))",
+      backgroundColor: "transparent",
+      boxShadow: "none",
+      ":hover": { borderColor: "hsl(var(--border))" },
+    }),
+    valueContainer: (base: any) => ({ ...base, padding: "2px 8px" }),
+    indicatorsContainer: (base: any) => ({ ...base, height: 28 }),
+    dropdownIndicator: (base: any) => ({ ...base, padding: 4 }),
+    clearIndicator: (base: any) => ({ ...base, padding: 4 }),
+    multiValue: (base: any) => ({
+      ...base,
+      backgroundColor: "hsl(var(--secondary))",
+      color: "hsl(var(--secondary-foreground))",
+    }),
+    multiValueLabel: (base: any) => ({
+      ...base,
+      fontSize: 12,
+      color: "hsl(var(--secondary-foreground))",
+    }),
+    multiValueRemove: (base: any) => ({
+      ...base,
+      ":hover": {
+        backgroundColor: "transparent",
+        color: "hsl(var(--foreground))",
+      },
+    }),
+    menu: (base: any) => ({
+      ...base,
+      zIndex: 50,
+      border: "1px solid hsl(var(--border))",
+      boxShadow: "var(--shadow)",
+      backgroundColor: "hsl(var(--background))",
+    }),
+    option: (base: any, state: any) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "hsl(var(--muted))" : "transparent",
+      color: "hsl(var(--foreground))",
+    }),
+  } as const;
+
+  // Avoid SSR portal crash
+  const menuPortalTarget =
+    typeof document !== "undefined" ? document.body : undefined;
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-4 items-end">
+      <div className="flex gap-4 items-end flex-wrap">
         {/* Abated only */}
         <div className="flex flex-col gap-2">
           <Label
@@ -182,18 +249,18 @@ export default function FiltersDialog() {
           </Label>
           <Switch
             id="abated-only"
-            defaultChecked={searchParams?.get("abated") === "1"}
+            checked={isAbatedOnly}
             onCheckedChange={(v) =>
               setParams({ abated: v ? 1 : null, page: 1 })
             }
           />
         </div>
 
-        {/* Land-use set (includes All) */}
+        {/* Land-use set (shadcn single select) */}
         <div className="space-y-2">
           <div className="text-xs text-muted-foreground">Set</div>
-          <Select
-            defaultValue={setKey}
+          <ShadSelect
+            value={setKey}
             onValueChange={(v) => setParams({ set: v as LuSet, page: 1 })}
           >
             <SelectTrigger className="h-8 w-[180px]">
@@ -205,45 +272,57 @@ export default function FiltersDialog() {
               <SelectItem value="other">Other</SelectItem>
               <SelectItem value="lots">Lots</SelectItem>
             </SelectContent>
-          </Select>
+          </ShadSelect>
         </div>
 
-        {/* Land uses MultiSelect (shadcn) */}
-        <div className="space-y-2 md:col-span-1">
+        {/* Land uses (react-select multi) */}
+        <div className="space-y-2 w-[320px]">
           <div className="text-xs text-muted-foreground">Land uses</div>
-          <MultiSelect
-            key={`lus-${selectedLandUses.join(",")}-${setKey}`} // remount on URL change to keep in sync
+          <Select
+            instanceId="land-uses"
+            isMulti
             options={landUseOptionsWithinSet}
-            defaultValue={selectedLandUses}
-            onValueChange={(next: string[]) => {
-              setParams({
-                page: 1,
-                lus: next.length ? next.join(",") : null,
-              });
+            defaultValue={luValue}
+            onChange={(next) => {
+              const arr = Array.isArray(next) ? next.map((o) => o.value) : [];
+              setParams({ page: 1, lus: arr.length ? arr.join(",") : null });
             }}
+            placeholder="Search land uses…"
+            classNamePrefix="rs"
+            styles={rsStyles}
+            menuPortalTarget={menuPortalTarget}
+            closeMenuOnSelect={false}
+            hideSelectedOptions={false}
           />
         </div>
 
-        {/* Neighborhoods MultiSelect (shadcn) */}
-        <div className="space-y-2 md:col-span-1">
+        {/* Neighborhoods (react-select multi) */}
+        <div className="space-y-2 w-[360px]">
           <div className="text-xs text-muted-foreground">Neighborhoods</div>
-          <MultiSelect
-            key={`nbhds-${selectedNeighborhoods.join(",")}`}
-            options={formattedNeighborhoodOptions}
-            defaultValue={selectedNeighborhoods}
-            onValueChange={(next: string[]) => {
-              setParams({
-                page: 1,
-                nbhds: next.length ? next.join(",") : null,
-              });
+          <Select
+            instanceId="neighborhoods"
+            isMulti
+            options={nbOptions}
+            defaultValue={nbValue}
+            onChange={(next) => {
+              const arr = Array.isArray(next) ? next.map((o) => o.value) : [];
+              setParams({ page: 1, nbhds: arr.length ? arr.join(",") : null });
             }}
+            placeholder="Search neighborhoods…"
+            classNamePrefix="rs"
+            styles={rsStyles}
+            menuPortalTarget={menuPortalTarget}
+            closeMenuOnSelect={false}
+            hideSelectedOptions={false}
           />
         </div>
 
+        {/* Dialog for the rest of the filters */}
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="h-8">
               <Filter className="mr-2 h-4 w-4" />
+              More
             </Button>
           </DialogTrigger>
 

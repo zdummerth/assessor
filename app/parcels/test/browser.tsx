@@ -8,7 +8,6 @@ import { DataTable } from "./features/data-table";
 import { makeColumns } from "./features/columns";
 import { ServerPagination } from "./features/server-pagination";
 import FiltersDialog from "./filters";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 type HookOpts = {
   as_of_date?: string;
@@ -69,7 +68,7 @@ export default function ParcelFeaturesBrowserClient({ hookOpts }: Props) {
   const total = meta?.total ?? 0;
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="w-[95vw] mx-auto space-y-3">
       {/* Top bar: just the Filters control and meta (chips are inside FiltersDialog) */}
       <div className="rounded border p-3">
         <div className="flex items-end justify-between gap-3 flex-wrap">
@@ -89,20 +88,17 @@ export default function ParcelFeaturesBrowserClient({ hookOpts }: Props) {
         </div>
       </div>
 
-      {/* Scrollable data table area */}
-      <ScrollArea className="h-[80vh] rounded border">
-        <div className="min-w-[900px]">
-          <DataTable
-            columns={columns}
-            data={data}
-            sortKeyFor={sortKeyFor}
-            sort={hookOpts.sort ?? ""}
-            setSort={setSortURL}
-            setPage={setPageURL}
-            isLoading={isLoading}
-          />
-        </div>
-      </ScrollArea>
+      <div className="h-[80vh] w-[100%] overflow-auto rounded border">
+        <DataTable
+          columns={columns}
+          data={data}
+          sortKeyFor={sortKeyFor}
+          sort={hookOpts.sort ?? ""}
+          setSort={setSortURL}
+          setPage={setPageURL}
+          isLoading={isLoading}
+        />
+      </div>
 
       {error && (
         <div className="rounded border px-3 py-2 text-sm text-red-600">
