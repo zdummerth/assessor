@@ -50,7 +50,7 @@ export function ServerPagination(props: {
         <span className="text-sm text-muted-foreground">Rows per page</span>
         <select
           className="h-8 rounded-md border bg-background px-2 text-sm"
-          value={pageSize}
+          defaultValue={pageSize}
           onChange={(e) => {
             setPageSize(Number(e.target.value));
             setPage(1);
