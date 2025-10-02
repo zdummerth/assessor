@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useParcelValueFeatures } from "@/lib/client-queries";
 import { DataTable } from "./features/data-table";
 import { makeColumns } from "./features/columns";
-import { ServerPagination } from "./features/server-pagination";
+import PaginationToolbar from "./features/pagination-toolbar";
 import FiltersDialog from "./filters";
 
 type HookOpts = {
@@ -69,22 +69,17 @@ export default function ParcelFeaturesBrowserClient({ hookOpts }: Props) {
 
   return (
     <div className="w-[95vw] mx-auto space-y-3">
-      {/* Top bar: just the Filters control and meta (chips are inside FiltersDialog) */}
       <div className="rounded border p-3">
         <div className="flex items-end justify-between gap-3 flex-wrap">
           <FiltersDialog />
-          <ServerPagination
+          <PaginationToolbar
             page={hookOpts.page}
             setPage={setPageURL}
             pageSize={hookOpts.page_size}
             setPageSize={setPageSizeURL}
-            hasMore={meta?.has_more}
             isLoading={isLoading}
+            total={total}
           />
-
-          <div className="text-sm text-muted-foreground">
-            Total parcels: {total}
-          </div>
         </div>
       </div>
 
@@ -102,7 +97,7 @@ export default function ParcelFeaturesBrowserClient({ hookOpts }: Props) {
 
       {error && (
         <div className="rounded border px-3 py-2 text-sm text-red-600">
-          Error loading data. Check console.
+          {`Error loading data: ${error.message}`}
         </div>
       )}
     </div>

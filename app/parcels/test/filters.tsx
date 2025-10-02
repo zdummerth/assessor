@@ -4,7 +4,7 @@
 import * as React from "react";
 import { useMemo, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import Select from "react-select";
+import ReactSelectMulti, { RSOption } from "@/components/ui/react-select-multi";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +16,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select as ShadSelect,
+  Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
@@ -104,9 +104,6 @@ function useURLState() {
   return { searchParams, setParams, getArray };
 }
 
-// For react-select options
-type RSOption = { value: string; label: string };
-
 export default function FiltersDialog() {
   const { searchParams, setParams, getArray } = useURLState();
 
@@ -116,10 +113,10 @@ export default function FiltersDialog() {
   const selectedLandUses = getArray("lus");
   const selectedNeighborhoods = getArray("nbhds");
   const ilikeStreet = searchParams?.get("street") ?? "";
-  const tfaMin = searchParams?.get("tfa_min") ?? "";
-  const tfaMax = searchParams?.get("tfa_max") ?? "";
-  const cvMin = searchParams?.get("cv_min") ?? "";
-  const cvMax = searchParams?.get("cv_max") ?? "";
+  const tfaMin = searchParams?.get("tfa_min") ?? "any";
+  const tfaMax = searchParams?.get("tfa_max") ?? "any";
+  const cvMin = searchParams?.get("cv_min") ?? "any";
+  const cvMax = searchParams?.get("cv_max") ?? "any";
   const isAbatedOnly = (searchParams?.get("abated") ?? "") === "1";
 
   // options from hooks
@@ -172,69 +169,54 @@ export default function FiltersDialog() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setKey]);
 
-  // react-select "value" needs the full option objects
-  const luValue: RSOption[] = useMemo(
-    () =>
-      landUseOptionsWithinSet.filter((o) =>
-        selectedLandUses.includes(String(o.value))
-      ),
-    [landUseOptionsWithinSet, selectedLandUses]
+  {
+    /* Helpers (put these inside the component, above the JSX) */
+  }
+  const TFA_MAX = 20000; // 0 → 20,000 sf in 500s (adjust if needed)
+  const CV_MAX = 1000000; // 0 → 1,000,000 in 5,000s (adjust if needed)
+
+  const tfaMinNum = Number.isFinite(Number(tfaMin))
+    ? Number(tfaMin)
+    : undefined;
+  const tfaMaxNum = Number.isFinite(Number(tfaMax))
+    ? Number(tfaMax)
+    : undefined;
+  const cvMinNum = Number.isFinite(Number(cvMin)) ? Number(cvMin) : undefined;
+  const cvMaxNum = Number.isFinite(Number(cvMax)) ? Number(cvMax) : undefined;
+
+  const tfaSteps = React.useMemo(
+    () => Array.from({ length: TFA_MAX / 500 + 1 }, (_, i) => i * 500),
+    []
+  );
+  const cvSteps = React.useMemo(
+    () => Array.from({ length: CV_MAX / 5000 + 1 }, (_, i) => i * 5000),
+    []
   );
 
-  const nbValue: RSOption[] = useMemo(
-    () => nbOptions.filter((o) => selectedNeighborhoods.includes(o.value)),
-    [nbOptions, selectedNeighborhoods]
+  const tfaMinOptions = React.useMemo(
+    () => tfaSteps.filter((v) => (tfaMaxNum == null ? true : v <= tfaMaxNum)),
+    [tfaSteps, tfaMaxNum]
+  );
+  const tfaMaxOptions = React.useMemo(
+    () => tfaSteps.filter((v) => (tfaMinNum == null ? true : v >= tfaMinNum)),
+    [tfaSteps, tfaMinNum]
   );
 
-  // react-select styling to match compact UI
-  const rsStyles = {
-    control: (base: any) => ({
-      ...base,
-      minHeight: 32,
-      height: "auto",
-      borderColor: "hsl(var(--border))",
-      backgroundColor: "transparent",
-      boxShadow: "none",
-      ":hover": { borderColor: "hsl(var(--border))" },
-    }),
-    valueContainer: (base: any) => ({ ...base, padding: "2px 8px" }),
-    indicatorsContainer: (base: any) => ({ ...base, height: 28 }),
-    dropdownIndicator: (base: any) => ({ ...base, padding: 4 }),
-    clearIndicator: (base: any) => ({ ...base, padding: 4 }),
-    multiValue: (base: any) => ({
-      ...base,
-      backgroundColor: "hsl(var(--secondary))",
-      color: "hsl(var(--secondary-foreground))",
-    }),
-    multiValueLabel: (base: any) => ({
-      ...base,
-      fontSize: 12,
-      color: "hsl(var(--secondary-foreground))",
-    }),
-    multiValueRemove: (base: any) => ({
-      ...base,
-      ":hover": {
-        backgroundColor: "transparent",
-        color: "hsl(var(--foreground))",
-      },
-    }),
-    menu: (base: any) => ({
-      ...base,
-      zIndex: 50,
-      border: "1px solid hsl(var(--border))",
-      boxShadow: "var(--shadow)",
-      backgroundColor: "hsl(var(--background))",
-    }),
-    option: (base: any, state: any) => ({
-      ...base,
-      backgroundColor: state.isFocused ? "hsl(var(--muted))" : "transparent",
-      color: "hsl(var(--foreground))",
-    }),
-  } as const;
+  const cvMinOptions = React.useMemo(
+    () => cvSteps.filter((v) => (cvMaxNum == null ? true : v <= cvMaxNum)),
+    [cvSteps, cvMaxNum]
+  );
+  const cvMaxOptions = React.useMemo(
+    () => cvSteps.filter((v) => (cvMinNum == null ? true : v >= cvMinNum)),
+    [cvSteps, cvMinNum]
+  );
 
-  // Avoid SSR portal crash
-  const menuPortalTarget =
-    typeof document !== "undefined" ? document.body : undefined;
+  const fmtUSD = (n: number) =>
+    Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(n);
 
   return (
     <div className="space-y-2">
@@ -249,7 +231,7 @@ export default function FiltersDialog() {
           </Label>
           <Switch
             id="abated-only"
-            checked={isAbatedOnly}
+            defaultChecked={isAbatedOnly}
             onCheckedChange={(v) =>
               setParams({ abated: v ? 1 : null, page: 1 })
             }
@@ -259,8 +241,8 @@ export default function FiltersDialog() {
         {/* Land-use set (shadcn single select) */}
         <div className="space-y-2">
           <div className="text-xs text-muted-foreground">Set</div>
-          <ShadSelect
-            value={setKey}
+          <Select
+            defaultValue={setKey}
             onValueChange={(v) => setParams({ set: v as LuSet, page: 1 })}
           >
             <SelectTrigger className="h-8 w-[180px]">
@@ -272,48 +254,30 @@ export default function FiltersDialog() {
               <SelectItem value="other">Other</SelectItem>
               <SelectItem value="lots">Lots</SelectItem>
             </SelectContent>
-          </ShadSelect>
+          </Select>
         </div>
 
-        {/* Land uses (react-select multi) */}
         <div className="space-y-2 w-[320px]">
-          <div className="text-xs text-muted-foreground">Land uses</div>
-          <Select
-            instanceId="land-uses"
-            isMulti
-            options={landUseOptionsWithinSet}
-            defaultValue={luValue}
-            onChange={(next) => {
-              const arr = Array.isArray(next) ? next.map((o) => o.value) : [];
-              setParams({ page: 1, lus: arr.length ? arr.join(",") : null });
-            }}
-            placeholder="Search land uses…"
-            classNamePrefix="rs"
-            styles={rsStyles}
-            menuPortalTarget={menuPortalTarget}
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
+          <ReactSelectMulti
+            instanceId="neighborhoods"
+            options={nbOptions /* RSOption[] */}
+            value={selectedNeighborhoods /* string[] from URL */}
+            onChange={(arr) =>
+              setParams({ page: 1, nbhds: arr.length ? arr.join(",") : null })
+            }
+            placeholder="Search neighborhoods…"
           />
         </div>
 
-        {/* Neighborhoods (react-select multi) */}
         <div className="space-y-2 w-[360px]">
-          <div className="text-xs text-muted-foreground">Neighborhoods</div>
-          <Select
-            instanceId="neighborhoods"
-            isMulti
-            options={nbOptions}
-            defaultValue={nbValue}
-            onChange={(next) => {
-              const arr = Array.isArray(next) ? next.map((o) => o.value) : [];
-              setParams({ page: 1, nbhds: arr.length ? arr.join(",") : null });
-            }}
-            placeholder="Search neighborhoods…"
-            classNamePrefix="rs"
-            styles={rsStyles}
-            menuPortalTarget={menuPortalTarget}
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
+          <ReactSelectMulti
+            instanceId="land-uses"
+            options={landUseOptionsWithinSet}
+            value={selectedLandUses}
+            onChange={(arr) =>
+              setParams({ page: 1, lus: arr.length ? arr.join(",") : null })
+            }
+            placeholder="Search land uses…"
           />
         </div>
 
@@ -361,53 +325,99 @@ export default function FiltersDialog() {
                   />
                 </div>
 
-                {/* Finished area range */}
+                {/* Finished area range (shadcn Selects, step = 500) */}
                 <div className="space-y-2">
                   <div className="text-xs text-muted-foreground">
                     Finished area (sf)
                   </div>
                   <div className="flex gap-2">
-                    <Input
-                      inputMode="numeric"
-                      placeholder="Min"
-                      value={tfaMin}
-                      onChange={(e) =>
-                        setParams({ tfa_min: e.target.value, page: 1 })
+                    {/* Min */}
+                    <Select
+                      defaultValue={tfaMin || "any"}
+                      onValueChange={(v) =>
+                        setParams({ tfa_min: v || null, page: 1 })
                       }
-                    />
-                    <Input
-                      inputMode="numeric"
-                      placeholder="Max"
-                      value={tfaMax}
-                      onChange={(e) =>
-                        setParams({ tfa_max: e.target.value, page: 1 })
+                    >
+                      <SelectTrigger className="h-8 w-[150px]">
+                        <SelectValue placeholder="Min (Any)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="any">Any</SelectItem>
+                        {tfaMinOptions.map((v) => (
+                          <SelectItem key={v} value={String(v)}>
+                            {v.toLocaleString()} sf
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Max */}
+                    <Select
+                      defaultValue={tfaMax || "any"}
+                      onValueChange={(v) =>
+                        setParams({ tfa_max: v || null, page: 1 })
                       }
-                    />
+                    >
+                      <SelectTrigger className="h-8 w-[150px]">
+                        <SelectValue placeholder="Max (Any)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="any">Any</SelectItem>
+                        {tfaMaxOptions.map((v) => (
+                          <SelectItem key={v} value={String(v)}>
+                            {v.toLocaleString()} sf
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
-                {/* Current value range */}
+                {/* Current value range (shadcn Selects, step = 5,000) */}
                 <div className="space-y-2">
                   <div className="text-xs text-muted-foreground">
                     Current value ($)
                   </div>
                   <div className="flex gap-2">
-                    <Input
-                      inputMode="numeric"
-                      placeholder="Min"
-                      value={cvMin}
-                      onChange={(e) =>
-                        setParams({ cv_min: e.target.value, page: 1 })
+                    {/* Min */}
+                    <Select
+                      defaultValue={cvMin || "any"}
+                      onValueChange={(v) =>
+                        setParams({ cv_min: v || null, page: 1 })
                       }
-                    />
-                    <Input
-                      inputMode="numeric"
-                      placeholder="Max"
-                      value={cvMax}
-                      onChange={(e) =>
-                        setParams({ cv_max: e.target.value, page: 1 })
+                    >
+                      <SelectTrigger className="h-8 w-[170px]">
+                        <SelectValue placeholder="Min (Any)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="any">Any</SelectItem>
+                        {cvMinOptions.map((v) => (
+                          <SelectItem key={v} value={String(v)}>
+                            {fmtUSD(v)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Max */}
+                    <Select
+                      defaultValue={cvMax || "any"}
+                      onValueChange={(v) =>
+                        setParams({ cv_max: v || null, page: 1 })
                       }
-                    />
+                    >
+                      <SelectTrigger className="h-8 w-[170px]">
+                        <SelectValue placeholder="Max (Any)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="any">Any</SelectItem>
+                        {cvMaxOptions.map((v) => (
+                          <SelectItem key={v} value={String(v)}>
+                            {fmtUSD(v)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>

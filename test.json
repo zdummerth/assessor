@@ -1,30 +1,30 @@
 [
   {
-    "type": "CH99",
-    "phases": [
+    "type_id": 6,
+    "due_date": "2025-09-27",
+    "statuses": [
       {
-        "phase": 1,
-        "phase_id": 297,
-        "last_year": 2029,
-        "agr_abated": 1,
-        "com_abated": 1,
-        "first_year": 2020,
-        "res_abated": 1
+        "id": 15,
+        "status_id": 2,
+        "created_at": "2025-09-27T20:24:04.289269+00:00",
+        "created_by": "4be94f1c-078e-4810-8b6c-f2800a3c02f8"
+      },
+      {
+        "id": 16,
+        "status_id": 1,
+        "created_at": "2025-09-27T20:31:53.487945+00:00",
+        "created_by": "4be94f1c-078e-4810-8b6c-f2800a3c02f8"
       }
     ],
-    "last_year": 2029,
-    "first_year": 2020,
-    "scale_type": "F",
-    "parcel_bases": { "agr": 0, "com": 153900, "res": 155610 },
-    "current_phase": {
-      "phase": 1,
-      "phase_id": 297,
-      "last_year": 2029,
-      "agr_abated": 1,
-      "com_abated": 1,
-      "first_year": 2020,
-      "res_abated": 1
+    "review_id": 11,
+    "created_at": "2025-09-27T20:24:04.289269+00:00",
+    "created_by": "4be94f1c-078e-4810-8b6c-f2800a3c02f8",
+    "latest_status": {
+      "id": 16,
+      "status_id": 1,
+      "created_at": "2025-09-27T20:31:53.487945+00:00",
+      "created_by": "4be94f1c-078e-4810-8b6c-f2800a3c02f8"
     },
-    "abatement_program_id": 112
+    "site_visited_at": null
   }
 ]
