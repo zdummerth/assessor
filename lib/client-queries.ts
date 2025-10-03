@@ -135,6 +135,24 @@ export function useLandUseOptions() {
   };
 }
 
+export function useTaxStatusOptions() {
+  const { data, error, isLoading } = useSWR("/tax-statuses", fetcher);
+  return {
+    options: Array.isArray(data) ? data : [],
+    isLoading,
+    error,
+  };
+}
+
+export function usePropertyClassOptions() {
+  const { data, error, isLoading } = useSWR("/property-classes", fetcher);
+  return {
+    options: Array.isArray(data) ? data : [],
+    isLoading,
+    error,
+  };
+}
+
 export function useNeighborhoods() {
   const { data, error, isLoading } = useSWR<string[]>(
     "/neighborhoods",
@@ -402,6 +420,8 @@ type Filters = {
 
 export function useParcelValueFeatures(options?: {
   as_of_date?: string; // 'YYYY-MM-DD'
+  tax_status?: string;
+  property_class?: string;
   land_uses?: Array<string | number>;
   neighborhoods?: Array<string | number>;
   parcel_ids?: Array<string | number>;
@@ -415,6 +435,9 @@ export function useParcelValueFeatures(options?: {
   const params = new URLSearchParams();
 
   if (options?.as_of_date) params.set("as_of_date", options.as_of_date);
+  if (options?.tax_status) params.set("tax_status", options.tax_status);
+  if (options?.property_class)
+    params.set("property_class", options.property_class);
   if (options?.land_uses?.length)
     params.set("land_uses", options.land_uses.join(","));
   if (options?.neighborhoods?.length)

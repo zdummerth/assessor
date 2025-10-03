@@ -1,5 +1,3 @@
-// app/(whatever)/page.tsx
-import { parse } from "path";
 import ParcelFeaturesBrowserClient from "./browser";
 import luSets from "@/lib/land_use_arrays.json";
 
@@ -30,16 +28,6 @@ const setCodes = (k: LuSet): string[] | null => {
   }
 };
 
-function strOf(q: Record<string, string | string[] | undefined>, k: string) {
-  const v = q[k];
-  if (typeof v === "string") return v;
-  if (Array.isArray(v)) return v.join(",");
-  return "";
-}
-function numOr(v: string | null, fallback: number) {
-  const n = v ? Number(v) : NaN;
-  return Number.isFinite(n) ? n : fallback;
-}
 function csvToArray(v: string | null): string[] {
   if (!v) return [];
   return v
@@ -51,6 +39,8 @@ function csvToArray(v: string | null): string[] {
 export default async function Page(props: {
   searchParams?: Promise<{
     set?: string;
+    tax_status?: string;
+    property_class?: string;
     as_of_date?: string;
     lus?: string;
     nbhds?: string;
@@ -69,13 +59,16 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   // read params
   const setKey = ((): LuSet => {
-    const s = searchParams?.set || "residential";
+    const s = searchParams?.set || "all";
     return ["all", "residential", "other", "lots"].includes(s)
       ? (s as LuSet)
-      : "residential";
+      : "all";
   })();
 
   const asOfDate = searchParams?.as_of_date || "";
+
+  const selectedTaxStatus = csvToArray(searchParams?.tax_status || "");
+  const selectedPropertyClass = csvToArray(searchParams?.property_class || "");
   const selectedLandUses = csvToArray(searchParams?.lus || "");
   const selectedNeighborhoods = csvToArray(searchParams?.nbhds || "");
   const ilikeStreet = searchParams?.street || "";
@@ -118,6 +111,10 @@ export default async function Page(props: {
 
   const hookOpts = {
     as_of_date: asOfDate || undefined,
+    tax_status: selectedTaxStatus.length ? selectedTaxStatus : undefined,
+    property_class: selectedPropertyClass.length
+      ? selectedPropertyClass
+      : undefined,
     land_uses: land_uses || [], // may be null
     neighborhoods: selectedNeighborhoods.length ? selectedNeighborhoods : [],
     is_abated: isAbatedOnly ? true : undefined,

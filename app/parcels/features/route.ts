@@ -1,6 +1,7 @@
 // app/api/find-parcel-features/route.ts
 import { createClient } from "@supabase/supabase-js";
 import { type NextRequest } from "next/server";
+import { parse } from "path";
 
 // Columns returned by get_parcel_value_features_asof
 const NUMERIC_COLS = new Set([
@@ -68,6 +69,8 @@ export async function GET(request: NextRequest) {
         return Response.json({ error: "Invalid as_of_date" }, { status: 400 });
       }
     }
+    const taxStatus = parseCsvNums(sp.get("tax_status")); // -> p_tax_status
+    const propertyClass = parseCsvNums(sp.get("property_class")); // -> p_property_class
     const landUsesArg = parseCsvNums(sp.get("land_uses")); // -> p_land_uses
     const neighborhoodsArg = parseCsvNums(sp.get("neighborhoods")); // -> p_neighborhoods
     const parcelIdsArg = parseCsvNums(sp.get("parcel_ids")); // -> p_parcel_ids
@@ -108,6 +111,8 @@ export async function GET(request: NextRequest) {
     // ---- Build args for RPC ----
     const args: {
       p_as_of_date?: string;
+      p_tax_status_ids?: number[];
+      p_property_class_ids?: number[];
       p_land_uses?: number[];
       p_neighborhoods?: number[];
       p_parcel_ids?: number[];
@@ -115,6 +120,8 @@ export async function GET(request: NextRequest) {
       p_programs?: string[];
     } = {};
     if (asOfDate) args.p_as_of_date = asOfDate;
+    if (taxStatus) args.p_tax_status_ids = taxStatus;
+    if (propertyClass) args.p_property_class_ids = propertyClass;
     if (landUsesArg) args.p_land_uses = landUsesArg;
     if (neighborhoodsArg) args.p_neighborhoods = neighborhoodsArg;
     if (parcelIdsArg) args.p_parcel_ids = parcelIdsArg;
@@ -122,7 +129,7 @@ export async function GET(request: NextRequest) {
     if (programsArg) args.p_programs = programsArg;
 
     // ---- Base query (use count for pagination metadata if available) ----
-    let query = supabase.rpc("testing_get_parcel_features_v2", args, {
+    let query = supabase.rpc("testing_get_parcel_features_v4", args, {
       count: "exact",
     });
 

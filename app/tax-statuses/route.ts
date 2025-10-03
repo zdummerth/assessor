@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
 
 export async function GET(_req: NextRequest) {
-  console.log("Fetching land use options from Supabase...");
+  console.log("Fetching tax status options from Supabase...");
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,11 +11,9 @@ export async function GET(_req: NextRequest) {
     );
 
     const { data, error } = await supabase
-      .from("land_use_codes")
-      .select("code")
-      .not("code", "is", null);
-
-    console.log("Supabase data:", data, "error:", error);
+      .from("tax_statuses")
+      .select("id, name")
+      .not("id", "is", null);
 
     if (error) {
       console.error("Supabase error:", error.message);
@@ -25,11 +23,7 @@ export async function GET(_req: NextRequest) {
       );
     }
 
-    const options = Array.from(
-      new Set((data ?? []).map((r: any) => r.code.toString()))
-    ).sort();
-
-    return Response.json(options);
+    return Response.json(data);
   } catch (err) {
     console.error("Unexpected error:", err);
     return Response.json({ error: "Unexpected error" }, { status: 500 });

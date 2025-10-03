@@ -833,6 +833,7 @@ export type Database = {
           id: number
           review_id: number
           status: string
+          status_id: number | null
         }
         Insert: {
           created_at?: string
@@ -840,6 +841,7 @@ export type Database = {
           id?: number
           review_id: number
           status: string
+          status_id?: number | null
         }
         Update: {
           created_at?: string
@@ -847,6 +849,7 @@ export type Database = {
           id?: number
           review_id?: number
           status?: string
+          status_id?: number | null
         }
         Relationships: [
           {
@@ -863,7 +866,47 @@ export type Database = {
             referencedRelation: "field_reviews_with_current_status"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "field_review_statuses_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      field_review_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string
+          default_due_days: number | null
+          description: string | null
+          display_name: string
+          id: number
+          slug: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          default_due_days?: number | null
+          description?: string | null
+          display_name: string
+          id?: number
+          slug: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          default_due_days?: number | null
+          description?: string | null
+          display_name?: string
+          id?: number
+          slug?: string
+        }
+        Relationships: []
       }
       field_reviews: {
         Row: {
@@ -872,7 +915,8 @@ export type Database = {
           due_date: string | null
           id: number
           parcel_id: number
-          type: string | null
+          site_visited_at: string | null
+          type_id: number | null
         }
         Insert: {
           created_at?: string
@@ -880,7 +924,8 @@ export type Database = {
           due_date?: string | null
           id?: number
           parcel_id: number
-          type?: string | null
+          site_visited_at?: string | null
+          type_id?: number | null
         }
         Update: {
           created_at?: string
@@ -888,7 +933,8 @@ export type Database = {
           due_date?: string | null
           id?: number
           parcel_id?: number
-          type?: string | null
+          site_visited_at?: string | null
+          type_id?: number | null
         }
         Relationships: [
           {
@@ -896,6 +942,13 @@ export type Database = {
             columns: ["parcel_id"]
             isOneToOne: false
             referencedRelation: "test_parcels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_reviews_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "field_review_types"
             referencedColumns: ["id"]
           },
         ]
@@ -1368,6 +1421,48 @@ export type Database = {
         }
         Relationships: []
       }
+      parcel_property_classes: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: number
+          parcel_id: number | null
+          property_class_id: number | null
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: number
+          parcel_id?: number | null
+          property_class_id?: number | null
+          start_date: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: number
+          parcel_id?: number | null
+          property_class_id?: number | null
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_preoperty_classes_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "test_parcels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_property_classes_property_class_id_fkey"
+            columns: ["property_class_id"]
+            isOneToOne: false
+            referencedRelation: "property_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parcel_tax_rates: {
         Row: {
           id: number
@@ -1390,6 +1485,48 @@ export type Database = {
             columns: ["rate_year_id"]
             isOneToOne: false
             referencedRelation: "tax_rate_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcel_tax_statuses: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: number
+          parcel_id: number | null
+          start_date: string
+          tax_status_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: number
+          parcel_id?: number | null
+          start_date: string
+          tax_status_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: number
+          parcel_id?: number | null
+          start_date?: string
+          tax_status_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_tax_statuses_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "test_parcels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_tax_statuses_tax_status_id_fkey"
+            columns: ["tax_status_id"]
+            isOneToOne: false
+            referencedRelation: "tax_statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -1477,6 +1614,24 @@ export type Database = {
           },
         ]
       }
+      property_classes: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       report_dates: {
         Row: {
           id: number
@@ -1513,6 +1668,36 @@ export type Database = {
           column_name?: string | null
           id?: number
           table_name?: string | null
+        }
+        Relationships: []
+      }
+      review_types: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean
+          label: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          label: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          label?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1678,6 +1863,24 @@ export type Database = {
         }
         Relationships: []
       }
+      statuses: {
+        Row: {
+          created_at: string
+          id: number
+          name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string | null
+        }
+        Relationships: []
+      }
       tax_rate_years: {
         Row: {
           cap: number | null
@@ -1731,6 +1934,24 @@ export type Database = {
           code?: string
           description?: string | null
           id?: number
+        }
+        Relationships: []
+      }
+      tax_statuses: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
         }
         Relationships: []
       }
@@ -2197,6 +2418,120 @@ export type Database = {
             columns: ["parcel_id"]
             isOneToOne: false
             referencedRelation: "test_parcels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      test_parcel_review_items: {
+        Row: {
+          created_at: string
+          details: string | null
+          due_date: string | null
+          file_url: string | null
+          id: number
+          label: string
+          received_at: string | null
+          requested_at: string
+          required: boolean
+          review_id: number
+          status: Database["public"]["Enums"]["review_item_status"]
+          updated_at: string
+          value_json: Json | null
+          value_text: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          due_date?: string | null
+          file_url?: string | null
+          id?: number
+          label: string
+          received_at?: string | null
+          requested_at?: string
+          required?: boolean
+          review_id: number
+          status?: Database["public"]["Enums"]["review_item_status"]
+          updated_at?: string
+          value_json?: Json | null
+          value_text?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          due_date?: string | null
+          file_url?: string | null
+          id?: number
+          label?: string
+          received_at?: string | null
+          requested_at?: string
+          required?: boolean
+          review_id?: number
+          status?: Database["public"]["Enums"]["review_item_status"]
+          updated_at?: string
+          value_json?: Json | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_parcel_review_items_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "test_parcel_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_parcel_review_items_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "v_test_parcel_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      test_parcel_reviews: {
+        Row: {
+          created_at: string
+          data_entered: boolean
+          description: string | null
+          due_date: string | null
+          id: number
+          parcel_id: number
+          review_type_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_entered?: boolean
+          description?: string | null
+          due_date?: string | null
+          id?: number
+          parcel_id: number
+          review_type_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_entered?: boolean
+          description?: string | null
+          due_date?: string | null
+          id?: number
+          parcel_id?: number
+          review_type_id?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_parcel_reviews_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "test_parcels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_parcel_reviews_review_type_id_fkey"
+            columns: ["review_type_id"]
+            isOneToOne: false
+            referencedRelation: "review_types"
             referencedColumns: ["id"]
           },
         ]
@@ -2879,6 +3214,36 @@ export type Database = {
           },
         ]
       }
+      v_test_parcel_reviews: {
+        Row: {
+          created_at: string | null
+          data_entered: boolean | null
+          description: string | null
+          due_date: string | null
+          id: number | null
+          parcel_id: number | null
+          review_type_code: string | null
+          review_type_id: number | null
+          review_type_label: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_parcel_reviews_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "test_parcels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_parcel_reviews_review_type_id_fkey"
+            columns: ["review_type_id"]
+            isOneToOne: false
+            referencedRelation: "review_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       compare_parcel_to_comp_sales: {
@@ -3337,9 +3702,178 @@ export type Database = {
           values_per_unit: number
         }[]
       }
+      testing_get_parcel_features_v2: {
+        Args: {
+          p_abatement_programs?: number[]
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_is_abated?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+        }
+        Returns: {
+          abatement: Json
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          postcode: string
+          retired_at: string
+          street: string
+          structure_count: number
+          structures: Json
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+          values_per_sqft_building_total: number
+          values_per_sqft_finished: number
+          values_per_sqft_land: number
+          values_per_unit: number
+        }[]
+      }
+      testing_get_parcel_features_v3: {
+        Args: {
+          p_abatement_programs?: number[]
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_is_abated?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+          p_review_status_ids?: number[]
+          p_review_type_ids?: number[]
+        }
+        Returns: {
+          abatement: Json
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          field_reviews: Json
+          house_number: string
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          postcode: string
+          retired_at: string
+          street: string
+          structure_count: number
+          structures: Json
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+          values_per_sqft_building_total: number
+          values_per_sqft_finished: number
+          values_per_sqft_land: number
+          values_per_unit: number
+        }[]
+      }
+      testing_get_parcel_features_v3_simple: {
+        Args: {
+          p_abatement_programs?: number[]
+          p_exclude_retired_parcels?: boolean
+          p_is_abated?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+          p_review_status_ids?: number[]
+          p_review_type_ids?: number[]
+        }
+        Returns: {
+          abatements_json: Json
+          block: number
+          ext: number
+          field_reviews_json: Json
+          geo_json: Json
+          land_areas_json: Json
+          land_uses_json: Json
+          lot: string
+          neighborhoods_json: Json
+          parcel_id: number
+          retired_at: string
+          structures_json: Json
+          values_json: Json
+        }[]
+      }
+      testing_get_parcel_features_v4: {
+        Args: {
+          p_abatement_programs?: number[]
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_is_abated?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_review_status_ids?: number[]
+          p_review_type_ids?: number[]
+          p_tax_status_ids?: number[]
+        }
+        Returns: {
+          abatement: Json
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          field_reviews: Json
+          house_number: string
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          postcode: string
+          property_class_id: number
+          retired_at: string
+          street: string
+          structure_count: number
+          structures: Json
+          tax_status_id: number
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+          values_per_sqft_building_total: number
+          values_per_sqft_finished: number
+          values_per_sqft_land: number
+          values_per_unit: number
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      review_item_status: "requested" | "in_progress" | "received" | "canceled"
     }
     CompositeTypes: {
       regression_coef: {
@@ -3480,6 +4014,8 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      review_item_status: ["requested", "in_progress", "received", "canceled"],
+    },
   },
 } as const

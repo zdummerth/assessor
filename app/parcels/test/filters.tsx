@@ -27,7 +27,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-import { useLandUseOptions, useNeighborhoods } from "@/lib/client-queries";
+import {
+  useLandUseOptions,
+  useNeighborhoods,
+  useTaxStatusOptions,
+  usePropertyClassOptions,
+} from "@/lib/client-queries";
 import luSets from "@/lib/land_use_arrays.json";
 import { Filter } from "lucide-react";
 
@@ -110,6 +115,8 @@ export default function FiltersDialog() {
   // URL-derived values
   const setKey = ((searchParams?.get("set") as LuSet) ?? "all") as LuSet;
   const asOfDate = searchParams?.get("as_of_date") ?? "";
+  const selectedTaxStatus = getArray("tax_status");
+  const selectedPropertyClass = getArray("property_class");
   const selectedLandUses = getArray("lus");
   const selectedNeighborhoods = getArray("nbhds");
   const ilikeStreet = searchParams?.get("street") ?? "";
@@ -122,6 +129,8 @@ export default function FiltersDialog() {
   // options from hooks
   const { options: landUseOptions } = useLandUseOptions();
   const { options: neighborhoodOptions } = useNeighborhoods();
+  const { options: taxStatusOptions } = useTaxStatusOptions();
+  const { options: propertyClassOptions } = usePropertyClassOptions();
 
   // normalize Land Use options to react-select { value, label }
   const allLUOptions: RSOption[] = useMemo(() => {
@@ -147,6 +156,24 @@ export default function FiltersDialog() {
         label: `${n.neighborhood} (${n.name ?? ""})`,
       })),
     [neighborhoodOptions]
+  );
+
+  const tsOptions: RSOption[] = useMemo(
+    () =>
+      (taxStatusOptions as any[]).map((n) => ({
+        value: String(n.id),
+        label: String(n.name),
+      })),
+    [taxStatusOptions]
+  );
+
+  const pcOptions: RSOption[] = useMemo(
+    () =>
+      (propertyClassOptions as any[]).map((n) => ({
+        value: String(n.id),
+        label: String(n.name),
+      })),
+    [propertyClassOptions]
   );
 
   // constrain LU options by set (null = unconstrained)
@@ -255,6 +282,36 @@ export default function FiltersDialog() {
               <SelectItem value="lots">Lots</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2 w-[320px]">
+          <ReactSelectMulti
+            instanceId="tax_status"
+            options={tsOptions}
+            value={selectedTaxStatus}
+            onChange={(arr) =>
+              setParams({
+                page: 1,
+                tax_status: arr.length ? arr.join(",") : null,
+              })
+            }
+            placeholder="Search tax status…"
+          />
+        </div>
+
+        <div className="space-y-2 w-[320px]">
+          <ReactSelectMulti
+            instanceId="property_class"
+            options={pcOptions}
+            value={selectedPropertyClass}
+            onChange={(arr) =>
+              setParams({
+                page: 1,
+                property_class: arr.length ? arr.join(",") : null,
+              })
+            }
+            placeholder="Search property class…"
+          />
         </div>
 
         <div className="space-y-2 w-[320px]">

@@ -7,7 +7,7 @@ import { useParcelValueFeatures } from "@/lib/client-queries";
 import { DataTable } from "./features/data-table";
 import { makeColumns } from "./features/columns";
 import PaginationToolbar from "./features/pagination-toolbar";
-import FiltersDialog from "./filters";
+import FiltersDialog from "./filters-apply";
 
 type HookOpts = {
   as_of_date?: string;
