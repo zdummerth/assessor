@@ -21,6 +21,8 @@ type ReactSelectMultiProps = {
 const defaultStyles = {
   control: (base: any) => ({
     ...base,
+    position: "relative",
+    zIndex: 1,
     minHeight: 32,
     height: "auto",
     borderColor: "hsl(var(--border))",
@@ -51,15 +53,12 @@ const defaultStyles = {
   }),
   menu: (base: any) => ({
     ...base,
-    zIndex: 50,
     border: "1px solid hsl(var(--border))",
     boxShadow: "var(--shadow)",
     backgroundColor: "hsl(var(--background))",
   }),
-  option: (base: any, state: any) => ({
+  menuPortal: (base: any) => ({
     ...base,
-    backgroundColor: state.isFocused ? "hsl(var(--muted))" : "transparent",
-    color: "hsl(var(--foreground))",
   }),
 } as const;
 
@@ -78,29 +77,16 @@ export default function ReactSelectMulti({
   const menuPortalTarget =
     typeof document !== "undefined" ? document.body : undefined;
 
-  // Authoritative base comes from `value`, optimistic patches applied on top
-  const [optimisticValues, addOptimistic] = React.useOptimistic<
-    string[],
-    string[]
-  >(value ?? [], (_curr, next) => next);
-
-  // Transition for optimistic updates (required by React)
-  const [isPending, startTransition] = React.useTransition();
-
+  // derive objects for react-select from the controlled value prop
   const valueObjects = React.useMemo(
-    () => options.filter((o) => optimisticValues.includes(o.value)),
-    [options, optimisticValues]
+    () => options.filter((o) => value.includes(o.value)),
+    [options, value]
   );
 
   const handleChange = (next: MultiValue<RSOption>) => {
     const arr = Array.isArray(next) ? next.map((o) => o.value) : [];
-
-    // ✅ Wrap optimistic update in a transition
-    startTransition(() => {
-      addOptimistic(arr);
-      // (Optional) also wrap parent onChange if it’s heavy (URL updates, etc.)
-      onChange(arr);
-    });
+    console.log("ReactSelectMulti handleChange", arr);
+    onChange(arr);
   };
 
   return (
@@ -116,10 +102,12 @@ export default function ReactSelectMulti({
       placeholder={placeholder}
       closeMenuOnSelect={closeMenuOnSelect}
       hideSelectedOptions={hideSelectedOptions}
-      styles={stylesOverride ?? defaultStyles}
+      // styles={
+      //   stylesOverride ? { ...defaultStyles, ...stylesOverride } : defaultStyles
+      // }
       menuPortalTarget={menuPortalTarget}
-      // You can show pending UI if you want:
-      // isLoading={isPending}
+      menuPosition="fixed"
+      menuShouldScrollIntoView={false}
     />
   );
 }

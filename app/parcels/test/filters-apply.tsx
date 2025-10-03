@@ -1,11 +1,19 @@
-// app/(whatever)/features/filters-dialog.tsx
 "use client";
 
 import * as React from "react";
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import ReactSelectMulti, { RSOption } from "@/components/ui/react-select-multi";
+
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+  DialogContent,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectTrigger,
@@ -24,8 +32,13 @@ import {
 } from "@/lib/client-queries";
 import luSets from "@/lib/land_use_arrays.json";
 
-type LuSet = "all" | "residential" | "other" | "lots";
+// NEW: shadcn/cmdk combobox multi
+import {
+  ComboboxMulti,
+  type ComboOption,
+} from "@/components/ui/combobox-multi";
 
+type LuSet = "all" | "residential" | "other" | "lots";
 type FiltersState = {
   setKey: LuSet;
   abated: boolean;
@@ -83,17 +96,15 @@ const readURLToState = (sp: URLSearchParams | null): FiltersState => {
   };
 };
 
-const stateToParams = (s: FiltersState): Record<string, string | null> => {
-  return {
-    set: s.setKey === "all" ? null : s.setKey,
-    abated: s.abated ? "1" : null,
-    tax_status: s.tax_status.length ? s.tax_status.join(",") : null,
-    property_class: s.property_class.length ? s.property_class.join(",") : null,
-    nbhds: s.nbhds.length ? s.nbhds.join(",") : null,
-    lus: s.lus.length ? s.lus.join(",") : null,
-    page: "1", // reset page whenever filters apply
-  };
-};
+const stateToParams = (s: FiltersState): Record<string, string | null> => ({
+  set: s.setKey === "all" ? null : s.setKey,
+  abated: s.abated ? "1" : null,
+  tax_status: s.tax_status.length ? s.tax_status.join(",") : null,
+  property_class: s.property_class.length ? s.property_class.join(",") : null,
+  nbhds: s.nbhds.length ? s.nbhds.join(",") : null,
+  lus: s.lus.length ? s.lus.join(",") : null,
+  page: "1",
+});
 
 const arraysEqualAsSets = (a: string[], b: string[]) => {
   if (a.length !== b.length) return false;
@@ -101,7 +112,6 @@ const arraysEqualAsSets = (a: string[], b: string[]) => {
   for (const x of b) if (!A.has(x)) return false;
   return true;
 };
-
 const statesEqual = (a: FiltersState, b: FiltersState) =>
   a.setKey === b.setKey &&
   a.abated === b.abated &&
@@ -121,8 +131,8 @@ export default function FiltersDialog() {
   const { options: taxStatusOptions } = useTaxStatusOptions();
   const { options: propertyClassOptions } = usePropertyClassOptions();
 
-  // Normalize options
-  const luOptionsAll: RSOption[] = useMemo(() => {
+  // Normalize to ComboOption for ComboboxMulti
+  const luOptionsAll: ComboOption[] = useMemo(() => {
     const raw = Array.isArray(landUseOptions) ? landUseOptions : [];
     if (raw.length && typeof raw[0] === "string") {
       return (raw as string[]).map((v) => ({
@@ -136,7 +146,7 @@ export default function FiltersDialog() {
     }));
   }, [landUseOptions]);
 
-  const nbOptions: RSOption[] = useMemo(
+  const nbOptions: ComboOption[] = useMemo(
     () =>
       (neighborhoodOptions as any[]).map((n) => ({
         value: String(n.id),
@@ -145,7 +155,7 @@ export default function FiltersDialog() {
     [neighborhoodOptions]
   );
 
-  const tsOptions: RSOption[] = useMemo(
+  const tsOptions: ComboOption[] = useMemo(
     () =>
       (taxStatusOptions as any[]).map((n) => ({
         value: String(n.id),
@@ -154,7 +164,7 @@ export default function FiltersDialog() {
     [taxStatusOptions]
   );
 
-  const pcOptions: RSOption[] = useMemo(
+  const pcOptions: ComboOption[] = useMemo(
     () =>
       (propertyClassOptions as any[]).map((n) => ({
         value: String(n.id),
@@ -163,24 +173,24 @@ export default function FiltersDialog() {
     [propertyClassOptions]
   );
 
-  // ---- URL snapshot & component state ----
+  // Helpers to map ids->labels for badges
+  const mapLabel = (opts: ComboOption[], value: string) =>
+    opts.find((o) => String(o.value) === String(value))?.label ?? value;
+
+  // ---- URL snapshot & dialog-local state ----
   const urlState = useMemo(() => readURLToState(searchParams), [searchParams]);
-  const mounted = useRef(false);
+  const [open, setOpen] = useState(false);
   const [state, setState] = useState<FiltersState>(urlState);
 
-  //   // Initialize from URL only once on mount
-  //   useEffect(() => {
-  //     if (!mounted.current) {
-  //       setState(urlState);
-  //       mounted.current = true;
-  //     }
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, []);
+  // Reset dialog state from URL whenever the dialog opens
+  useEffect(() => {
+    if (open) setState(urlState);
+  }, [open, urlState]);
 
-  // Recompute allowed LUs when setKey changes; clamp selected LUs to allowed
+  // Clamp LUs by selected set
   const allowedLUs = useMemo(() => setCodes(state.setKey), [state.setKey]);
   useEffect(() => {
-    if (!allowedLUs) return; // "all" => no clamping
+    if (!allowedLUs) return;
     const allowed = new Set(allowedLUs);
     const filtered = state.lus.filter((v) => allowed.has(String(v)));
     if (filtered.length !== state.lus.length) {
@@ -188,148 +198,188 @@ export default function FiltersDialog() {
     }
   }, [allowedLUs]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // LU options constrained by set
-  const luOptionsWithinSet: RSOption[] = useMemo(() => {
+  const luOptionsWithinSet = useMemo(() => {
     if (!allowedLUs) return luOptionsAll;
     const allowed = new Set(allowedLUs.map(String));
     return luOptionsAll.filter((o) => allowed.has(o.value));
   }, [luOptionsAll, allowedLUs]);
 
-  // ---- dirty check (URL vs local state) ----
   const isDirty = useMemo(
     () => !statesEqual(state, urlState),
     [state, urlState]
   );
 
-  // ---- handlers ----
   const applyAll = () => {
     const next = new URLSearchParams();
     const params = stateToParams(state);
     for (const [k, v] of Object.entries(params)) {
       if (v !== null && v !== "") next.set(k, v);
     }
-    // persist all at once
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+    setOpen(false);
   };
 
   const clearAll = () => {
     router.replace(`${pathname}`, { scroll: false });
-    setState({
-      setKey: "all",
-      abated: false,
-      tax_status: [],
-      property_class: [],
-      nbhds: [],
-      lus: [],
-    });
+    setOpen(false);
   };
+
+  // Badges (read-only) from URL
+  const badges = (
+    <div className="flex flex-wrap items-center gap-2">
+      {urlState.abated && <Badge variant="secondary">Abated</Badge>}
+      {urlState.setKey !== "all" && (
+        <Badge variant="outline">Set: {urlState.setKey}</Badge>
+      )}
+      {urlState.tax_status.map((id) => (
+        <Badge key={`ts-${id}`} variant="secondary">
+          {mapLabel(tsOptions, id)}
+        </Badge>
+      ))}
+      {urlState.property_class.map((id) => (
+        <Badge key={`pc-${id}`} variant="secondary">
+          {mapLabel(pcOptions, id)}
+        </Badge>
+      ))}
+      {urlState.nbhds.map((id) => (
+        <Badge key={`nb-${id}`} variant="secondary">
+          {mapLabel(nbOptions, id)}
+        </Badge>
+      ))}
+      {urlState.lus.map((code) => (
+        <Badge key={`lu-${code}`} variant="secondary">
+          {mapLabel(luOptionsAll, code)}
+        </Badge>
+      ))}
+      {!urlState.abated &&
+        urlState.setKey === "all" &&
+        urlState.tax_status.length === 0 &&
+        urlState.property_class.length === 0 &&
+        urlState.nbhds.length === 0 &&
+        urlState.lus.length === 0 && (
+          <span className="text-xs text-muted-foreground">
+            No filters applied
+          </span>
+        )}
+    </div>
+  );
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-4 items-end flex-wrap">
-        {/* Abated only */}
-        <div className="flex flex-col gap-2">
-          <Label
-            htmlFor="abated-only"
-            className="text-xs text-muted-foreground"
-          >
-            Abated
-          </Label>
-          <Switch
-            id="abated-only"
-            checked={state.abated}
-            onCheckedChange={(v) => setState((s) => ({ ...s, abated: !!v }))}
-          />
-        </div>
+      <div className="flex items-start gap-3">
+        <div className="flex-1">{badges}</div>
 
-        {/* Land-use set */}
-        <div className="space-y-2">
-          <div className="text-xs text-muted-foreground">Set</div>
-          <Select
-            value={state.setKey}
-            onValueChange={(v) =>
-              setState((s) => ({ ...s, setKey: v as LuSet }))
-            }
-          >
-            <SelectTrigger className="h-8 w-[180px]">
-              <SelectValue placeholder="Land-use set" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="residential">Residential</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-              <SelectItem value="lots">Lots</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">Edit Filters</Button>
+          </DialogTrigger>
 
-        {/* Tax Status */}
-        <div className="space-y-2 w-[320px]">
-          <ReactSelectMulti
-            instanceId="tax_status"
-            options={tsOptions}
-            value={state.tax_status}
-            onChange={(arr) =>
-              setState((s) => ({ ...s, tax_status: arr as string[] }))
-            }
-            placeholder="Search tax status…"
-          />
-        </div>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Filters</DialogTitle>
+            </DialogHeader>
 
-        {/* Property Class */}
-        <div className="space-y-2 w-[320px]">
-          <ReactSelectMulti
-            instanceId="property_class"
-            options={pcOptions}
-            value={state.property_class}
-            onChange={(arr) =>
-              setState((s) => ({ ...s, property_class: arr as string[] }))
-            }
-            placeholder="Search property class…"
-          />
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              {/* Abated */}
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <div>
+                  <Label htmlFor="abated-only" className="text-sm">
+                    Abated
+                  </Label>
+                  <div className="text-xs text-muted-foreground">
+                    Show only abated parcels
+                  </div>
+                </div>
+                <Switch
+                  id="abated-only"
+                  checked={state.abated}
+                  onCheckedChange={(v) =>
+                    setState((s) => ({ ...s, abated: !!v }))
+                  }
+                />
+              </div>
 
-        {/* Neighborhoods */}
-        <div className="space-y-2 w-[320px]">
-          <ReactSelectMulti
-            instanceId="neighborhoods"
-            options={nbOptions}
-            value={state.nbhds}
-            onChange={(arr) =>
-              setState((s) => ({ ...s, nbhds: arr as string[] }))
-            }
-            placeholder="Search neighborhoods…"
-          />
-        </div>
+              {/* Land-use set */}
+              <div className="space-y-2">
+                <Label className="text-sm">Land-use Set</Label>
+                <Select
+                  value={state.setKey}
+                  onValueChange={(v) =>
+                    setState((s) => ({ ...s, setKey: v as LuSet }))
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Set" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="residential">Residential</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="lots">Lots</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-        {/* Land Uses (constrained by set) */}
-        <div className="space-y-2 w-[360px]">
-          <ReactSelectMulti
-            instanceId="land-uses"
-            options={luOptionsWithinSet}
-            value={state.lus}
-            onChange={(arr) =>
-              setState((s) => ({ ...s, lus: arr as string[] }))
-            }
-            placeholder="Search land uses…"
-          />
-        </div>
+              {/* Tax Status */}
+              <div className="space-y-2">
+                <Label className="text-sm">Tax Status</Label>
+                <ComboboxMulti
+                  options={tsOptions}
+                  value={state.tax_status}
+                  onChange={(arr) =>
+                    setState((s) => ({ ...s, tax_status: arr }))
+                  }
+                  placeholder="Select tax status…"
+                />
+              </div>
 
-        {/* Actions */}
-        <div className="ml-auto flex gap-2">
-          <Button variant="outline" onClick={clearAll} disabled={false}>
-            Clear
-          </Button>
-          <Button onClick={applyAll} disabled={!isDirty}>
-            Apply
-          </Button>
-        </div>
+              {/* Property Class */}
+              <div className="space-y-2">
+                <Label className="text-sm">Property Class</Label>
+                <ComboboxMulti
+                  options={pcOptions}
+                  value={state.property_class}
+                  onChange={(arr) =>
+                    setState((s) => ({ ...s, property_class: arr }))
+                  }
+                  placeholder="Select property class…"
+                />
+              </div>
+
+              {/* Neighborhoods */}
+              <div className="space-y-2 md:col-span-2">
+                <Label className="text-sm">Neighborhoods</Label>
+                <ComboboxMulti
+                  options={nbOptions}
+                  value={state.nbhds}
+                  onChange={(arr) => setState((s) => ({ ...s, nbhds: arr }))}
+                  placeholder="Select neighborhoods…"
+                />
+              </div>
+
+              {/* Land Uses (constrained by set) */}
+              <div className="space-y-2 md:col-span-2">
+                <Label className="text-sm">Land Uses</Label>
+                <ComboboxMulti
+                  options={luOptionsWithinSet}
+                  value={state.lus}
+                  onChange={(arr) => setState((s) => ({ ...s, lus: arr }))}
+                  placeholder="Select land uses…"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={clearAll}>
+                Clear
+              </Button>
+              <Button onClick={applyAll} disabled={!isDirty}>
+                Apply
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Optional: tiny hint about dirty state */}
-      {/* <div className="text-xs text-muted-foreground">
-        {isDirty ? "Unsaved filter changes" : "Filters match URL"}
-      </div> */}
     </div>
   );
 }
