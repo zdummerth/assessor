@@ -1,3 +1,4 @@
+// app/(whatever)/features/filters-dialog.tsx
 "use client";
 
 import * as React from "react";
@@ -14,13 +15,6 @@ import {
   DialogContent,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -30,47 +24,21 @@ import {
   useTaxStatusOptions,
   usePropertyClassOptions,
 } from "@/lib/client-queries";
-import luSets from "@/lib/land_use_arrays.json";
 
-// NEW: shadcn/cmdk combobox multi
 import {
   ComboboxMulti,
   type ComboOption,
 } from "@/components/ui/combobox-multi";
 
-type LuSet = "all" | "residential" | "other" | "lots";
+import { Filter } from "lucide-react";
+import { cn } from "@/lib/utils";
+
 type FiltersState = {
-  setKey: LuSet;
   abated: boolean;
   tax_status: string[];
   property_class: string[];
   nbhds: string[];
   lus: string[];
-};
-
-// --- land-use set helpers ---
-const residential = luSets.residential;
-const commercial = luSets.commercial;
-const industrial = luSets.agriculture;
-const lotsArr = luSets.lots;
-const single_family = luSets.single_family;
-const condo = luSets.condo;
-
-const all_residential = [...residential, ...single_family, ...condo];
-const all_other = [...commercial, ...industrial];
-
-const setCodes = (k: LuSet): string[] | null => {
-  switch (k) {
-    case "residential":
-      return all_residential.map(String);
-    case "other":
-      return all_other.map(String);
-    case "lots":
-      return lotsArr.map(String);
-    case "all":
-    default:
-      return null;
-  }
 };
 
 // ---- URL helpers ----
@@ -85,9 +53,7 @@ const getArrayParam = (sp: URLSearchParams | null, key: string): string[] => {
 };
 
 const readURLToState = (sp: URLSearchParams | null): FiltersState => {
-  const setKey = ((sp?.get("set") as LuSet) ?? "all") as LuSet;
   return {
-    setKey,
     abated: (sp?.get("abated") ?? "") === "1",
     tax_status: getArrayParam(sp, "tax_status"),
     property_class: getArrayParam(sp, "property_class"),
@@ -97,7 +63,6 @@ const readURLToState = (sp: URLSearchParams | null): FiltersState => {
 };
 
 const stateToParams = (s: FiltersState): Record<string, string | null> => ({
-  set: s.setKey === "all" ? null : s.setKey,
   abated: s.abated ? "1" : null,
   tax_status: s.tax_status.length ? s.tax_status.join(",") : null,
   property_class: s.property_class.length ? s.property_class.join(",") : null,
@@ -113,12 +78,37 @@ const arraysEqualAsSets = (a: string[], b: string[]) => {
   return true;
 };
 const statesEqual = (a: FiltersState, b: FiltersState) =>
-  a.setKey === b.setKey &&
   a.abated === b.abated &&
   arraysEqualAsSets(a.tax_status, b.tax_status) &&
   arraysEqualAsSets(a.property_class, b.property_class) &&
   arraysEqualAsSets(a.nbhds, b.nbhds) &&
   arraysEqualAsSets(a.lus, b.lus);
+
+// Simple group wrapper for badges
+function BadgeGroup({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "inline-flex items-start gap-2 rounded-md border px-2 py-1",
+        "bg-background",
+        className
+      )}
+    >
+      <span className="mt-0.5 shrink-0 text-[11px] uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
+      <div className="flex flex-wrap items-center gap-1">{children}</div>
+    </div>
+  );
+}
 
 export default function FiltersDialog() {
   const router = useRouter();
@@ -187,23 +177,6 @@ export default function FiltersDialog() {
     if (open) setState(urlState);
   }, [open, urlState]);
 
-  // Clamp LUs by selected set
-  const allowedLUs = useMemo(() => setCodes(state.setKey), [state.setKey]);
-  useEffect(() => {
-    if (!allowedLUs) return;
-    const allowed = new Set(allowedLUs);
-    const filtered = state.lus.filter((v) => allowed.has(String(v)));
-    if (filtered.length !== state.lus.length) {
-      setState((prev) => ({ ...prev, lus: filtered }));
-    }
-  }, [allowedLUs]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const luOptionsWithinSet = useMemo(() => {
-    if (!allowedLUs) return luOptionsAll;
-    const allowed = new Set(allowedLUs.map(String));
-    return luOptionsAll.filter((o) => allowed.has(o.value));
-  }, [luOptionsAll, allowedLUs]);
-
   const isDirty = useMemo(
     () => !statesEqual(state, urlState),
     [state, urlState]
@@ -224,54 +197,79 @@ export default function FiltersDialog() {
     setOpen(false);
   };
 
-  // Badges (read-only) from URL
-  const badges = (
-    <div className="flex flex-wrap items-center gap-2">
-      {urlState.abated && <Badge variant="secondary">Abated</Badge>}
-      {urlState.setKey !== "all" && (
-        <Badge variant="outline">Set: {urlState.setKey}</Badge>
+  // Grouped badges (read-only) from URL
+  const hasAny =
+    urlState.abated ||
+    urlState.tax_status.length > 0 ||
+    urlState.property_class.length > 0 ||
+    urlState.nbhds.length > 0 ||
+    urlState.lus.length > 0;
+
+  const groupedBadges = (
+    <div className="flex flex-wrap items-start gap-2">
+      {urlState.abated && (
+        <BadgeGroup label="abated">
+          <Badge variant="secondary">Abated</Badge>
+        </BadgeGroup>
       )}
-      {urlState.tax_status.map((id) => (
-        <Badge key={`ts-${id}`} variant="secondary">
-          {mapLabel(tsOptions, id)}
-        </Badge>
-      ))}
-      {urlState.property_class.map((id) => (
-        <Badge key={`pc-${id}`} variant="secondary">
-          {mapLabel(pcOptions, id)}
-        </Badge>
-      ))}
-      {urlState.nbhds.map((id) => (
-        <Badge key={`nb-${id}`} variant="secondary">
-          {mapLabel(nbOptions, id)}
-        </Badge>
-      ))}
-      {urlState.lus.map((code) => (
-        <Badge key={`lu-${code}`} variant="secondary">
-          {mapLabel(luOptionsAll, code)}
-        </Badge>
-      ))}
-      {!urlState.abated &&
-        urlState.setKey === "all" &&
-        urlState.tax_status.length === 0 &&
-        urlState.property_class.length === 0 &&
-        urlState.nbhds.length === 0 &&
-        urlState.lus.length === 0 && (
-          <span className="text-xs text-muted-foreground">
-            No filters applied
-          </span>
-        )}
+
+      {urlState.tax_status.length > 0 && (
+        <BadgeGroup label="tax_status">
+          {urlState.tax_status.map((id) => (
+            <Badge key={`ts-${id}`} variant="secondary">
+              {mapLabel(tsOptions, id)}
+            </Badge>
+          ))}
+        </BadgeGroup>
+      )}
+
+      {urlState.property_class.length > 0 && (
+        <BadgeGroup label="property_class">
+          {urlState.property_class.map((id) => (
+            <Badge key={`pc-${id}`} variant="secondary">
+              {mapLabel(pcOptions, id)}
+            </Badge>
+          ))}
+        </BadgeGroup>
+      )}
+
+      {urlState.nbhds.length > 0 && (
+        <BadgeGroup label="nbhds">
+          {urlState.nbhds.map((id) => (
+            <Badge key={`nb-${id}`} variant="secondary">
+              {mapLabel(nbOptions, id)}
+            </Badge>
+          ))}
+        </BadgeGroup>
+      )}
+
+      {urlState.lus.length > 0 && (
+        <BadgeGroup label="lus">
+          {urlState.lus.map((code) => (
+            <Badge key={`lu-${code}`} variant="secondary">
+              {mapLabel(luOptionsAll, code)}
+            </Badge>
+          ))}
+        </BadgeGroup>
+      )}
+
+      {!hasAny && (
+        <span className="text-xs text-muted-foreground">
+          No filters applied
+        </span>
+      )}
     </div>
   );
 
   return (
     <div className="space-y-3">
       <div className="flex items-start gap-3">
-        <div className="flex-1">{badges}</div>
-
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">Edit Filters</Button>
+            <Button variant="outline">
+              <Filter className="mr-2 h-4 w-4" />
+              Filters
+            </Button>
           </DialogTrigger>
 
           <DialogContent className="max-w-4xl">
@@ -299,27 +297,6 @@ export default function FiltersDialog() {
                 />
               </div>
 
-              {/* Land-use set */}
-              <div className="space-y-2">
-                <Label className="text-sm">Land-use Set</Label>
-                <Select
-                  value={state.setKey}
-                  onValueChange={(v) =>
-                    setState((s) => ({ ...s, setKey: v as LuSet }))
-                  }
-                >
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Set" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="residential">Residential</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                    <SelectItem value="lots">Lots</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Tax Status */}
               <div className="space-y-2">
                 <Label className="text-sm">Tax Status</Label>
@@ -329,7 +306,7 @@ export default function FiltersDialog() {
                   onChange={(arr) =>
                     setState((s) => ({ ...s, tax_status: arr }))
                   }
-                  placeholder="Select tax status…"
+                  placeholder="Search tax status…"
                 />
               </div>
 
@@ -342,7 +319,7 @@ export default function FiltersDialog() {
                   onChange={(arr) =>
                     setState((s) => ({ ...s, property_class: arr }))
                   }
-                  placeholder="Select property class…"
+                  placeholder="Search property class…"
                 />
               </div>
 
@@ -353,18 +330,18 @@ export default function FiltersDialog() {
                   options={nbOptions}
                   value={state.nbhds}
                   onChange={(arr) => setState((s) => ({ ...s, nbhds: arr }))}
-                  placeholder="Select neighborhoods…"
+                  placeholder="Search neighborhoods…"
                 />
               </div>
 
-              {/* Land Uses (constrained by set) */}
+              {/* Land Uses */}
               <div className="space-y-2 md:col-span-2">
                 <Label className="text-sm">Land Uses</Label>
                 <ComboboxMulti
-                  options={luOptionsWithinSet}
+                  options={luOptionsAll}
                   value={state.lus}
                   onChange={(arr) => setState((s) => ({ ...s, lus: arr }))}
-                  placeholder="Select land uses…"
+                  placeholder="Search land uses…"
                 />
               </div>
             </div>
@@ -379,6 +356,8 @@ export default function FiltersDialog() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <div className="flex-1">{groupedBadges}</div>
       </div>
     </div>
   );

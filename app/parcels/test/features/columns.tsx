@@ -109,6 +109,20 @@ export function makeColumns() {
       ),
     },
     {
+      accessorKey: "tax_status_name",
+      header: "Tax Status",
+      cell: ({ getValue }) => (
+        <div className="min-w-[100px]">{String(getValue() ?? "")}</div>
+      ),
+    },
+    {
+      accessorKey: "property_class_name",
+      header: "Property Class",
+      cell: ({ getValue }) => (
+        <div className="min-w-[100px]">{String(getValue() ?? "")}</div>
+      ),
+    },
+    {
       accessorKey: "structure_count",
       header: "Structs",
       cell: ({ getValue }) => (

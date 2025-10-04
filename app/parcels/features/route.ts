@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
     if (programsArg) args.p_programs = programsArg;
 
     // ---- Base query (use count for pagination metadata if available) ----
-    let query = supabase.rpc("testing_get_parcel_features_v4", args, {
+    let query = supabase.rpc("testing_get_parcel_features_v5", args, {
       count: "exact",
     });
 
