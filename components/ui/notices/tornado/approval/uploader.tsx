@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import TornadoReliefApprovalNotice from "./notice";
 
-// Keep address_2 optional like before; add the three new required fields.
+// Keep address_2 optional like before; add the two new required assessed fields.
 const REQUIRED_HEADERS = [
   "parcel_number",
   "site_address",
@@ -14,6 +14,8 @@ const REQUIRED_HEADERS = [
   "zip",
   "original_appraised_value",
   "adjusted_appraised_value",
+  "original_assessed_value",
+  "adjusted_assessed_value",
   "days_unocc",
 ] as const;
 
@@ -135,6 +137,12 @@ export default function NoticePrinter() {
                 ),
                 adjusted_appraised_value: toCurrencyNumber(
                   data["adjusted_appraised_value"]
+                ),
+                original_assessed_value: toCurrencyNumber(
+                  data["original_assessed_value"]
+                ),
+                adjusted_assessed_value: toCurrencyNumber(
+                  data["adjusted_assessed_value"]
                 ),
                 days_unocc: toInt(data["days_unocc"]),
               };

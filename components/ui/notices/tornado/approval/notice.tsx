@@ -15,10 +15,14 @@ type NoticeFormData = {
   state?: string;
   zip?: string;
 
-  // NEW FIELDS (approval specifics)
+  // Values
   original_appraised_value?: number;
-  adjusted_appraised_value?: number; // after proration/relief
-  days_unocc?: number; // total calendar days
+  adjusted_appraised_value?: number;
+  original_assessed_value?: number;
+  adjusted_assessed_value?: number;
+
+  // Other
+  days_unocc?: number;
 };
 
 export default function TornadoReliefApprovalNotice({
@@ -87,47 +91,65 @@ export default function TornadoReliefApprovalNotice({
 
             <p>
               Your application for property tax relief related to the May 16,
-              2025 tornado, has been <strong>approved</strong> by the Board of
+              2025 tornado has been <strong>approved</strong> by the Board of
               Equalization for the property listed above. The Assessor has
-              prorated the assessed value based on the period the residence was
-              unoccupied and uninhabitable due to the disaster.
+              prorated the <strong>assessed value</strong> based on the period
+              the residence was unoccupied and uninhabitable due to the
+              disaster.
             </p>
 
-            {/* Relief Summary (new fields) */}
-            <div className="border rounded">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-0 text-sm">
-                <div className="p-3 border-b md:border-b-0 md:border-r">
-                  <p className="text-xs uppercase text-gray-600">
-                    Original Appraised Value
-                  </p>
-                  <p className="font-semibold">
-                    {fmtUSD(formData.original_appraised_value)}
-                  </p>
-                </div>
-                <div className="p-3 border-b md:border-b-0 md:border-r">
-                  <p className="text-xs uppercase text-gray-600">
-                    Adjusted Appraised Value
-                  </p>
-                  <p className="font-semibold">
-                    {fmtUSD(formData.adjusted_appraised_value)}
-                  </p>
-                </div>
-                <div className="p-3">
-                  <p className="text-xs uppercase text-gray-600">
-                    Days Unoccupied
-                  </p>
-                  <p className="font-semibold">
-                    {typeof formData.days_unocc === "number"
-                      ? formData.days_unocc.toLocaleString("en-US")
-                      : "—"}
-                  </p>
-                </div>
+            {/* Relief Summary */}
+            <div className="border rounded overflow-hidden">
+              <div className="p-3 border-b flex items-center gap-4">
+                <p className="text-xs uppercase text-gray-600">
+                  Days Unoccupied
+                </p>
+                <p className="font-semibold">
+                  {typeof formData.days_unocc === "number"
+                    ? formData.days_unocc.toLocaleString("en-US")
+                    : "—"}
+                </p>
+              </div>
+
+              {/* Values table */}
+              <div className="p-0">
+                <table className="w-full text-sm">
+                  <thead className="">
+                    <tr className="text-left">
+                      <th className="p-3 border-b"></th>
+                      <th className="p-3 border-b w-1/3">Original</th>
+                      <th className="p-3 border-b w-1/3">Adjusted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="p-3 border-b font-medium">Market Value</td>
+                      <td className="p-3 border-b">
+                        {fmtUSD(formData.original_appraised_value)}
+                      </td>
+                      <td className="p-3 border-b">
+                        {fmtUSD(formData.adjusted_appraised_value)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 border-b font-medium">
+                        Assessed Value
+                      </td>
+                      <td className="p-3 border-b">
+                        {fmtUSD(formData.original_assessed_value)}
+                      </td>
+                      <td className="p-3 border-b">
+                        {fmtUSD(formData.adjusted_assessed_value)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
             <p className="mt-3">
-              The adjusted appraised value will be used to compute the tax due
-              for the 2025 tax year.
+              The <strong>adjusted assessed value</strong> will be used to
+              compute the tax due for the 2025 tax year.
             </p>
 
             <div className="mt-2 text-sm">
