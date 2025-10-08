@@ -16,9 +16,9 @@ type NoticeFormData = {
   zip?: string;
 
   // NEW FIELDS (approval specifics)
-  original_assessed_value?: number; // cents not assumed; pass whole-dollar integer
-  adjusted_assessed_value?: number; // after proration/relief
-  days_unoccupied?: number; // total calendar days
+  original_appraised_value?: number;
+  adjusted_appraised_value?: number; // after proration/relief
+  days_unocc?: number; // total calendar days
 };
 
 export default function TornadoReliefApprovalNotice({
@@ -98,18 +98,18 @@ export default function TornadoReliefApprovalNotice({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-0 text-sm">
                 <div className="p-3 border-b md:border-b-0 md:border-r">
                   <p className="text-xs uppercase text-gray-600">
-                    Original Assessed Value
+                    Original Appraised Value
                   </p>
                   <p className="font-semibold">
-                    {fmtUSD(formData.original_assessed_value)}
+                    {fmtUSD(formData.original_appraised_value)}
                   </p>
                 </div>
                 <div className="p-3 border-b md:border-b-0 md:border-r">
                   <p className="text-xs uppercase text-gray-600">
-                    Adjusted Assessed Value
+                    Adjusted Appraised Value
                   </p>
                   <p className="font-semibold">
-                    {fmtUSD(formData.adjusted_assessed_value)}
+                    {fmtUSD(formData.adjusted_appraised_value)}
                   </p>
                 </div>
                 <div className="p-3">
@@ -117,8 +117,8 @@ export default function TornadoReliefApprovalNotice({
                     Days Unoccupied
                   </p>
                   <p className="font-semibold">
-                    {typeof formData.days_unoccupied === "number"
-                      ? formData.days_unoccupied.toLocaleString("en-US")
+                    {typeof formData.days_unocc === "number"
+                      ? formData.days_unocc.toLocaleString("en-US")
                       : "—"}
                   </p>
                 </div>
@@ -126,10 +126,8 @@ export default function TornadoReliefApprovalNotice({
             </div>
 
             <p className="mt-3">
-              The adjusted assessed value will be used to compute the tax due
-              for the 2025 tax year. The tax rates for the 2025 tax year will be
-              set by the various taxing districts later this year. The amount of
-              tax relief will not be known until the tax rates are set.
+              The adjusted appraised value will be used to compute the tax due
+              for the 2025 tax year.
             </p>
 
             <div className="mt-2 text-sm">

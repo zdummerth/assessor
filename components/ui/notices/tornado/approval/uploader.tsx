@@ -12,9 +12,9 @@ const REQUIRED_HEADERS = [
   "city",
   "state",
   "zip",
-  "original_assessed_value",
-  "adjusted_assessed_value",
-  "days_unoccupied",
+  "original_appraised_value",
+  "adjusted_appraised_value",
+  "days_unocc",
 ] as const;
 
 type Row = Record<string, string>;
@@ -130,13 +130,13 @@ export default function NoticePrinter() {
                 city: data["city"] ?? "",
                 state: data["state"] ?? "",
                 zip: data["zip"] ?? "",
-                original_assessed_value: toCurrencyNumber(
-                  data["original_assessed_value"]
+                original_appraised_value: toCurrencyNumber(
+                  data["original_appraised_value"]
                 ),
-                adjusted_assessed_value: toCurrencyNumber(
-                  data["adjusted_assessed_value"]
+                adjusted_appraised_value: toCurrencyNumber(
+                  data["adjusted_appraised_value"]
                 ),
-                days_unoccupied: toInt(data["days_unoccupied"]),
+                days_unocc: toInt(data["days_unocc"]),
               };
 
               return (
