@@ -8,6 +8,11 @@ const NavClient = () => {
   const links = [
     { href: "/parcels", label: "Parcels" },
     { href: "/sales", label: "Sales" },
+    { href: "/ratios/stats", label: "Ratio Stats" },
+    {
+      href: "/senior-tax-credits/calculator/test",
+      label: "Senior Tax Credit Calculator",
+    },
     // { href: "/appraisers", label: "Appraisers" },
     // { href: "/building-permits", label: "Permits" },
     // { href: "/wards/summary/test", label: "Wards" },

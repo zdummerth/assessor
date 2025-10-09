@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import FiltersDialog from "../parcels/test/filters-apply";
+import ParcelNumber from "@/components/ui/parcel-number-updated";
 
 // shadcn/ui
 import {
@@ -19,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { parse } from "path";
 
 function csvToArray(v: string | null): string[] {
   if (!v) return [];
@@ -259,10 +261,12 @@ async function SalesTableContent({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="min-w-[200px]">Parcel</TableHead>
+            <TableHead>Address</TableHead>
             {th("sale_date", "Sale Date")}
             {th("sale_price", "Price")}
             {th("ratio", "Ratio")}
-            {th("current_value", "Assessed Value")}
+            {th("current_value", "Current Appraised Value")}
             {th("land_use_sale", "LU (Sale)")}
             {th("land_use_asof", "LU (As-Of)")}
             {th("structure_count", "Structs")}
@@ -270,8 +274,6 @@ async function SalesTableContent({
             {th("land_area", "Land SF")}
             {th("price_per_sqft_finished", "$/SF Fin")}
             {th("price_per_unit", "$/Unit")}
-            <TableHead>Address</TableHead>
-            <TableHead>Structures</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -289,6 +291,20 @@ async function SalesTableContent({
               const addr = [r.house_number, r.street].filter(Boolean).join(" ");
               return (
                 <TableRow key={`${r.sale_id}-${r.parcel_id}`}>
+                  <TableCell>
+                    <ParcelNumber
+                      id={r.parcel_id}
+                      block={r.block || 0}
+                      lot={parseInt(r.lot || "0") || 0}
+                      ext={r.ext || 0}
+                    />
+                  </TableCell>
+                  <TableCell className="max-w-[220px]">
+                    <div className="truncate">{addr || "—"}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {r.postcode ?? ""} {r.district ? `• ${r.district}` : ""}
+                    </div>
+                  </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {r.sale_date
                       ? new Date(r.sale_date).toLocaleDateString()
@@ -333,13 +349,8 @@ async function SalesTableContent({
                         })}`
                       : "—"}
                   </TableCell>
-                  <TableCell className="max-w-[220px]">
-                    <div className="truncate">{addr || "—"}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {r.postcode ?? ""} {r.district ? `• ${r.district}` : ""}
-                    </div>
-                  </TableCell>
-                  <TableCell>
+
+                  {/* <TableCell>
                     <details>
                       <summary className="cursor-pointer text-sm underline underline-offset-2">
                         View
@@ -399,7 +410,7 @@ async function SalesTableContent({
                         })}
                       </div>
                     </details>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               );
             })
