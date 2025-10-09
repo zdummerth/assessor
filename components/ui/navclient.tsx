@@ -6,7 +6,8 @@ const NavClient = () => {
   // call hook to cache  salesdata
   const pathname = usePathname();
   const links = [
-    { href: "/parcels", label: "Parcels" },
+    { href: "/", label: "Home" },
+    { href: "/parcels/test", label: "Parcels" },
     { href: "/sales", label: "Sales" },
     { href: "/ratios/stats", label: "Ratio Stats" },
     {
