@@ -402,8 +402,8 @@ const taxRates: TaxRate[] = [
 // utils
 const uniq = <T,>(arr: T[]) => Array.from(new Set(arr));
 const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
-const taxFromAppraised = (appraised: number, rate: number) =>
-  parseFloat(((appraised / 100) * 0.19 * rate).toFixed(2));
+const taxFromAssessed = (assessed: number, rate: number) =>
+  parseFloat(((assessed / 100) * rate).toFixed(2));
 const yearsBetween = (start: number, end: number) =>
   start < end
     ? Array.from({ length: end - start }, (_, i) => start + i + 1)
@@ -419,11 +419,11 @@ export default function TaxFreezeCalculator() {
   const [baseYear, setBaseYear] = useState<number>(2024);
   const [compareYear, setCompareYear] = useState<number>(2025);
 
-  // Values
-  const [baseValue, setBaseValue] = useState<number>(50000);
-  const [compareValue, setCompareValue] = useState<number>(55000);
+  // Assessed values (user inputs)
+  const [assessedBase, setAssessedBase] = useState<number>(9500); // example assessed
+  const [assessedCompare, setAssessedCompare] = useState<number>(10500);
 
-  // New construction by year: { [year]: amount }
+  // New construction by year (assessed): { [year]: amount }
   const [ncByYear, setNcByYear] = useState<Record<number, number>>({});
 
   // Lookups
@@ -457,38 +457,37 @@ export default function TaxFreezeCalculator() {
     ratesByYearDistrict(compareYear, "Non-City").map((r) => r.rate)
   );
 
-  // --- New construction handling ---
-  const interYears = yearsBetween(baseYear, compareYear); // e.g., base+1, ..., compare
+  // --- New construction handling (assessed) ---
+  const interYears = yearsBetween(baseYear, compareYear); // base+1..compare
   const priorYears = interYears.filter((y) => y < compareYear);
   const ncPriorTotal = sum(priorYears.map((y) => ncByYear[y] ?? 0));
   const ncCompare = ncByYear[compareYear] ?? 0;
 
-  // "Frozen base" for the compare year = base value + prior-year new construction
-  const frozenBaseForCompare = baseValue + ncPriorTotal;
+  // "Frozen base" for the compare year = base assessed + prior-year new construction (assessed)
+  const frozenBaseForCompare = assessedBase + ncPriorTotal;
 
-  // Base year taxes (no NC by definition)
-  const cityTaxBase = taxFromAppraised(baseValue, cityRateSumBase);
-  const nonCityTaxBase = taxFromAppraised(baseValue, nonCityRateSumBase);
+  // Base year taxes
+  const cityTaxBase = taxFromAssessed(assessedBase, cityRateSumBase);
+  const nonCityTaxBase = taxFromAssessed(assessedBase, nonCityRateSumBase);
   const totalBase = cityTaxBase + nonCityTaxBase;
 
   // Compare year (actual)
-  const cityTaxCompareActual = taxFromAppraised(
-    compareValue,
+  const cityTaxCompareActual = taxFromAssessed(
+    assessedCompare,
     cityRateSumCompare
   );
-  const nonCityTaxCompare = taxFromAppraised(
-    compareValue,
+  const nonCityTaxCompare = taxFromAssessed(
+    assessedCompare,
     nonCityRateSumCompare
   );
   const totalCompareActual = cityTaxCompareActual + nonCityTaxCompare;
 
-  // Compare year (with freeze logic & NC rules)
-  // 1) Frozen part: min( base-year ceiling on frozen base, current-year tax on frozen base )
-  const cityFrozenCeiling = taxFromAppraised(
+  // Compare year (freeze logic on City only)
+  const cityFrozenCeiling = taxFromAssessed(
     frozenBaseForCompare,
     cityRateSumBase
   );
-  const cityFrozenActualOnFrozenBase = taxFromAppraised(
+  const cityFrozenActualOnFrozenBase = taxFromAssessed(
     frozenBaseForCompare,
     cityRateSumCompare
   );
@@ -496,24 +495,18 @@ export default function TaxFreezeCalculator() {
     cityFrozenCeiling,
     cityFrozenActualOnFrozenBase
   );
-
-  // 2) New construction in compare year is NOT frozen
-  const cityUnfrozenNCInCompare = taxFromAppraised(
+  const cityUnfrozenNCInCompare = taxFromAssessed(
     ncCompare,
     cityRateSumCompare
   );
-
   const cityTaxCompareWithFreeze = cityFrozenPart + cityUnfrozenNCInCompare;
   const totalCompareWithFreeze = cityTaxCompareWithFreeze + nonCityTaxCompare;
 
   const creditAmount = totalCompareActual - totalCompareWithFreeze;
 
-  const assessedBase = baseValue * 0.19;
-  const assessedCompare = compareValue * 0.19;
-
-  // If you’re on the new-construction version from earlier, these exist:
-  const assessedFrozenBaseForCompare = frozenBaseForCompare * 0.19;
-  const assessedNcCompare = (ncCompare ?? 0) * 0.19;
+  // Display helpers (assessed already)
+  const assessedFrozenBaseForCompare = frozenBaseForCompare;
+  const assessedNcCompare = ncCompare;
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow rounded-lg space-y-8">
@@ -524,13 +517,14 @@ export default function TaxFreezeCalculator() {
       <div className="bg-blue-50 p-4 rounded border text-sm text-gray-700">
         <p>
           <strong>How the freeze works:</strong> City tax is frozen at the base
-          year amount. <strong>New construction</strong> is <em>not</em> frozen
-          in the year it’s built, and it’s{" "}
+          year amount.
+          <strong> New construction</strong> is <em>not</em> frozen in the year
+          it’s built, and it’s{" "}
           <strong>added to the frozen base the following year</strong>.
         </p>
       </div>
 
-      {/* Year + Value selectors */}
+      {/* Year + Assessed selectors */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-gray-700 font-medium">
@@ -548,11 +542,11 @@ export default function TaxFreezeCalculator() {
             ))}
           </select>
 
-          <label className="text-gray-700">Appraised Value ({baseYear})</label>
+          <label className="text-gray-700">Assessed Value ({baseYear})</label>
           <input
             type="number"
-            value={baseValue}
-            onChange={(e) => setBaseValue(Number(e.target.value))}
+            value={assessedBase}
+            onChange={(e) => setAssessedBase(Number(e.target.value))}
             className="block w-full border rounded px-3 py-2"
           />
         </div>
@@ -572,32 +566,32 @@ export default function TaxFreezeCalculator() {
           </select>
 
           <label className="text-gray-700">
-            Appraised Value ({compareYear})
+            Assessed Value ({compareYear})
           </label>
           <input
             type="number"
-            value={compareValue}
-            onChange={(e) => setCompareValue(Number(e.target.value))}
+            value={assessedCompare}
+            onChange={(e) => setAssessedCompare(Number(e.target.value))}
             className="block w-full border rounded px-3 py-2"
           />
         </div>
       </div>
 
-      {/* New construction inputs */}
+      {/* New construction inputs (assessed) */}
       {interYears.length > 0 && (
         <div className="bg-gray-50 p-4 rounded border">
           <h2 className="text-lg font-semibold mb-2 text-gray-800">
             New Construction
           </h2>
           <p className="text-sm text-gray-600 mb-3">
-            Enter the appraised value of new construction for each year. It’s
-            not frozen in the construction year; it’s added to the frozen base
-            the year after.
+            Enter the <strong>assessed</strong> value of new construction for
+            each year. It’s not frozen in the construction year; it’s added to
+            the frozen base the year after.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {interYears.map((y) => (
               <label key={y} className="text-gray-700">
-                New Construction ({y})
+                New Construction (Assessed) – {y}
                 <input
                   type="number"
                   value={ncByYear[y] ?? 0}
@@ -616,17 +610,17 @@ export default function TaxFreezeCalculator() {
           <div className="mt-3 text-sm text-gray-700">
             <div>
               Frozen base for {compareYear}:{" "}
-              <strong>{frozenBaseForCompare.toLocaleString()}</strong>
+              <strong>{assessedFrozenBaseForCompare.toLocaleString()}</strong>
             </div>
             <div>
               New construction in {compareYear} (unfrozen):{" "}
-              <strong>{(ncCompare || 0).toLocaleString()}</strong>
+              <strong>{(assessedNcCompare || 0).toLocaleString()}</strong>
             </div>
           </div>
         </div>
       )}
 
-      {/* Summary cards */}
+      {/* Summary cards with explicit math */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-gray-50 p-4 rounded border">
           <h2 className="text-lg font-semibold mb-2 text-gray-800">
@@ -638,10 +632,6 @@ export default function TaxFreezeCalculator() {
               <div className="text-xs text-gray-500">
                 = (({assessedBase.toLocaleString()} ÷ 100) ×{" "}
                 {cityRateSumBase.toFixed(4)})
-              </div>
-              <div className="text-[11px] text-gray-400">
-                where assessed {baseYear} = {baseValue.toLocaleString()} × 0.19
-                = {assessedBase.toLocaleString()}
               </div>
             </li>
             <li>
@@ -669,23 +659,16 @@ export default function TaxFreezeCalculator() {
                 = min(
                 <br />
                 &nbsp;&nbsp;({assessedFrozenBaseForCompare.toLocaleString()} ÷
-                100) × {cityRateSumBase.toFixed(4)}
-                {" = "}${cityFrozenCeiling.toLocaleString()}
-                ,
+                100) × {cityRateSumBase.toFixed(4)} = $
+                {cityFrozenCeiling.toLocaleString()},
                 <br />
                 &nbsp;&nbsp;({assessedFrozenBaseForCompare.toLocaleString()} ÷
-                100) × {cityRateSumCompare.toFixed(4)}
-                {" = "}${cityFrozenActualOnFrozenBase.toLocaleString()}
+                100) × {cityRateSumCompare.toFixed(4)} = $
+                {cityFrozenActualOnFrozenBase.toLocaleString()}
                 )
                 <br />+ ({assessedNcCompare.toLocaleString()} ÷ 100) ×{" "}
-                {cityRateSumCompare.toFixed(4)}
-                {" = "}${cityUnfrozenNCInCompare.toLocaleString()}
-              </div>
-              <div className="text-[11px] text-gray-400">
-                frozen base {compareYear} = {baseValue.toLocaleString()} +
-                prior-year new construction ={" "}
-                {frozenBaseForCompare.toLocaleString()}; new construction in{" "}
-                {compareYear}: {(ncCompare ?? 0).toLocaleString()}
+                {cityRateSumCompare.toFixed(4)} = $
+                {cityUnfrozenNCInCompare.toLocaleString()}
               </div>
             </li>
 
@@ -696,17 +679,13 @@ export default function TaxFreezeCalculator() {
                 = (({assessedCompare.toLocaleString()} ÷ 100) ×{" "}
                 {nonCityRateSumCompare.toFixed(4)})
               </div>
-              <div className="text-[11px] text-gray-400">
-                assessed {compareYear} = {compareValue.toLocaleString()} × 0.19
-                = {assessedCompare.toLocaleString()}
-              </div>
             </li>
 
             <li className="font-semibold text-red-600">
               <strong>Total (Without Freeze):</strong> $
               {totalCompareActual.toLocaleString()}
               <div className="text-xs text-gray-500">
-                = City actual (({assessedCompare.toLocaleString()} ÷ 100) ×{" "}
+                = City (({assessedCompare.toLocaleString()} ÷ 100) ×{" "}
                 {cityRateSumCompare.toFixed(4)}) + Non-City ((
                 {assessedCompare.toLocaleString()} ÷ 100) ×{" "}
                 {nonCityRateSumCompare.toFixed(4)})
@@ -766,21 +745,21 @@ export default function TaxFreezeCalculator() {
                 const rateBase = rateFor(baseYear, subdistrict, district);
                 const rateCompare = rateFor(compareYear, subdistrict, district);
 
-                const taxBase = taxFromAppraised(baseValue, rateBase);
-                const taxCompareActual = taxFromAppraised(
-                  compareValue,
+                const taxBase = taxFromAssessed(assessedBase, rateBase);
+                const taxCompareActual = taxFromAssessed(
+                  assessedCompare,
                   rateCompare
                 );
 
                 let taxCompareWithFreeze = taxCompareActual;
                 if (district === "City") {
                   const frozenBaseRow = frozenBaseForCompare;
-                  const ceilingRow = taxFromAppraised(frozenBaseRow, rateBase);
-                  const actualOnFrozenRow = taxFromAppraised(
+                  const ceilingRow = taxFromAssessed(frozenBaseRow, rateBase);
+                  const actualOnFrozenRow = taxFromAssessed(
                     frozenBaseRow,
                     rateCompare
                   );
-                  const ncRow = taxFromAppraised(ncCompare, rateCompare); // unfrozen in construction year
+                  const ncRow = taxFromAssessed(assessedNcCompare, rateCompare); // unfrozen in construction year
                   taxCompareWithFreeze =
                     Math.min(ceilingRow, actualOnFrozenRow) + ncRow;
                 }
