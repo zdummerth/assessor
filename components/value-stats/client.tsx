@@ -2,25 +2,38 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Pie, PieChart, ResponsiveContainer, Legend, Cell } from "recharts";
+import { PieChart, Pie, ResponsiveContainer, Legend, Cell } from "recharts";
 
-// --- Types matching the SQL function return shape
-export type StatRow = {
-  column_name: string; // e.g., "bldg_agriculture"
-  mean: number | null;
-  median: number | null;
-  count_nonzero: number | null;
-  sum_nonzero: number | null;
+/**
+ * Data shape returned by get_category_sums_asof(as_of_date):
+ *   category: 'agriculture' | 'commercial' | 'residential'
+ *   assessed_land_sum, assessed_land_count
+ *   assessed_bldg_sum, assessed_bldg_count
+ *   assessed_total_sum, assessed_total_count
+ *   new_const_sum, new_const_count
+ *   taxable_total_sum, taxable_total_count
+ */
+export type CategoryRow = {
+  category: "agriculture" | "commercial" | "residential";
+  assessed_land_sum: number | null;
+  assessed_land_count: number | null;
+  assessed_bldg_sum: number | null;
+  assessed_bldg_count: number | null;
+  assessed_total_sum: number | null;
+  assessed_total_count: number | null;
+  new_const_sum: number | null;
+  new_const_count: number | null;
+  taxable_total_sum: number | null;
+  taxable_total_count: number | null;
 };
 
-// Currency formatter
+// Currency formatter helpers
 const currencyFmt = new Intl.NumberFormat(undefined, {
   style: "currency",
   currency: "USD",
@@ -29,153 +42,236 @@ const currencyFmt = new Intl.NumberFormat(undefined, {
 const fmtCurrency = (n: number | null | undefined) =>
   typeof n === "number" && Number.isFinite(n) ? currencyFmt.format(n) : "–";
 
-// Friendly labels
-const LABELS: Record<string, string> = {
-  bldg_agriculture: "Building – Agriculture",
-  bldg_commercial: "Building – Commercial",
-  bldg_residential: "Building – Residential",
-  land_agriculture: "Land – Agriculture",
-  land_commercial: "Land – Commercial",
-  land_residential: "Land – Residential",
-  new_const_agriculture: "New Const – Agriculture",
-  new_const_commercial: "New Const – Commercial",
-  new_const_residential: "New Const – Residential",
-  bldg_total: "Building Total",
-  land_total: "Land Total",
-  new_const_total: "New Construction Total",
-  agriculture_all: "Agriculture (All)",
-  commercial_all: "Commercial (All)",
-  residential_all: "Residential (All)",
+// Theme colors (shadcn tokens)
+const CAT_COLORS: Record<CategoryRow["category"], string> = {
+  agriculture: "var(--chart-1)",
+  commercial: "var(--chart-2)",
+  residential: "var(--chart-3)",
+};
+const SECTION_COLORS: Record<"bldg_total" | "land_total", string> = {
+  bldg_total: "var(--chart-4)",
+  land_total: "var(--chart-5)",
 };
 
-// Color tokens (uses your shadcn theme vars)
-const CAT_COLORS: Record<string, string> = {
-  agriculture_all: "var(--chart-4)",
-  commercial_all: "var(--chart-2)",
-  residential_all: "var(--chart-3)",
-};
-const SECTION_COLORS: Record<string, string> = {
-  bldg_total: "var(--chart-3)",
-  land_total: "var(--chart-4)",
+// Label map
+const LABEL: Record<CategoryRow["category"], string> = {
+  agriculture: "Agriculture",
+  commercial: "Commercial",
+  residential: "Residential",
 };
 
-export default function StatsClient({
+export default function AbatementDashboard({
   rows,
   asOfDate,
 }: {
-  rows: StatRow[];
+  rows: CategoryRow[];
   asOfDate: string;
 }) {
-  // Helper to access a row by column_name
-  const row = (key: string): StatRow | undefined =>
-    rows.find((r) => r.column_name === key);
+  // Safe number getter
+  const n = (v: number | null | undefined) => (typeof v === "number" ? v : 0);
 
-  // Build chart datasets (include `fill` so Legend matches slice colors)
-  const catData = [
-    {
-      name: "Agriculture (All)",
-      key: "agriculture_all",
-      value: row("agriculture_all")?.sum_nonzero ?? 0,
-      fill: CAT_COLORS.agriculture_all,
-    },
-    {
-      name: "Commercial (All)",
-      key: "commercial_all",
-      value: row("commercial_all")?.sum_nonzero ?? 0,
-      fill: CAT_COLORS.commercial_all,
-    },
-    {
-      name: "Residential (All)",
-      key: "residential_all",
-      value: row("residential_all")?.sum_nonzero ?? 0,
-      fill: CAT_COLORS.residential_all,
-    },
-  ];
+  // Totals across categories
+  const assessedLandTotal = rows.reduce(
+    (s, r) => s + n(r.assessed_land_sum),
+    0
+  );
+  const assessedBldgTotal = rows.reduce(
+    (s, r) => s + n(r.assessed_bldg_sum),
+    0
+  );
+  const assessedTotal = rows.reduce((s, r) => s + n(r.assessed_total_sum), 0);
 
-  const sectionData = [
+  const taxableTotal = rows.reduce((s, r) => s + n(r.taxable_total_sum), 0);
+  const abatedTotal = rows.reduce(
+    (s, r) => s + Math.max(0, n(r.assessed_total_sum) - n(r.taxable_total_sum)),
+    0
+  );
+
+  // Datasets
+  const assessedByCategory = rows.map((r) => ({
+    name: `${LABEL[r.category]} (Assessed)`,
+    key: r.category,
+    value: n(r.assessed_total_sum),
+    fill: CAT_COLORS[r.category],
+  }));
+
+  const assessedBySection = [
     {
-      name: "Building Total",
+      name: "Building (Assessed)",
       key: "bldg_total",
-      value: row("bldg_total")?.sum_nonzero ?? 0,
+      value: assessedBldgTotal,
       fill: SECTION_COLORS.bldg_total,
     },
     {
-      name: "Land Total",
+      name: "Land (Assessed)",
       key: "land_total",
-      value: row("land_total")?.sum_nonzero ?? 0,
+      value: assessedLandTotal,
       fill: SECTION_COLORS.land_total,
     },
   ];
 
-  // Grid ordering (cards)
-  const cardOrder = [
-    "bldg_agriculture",
-    "bldg_commercial",
-    "bldg_residential",
-    "land_agriculture",
-    "land_commercial",
-    "land_residential",
-    "new_const_agriculture",
-    "new_const_commercial",
-    "new_const_residential",
-    "bldg_total",
-    "land_total",
-    "new_const_total",
-    "agriculture_all",
-    "commercial_all",
-    "residential_all",
-  ];
+  const taxableByCategory = rows.map((r) => ({
+    name: `${LABEL[r.category]} (Taxable)`,
+    key: `${r.category}_taxable`,
+    value: n(r.taxable_total_sum),
+    fill: CAT_COLORS[r.category],
+  }));
+
+  // Abated amount per category = assessed_total_sum - taxable_total_sum
+  const abatedByCategory = rows.map((r) => ({
+    name: `${LABEL[r.category]} (Abated)`,
+    key: `${r.category}_abated`,
+    value: Math.max(0, n(r.assessed_total_sum) - n(r.taxable_total_sum)),
+    fill: CAT_COLORS[r.category],
+  }));
+
+  // Grouped cards (per category)
+  const GroupCard = ({ r }: { r: CategoryRow }) => {
+    const land = n(r.assessed_land_sum);
+    const bldg = n(r.assessed_bldg_sum);
+    const total = n(r.assessed_total_sum);
+    const taxable = n(r.taxable_total_sum);
+    const newc = n(r.new_const_sum);
+    const abated = Math.max(0, total - taxable);
+
+    return (
+      <Card
+        className="rounded-2xl border"
+        style={{ borderTopWidth: 6, borderTopColor: CAT_COLORS[r.category] }}
+      >
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{LABEL[r.category]}</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">Land (Sum)</div>
+              <div className="font-medium">{fmtCurrency(land)}</div>
+              <div className="text-xs text-muted-foreground">
+                Count: {r.assessed_land_count ?? 0}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">
+                Building (Sum)
+              </div>
+              <div className="font-medium">{fmtCurrency(bldg)}</div>
+              <div className="text-xs text-muted-foreground">
+                Count: {r.assessed_bldg_count ?? 0}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">
+                Assessed Total
+              </div>
+              <div className="font-medium">{fmtCurrency(total)}</div>
+              <div className="text-xs text-muted-foreground">
+                Count: {r.assessed_total_count ?? 0}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">
+                New Construction (Sum)
+              </div>
+              <div className="font-medium">{fmtCurrency(newc)}</div>
+              <div className="text-xs text-muted-foreground">
+                Count: {r.new_const_count ?? 0}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">Taxable Total</div>
+              <div className="font-semibold">{fmtCurrency(taxable)}</div>
+              <div className="text-xs text-muted-foreground">
+                Count: {r.taxable_total_count ?? 0}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">Abated Amount</div>
+              <div className="font-semibold">{fmtCurrency(abated)}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Value Stats</h1>
-          <p className="text-sm text-muted-foreground">
-            As of {new Date(asOfDate).toLocaleDateString()}
-          </p>
+      {/* Header with high-level totals */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Total Assessed & Taxable Values
+        </h1>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:gap-8 gap-2">
+          <div>
+            <div className="text-xs text-muted-foreground">Assessed (All)</div>
+            <div className="text-3xl font-bold">
+              {fmtCurrency(assessedTotal)}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Land: {fmtCurrency(assessedLandTotal)} • Building:{" "}
+              {fmtCurrency(assessedBldgTotal)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Taxable (All)</div>
+            <div className="text-3xl font-bold">
+              {fmtCurrency(taxableTotal)}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Total Abated: {fmtCurrency(abatedTotal)}
+            </div>
+          </div>
         </div>
+        <p className="text-sm text-muted-foreground">
+          As of {new Date(asOfDate).toLocaleDateString()}
+        </p>
       </div>
 
-      {/* Charts FIRST */}
+      {/* Charts — Two for Assessed, Two for Taxable */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Category totals pie (Agriculture/Commercial/Residential) */}
+        {/* Assessed: by Category */}
         <Card className="rounded-2xl">
           <CardHeader className="pb-0">
-            <CardTitle className="text-base">Category Totals (All)</CardTitle>
+            <CardTitle className="text-base">
+              Assessed Totals by Category
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-2">
             <ChartContainer
               className="h-80"
               config={{
-                agriculture_all: {
-                  label: "Agriculture (All)",
-                  color: CAT_COLORS.agriculture_all,
+                agriculture: {
+                  label: "Agriculture",
+                  color: CAT_COLORS.agriculture,
                 },
-                commercial_all: {
-                  label: "Commercial (All)",
-                  color: CAT_COLORS.commercial_all,
+                commercial: {
+                  label: "Commercial",
+                  color: CAT_COLORS.commercial,
                 },
-                residential_all: {
-                  label: "Residential (All)",
-                  color: CAT_COLORS.residential_all,
+                residential: {
+                  label: "Residential",
+                  color: CAT_COLORS.residential,
                 },
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={catData}
+                    data={assessedByCategory}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
                     outerRadius={110}
-                    label={({ value }) => fmtCurrency(Number(value))}
+                    label={({ value }) =>
+                      typeof value === "number" ? currencyFmt.format(value) : ""
+                    }
                     labelLine={false}
                   >
-                    {catData.map((d) => (
+                    {assessedByCategory.map((d) => (
                       <Cell key={d.key} fill={d.fill} />
                     ))}
                   </Pie>
@@ -189,38 +285,145 @@ export default function StatsClient({
           </CardContent>
         </Card>
 
-        {/* Section totals pie (Building vs Land) */}
+        {/* Assessed: by Section (Land vs Building) */}
         <Card className="rounded-2xl">
           <CardHeader className="pb-0">
-            <CardTitle className="text-base">Section Totals</CardTitle>
+            <CardTitle className="text-base">
+              Assessed Land vs Building
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-2">
             <ChartContainer
               className="h-80"
               config={{
                 bldg_total: {
-                  label: "Building Total",
+                  label: "Building",
                   color: SECTION_COLORS.bldg_total,
                 },
-                land_total: {
-                  label: "Land Total",
-                  color: SECTION_COLORS.land_total,
+                land_total: { label: "Land", color: SECTION_COLORS.land_total },
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={assessedBySection}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={110}
+                    label={({ value }) =>
+                      typeof value === "number" ? currencyFmt.format(value) : ""
+                    }
+                    labelLine={false}
+                  >
+                    {assessedBySection.map((d) => (
+                      <Cell key={d.key} fill={d.fill} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip
+                    content={<ChartTooltipContent nameKey="name" />}
+                  />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Taxable: by Category */}
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base">
+              Taxable Totals by Category
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <ChartContainer
+              className="h-80"
+              config={{
+                agriculture_taxable: {
+                  label: "Agriculture (Taxable)",
+                  color: CAT_COLORS.agriculture,
+                },
+                commercial_taxable: {
+                  label: "Commercial (Taxable)",
+                  color: CAT_COLORS.commercial,
+                },
+                residential_taxable: {
+                  label: "Residential (Taxable)",
+                  color: CAT_COLORS.residential,
                 },
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={sectionData}
+                    data={taxableByCategory}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
                     outerRadius={110}
-                    label={({ value }) => fmtCurrency(Number(value))}
+                    label={({ value }) =>
+                      typeof value === "number" ? currencyFmt.format(value) : ""
+                    }
                     labelLine={false}
                   >
-                    {sectionData.map((d) => (
+                    {taxableByCategory.map((d) => (
+                      <Cell key={d.key} fill={d.fill} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip
+                    content={<ChartTooltipContent nameKey="name" />}
+                  />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Taxable: Abated Amount by Category */}
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base">
+              Abated Amount by Category
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <ChartContainer
+              className="h-80"
+              config={{
+                agriculture_abated: {
+                  label: "Agriculture (Abated)",
+                  color: CAT_COLORS.agriculture,
+                },
+                commercial_abated: {
+                  label: "Commercial (Abated)",
+                  color: CAT_COLORS.commercial,
+                },
+                residential_abated: {
+                  label: "Residential (Abated)",
+                  color: CAT_COLORS.residential,
+                },
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={abatedByCategory}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={110}
+                    label={({ value }) =>
+                      typeof value === "number" ? currencyFmt.format(value) : ""
+                    }
+                    labelLine={false}
+                  >
+                    {abatedByCategory.map((d) => (
                       <Cell key={d.key} fill={d.fill} />
                     ))}
                   </Pie>
@@ -237,47 +440,11 @@ export default function StatsClient({
 
       <Separator />
 
-      {/* Cards grid AFTER charts */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        {cardOrder.map((key) => {
-          const r = row(key);
-          if (!r) return null;
-          return (
-            <Card key={key} className="rounded-2xl">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base leading-tight">
-                    {LABELS[key] ?? key}
-                  </CardTitle>
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] uppercase tracking-wide"
-                  >
-                    {r.count_nonzero ?? 0} non-zero
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div>
-                    <div className="text-xs text-muted-foreground">Mean</div>
-                    <div className="font-medium">{fmtCurrency(r.mean)}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Median</div>
-                    <div className="font-medium">{fmtCurrency(r.median)}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Sum</div>
-                    <div className="font-medium">
-                      {fmtCurrency(r.sum_nonzero)}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Grouped summary cards */}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {rows.map((r) => (
+          <GroupCard key={r.category} r={r} />
+        ))}
       </div>
     </div>
   );
