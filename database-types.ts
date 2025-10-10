@@ -1881,14 +1881,35 @@ export type Database = {
         }
         Relationships: []
       }
+      tax_districts: {
+        Row: {
+          code: string
+          description: string | null
+          id: number
+          name: string | null
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          id?: number
+          name?: string | null
+        }
+        Relationships: []
+      }
       tax_rate_years: {
         Row: {
           cap: number | null
           created_at: string | null
           id: number
           rate: number
-          rate_id: number
           rate_type: string
+          subdistrict_id: number
           tax_year: number
         }
         Insert: {
@@ -1896,8 +1917,8 @@ export type Database = {
           created_at?: string | null
           id?: number
           rate: number
-          rate_id: number
           rate_type: string
+          subdistrict_id: number
           tax_year: number
         }
         Update: {
@@ -1905,37 +1926,19 @@ export type Database = {
           created_at?: string | null
           id?: number
           rate?: number
-          rate_id?: number
           rate_type?: string
+          subdistrict_id?: number
           tax_year?: number
         }
         Relationships: [
           {
-            foreignKeyName: "tax_rate_years_rate_id_fkey"
-            columns: ["rate_id"]
+            foreignKeyName: "tax_rate_years_subdistrict_id_fkey"
+            columns: ["subdistrict_id"]
             isOneToOne: false
-            referencedRelation: "tax_rates"
+            referencedRelation: "tax_subdistricts"
             referencedColumns: ["id"]
           },
         ]
-      }
-      tax_rates: {
-        Row: {
-          code: string
-          description: string | null
-          id: number
-        }
-        Insert: {
-          code: string
-          description?: string | null
-          id?: number
-        }
-        Update: {
-          code?: string
-          description?: string | null
-          id?: number
-        }
-        Relationships: []
       }
       tax_statuses: {
         Row: {
@@ -1954,6 +1957,35 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      tax_subdistricts: {
+        Row: {
+          description: string | null
+          id: number
+          name: string | null
+          tax_district_id: number | null
+        }
+        Insert: {
+          description?: string | null
+          id?: number
+          name?: string | null
+          tax_district_id?: number | null
+        }
+        Update: {
+          description?: string | null
+          id?: number
+          name?: string | null
+          tax_district_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_subdistricts_tax_district_id_fkey"
+            columns: ["tax_district_id"]
+            isOneToOne: false
+            referencedRelation: "tax_districts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       test_conditions: {
         Row: {
@@ -3376,6 +3408,30 @@ export type Database = {
           total_unfinished_area: number
         }[]
       }
+      get_category_sums_asof: {
+        Args: { p_as_of_date?: string }
+        Returns: {
+          assessed_bldg_count: number
+          assessed_bldg_sum: number
+          assessed_land_count: number
+          assessed_land_sum: number
+          assessed_total_count: number
+          assessed_total_sum: number
+          category: string
+          new_const_count: number
+          new_const_sum: number
+          taxable_total_count: number
+          taxable_total_sum: number
+        }[]
+      }
+      get_category_totals_asof: {
+        Args: { p_as_of_date?: string }
+        Returns: {
+          assessed_total: number
+          category: string
+          taxable_total: number
+        }[]
+      }
       get_parcel_features: {
         Args: {
           p_as_of_date?: string
@@ -3417,6 +3473,524 @@ export type Database = {
           values_per_unit: number
         }[]
       }
+      get_ratios: {
+        Args: {
+          p_as_of_date?: string
+          p_end_date?: string
+          p_land_uses?: number[]
+          p_start_date?: string
+          p_valid_only?: boolean
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          is_valid: boolean
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          land_use_asof: string
+          land_use_sale: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_sale: Json
+          parcel_id: number
+          postcode: string
+          price_per_sqft_building_total: number
+          price_per_sqft_finished: number
+          price_per_sqft_land: number
+          price_per_unit: number
+          ratio: number
+          sale_date: string
+          sale_id: number
+          sale_price: number
+          sale_type: string
+          street: string
+          structure_count: number
+          structures: Json
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+        }[]
+      }
+      get_ratios_v6: {
+        Args: {
+          p_as_of_date?: string
+          p_end_date?: string
+          p_land_uses?: number[]
+          p_start_date?: string
+          p_valid_only?: boolean
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          is_valid: boolean
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          land_use_asof: string
+          land_use_sale: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_sale: Json
+          parcel_id: number
+          postcode: string
+          price_per_sqft_building_total: number
+          price_per_sqft_finished: number
+          price_per_sqft_land: number
+          price_per_unit: number
+          ratio: number
+          sale_date: string
+          sale_id: number
+          sale_price: number
+          sale_type: string
+          street: string
+          structure_count: number
+          structures: Json
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+        }[]
+      }
+      get_sale_features_v1: {
+        Args: {
+          p_abatement_programs?: number[]
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_is_abated?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_review_status_ids?: number[]
+          p_review_type_ids?: number[]
+          p_sale_end_date?: string
+          p_sale_price_max?: number
+          p_sale_price_min?: number
+          p_sale_start_date?: string
+          p_sale_type_ids?: number[]
+          p_sale_valid_only?: boolean
+          p_tax_status_ids?: number[]
+        }
+        Returns: {
+          abatement_at_asof: Json
+          abatement_at_sale: Json
+          avg_condition_at_asof: number
+          avg_condition_at_sale: number
+          avg_year_built_at_asof: number
+          avg_year_built_at_sale: number
+          block: number
+          current_value_at_asof: number
+          current_value_at_sale: number
+          date_of_assessment_at_asof: string
+          date_of_assessment_at_sale: string
+          district_at_asof: string
+          district_at_sale: string
+          ext: number
+          field_reviews_at_asof: Json
+          field_reviews_at_sale: Json
+          house_number_at_asof: string
+          house_number_at_sale: string
+          is_valid: boolean
+          land_area_at_asof: number
+          land_area_at_sale: number
+          land_to_building_area_ratio_at_asof: number
+          land_to_building_area_ratio_at_sale: number
+          land_use_at_asof: string
+          land_use_at_sale: string
+          lat_at_asof: number
+          lat_at_sale: number
+          lon_at_asof: number
+          lon_at_sale: number
+          lot: string
+          neighborhoods_at_asof: Json
+          neighborhoods_at_sale: Json
+          parcel_id: number
+          postcode_at_asof: string
+          postcode_at_sale: string
+          price_per_sqft_building_total_at_asof: number
+          price_per_sqft_building_total_at_sale: number
+          price_per_sqft_finished_at_asof: number
+          price_per_sqft_finished_at_sale: number
+          price_per_sqft_land_at_asof: number
+          price_per_sqft_land_at_sale: number
+          price_per_unit_at_asof: number
+          price_per_unit_at_sale: number
+          property_class_id_at_asof: number
+          property_class_id_at_sale: number
+          property_class_name_at_asof: string
+          property_class_name_at_sale: string
+          ratio_at_asof: number
+          ratio_at_sale: number
+          sale_date: string
+          sale_id: number
+          sale_price: number
+          sale_type_id: number
+          sale_type_name: string
+          street_at_asof: string
+          street_at_sale: string
+          structure_count_at_asof: number
+          structure_count_at_sale: number
+          structures_at_asof: Json
+          structures_at_sale: Json
+          tax_status_id_at_asof: number
+          tax_status_id_at_sale: number
+          tax_status_name_at_asof: string
+          tax_status_name_at_sale: string
+          total_finished_area_at_asof: number
+          total_finished_area_at_sale: number
+          total_unfinished_area_at_asof: number
+          total_unfinished_area_at_sale: number
+          total_units_at_asof: number
+          total_units_at_sale: number
+          value_row_id_at_asof: number
+          value_row_id_at_sale: number
+          value_year_at_asof: number
+          value_year_at_sale: number
+          values_per_sqft_building_total_at_asof: number
+          values_per_sqft_building_total_at_sale: number
+          values_per_sqft_finished_at_asof: number
+          values_per_sqft_finished_at_sale: number
+          values_per_sqft_land_at_asof: number
+          values_per_sqft_land_at_sale: number
+          values_per_unit_at_asof: number
+          values_per_unit_at_sale: number
+        }[]
+      }
+      get_sale_features_v2: {
+        Args: {
+          p_abatement_programs?: number[]
+          p_exclude_retired_parcels?: boolean
+          p_is_abated?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_review_status_ids?: number[]
+          p_review_type_ids?: number[]
+          p_sale_end_date?: string
+          p_sale_price_max?: number
+          p_sale_price_min?: number
+          p_sale_start_date?: string
+          p_sale_type_ids?: number[]
+          p_sale_valid_only?: boolean
+          p_tax_status_ids?: number[]
+        }
+        Returns: {
+          abatement_at_sale: Json
+          avg_condition_at_sale: number
+          avg_year_built_at_sale: number
+          block: number
+          current_value_at_sale: number
+          date_of_assessment_at_sale: string
+          district_at_sale: string
+          ext: number
+          field_reviews_at_sale: Json
+          house_number_at_sale: string
+          is_valid: boolean
+          land_area_at_sale: number
+          land_to_building_area_ratio_at_sale: number
+          land_use_at_sale: string
+          lat_at_sale: number
+          lon_at_sale: number
+          lot: string
+          neighborhoods_at_sale: Json
+          parcel_id: number
+          postcode_at_sale: string
+          price_per_sqft_building_total_at_sale: number
+          price_per_sqft_finished_at_sale: number
+          price_per_sqft_land_at_sale: number
+          price_per_unit_at_sale: number
+          property_class_id_at_sale: number
+          property_class_name_at_sale: string
+          ratio_at_sale: number
+          sale_date: string
+          sale_id: number
+          sale_price: number
+          sale_type_id: number
+          sale_type_name: string
+          street_at_sale: string
+          structure_count_at_sale: number
+          structures_at_sale: Json
+          tax_status_id_at_sale: number
+          tax_status_name_at_sale: string
+          total_finished_area_at_sale: number
+          total_unfinished_area_at_sale: number
+          total_units_at_sale: number
+          value_row_id_at_sale: number
+          value_year_at_sale: number
+          values_per_sqft_building_total_at_sale: number
+          values_per_sqft_finished_at_sale: number
+          values_per_sqft_land_at_sale: number
+          values_per_unit_at_sale: number
+        }[]
+      }
+      get_sale_features_v4: {
+        Args: {
+          p_as_of_date?: string
+          p_end_date?: string
+          p_land_uses?: number[]
+          p_start_date?: string
+          p_valid_only?: boolean
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          is_valid: boolean
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          land_use_asof: string
+          land_use_sale: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_sale: Json
+          parcel_id: number
+          postcode: string
+          price_per_sqft_building_total: number
+          price_per_sqft_finished: number
+          price_per_sqft_land: number
+          price_per_unit: number
+          ratio: number
+          sale_date: string
+          sale_id: number
+          sale_price: number
+          sale_type: string
+          street: string
+          structure_count: number
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+        }[]
+      }
+      get_sale_features_v5: {
+        Args: {
+          p_as_of_date?: string
+          p_end_date?: string
+          p_land_uses?: number[]
+          p_start_date?: string
+          p_valid_only?: boolean
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          is_valid: boolean
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          land_use_asof: string
+          land_use_sale: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_sale: Json
+          parcel_features: Json
+          parcel_id: number
+          postcode: string
+          price_per_sqft_building_total: number
+          price_per_sqft_finished: number
+          price_per_sqft_land: number
+          price_per_unit: number
+          ratio: number
+          sale_date: string
+          sale_id: number
+          sale_parcel_count: number
+          sale_price: number
+          sale_type: string
+          street: string
+          structure_count: number
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+        }[]
+      }
+      get_sale_features_v6: {
+        Args: {
+          p_as_of_date?: string
+          p_end_date?: string
+          p_land_uses?: number[]
+          p_start_date?: string
+          p_valid_only?: boolean
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          is_valid: boolean
+          land_area: number
+          land_to_building_area_ratio: number
+          parcel_features: Json
+          parcel_id: number
+          price_per_sqft_building_total: number
+          price_per_sqft_finished: number
+          price_per_sqft_land: number
+          price_per_unit: number
+          ratio: number
+          sale_date: string
+          sale_id: number
+          sale_parcel_count: number
+          sale_price: number
+          sale_type: string
+          structure_count: number
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+        }[]
+      }
+      get_sale_parcel_aggregates_v12: {
+        Args: {
+          p_avg_condition_max?: number
+          p_avg_condition_min?: number
+          p_end_date?: string
+          p_finished_area_max?: number
+          p_finished_area_min?: number
+          p_land_area_max?: number
+          p_land_area_min?: number
+          p_land_uses?: number[]
+          p_neighborhood_ids?: number[]
+          p_sale_price_max?: number
+          p_sale_price_min?: number
+          p_sale_type_ids?: number[]
+          p_section_materials_any?: string[]
+          p_start_date?: string
+          p_upper_floor_same_materials?: string[]
+          p_valid_only?: boolean
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          is_valid: boolean
+          land_area: number
+          land_to_building_area_ratio: number
+          parcel_features: Json
+          price_per_sqft_building_total: number
+          price_per_sqft_finished: number
+          price_per_sqft_land: number
+          price_per_unit: number
+          sale_date: string
+          sale_id: number
+          sale_parcel_count: number
+          sale_price: number
+          sale_type: string
+          structure_count: number
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+        }[]
+      }
+      get_sale_parcel_aggregates_v13: {
+        Args: {
+          p_avg_condition_max?: number
+          p_avg_condition_min?: number
+          p_end_date?: string
+          p_finished_area_max?: number
+          p_finished_area_min?: number
+          p_has_basement?: boolean
+          p_land_area_max?: number
+          p_land_area_min?: number
+          p_land_uses?: number[]
+          p_neighborhood_ids?: number[]
+          p_sale_price_max?: number
+          p_sale_price_min?: number
+          p_sale_type_ids?: number[]
+          p_section_materials_any?: string[]
+          p_start_date?: string
+          p_stories_max?: number
+          p_stories_min?: number
+          p_upper_floor_same_materials?: string[]
+          p_valid_only?: boolean
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          is_valid: boolean
+          land_area: number
+          land_to_building_area_ratio: number
+          parcel_features: Json
+          price_per_sqft_building_total: number
+          price_per_sqft_finished: number
+          price_per_sqft_land: number
+          price_per_unit: number
+          sale_date: string
+          sale_id: number
+          sale_parcel_count: number
+          sale_price: number
+          sale_type: string
+          structure_count: number
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+        }[]
+      }
+      get_single_parcel_sale_ratios_v1: {
+        Args: {
+          p_as_of_date?: string
+          p_end_date?: string
+          p_land_uses?: number[]
+          p_start_date?: string
+          p_valid_only?: boolean
+        }
+        Returns: {
+          avg_condition: number
+          avg_year_built: number
+          current_value: number
+          date_of_assessment: string
+          is_valid: boolean
+          land_area: number
+          land_to_building_area_ratio: number
+          parcel_features: Json
+          parcel_id: number
+          price_per_sqft_building_total: number
+          price_per_sqft_finished: number
+          price_per_sqft_land: number
+          price_per_unit: number
+          ratio: number
+          sale_date: string
+          sale_id: number
+          sale_parcel_count: number
+          sale_price: number
+          sale_type: string
+          structure_count: number
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+        }[]
+      }
       get_sold_parcel_features_multi: {
         Args: {
           p_end_date?: string
@@ -3444,6 +4018,16 @@ export type Database = {
           total_finished_area: number
           total_unfinished_area: number
           total_units: number
+        }[]
+      }
+      get_value_stats_asof: {
+        Args: { p_as_of_date?: string }
+        Returns: {
+          column_name: string
+          count_nonzero: number
+          mean: number
+          median: number
+          sum_nonzero: number
         }[]
       }
       gtrgm_compress: {
@@ -3860,6 +4444,59 @@ export type Database = {
           structure_count: number
           structures: Json
           tax_status_id: number
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+          values_per_sqft_building_total: number
+          values_per_sqft_finished: number
+          values_per_sqft_land: number
+          values_per_unit: number
+        }[]
+      }
+      testing_get_parcel_features_v5: {
+        Args: {
+          p_abatement_programs?: number[]
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_is_abated?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_review_status_ids?: number[]
+          p_review_type_ids?: number[]
+          p_tax_status_ids?: number[]
+        }
+        Returns: {
+          abatement: Json
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          field_reviews: Json
+          house_number: string
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          postcode: string
+          property_class_id: number
+          property_class_name: string
+          retired_at: string
+          street: string
+          structure_count: number
+          structures: Json
+          tax_status_id: number
+          tax_status_name: string
           total_finished_area: number
           total_unfinished_area: number
           total_units: number
