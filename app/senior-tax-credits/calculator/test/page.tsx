@@ -487,8 +487,10 @@ export default function TaxFreezeCalculator() {
     frozenBaseForCompare,
     cityRateSumBase
   );
+
+  const assessedCompareLessNcCompare = assessedCompare - ncCompare;
   const cityFrozenActualOnFrozenBase = taxFromAssessed(
-    frozenBaseForCompare,
+    assessedCompareLessNcCompare,
     cityRateSumCompare
   );
   const cityFrozenPart = Math.min(
@@ -662,7 +664,7 @@ export default function TaxFreezeCalculator() {
                 100) × {cityRateSumBase.toFixed(4)} = $
                 {cityFrozenCeiling.toLocaleString()},
                 <br />
-                &nbsp;&nbsp;({assessedFrozenBaseForCompare.toLocaleString()} ÷
+                &nbsp;&nbsp;({assessedCompareLessNcCompare.toLocaleString()} ÷
                 100) × {cityRateSumCompare.toFixed(4)} = $
                 {cityFrozenActualOnFrozenBase.toLocaleString()}
                 )
