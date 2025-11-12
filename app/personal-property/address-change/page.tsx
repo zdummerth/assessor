@@ -46,7 +46,7 @@ export default function AccountUpdateFormPage() {
             <Field label="Phone Number" />
           </div>
           <div className="grid grid-cols-2 gap-5">
-            <Field label="Current Name" />
+            <Field label="Previous Name" />
             <Field label="Updated Name" />
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function AccountUpdateFormPage() {
         {/* Current Address */}
         <section className="mt-6">
           <div className="grid grid-cols-1 gap-5">
-            <Field label="Current Address" />
+            <Field label="Previous City Address" />
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
               <Field label="City" />
               <Field label="State" />
