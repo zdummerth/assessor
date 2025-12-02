@@ -29,11 +29,13 @@ export default function NewFieldReviewModal({
   revalidatePath,
   buttonLabel = "Add Field Review",
   title = "New Field Review",
+  reviewTypes,
 }: {
   parcelId: number;
   revalidatePath?: string;
   buttonLabel?: string;
   title?: string;
+  reviewTypes: Array<{ id: number; name: string }>;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [state, action, pending] = useActionState(
@@ -90,9 +92,9 @@ export default function NewFieldReviewModal({
                     defaultValue="general"
                     className="border rounded px-3 py-2"
                   >
-                    {TYPE_OPTIONS.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
+                    {reviewTypes.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
                       </option>
                     ))}
                   </select>

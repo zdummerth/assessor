@@ -24,6 +24,14 @@ export async function createFieldReviewWithInitial(
     if (!initial_status && !initial_note)
       return { error: "Provide an initial status or note", success: "" };
 
+    console.log("Creating field review:", {
+      parcel_id,
+      due_date,
+      type,
+      initial_status,
+      initial_note,
+    });
+
     const supabase = await createClient();
 
     // Call the Postgres function (returns one row with ids/timestamps)
@@ -32,7 +40,8 @@ export async function createFieldReviewWithInitial(
       .rpc("create_field_review", {
         p_parcel_id: parcel_id,
         p_due_date: due_date,
-        p_type: type,
+        //@ts-expect-error need to generate types for rpc
+        p_type_id: type,
         p_initial_status: initial_status,
         p_initial_note: initial_note,
       });
