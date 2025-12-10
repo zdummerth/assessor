@@ -10,11 +10,9 @@ export async function GET(_req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Distinct land uses from parcel_land_uses
-    // You can switch to a dedicated view/function if you prefer.
-    const { data, error } = await supabase.from("neighborhoods").select(`
-        id, neighborhood, name, neighborhood_sets(name)
-        `);
+    const { data, error } = await supabase
+      .from("field_review_statuses")
+      .select(`id, name`);
 
     if (error) {
       console.error("Supabase error:", error.message);

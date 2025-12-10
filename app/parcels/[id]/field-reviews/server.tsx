@@ -49,7 +49,10 @@ type EmployeeRow = {
 type StatusRow = {
   id: number;
   review_id: number;
-  status: string;
+  status: {
+    id: number;
+    name: string;
+  };
   created_at: string | null;
   created_by: string | null;
 };
@@ -61,7 +64,7 @@ type ReviewRow = {
   created_at: string | null;
   created_by: string | null;
   field_review_notes?: NoteRow[];
-  field_review_statuses?: StatusRow[];
+  field_review_status_history?: StatusRow[];
   field_review_images?: ImageRow[];
 };
 
@@ -123,10 +126,13 @@ export default async function ServerParcelFieldReviews({
           last_name
         )
       ),
-      field_review_statuses (
+      field_review_status_history (
         id,
         review_id,
-        status,
+        status:field_review_statuses(
+          id,
+          name
+        ),
         created_at,
         created_by
       ),
@@ -244,7 +250,7 @@ export default async function ServerParcelFieldReviews({
           {/* All reviews as consistent cards */}
           <div className="flex flex-col gap-3">
             {reviews.map((r, index) => {
-              const latestStatus = latestOf(r.field_review_statuses);
+              const latestStatus = latestOf(r.field_review_status_history);
               const latestNote = latestOf(r.field_review_notes);
 
               const firstImage = r.field_review_images?.[0];
@@ -262,7 +268,7 @@ export default async function ServerParcelFieldReviews({
                   <ReviewThreadModal
                     reviewId={r.id}
                     initialNotes={r.field_review_notes ?? []}
-                    initialStatuses={r.field_review_statuses ?? []}
+                    initialStatuses={r.field_review_status_history ?? []}
                     initialImages={toImageDisplay(r.field_review_images)}
                     revalidatePath={revalidatePath}
                     trigger={
@@ -302,7 +308,7 @@ export default async function ServerParcelFieldReviews({
                               {latestStatus && (
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs font-medium">
-                                    {latestStatus.status}
+                                    {latestStatus.status.name}
                                   </span>
                                   <span className="text-[11px] text-gray-500">
                                     {latestStatus.created_at

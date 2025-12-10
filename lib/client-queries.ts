@@ -135,6 +135,25 @@ export function useLandUseOptions() {
   };
 }
 
+export function useReviewStatusOptions() {
+  const { data, error, isLoading } = useSWR("/reviews/statuses", fetcher);
+
+  return {
+    options: Array.isArray(data) ? data : [],
+    isLoading,
+    error,
+  };
+}
+
+export function useReviewTypeOptions() {
+  const { data, error, isLoading } = useSWR("/reviews/types", fetcher);
+  return {
+    options: Array.isArray(data) ? data : [],
+    isLoading,
+    error,
+  };
+}
+
 export function useTaxStatusOptions() {
   const { data, error, isLoading } = useSWR("/tax-statuses", fetcher);
   return {

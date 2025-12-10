@@ -15,8 +15,6 @@ export async function GET(_req: NextRequest) {
       .select("code")
       .not("code", "is", null);
 
-    console.log("Supabase data:", data, "error:", error);
-
     if (error) {
       console.error("Supabase error:", error.message);
       return Response.json(

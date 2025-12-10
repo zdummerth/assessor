@@ -14,37 +14,33 @@ export async function createFieldReviewWithInitial(
   try {
     const parcel_id = Number(formData.get("parcel_id"));
     const due_date = String(formData.get("due_date") || "");
-    const type = String(formData.get("type") || ""); // ← NEW
+    const type_id = Number(formData.get("type") || ""); // ← NEW
     const initial_status = String(formData.get("initial_status") || "");
     const initial_note = String(formData.get("initial_note") || "");
     const revalidate_path = (formData.get("revalidate_path") as string) || null;
 
     if (!parcel_id) return { error: "Missing parcel_id", success: "" };
-    if (!type) return { error: "Missing type", success: "" };
+    if (!type_id) return { error: "Missing type", success: "" };
     if (!initial_status && !initial_note)
       return { error: "Provide an initial status or note", success: "" };
 
     console.log("Creating field review:", {
       parcel_id,
       due_date,
-      type,
+      type_id,
       initial_status,
       initial_note,
     });
 
     const supabase = await createClient();
 
-    // Call the Postgres function (returns one row with ids/timestamps)
-    const { data, error } = await supabase
-      // @ts-ignore rpc is typed loosely in supabase-js
-      .rpc("create_field_review", {
-        p_parcel_id: parcel_id,
-        p_due_date: due_date,
-        //@ts-expect-error need to generate types for rpc
-        p_type_id: type,
-        p_initial_status: initial_status,
-        p_initial_note: initial_note,
-      });
+    const { error } = await supabase.rpc("create_field_review", {
+      p_parcel_id: parcel_id,
+      p_due_date: due_date,
+      p_type_id: type_id,
+      p_initial_status: initial_status,
+      p_initial_note: initial_note,
+    });
 
     if (error) {
       return {
@@ -128,42 +124,20 @@ export async function deleteReviewNotes(
 export async function addReviewStatus(_prev: ActionState, formData: FormData) {
   try {
     const review_id = Number(formData.get("review_id"));
-    const status = String(formData.get("status") || "");
+    const status_id = Number(formData.get("status_id") || "");
     const revalidate_path = (formData.get("revalidate_path") as string) || null;
-    if (!review_id || !status) throw new Error("Missing review_id or status");
+    if (!review_id || !status_id)
+      throw new Error("Missing review_id or status");
 
     const supabase = await createClient();
     const { error } = await supabase
-      .from("field_review_statuses")
-      .insert({ review_id, status });
+      .from("field_review_status_history")
+      .insert({ review_id, status_id });
     if (error) throw error;
     if (revalidate_path) rp(revalidate_path);
     return { error: "", success: "Status added" };
   } catch (e: any) {
     return { error: e.message || "Failed to add status", success: "" };
-  }
-}
-
-export async function updateReviewStatus(
-  _prev: ActionState,
-  formData: FormData
-) {
-  try {
-    const id = Number(formData.get("id"));
-    const status = String(formData.get("status") || "");
-    const revalidate_path = (formData.get("revalidate_path") as string) || null;
-    if (!id || !status) throw new Error("Missing id or status");
-
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from("field_review_statuses")
-      .update({ status })
-      .eq("id", id);
-    if (error) throw error;
-    if (revalidate_path) rp(revalidate_path);
-    return { error: "", success: "Status updated" };
-  } catch (e: any) {
-    return { error: e.message || "Failed to update status", success: "" };
   }
 }
 
@@ -294,12 +268,6 @@ export const uploadReviewImages = async (
   } catch (e: any) {
     return { error: e?.message || "Upload failed", success: "" };
   }
-};
-
-type FileRef = {
-  file_id: number;
-  bucket_name: string;
-  path: string;
 };
 
 function parseIds(formData: FormData): number[] {

@@ -13,6 +13,7 @@ import {
 } from "@headlessui/react";
 import UploadReviewImagesModal from "./upload-images";
 import ReviewImagesGrid from "./images-editor";
+import { useReviewStatusOptions } from "@/lib/client-queries";
 
 type NoteRow = {
   id: number;
@@ -31,7 +32,10 @@ type NoteRow = {
 type StatusRow = {
   id: number;
   review_id: number;
-  status: string;
+  status: {
+    id: number;
+    name: string;
+  };
   created_at: string | null;
   created_by: string | null;
 };
@@ -139,6 +143,12 @@ export default function ReviewThreadModal({
   const errorMessage =
     addStatusState.error || addNoteState.error || delNotesState.error;
 
+  const {
+    options: statusOptions,
+    isLoading: loadingStatusOptions,
+    error: statusOptionsError,
+  } = useReviewStatusOptions();
+
   return (
     <>
       <span onClick={() => setIsOpen(true)}>
@@ -244,19 +254,26 @@ export default function ReviewThreadModal({
                         Update status
                       </label>
                       <select
-                        name="status"
+                        name="status_id"
                         required
                         defaultValue=""
                         className="w-full rounded border bg-background px-3 py-2 text-xs"
                       >
                         <option value="" disabled>
-                          — Select —
+                          {loadingStatusOptions
+                            ? "Loading options..."
+                            : "Select a status"}
                         </option>
-                        {STATUS_OPTIONS.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
+                        {statusOptions &&
+                          statusOptions.map((opt) => (
+                            <option
+                              key={opt.id}
+                              value={opt.id}
+                              disabled={opt.id === latestStatus?.status.id}
+                            >
+                              {opt.name}
+                            </option>
+                          ))}
                       </select>
                     </div>
                     <div className="flex justify-end">
@@ -264,7 +281,7 @@ export default function ReviewThreadModal({
                         type="submit"
                         className="inline-flex items-center rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
                         aria-busy={addingStatus}
-                        disabled={addingStatus}
+                        disabled={addingStatus || !!statusOptionsError}
                       >
                         {addingStatus ? "Adding…" : "Save status"}
                       </button>
@@ -278,7 +295,7 @@ export default function ReviewThreadModal({
                         <div>
                           <div className="inline-flex items-center gap-2">
                             <span className="text-xs font-semibold">
-                              {latestStatus.status}
+                              {latestStatus.status.name}
                             </span>
                             <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
                               Current
@@ -320,7 +337,7 @@ export default function ReviewThreadModal({
                         <ul className="divide-y text-xs">
                           {olderStatuses.map((s) => (
                             <li key={s.id} className="px-3 py-2">
-                              <div className="font-medium">{s.status}</div>
+                              <div className="font-medium">{s.status.name}</div>
                               <div className="text-[11px] text-muted-foreground">
                                 {fmtShortDateTime(s.created_at)}
                               </div>

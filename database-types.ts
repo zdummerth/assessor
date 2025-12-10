@@ -778,13 +778,6 @@ export type Database = {
             referencedRelation: "field_reviews"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "field_review_images_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "field_reviews_with_current_status"
-            referencedColumns: ["id"]
-          },
         ]
       }
       field_review_notes: {
@@ -811,17 +804,59 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "field_review_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "field_review_notes_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
             referencedRelation: "field_reviews"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      field_review_status_history: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: number
+          review_id: number
+          status_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          review_id: number
+          status_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          review_id?: number
+          status_id?: number | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "field_review_notes_review_id_fkey"
+            foreignKeyName: "field_review_status_history_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "field_review_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_review_statuses_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
-            referencedRelation: "field_reviews_with_current_status"
+            referencedRelation: "field_reviews"
             referencedColumns: ["id"]
           },
         ]
@@ -829,51 +864,20 @@ export type Database = {
       field_review_statuses: {
         Row: {
           created_at: string
-          created_by: string
           id: number
-          review_id: number
-          status: string
-          status_id: number | null
+          name: string | null
         }
         Insert: {
           created_at?: string
-          created_by?: string
           id?: number
-          review_id: number
-          status: string
-          status_id?: number | null
+          name?: string | null
         }
         Update: {
           created_at?: string
-          created_by?: string
           id?: number
-          review_id?: number
-          status?: string
-          status_id?: number | null
+          name?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "field_review_statuses_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "field_reviews"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "field_review_statuses_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "field_reviews_with_current_status"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "field_review_statuses_status_id_fkey"
-            columns: ["status_id"]
-            isOneToOne: false
-            referencedRelation: "statuses"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       field_review_types: {
         Row: {
@@ -1788,7 +1792,7 @@ export type Database = {
       search_table_2: {
         Row: {
           created_at: string | null
-          fts: unknown | null
+          fts: unknown
           house_number: string | null
           id: number
           name: string | null
@@ -1800,7 +1804,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          fts?: unknown | null
+          fts?: unknown
           house_number?: string | null
           id?: number
           name?: string | null
@@ -1812,7 +1816,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          fts?: unknown | null
+          fts?: unknown
           house_number?: string | null
           id?: number
           name?: string | null
@@ -1904,6 +1908,7 @@ export type Database = {
       }
       tax_rate_years: {
         Row: {
+          applies_to: Json[] | null
           cap: number | null
           created_at: string | null
           id: number
@@ -1913,6 +1918,7 @@ export type Database = {
           tax_year: number
         }
         Insert: {
+          applies_to?: Json[] | null
           cap?: number | null
           created_at?: string | null
           id?: number
@@ -1922,6 +1928,7 @@ export type Database = {
           tax_year: number
         }
         Update: {
+          applies_to?: Json[] | null
           cap?: number | null
           created_at?: string | null
           id?: number
@@ -2064,7 +2071,7 @@ export type Database = {
           district: string | null
           footway: string | null
           formatted: string | null
-          fts_address_line1: unknown | null
+          fts_address_line1: unknown
           geocode_id: string | null
           hamlet: string | null
           housenumber: string | null
@@ -2107,7 +2114,7 @@ export type Database = {
           district?: string | null
           footway?: string | null
           formatted?: string | null
-          fts_address_line1?: unknown | null
+          fts_address_line1?: unknown
           geocode_id?: string | null
           hamlet?: string | null
           housenumber?: string | null
@@ -2150,7 +2157,7 @@ export type Database = {
           district?: string | null
           footway?: string | null
           formatted?: string | null
-          fts_address_line1?: unknown | null
+          fts_address_line1?: unknown
           geocode_id?: string | null
           hamlet?: string | null
           housenumber?: string | null
@@ -3171,41 +3178,6 @@ export type Database = {
       }
     }
     Views: {
-      field_reviews_with_current_status: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          current_status: string | null
-          due_date: string | null
-          id: number | null
-          parcel_id: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          current_status?: never
-          due_date?: string | null
-          id?: number | null
-          parcel_id?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          current_status?: never
-          due_date?: string | null
-          id?: number | null
-          parcel_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "field_reviews_parcel_id_fkey"
-            columns: ["parcel_id"]
-            isOneToOne: false
-            referencedRelation: "test_parcels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       mv_structure_area_totals: {
         Row: {
           finished_area_total: number | null
@@ -3324,7 +3296,7 @@ export type Database = {
           p_initial_note: string
           p_initial_status: string
           p_parcel_id: number
-          p_type: string
+          p_type_id: number
         }
         Returns: {
           note_id: number
@@ -3361,10 +3333,7 @@ export type Database = {
           path: string
         }[]
       }
-      delete_parcel_image: {
-        Args: { p_image_url: string }
-        Returns: undefined
-      }
+      delete_parcel_image: { Args: { p_image_url: string }; Returns: undefined }
       delete_parcel_images: {
         Args: { p_image_urls: string[] }
         Returns: undefined
@@ -3430,6 +3399,38 @@ export type Database = {
           assessed_total: number
           category: string
           taxable_total: number
+        }[]
+      }
+      get_field_reviews_with_parcel_details: {
+        Args: never
+        Returns: {
+          address_city: string
+          address_formatted: string
+          address_lat: number
+          address_line1: string
+          address_lon: number
+          address_place_id: string
+          address_postcode: string
+          address_state: string
+          assessor_neighborhood: number
+          block: number
+          cda_neighborhood: string
+          ext: number
+          field_review_id: number
+          latest_status_hist_id: number
+          latest_status_id: number
+          latest_status_name: string
+          latest_status_set_at: string
+          lot: number
+          parcel_created_at: string
+          parcel_id: number
+          parcel_retired_at: string
+          review_created_at: string
+          review_due_date: string
+          review_type_id: number
+          review_type_name: string
+          review_type_slug: string
+          site_visited_at: string
         }[]
       }
       get_parcel_features: {
@@ -4030,34 +4031,11 @@ export type Database = {
           sum_nonzero: number
         }[]
       }
-      gtrgm_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_options: {
-        Args: { "": unknown }
-        Returns: undefined
-      }
-      gtrgm_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
       insert_parcel_image: {
         Args: { p_image_url: string; p_parcel_id: number }
         Returns: number
       }
-      load_parcel_site_addresses: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      load_parcel_site_addresses: { Args: never; Returns: undefined }
       score_sales_with_model_with_coeff: {
         Args: { p_limit?: number; p_parcel_ids?: number[]; p_run_id?: number }
         Returns: {
@@ -4109,7 +4087,7 @@ export type Database = {
         Args: { search_term: string }
         Returns: {
           created_at: string | null
-          fts: unknown | null
+          fts: unknown
           house_number: string | null
           id: number
           name: string | null
@@ -4119,6 +4097,12 @@ export type Database = {
           street_suffix: string | null
           zip_code: string | null
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "search_table_2"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       search_parcels_by_prefix: {
         Args: { active?: boolean; prefix: string }
@@ -4144,18 +4128,8 @@ export type Database = {
           sale_type: string
         }[]
       }
-      set_limit: {
-        Args: { "": number }
-        Returns: number
-      }
-      show_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      show_trgm: {
-        Args: { "": string }
-        Returns: string[]
-      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       test_get_parcel_features: {
         Args: {
           p_as_of_date?: string
