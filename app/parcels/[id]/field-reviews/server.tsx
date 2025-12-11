@@ -4,6 +4,7 @@ import { SearchX, PlusCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import ReviewThreadModal from "./thread";
 import NewFieldReviewModal from "./create";
+import { FieldReviewCreateDialog } from "./create-dialog";
 import UploadReviewImagesModal from "./upload-images";
 import { Tables } from "@/database-types";
 
@@ -224,14 +225,8 @@ export default async function ServerParcelFieldReviews({
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">{title}</h3>
-        <NewFieldReviewModal
-          reviewTypes={
-            fieldReviewTypes?.map((t) => ({
-              id: t.id,
-              name: t.display_name,
-            })) || []
-          }
-          parcelId={parcel.id as number}
+        <FieldReviewCreateDialog
+          parcelIds={[parcel.id as number]}
           revalidatePath={revalidatePath}
         />
       </div>

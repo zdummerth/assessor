@@ -4,7 +4,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useActionState } from "react";
 import { addReviewNote, deleteReviewNotes, addReviewStatus } from "./actions";
-import { Trash2, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import {
   Dialog,
   DialogBackdrop,
@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import UploadReviewImagesModal from "./upload-images";
+import { ReviewStatusHistory } from "@/components/reviews/review-status-history";
 import ReviewImagesGrid from "./images-editor";
 import { useReviewStatusOptions } from "@/lib/client-queries";
 
@@ -63,8 +64,6 @@ const fmtShortDateTime = (s?: string | null) => {
     minute: "2-digit",
   });
 };
-
-const STATUS_OPTIONS = ["In Progress", "Complete"] as const;
 
 export default function ReviewThreadModal({
   reviewId,
@@ -137,8 +136,6 @@ export default function ReviewThreadModal({
   );
 
   const latestStatus = statuses[0];
-  const olderStatuses = statuses.slice(1);
-  const [showHistory, setShowHistory] = useState(false);
 
   const errorMessage =
     addStatusState.error || addNoteState.error || delNotesState.error;
@@ -168,27 +165,13 @@ export default function ReviewThreadModal({
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
           <DialogPanel className="w-full max-w-5xl max-h-[95vh] overflow-hidden rounded-xl border bg-background shadow-lg">
             {/* Header */}
-            <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
-              <div className="space-y-0.5">
+            <div className="border-b px-4 py-3 md:px-6">
+              {/* Title + Close button */}
+              <div className="flex items-center justify-between">
                 <DialogTitle className="text-sm font-semibold">
                   {title}
                 </DialogTitle>
-                <p className="text-[11px] text-muted-foreground">
-                  Manage statuses, notes, and images for this field review.
-                </p>
-                <div className="flex items-center justify-between pt-1 text-[11px]">
-                  {errorMessage && (
-                    <div className="text-red-600">{errorMessage}</div>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <UploadReviewImagesModal
-                  reviewId={reviewId}
-                  revalidatePath={revalidatePath}
-                  buttonLabel="Images"
-                  title="Upload Images"
-                />
+
                 <button
                   type="button"
                   className="inline-flex h-8 w-8 items-center justify-center rounded-full border text-muted-foreground hover:bg-muted"
@@ -198,10 +181,67 @@ export default function ReviewThreadModal({
                   <X className="h-4 w-4" />
                 </button>
               </div>
+
+              {/* Status history + Form */}
+              <div className="mt-3 flex flex-col md:flex-row md:items-end gap-4">
+                {/* @ts-expect-error needs generating */}
+                <ReviewStatusHistory statuses={statuses} />
+
+                {/* New status form */}
+                <form action={addStatusAction}>
+                  <input type="hidden" name="review_id" value={reviewId} />
+                  {revalidatePath && (
+                    <input
+                      type="hidden"
+                      name="revalidate_path"
+                      value={revalidatePath}
+                    />
+                  )}
+
+                  <div className="flex gap-2">
+                    <select
+                      name="status_id"
+                      required
+                      defaultValue=""
+                      className="w-full rounded border bg-background px-3 py-2 text-xs"
+                    >
+                      <option value="" disabled>
+                        {loadingStatusOptions
+                          ? "Loading options..."
+                          : "Select a status"}
+                      </option>
+                      {statusOptions &&
+                        statusOptions
+                          .filter((opt) => opt.id !== latestStatus?.status.id)
+                          .map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.name}
+                            </option>
+                          ))}
+                    </select>
+
+                    <button
+                      type="submit"
+                      className="inline-flex items-center rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                      aria-busy={addingStatus}
+                      disabled={addingStatus || !!statusOptionsError}
+                    >
+                      {addingStatus ? "Updating…" : "Update"}
+                    </button>
+                  </div>
+
+                  {/* Error */}
+                  {errorMessage && (
+                    <div className="text-[11px] text-red-600">
+                      {errorMessage}
+                    </div>
+                  )}
+                </form>
+              </div>
             </div>
 
             {/* Body */}
-            <div className="flex flex-col md:grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)] md:gap-4 px-4 py-4 md:px-6 md:py-5 overflow-y-auto max-h-[calc(95vh-3rem)]">
+            <div className="flex flex-col md:grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)] md:gap-4 px-4 py-4 md:px-6 md:py-5 overflow-y-auto max-h-[calc(95vh-10rem)]">
               {/* LEFT: Images + Status */}
               <div className="space-y-4 md:pr-2 border-b md:border-b-0 md:border-r pb-4 md:pb-0">
                 {/* Images */}
@@ -210,6 +250,12 @@ export default function ReviewThreadModal({
                     <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       Images
                     </h3>
+                    <UploadReviewImagesModal
+                      reviewId={reviewId}
+                      revalidatePath={revalidatePath}
+                      buttonLabel="Images"
+                      title="Upload Images"
+                    />
                     {images.length > 0 && (
                       <span className="text-[11px] text-muted-foreground">
                         {images.length} file{images.length === 1 ? "" : "s"}
@@ -227,125 +273,6 @@ export default function ReviewThreadModal({
                       revalidatePath={revalidatePath}
                       className="space-y-2"
                     />
-                  )}
-                </div>
-
-                {/* Status */}
-                <div className="space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Status
-                  </h3>
-
-                  {/* New status form */}
-                  <form
-                    action={addStatusAction}
-                    className="flex flex-col gap-2 rounded-md border bg-muted/40 p-3 text-sm"
-                  >
-                    <input type="hidden" name="review_id" value={reviewId} />
-                    {revalidatePath && (
-                      <input
-                        type="hidden"
-                        name="revalidate_path"
-                        value={revalidatePath}
-                      />
-                    )}
-                    <div>
-                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
-                        Update status
-                      </label>
-                      <select
-                        name="status_id"
-                        required
-                        defaultValue=""
-                        className="w-full rounded border bg-background px-3 py-2 text-xs"
-                      >
-                        <option value="" disabled>
-                          {loadingStatusOptions
-                            ? "Loading options..."
-                            : "Select a status"}
-                        </option>
-                        {statusOptions &&
-                          statusOptions.map((opt) => (
-                            <option
-                              key={opt.id}
-                              value={opt.id}
-                              disabled={opt.id === latestStatus?.status.id}
-                            >
-                              {opt.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        className="inline-flex items-center rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-                        aria-busy={addingStatus}
-                        disabled={addingStatus || !!statusOptionsError}
-                      >
-                        {addingStatus ? "Adding…" : "Save status"}
-                      </button>
-                    </div>
-                  </form>
-
-                  {/* Current status */}
-                  {latestStatus ? (
-                    <div className="rounded-md border bg-background p-3 text-sm">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="inline-flex items-center gap-2">
-                            <span className="text-xs font-semibold">
-                              {latestStatus.status.name}
-                            </span>
-                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                              Current
-                            </span>
-                          </div>
-                          <div className="mt-1 text-[11px] text-muted-foreground">
-                            {fmtShortDateTime(latestStatus.created_at)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-xs text-muted-foreground">
-                      No statuses yet.
-                    </div>
-                  )}
-
-                  {/* Status history */}
-                  {olderStatuses.length > 0 && (
-                    <div className="rounded-md border bg-background">
-                      <button
-                        type="button"
-                        className="flex w-full items-center justify-between px-3 py-2 text-[11px] font-medium text-muted-foreground hover:bg-muted/40"
-                        onClick={() => setShowHistory((v) => !v)}
-                      >
-                        <span>
-                          {showHistory
-                            ? "Hide previous statuses"
-                            : `Show previous statuses (${olderStatuses.length})`}
-                        </span>
-                        {showHistory ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                      </button>
-
-                      {showHistory && (
-                        <ul className="divide-y text-xs">
-                          {olderStatuses.map((s) => (
-                            <li key={s.id} className="px-3 py-2">
-                              <div className="font-medium">{s.status.name}</div>
-                              <div className="text-[11px] text-muted-foreground">
-                                {fmtShortDateTime(s.created_at)}
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
                   )}
                 </div>
               </div>

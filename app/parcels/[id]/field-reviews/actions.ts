@@ -7,6 +7,95 @@ import { randomUUID } from "crypto";
 
 type ActionState = { error: string; success: string };
 
+// Example ActionState type
+// type ActionState = { error: string; success: string };
+
+export async function createFieldReviewsBulk(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    // 1. Parcel IDs (multiple)
+    const parcelIdsRaw = formData.getAll("parcel_ids");
+    const parcelIds = parcelIdsRaw
+      .map((v) =>
+        typeof v === "string"
+          ? Number(v)
+          : Number((v as any)?.toString?.() ?? NaN)
+      )
+      .filter((n) => Number.isFinite(n));
+
+    // 2. Other shared fields
+    const typeRaw = formData.get("type");
+    const dueDateRaw = formData.get("due_date");
+    const initialStatusRaw = formData.get("initial_status");
+    const initialNoteRaw = formData.get("initial_note");
+    const revalidate_path = (formData.get("revalidate_path") as string) || null;
+
+    const type_id = typeRaw ? Number(typeRaw) : NaN;
+    const due_date =
+      typeof dueDateRaw === "string" && dueDateRaw.trim() !== ""
+        ? dueDateRaw
+        : null;
+    const initial_status_id =
+      typeof initialStatusRaw === "string" && initialStatusRaw.trim() !== ""
+        ? Number(initialStatusRaw)
+        : null;
+    const note =
+      typeof initialNoteRaw === "string" && initialNoteRaw.trim() !== ""
+        ? initialNoteRaw.trim()
+        : null;
+
+    // 3. Validation
+    if (parcelIds.length === 0) {
+      return { error: "Missing parcel_ids", success: "" };
+    }
+    if (!Number.isFinite(type_id)) {
+      return { error: "Missing or invalid type", success: "" };
+    }
+    if (!initial_status_id && !note) {
+      return {
+        error: "Provide an initial status or note",
+        success: "",
+      };
+    }
+
+    console.log("Creating bulk field reviews:", {
+      parcelIds,
+      type_id,
+      due_date,
+      initial_status_id,
+      note,
+    });
+
+    const supabase = await createClient();
+
+    //@ts-expect-error need to generate
+    const { error } = await supabase.rpc("create_field_reviews_bulk", {
+      p_parcel_ids: parcelIds, // bigint[]
+      p_type_id: type_id, // bigint
+      p_due_date: due_date, // date (or null)
+      p_initial_status_id: initial_status_id, // bigint (or null)
+      p_note: note, // text (or null)
+    });
+
+    if (error) {
+      return {
+        error: error.message || "Failed to create field reviews",
+        success: "",
+      };
+    }
+
+    if (revalidate_path) {
+      rp(revalidate_path);
+    }
+
+    return { error: "", success: "Field reviews created" };
+  } catch (e: any) {
+    return { error: e?.message || "Unexpected error", success: "" };
+  }
+}
+
 export async function createFieldReviewWithInitial(
   _prev: ActionState,
   formData: FormData
@@ -133,6 +222,7 @@ export async function addReviewStatus(_prev: ActionState, formData: FormData) {
     const { error } = await supabase
       .from("field_review_status_history")
       .insert({ review_id, status_id });
+
     if (error) throw error;
     if (revalidate_path) rp(revalidate_path);
     return { error: "", success: "Status added" };
