@@ -1,7 +1,9 @@
 // app/test/field-reviews/table.tsx
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
-import FieldReviewsTable, { FieldReviewWithDetails } from "./table-client";
+import { FieldReviewWithDetails } from "./table-client";
+import ServerFieldReview from "./[id]/server";
+import ReviewsWithMap from "./reviews-with-map";
 const PAGE_SIZE = 10;
 
 type Props = {
@@ -23,6 +25,7 @@ export default async function FieldReviewsTableServer({
 
   let q = supabase
     .rpc("get_field_reviews_with_parcel_details", undefined, { count: "exact" })
+    .order("block", { ascending: true })
     .order("review_created_at", { ascending: false })
     .range(from, to);
 
@@ -57,7 +60,7 @@ export default async function FieldReviewsTableServer({
 
   return (
     <>
-      <FieldReviewsTable reviews={reviews} />
+      <ReviewsWithMap reviews={reviews} />
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">

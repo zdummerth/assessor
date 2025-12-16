@@ -1,4 +1,4 @@
-// app/test/field-reviews/ReviewThreadModal.tsx
+// app/parcels/[id]/field-reviews/thread.tsx
 "use client";
 
 import { useMemo, useState, useEffect } from "react";

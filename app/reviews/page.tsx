@@ -53,20 +53,10 @@ export default async function FieldReviewsPage({
       : "1";
   const currentPage = Number(pageParam) > 0 ? Number(pageParam) : 1;
 
-  console.log("FieldReviewsPage render with params:", {
-    nbhds,
-  });
-
   return (
-    <main className="space-y-4">
+    <main className="space-y-4 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-base font-semibold">Field Reviews</h1>
-        <Link
-          href="#"
-          className="inline-flex items-center rounded border px-3 py-1.5 text-xs hover:bg-muted"
-        >
-          New Review
-        </Link>
+        <h1 className="text-base font-semibold">Reviews</h1>
       </div>
 
       <Filters

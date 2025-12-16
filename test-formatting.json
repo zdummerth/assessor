@@ -1,0 +1,297 @@
+{
+  "land": [
+    {
+      "link": { "valid": "[2020-01-01,)", "review_id": 6 },
+      "tags": [],
+      "land_id": 16,
+      "attributes": []
+    }
+  ],
+  "sales": [
+    {
+      "sale": {
+        "id": 105972,
+        "created_at": "2025-07-11T10:42:40+00:00",
+        "created_by": null,
+        "document_number": "SALE-105972"
+      },
+      "version": {
+        "id": 71759,
+        "valid": "[2023-12-04,)",
+        "review_id": 10,
+        "sale_type": null,
+        "created_at": "2025-07-11T10:42:40+00:00",
+        "created_by": null,
+        "sale_price": 600000,
+        "date_of_sale": "2023-12-04"
+      }
+    }
+  ],
+  "parcel": {
+    "id": 150500,
+    "ext": 0,
+    "lot": 50,
+    "block": 15,
+    "created_at": "2020-01-01T00:00:00+00:00",
+    "retired_at": null
+  },
+  "reviews": [],
+  "addresses": [
+    {
+      "link": {
+        "id": 70443,
+        "valid": "[2020-01-01,)",
+        "review_id": 14,
+        "created_at": "2025-12-14T17:12:13.957894+00:00",
+        "is_primary": true,
+        "address_type": "site"
+      },
+      "address": {
+        "id": 4506,
+        "lat": 38.6301060480241,
+        "lon": -90.1831944871687,
+        "ref": null,
+        "city": "St. Louis",
+        "name": null,
+        "town": null,
+        "line1": "716 North 1st Street",
+        "line2": "St. Louis, MO 63102, United States of America",
+        "state": "Missouri",
+        "county": null,
+        "hamlet": null,
+        "street": "North 1st Street",
+        "suburb": null,
+        "country": "United States",
+        "footway": null,
+        "license": null,
+        "village": null,
+        "category": null,
+        "distance": null,
+        "district": "Downtown",
+        "old_name": null,
+        "place_id": "519bcc5e75b98b56c0593ea3a250a7504340f00102f9011b63842400000000c00203",
+        "postcode": "63102",
+        "timezone": null,
+        "formatted": "716 North 1st Street, St. Louis, MO 63102, United States of America",
+        "iso3166_2": null,
+        "plus_code": "86CFJRJ8+2P",
+        "created_at": "2025-12-14T17:12:13.957894+00:00",
+        "created_by": null,
+        "geocode_id": null,
+        "match_type": null,
+        "sourcename": null,
+        "state_code": "MO",
+        "attribution": null,
+        "housenumber": "716",
+        "result_type": "building",
+        "country_code": "us",
+        "address_line1": "716 North 1st Street",
+        "address_line2": "St. Louis, MO 63102, United States of America",
+        "devnet_address": "716 N 1ST ST",
+        "attribution_url": null,
+        "plus_code_short": "J8+2P St. Louis, Missouri, United States",
+        "timezone_offset": null,
+        "fts_address_line1": "'1st':3 '716':1 'north':2 'street':4",
+        "timezone_abbreviation": null
+      }
+    }
+  ],
+  "as_of_date": "2025-12-15",
+  "structures": [
+    {
+      "link": { "valid": "[2020-01-01,)", "review_id": 3 },
+      "tags": [],
+      "areas": { "total_area": 3997, "finished_area": 3997 },
+      "attributes": [
+        {
+          "valid": "[1900-01-01,)",
+          "value": {
+            "id": 317,
+            "name": "MC",
+            "slug": "mc",
+            "is_active": true,
+            "created_at": "2025-12-14T15:43:43.668265+00:00",
+            "created_by": null,
+            "sort_order": 0,
+            "value_bool": null,
+            "value_date": null,
+            "value_json": null,
+            "value_text": "MC",
+            "attribute_id": 19,
+            "value_number": null
+          },
+          "review_id": 3,
+          "definition": {
+            "id": 19,
+            "name": "Category",
+            "slug": "category",
+            "created_at": "2025-12-14T15:43:43.668265+00:00",
+            "created_by": null,
+            "value_type": "text",
+            "description": "Migrated from test_structures.category"
+          }
+        },
+        {
+          "valid": "[1900-01-01,)",
+          "value": {
+            "id": 280,
+            "name": "320",
+            "slug": "320",
+            "is_active": true,
+            "created_at": "2025-12-14T15:43:43.668265+00:00",
+            "created_by": null,
+            "sort_order": 0,
+            "value_bool": null,
+            "value_date": null,
+            "value_json": null,
+            "value_text": "320",
+            "attribute_id": 18,
+            "value_number": null
+          },
+          "review_id": 3,
+          "definition": {
+            "id": 18,
+            "name": "Structure Type",
+            "slug": "structure_type",
+            "created_at": "2025-12-14T15:43:43.668265+00:00",
+            "created_by": null,
+            "value_type": "text",
+            "description": "Migrated from test_structures.type"
+          }
+        },
+        {
+          "valid": "[2022-01-01,)",
+          "value": {
+            "id": 1099,
+            "name": "5820 - DRINKING PLACES",
+            "slug": "5820",
+            "is_active": true,
+            "created_at": "2025-12-14T18:09:56.575104+00:00",
+            "created_by": null,
+            "sort_order": 0,
+            "value_bool": null,
+            "value_date": null,
+            "value_json": null,
+            "value_text": "5820 - DRINKING PLACES",
+            "attribute_id": 33,
+            "value_number": null
+          },
+          "review_id": 15,
+          "definition": {
+            "id": 33,
+            "name": "Structure Use",
+            "slug": "structure_use",
+            "created_at": "2025-12-14T18:09:56.575104+00:00",
+            "created_by": null,
+            "value_type": "text",
+            "description": "Migrated from land_use_codes via test_parcel_land_uses"
+          }
+        },
+        {
+          "valid": "[1900-01-01,)",
+          "value": {
+            "id": 370,
+            "name": "1",
+            "slug": "1",
+            "is_active": true,
+            "created_at": "2025-12-14T15:43:43.668265+00:00",
+            "created_by": null,
+            "sort_order": 0,
+            "value_bool": null,
+            "value_date": null,
+            "value_json": null,
+            "value_text": null,
+            "attribute_id": 24,
+            "value_number": 1
+          },
+          "review_id": 3,
+          "definition": {
+            "id": 24,
+            "name": "Units",
+            "slug": "units",
+            "created_at": "2025-12-14T15:43:43.668265+00:00",
+            "created_by": null,
+            "value_type": "number",
+            "description": "Migrated from test_structures.units"
+          }
+        }
+      ],
+      "structure_id": 1505001,
+      "section_versions": [
+        {
+          "id": 122902,
+          "area": 3997,
+          "valid": "[1900-01-01,)",
+          "finished": true,
+          "review_id": 3,
+          "created_at": "2025-12-14T15:43:43.668265+00:00",
+          "created_by": null,
+          "section_type_id": 1,
+          "construction_material_id": null
+        }
+      ]
+    }
+  ],
+  "value_sets": [],
+  "parcel_tags": [],
+  "primary_address": {
+    "link": {
+      "id": 70443,
+      "valid": "[2020-01-01,)",
+      "review_id": 14,
+      "created_at": "2025-12-14T17:12:13.957894+00:00",
+      "is_primary": true,
+      "address_type": "site"
+    },
+    "address": {
+      "id": 4506,
+      "lat": 38.6301060480241,
+      "lon": -90.1831944871687,
+      "ref": null,
+      "city": "St. Louis",
+      "name": null,
+      "town": null,
+      "line1": "716 North 1st Street",
+      "line2": "St. Louis, MO 63102, United States of America",
+      "state": "Missouri",
+      "county": null,
+      "hamlet": null,
+      "street": "North 1st Street",
+      "suburb": null,
+      "country": "United States",
+      "footway": null,
+      "license": null,
+      "village": null,
+      "category": null,
+      "distance": null,
+      "district": "Downtown",
+      "old_name": null,
+      "place_id": "519bcc5e75b98b56c0593ea3a250a7504340f00102f9011b63842400000000c00203",
+      "postcode": "63102",
+      "timezone": null,
+      "formatted": "716 North 1st Street, St. Louis, MO 63102, United States of America",
+      "iso3166_2": null,
+      "plus_code": "86CFJRJ8+2P",
+      "created_at": "2025-12-14T17:12:13.957894+00:00",
+      "created_by": null,
+      "geocode_id": null,
+      "match_type": null,
+      "sourcename": null,
+      "state_code": "MO",
+      "attribution": null,
+      "housenumber": "716",
+      "result_type": "building",
+      "country_code": "us",
+      "address_line1": "716 North 1st Street",
+      "address_line2": "St. Louis, MO 63102, United States of America",
+      "devnet_address": "716 N 1ST ST",
+      "attribution_url": null,
+      "plus_code_short": "J8+2P St. Louis, Missouri, United States",
+      "timezone_offset": null,
+      "fts_address_line1": "'1st':3 '716':1 'north':2 'street':4",
+      "timezone_abbreviation": null
+    }
+  },
+  "parcel_attributes": [],
+  "structure_area_summary": { "total_area": 3997, "finished_area": 3997 }
+}

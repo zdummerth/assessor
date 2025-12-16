@@ -3,9 +3,7 @@ import Image from "next/image";
 import { SearchX, PlusCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import ReviewThreadModal from "./thread";
-import NewFieldReviewModal from "./create";
 import { FieldReviewCreateDialog } from "./create-dialog";
-import UploadReviewImagesModal from "./upload-images";
 import { Tables } from "@/database-types";
 
 type Parcel = Tables<"test_parcels">;
@@ -38,13 +36,6 @@ type NoteRow = {
   note: string;
   created_at: string | null;
   created_by: string | null;
-};
-
-type EmployeeRow = {
-  id: number;
-  email: string | null;
-  first_name: string | null;
-  last_name: string | null;
 };
 
 type StatusRow = {
@@ -104,7 +95,7 @@ export default async function ServerParcelFieldReviews({
 }) {
   const supabase = await createClient();
 
-  const [fieldReviewsRes, fieldReviewTypesRes] = await Promise.all([
+  const [fieldReviewsRes] = await Promise.all([
     supabase
       .from("field_reviews")
       .select(
@@ -160,15 +151,12 @@ export default async function ServerParcelFieldReviews({
       )
       .eq("parcel_id", parcel.id)
       .order("created_at", { ascending: false }),
-
-    supabase.from("field_review_types").select("*"),
   ]);
 
   const { data, error } = fieldReviewsRes;
-  const { data: fieldReviewTypes, error: frError } = fieldReviewTypesRes;
 
-  if (error || frError) {
-    const err = error || frError;
+  if (error) {
+    const err = error;
 
     return (
       <div className="w-full flex flex-col items-center justify-center mt-16">
