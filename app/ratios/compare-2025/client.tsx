@@ -72,7 +72,7 @@ function computeStatsIQR3(values: number[]) {
 
   return {
     n_total: sorted.length,
-    n_kept: filtered.length,
+    n_kept: filtered.length, // use this as the "sale count" for displayed stats
     median: filtered.length ? medianSorted(filtered) : NaN,
     min: filtered.length ? filtered[0] : NaN,
     max: filtered.length ? filtered[filtered.length - 1] : NaN,
@@ -89,7 +89,6 @@ function toPct(n: number) {
   }).format(n);
 }
 
-/** Fixed-range histogram across [0.0, 1.3] with fixed binWidth (default 10%) */
 function buildHistogram(vals: number[], binWidth: number): HistBin[] {
   const min = 0;
   const max = 1.3;
@@ -122,20 +121,25 @@ function chartColorVar(i: number) {
 /* ---------------- Component ---------------- */
 
 export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
-  // ✅ remove the slider: fixed 10% bins
-  const binWidth = 0.1;
+  const binWidth = 0.1; // fixed 10%
+
+  const normalize = (v: unknown) =>
+    String(v ?? "")
+      .trim()
+      .toLowerCase();
 
   const makeComparison = React.useCallback(
     (label: string, subset: AnyRow[]) => {
-      const before = subset
+      const beforeAll = subset
         .map((r) => Number(r.before_ratio))
-        .filter(Number.isFinite);
-      const current = subset
-        .map((r) => Number(r.current_ratio))
-        .filter(Number.isFinite);
+        .filter((v) => Number.isFinite(v) && v > 0);
 
-      const beforeStats = computeStatsIQR3(before);
-      const currentStats = computeStatsIQR3(current);
+      const currentAll = subset
+        .map((r) => Number(r.current_ratio))
+        .filter((v) => Number.isFinite(v) && v > 0);
+
+      const beforeStats = computeStatsIQR3(beforeAll);
+      const currentStats = computeStatsIQR3(currentAll);
 
       return {
         label,
@@ -151,11 +155,6 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
     },
     [binWidth]
   );
-
-  const normalize = (v: unknown) =>
-    String(v ?? "")
-      .trim()
-      .toLowerCase();
 
   const comparisons = React.useMemo(
     () => [
@@ -188,30 +187,22 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
     <div className="space-y-6">
       <style jsx global>{`
         @media print {
-          /* Each category = one centered page */
           .print-page {
             display: flex;
-            align-items: center; /* vertical centering */
-            justify-content: center; /* horizontal centering */
-
+            align-items: center;
+            justify-content: center;
             min-height: calc(100vh - 1.5in);
             break-after: page;
             page-break-after: always;
           }
-
-          /* Don't force a blank page at the end */
           .print-page:last-child {
             break-after: auto;
             page-break-after: auto;
           }
-
-          /* Keep card nicely sized on paper */
           .print-page > * {
             width: 100%;
-            max-width: 10in; /* prevents edge-to-edge stretching */
+            max-width: 10in;
           }
-
-          /* Optional: avoid card splitting */
           .print-page,
           .print-page * {
             break-inside: avoid;
@@ -220,15 +211,11 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
         }
       `}</style>
 
-      {/* Full-width comparison cards (each prints on its own page) */}
       <div className="space-y-6">
         {comparisons.map((c, i) => (
-          <div
-            key={c.label}
-            className={`print-page ${i === comparisons.length - 1 ? "" : ""}`}
-          >
+          <div key={c.label} className="print-page">
             <Card>
-              <CardHeader>
+              <CardHeader className="space-y-1">
                 <CardTitle className="text-base">{c.label}</CardTitle>
               </CardHeader>
 
@@ -237,6 +224,9 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-3">
                     <Badge variant="secondary">Before</Badge>
+                    <Badge variant="outline">
+                      Sales {c.before.stats.n_kept.toLocaleString()}
+                    </Badge>
                     <Badge variant="outline">
                       Median {formatRatio(c.before.stats.median)}
                     </Badge>
@@ -251,10 +241,7 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
                   <ChartContainer
                     className="h-[260px]"
                     config={{
-                      count: {
-                        label: "Before",
-                        color: chartColorVar(i),
-                      },
+                      count: { label: "Before", color: chartColorVar(i) },
                     }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
@@ -276,6 +263,9 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
                   <div className="flex flex-wrap gap-3">
                     <Badge variant="secondary">Current</Badge>
                     <Badge variant="outline">
+                      Sales {c.current.stats.n_kept.toLocaleString()}
+                    </Badge>
+                    <Badge variant="outline">
                       Median {formatRatio(c.current.stats.median)}
                     </Badge>
                     <Badge variant="outline">
@@ -289,10 +279,7 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
                   <ChartContainer
                     className="h-[260px]"
                     config={{
-                      count: {
-                        label: "Current",
-                        color: chartColorVar(i + 1),
-                      },
+                      count: { label: "Current", color: chartColorVar(i + 1) },
                     }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
