@@ -237,7 +237,9 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-3">
                     <Badge variant="secondary">Before</Badge>
-                    <Badge>Median {formatRatio(c.before.stats.median)}</Badge>
+                    <Badge variant="outline">
+                      Median {formatRatio(c.before.stats.median)}
+                    </Badge>
                     <Badge variant="outline">
                       Min {formatRatio(c.before.stats.min)}
                     </Badge>
@@ -263,7 +265,7 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
                         <ChartTooltip
                           content={<ChartTooltipContent nameKey="count" />}
                         />
-                        <Bar dataKey="count" fill="var(--color-count)" />
+                        <Bar dataKey="count" fill="#8884d8" />
                       </BarChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -273,7 +275,9 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-3">
                     <Badge variant="secondary">Current</Badge>
-                    <Badge>Median {formatRatio(c.current.stats.median)}</Badge>
+                    <Badge variant="outline">
+                      Median {formatRatio(c.current.stats.median)}
+                    </Badge>
                     <Badge variant="outline">
                       Min {formatRatio(c.current.stats.min)}
                     </Badge>
@@ -299,7 +303,7 @@ export default function RatioCompareClient({ rows }: { rows: AnyRow[] }) {
                         <ChartTooltip
                           content={<ChartTooltipContent nameKey="count" />}
                         />
-                        <Bar dataKey="count" fill="var(--color-count)" />
+                        <Bar dataKey="count" fill="#82ca9d" />
                       </BarChart>
                     </ResponsiveContainer>
                   </ChartContainer>
