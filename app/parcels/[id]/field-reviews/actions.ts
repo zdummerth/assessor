@@ -60,14 +60,6 @@ export async function createFieldReviewsBulk(
       };
     }
 
-    console.log("Creating bulk field reviews:", {
-      parcelIds,
-      type_id,
-      due_date,
-      initial_status_id,
-      note,
-    });
-
     const supabase = await createClient();
 
     //@ts-expect-error need to generate
@@ -91,6 +83,87 @@ export async function createFieldReviewsBulk(
     }
 
     return { error: "", success: "Field reviews created" };
+  } catch (e: any) {
+    return { error: e?.message || "Unexpected error", success: "" };
+  }
+}
+
+export async function createFieldReviewStatusesBulk(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    // 1) Review IDs (multiple)
+    const reviewIdsRaw = formData.getAll("review_ids");
+    const reviewIds = reviewIdsRaw
+      .map((v) =>
+        typeof v === "string"
+          ? Number(v)
+          : Number((v as any)?.toString?.() ?? NaN)
+      )
+      .filter((n) => Number.isFinite(n));
+
+    // 2) Shared fields
+    const statusRaw = formData.get("status_id");
+    const descriptionRaw = formData.get("description");
+    const revalidate_path = (formData.get("revalidate_path") as string) || null;
+
+    const status_id =
+      typeof statusRaw === "string" && statusRaw.trim() !== ""
+        ? Number(statusRaw)
+        : NaN;
+
+    const description =
+      typeof descriptionRaw === "string" && descriptionRaw.trim() !== ""
+        ? descriptionRaw.trim()
+        : null;
+
+    // 3) Validation
+    if (reviewIds.length === 0) {
+      return { error: "Missing review_ids", success: "" };
+    }
+    if (!Number.isFinite(status_id)) {
+      return { error: "Missing or invalid status_id", success: "" };
+    }
+
+    const supabase = await createClient();
+
+    // returns integer inserted count (if you used the function I gave)
+    const { data, error } = await supabase.rpc(
+      // @ts-expect-errorts-expect-error need to generate
+      "bulk_create_field_review_statuses",
+      {
+        p_review_ids: reviewIds, // bigint[]
+        p_status_id: status_id, // bigint
+        p_description: description, // text (or null)
+      }
+    );
+
+    if (error) {
+      return {
+        error: error.message || "Failed to create review statuses",
+        success: "",
+      };
+    }
+
+    if (revalidate_path) {
+      rp(revalidate_path);
+    }
+
+    const inserted =
+      typeof data === "number"
+        ? data
+        : Array.isArray(data)
+          ? data.length
+          : null;
+
+    return {
+      error: "",
+      success:
+        inserted != null
+          ? `Statuses created (${inserted})`
+          : "Statuses created",
+    };
   } catch (e: any) {
     return { error: e?.message || "Unexpected error", success: "" };
   }

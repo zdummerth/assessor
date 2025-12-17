@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import type { FieldReviewWithDetails } from "./table-client";
+import BulkStatusDialog from "../parcels/[id]/field-reviews/bulk-status-dialog";
 
 import {
   MapContainer,
@@ -67,46 +68,50 @@ function FitBoundsOnInit({
       }
     }
 
-    if (userLocation) {
-      if (
-        Number.isFinite(userLocation.lat) &&
-        Number.isFinite(userLocation.lon)
-      ) {
-        coords.push([userLocation.lat, userLocation.lon]);
+    if (
+      userLocation &&
+      Number.isFinite(userLocation.lat) &&
+      Number.isFinite(userLocation.lon)
+    ) {
+      coords.push([userLocation.lat, userLocation.lon]);
+    }
+
+    if (!coords.length) return;
+
+    // a little further out by default
+    const bounds = L.latLngBounds(coords);
+    map.fitBounds(bounds.pad(0.35), { animate: false });
+  }, [map, points, userLocation]);
+  return null;
+}
+
+function FitBoundsOnSelected({
+  points,
+  selectedReviewIds,
+}: {
+  points: MapPoint[];
+  selectedReviewIds: number[];
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!selectedReviewIds.length) return;
+
+    const set = new Set(selectedReviewIds);
+    const coords: [number, number][] = [];
+
+    for (const p of points) {
+      if (!set.has(p.review_id)) continue;
+      if (Number.isFinite(p.lat) && Number.isFinite(p.lon)) {
+        coords.push([p.lat, p.lon]);
       }
     }
 
     if (!coords.length) return;
 
     const bounds = L.latLngBounds(coords);
-    map.fitBounds(bounds.pad(0.2), { animate: false });
-  }, [map, points, userLocation]);
-  return null;
-}
-
-function FocusOnSelection({
-  points,
-  selectedReviewId,
-}: {
-  points: MapPoint[];
-  selectedReviewId: number | null;
-}) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!selectedReviewId) return;
-
-    const point = points.find((p) => p.review_id === selectedReviewId);
-    if (!point) return;
-
-    const lat = Number(point.lat);
-    const lon = Number(point.lon);
-
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-
-    const targetZoom = 16; // fixed, safe zoom
-    map.flyTo([lat, lon], targetZoom, { duration: 0.6 });
-  }, [map, points, selectedReviewId]);
+    map.fitBounds(bounds.pad(0.25), { animate: true });
+  }, [map, points, selectedReviewIds.join(",")]);
 
   return null;
 }
@@ -126,12 +131,12 @@ function InvalidateOnResize() {
 
 function FieldReviewsMap({
   reviews,
-  selectedReviewId,
-  onSelectReview,
+  selectedReviewIds,
+  onToggleSelectedFromMap,
 }: {
   reviews: FieldReviewWithDetails[];
-  selectedReviewId: number | null;
-  onSelectReview: (reviewId: number) => void;
+  selectedReviewIds: number[];
+  onToggleSelectedFromMap: (reviewId: number) => void;
 }) {
   const points = useMemo<MapPoint[]>(
     () =>
@@ -158,6 +163,7 @@ function FieldReviewsMap({
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [cityGeoJson, setCityGeoJson] = useState<any>(null);
 
+  // default zoom a bit further out
   const startCenter: [number, number] =
     points.length &&
     Number.isFinite(points[0].lat) &&
@@ -176,17 +182,12 @@ function FieldReviewsMap({
           lon: pos.coords.longitude,
         });
       },
-      (err) => {
-        console.warn("Geolocation error:", err);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-      }
+      (err) => console.warn("Geolocation error:", err),
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   }, []);
 
-  // Load City of St. Louis boundary as GeoJSON
+  // Load City boundary as GeoJSON
   useEffect(() => {
     const run = async () => {
       try {
@@ -203,10 +204,15 @@ function FieldReviewsMap({
     run();
   }, []);
 
+  const selectedSet = useMemo(
+    () => new Set(selectedReviewIds),
+    [selectedReviewIds]
+  );
+
   return (
     <MapContainer
       center={startCenter}
-      zoom={12}
+      zoom={11} // further out than before
       className="h-full w-full rounded-md border z-0"
       scrollWheelZoom
     >
@@ -215,7 +221,6 @@ function FieldReviewsMap({
         attribution="&copy; OpenStreetMap contributors"
       />
 
-      {/* City of St. Louis boundary */}
       {cityGeoJson && (
         <GeoJSON
           data={cityGeoJson}
@@ -224,7 +229,6 @@ function FieldReviewsMap({
         />
       )}
 
-      {/* User location */}
       {userLocation &&
         Number.isFinite(userLocation.lat) &&
         Number.isFinite(userLocation.lon) && (
@@ -253,9 +257,11 @@ function FieldReviewsMap({
 
       {/* Review points */}
       {points.map((p) => {
-        const isSelected = selectedReviewId === p.review_id;
-        const color = isSelected ? "#00E676" : "#1F51FF";
-        const radius = isSelected ? 9 : 6;
+        const isChecked = selectedSet.has(p.review_id);
+
+        // checked vs unchecked
+        const color = isChecked ? "#FF9800" : "#1F51FF";
+        const radius = isChecked ? 8 : 6;
 
         return (
           <CircleMarker
@@ -265,11 +271,12 @@ function FieldReviewsMap({
               color,
               fillColor: color,
               fillOpacity: 0.85,
-              weight: isSelected ? 3 : 2,
+              weight: isChecked ? 3 : 2,
             }}
             radius={radius}
             eventHandlers={{
-              click: () => onSelectReview(p.review_id),
+              // optional: clicking a marker toggles selection
+              click: () => onToggleSelectedFromMap(p.review_id),
             }}
           >
             <Popup>
@@ -290,7 +297,10 @@ function FieldReviewsMap({
       })}
 
       <FitBoundsOnInit points={points} userLocation={userLocation} />
-      <FocusOnSelection points={points} selectedReviewId={selectedReviewId} />
+      <FitBoundsOnSelected
+        points={points}
+        selectedReviewIds={selectedReviewIds}
+      />
       <InvalidateOnResize />
     </MapContainer>
   );
@@ -303,8 +313,31 @@ export default function ReviewsWithMap({
 }: {
   reviews: FieldReviewWithDetails[];
 }) {
-  const [selectedReviewId, setSelectedReviewId] = useState<number | null>(
-    reviews.length ? reviews[0].field_review_id : null
+  // Multi-select (checkboxes)
+  const [selectedReviewIds, setSelectedReviewIds] = useState<Set<number>>(
+    () => new Set<number>()
+  );
+
+  const toggleSelected = (id: number) => {
+    setSelectedReviewIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedReviewIds(new Set(reviews.map((r) => r.field_review_id)));
+  };
+
+  const deselectAll = () => setSelectedReviewIds(new Set());
+
+  const selectedCount = selectedReviewIds.size;
+
+  const selectedReviewIdsArray = useMemo(
+    () => Array.from(selectedReviewIds),
+    [selectedReviewIds]
   );
 
   // Controls map visibility on both mobile and desktop
@@ -324,15 +357,64 @@ export default function ReviewsWithMap({
 
   return (
     <div className="space-y-2">
-      {/* Map toggle (mobile + desktop) */}
-      <button
-        type="button"
-        className="inline-flex items-center gap-2 rounded border px-3 py-2 text-xs font-medium hover:bg-muted"
-        onClick={() => setIsMapOpen((v) => !v)}
-      >
-        <MapPin className="h-4 w-4" />
-        {isMapOpen ? "Hide Map" : "Show Map"}
-      </button>
+      {/* Top controls */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 rounded border px-3 py-2 text-xs font-medium hover:bg-muted"
+          onClick={() => setIsMapOpen((v) => !v)}
+        >
+          <MapPin className="h-4 w-4" />
+          {isMapOpen ? "Hide Map" : "Show Map"}
+        </button>
+
+        <button
+          type="button"
+          className="inline-flex items-center rounded border px-3 py-2 text-xs font-medium hover:bg-muted"
+          onClick={selectAll}
+          disabled={!reviews.length}
+        >
+          Select all
+        </button>
+
+        <button
+          type="button"
+          className="inline-flex items-center rounded border px-3 py-2 text-xs font-medium hover:bg-muted"
+          onClick={deselectAll}
+          disabled={selectedCount === 0}
+        >
+          Deselect all
+        </button>
+
+        <div className="ml-auto text-xs text-muted-foreground">
+          {selectedCount > 0 ? `${selectedCount} selected` : null}
+        </div>
+      </div>
+
+      {/* Bulk action bar */}
+      {selectedCount > 0 && (
+        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded border bg-background/95 px-3 py-2 text-xs shadow-sm backdrop-blur">
+          <div className="font-medium">{selectedCount} selected</div>
+
+          <div className="flex items-center gap-2">
+            <BulkStatusDialog
+              reviewIds={selectedReviewIdsArray}
+              revalidatePath="/test/field-reviews"
+              triggerLabel="Update Statuses"
+              title="Bulk Update Field Review Status"
+              description="Apply a status update to all selected field reviews."
+            />
+
+            <button
+              type="button"
+              className="inline-flex items-center rounded border px-2 py-1 text-[11px] font-medium hover:bg-muted"
+              onClick={deselectAll}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={`grid gap-4 ${gridColsClass}`}>
         {/* Map column (only rendered when open) */}
@@ -341,93 +423,102 @@ export default function ReviewsWithMap({
             <div className="h-64 md:h-[75vh]">
               <FieldReviewsMap
                 reviews={reviews}
-                selectedReviewId={selectedReviewId}
-                onSelectReview={(id) => setSelectedReviewId(id)}
+                selectedReviewIds={selectedReviewIdsArray}
+                onToggleSelectedFromMap={toggleSelected}
               />
             </div>
           </div>
         )}
 
-        {/* Cards column - scrolls separately from map on desktop */}
+        {/* Cards column */}
         <div className="space-y-2 md:h-[75vh] md:overflow-y-auto">
           {reviews.map((r) => {
-            const isSelected = selectedReviewId === r.field_review_id;
+            const isChecked = selectedReviewIds.has(r.field_review_id);
+
             return (
-              <button
+              <div
                 key={r.field_review_id}
-                type="button"
-                disabled={isSelected}
-                onClick={() => setSelectedReviewId(r.field_review_id)}
                 className={`w-full rounded border px-3 py-2 text-left text-xs shadow-sm transition-colors ${
-                  isSelected
-                    ? "border-blue-600 bg-blue-50"
+                  isChecked
+                    ? "border-orange-500 bg-orange-50"
                     : "border-border bg-background hover:bg-muted/60"
                 }`}
               >
-                <div className="flex items-baseline justify-between gap-2">
-                  <div className="font-semibold text-[11px] text-blue-700">
-                    Parcel {r.parcel_id}
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4"
+                    checked={isChecked}
+                    onChange={() => toggleSelected(r.field_review_id)}
+                    aria-label={`Select review ${r.field_review_id}`}
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <div className="truncate font-semibold text-[11px] text-blue-700">
+                        Parcel {r.parcel_id}
+                      </div>
+                      <div className="shrink-0 text-[10px] text-muted-foreground">
+                        Review #{r.field_review_id}
+                      </div>
+                    </div>
+
+                    {r.address_line1 || r.address_formatted ? (
+                      <div className="mt-1 truncate text-[11px]">
+                        {r.address_line1 || r.address_formatted}
+                      </div>
+                    ) : null}
+
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+                      {r.review_type_name && (
+                        <span>
+                          <span className="uppercase">Type:</span>{" "}
+                          {r.review_type_name}
+                        </span>
+                      )}
+                      {r.latest_status_name && (
+                        <span>
+                          <span className="uppercase">Status:</span>{" "}
+                          {r.latest_status_name}
+                        </span>
+                      )}
+                      {r.review_due_date && (
+                        <span>
+                          <span className="uppercase">Due:</span>{" "}
+                          {fmtDate(r.review_due_date)}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+                      {r.assessor_neighborhood != null && (
+                        <span>
+                          <span className="uppercase">Assessor:</span>{" "}
+                          {r.assessor_neighborhood}
+                        </span>
+                      )}
+                      {r.cda_neighborhood && (
+                        <span>
+                          <span className="uppercase">CDA:</span>{" "}
+                          {r.cda_neighborhood}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between">
+                      <Link
+                        href={`/test/field-reviews/${r.field_review_id}`}
+                        className="text-[10px] font-medium text-blue-700 hover:underline"
+                      >
+                        View thread
+                      </Link>
+                      <span className="text-[10px] text-muted-foreground">
+                        Created {fmtShortDateTime(r.review_created_at)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    Review #{r.field_review_id}
-                  </div>
                 </div>
-
-                {r.address_line1 || r.address_formatted ? (
-                  <div className="mt-1 text-[11px]">
-                    {r.address_line1 || r.address_formatted}
-                  </div>
-                ) : null}
-
-                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
-                  {r.review_type_name && (
-                    <span>
-                      <span className="uppercase">Type:</span>{" "}
-                      {r.review_type_name}
-                    </span>
-                  )}
-                  {r.latest_status_name && (
-                    <span>
-                      <span className="uppercase">Status:</span>{" "}
-                      {r.latest_status_name}
-                    </span>
-                  )}
-                  {r.review_due_date && (
-                    <span>
-                      <span className="uppercase">Due:</span>{" "}
-                      {fmtDate(r.review_due_date)}
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
-                  {r.assessor_neighborhood != null && (
-                    <span>
-                      <span className="uppercase">Assessor:</span>{" "}
-                      {r.assessor_neighborhood}
-                    </span>
-                  )}
-                  {r.cda_neighborhood && (
-                    <span>
-                      <span className="uppercase">CDA:</span>{" "}
-                      {r.cda_neighborhood}
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-2 flex items-center justify-between">
-                  <Link
-                    href={`/test/field-reviews/${r.field_review_id}`}
-                    className="text-[10px] font-medium text-blue-700 hover:underline"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    View thread
-                  </Link>
-                  <span className="text-[10px] text-muted-foreground">
-                    Created {fmtShortDateTime(r.review_created_at)}
-                  </span>
-                </div>
-              </button>
+              </div>
             );
           })}
         </div>

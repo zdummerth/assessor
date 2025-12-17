@@ -8,12 +8,13 @@ import {
   ChevronRight,
   ChevronsRight,
 } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   page: number;
-  setPage: (n: number) => void;
+  setPage?: (n: number) => void; // optional
   pageSize: number;
-  setPageSize: (n: number) => void;
+  setPageSize?: (n: number) => void; // optional
   total: number; // required
   hasMore?: boolean; // kept for compatibility (not used)
   isLoading?: boolean;
@@ -21,6 +22,36 @@ type Props = {
 
 export default function PaginationToolbar(props: Props) {
   const [isPending, startTransition] = React.useTransition();
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const setParam = React.useCallback(
+    (key: "page" | "page_size", value: number) => {
+      const sp = new URLSearchParams(searchParams?.toString());
+      sp.set(key, String(value));
+      //if page size changes, reset to page 1
+      if (key === "page_size") {
+        sp.set("page", "1");
+      }
+      router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
+
+  const setPageDefault = React.useCallback(
+    (n: number) => setParam("page", n),
+    [setParam]
+  );
+
+  const setPageSizeDefault = React.useCallback(
+    (n: number) => setParam("page_size", n),
+    [setParam]
+  );
+
+  const setPage = props.setPage ?? setPageDefault;
+  const setPageSize = props.setPageSize ?? setPageSizeDefault;
 
   // Optimistic shadow state for snappy UI
   const [optimistic, addOptimistic] = React.useOptimistic<
@@ -32,7 +63,6 @@ export default function PaginationToolbar(props: Props) {
   }));
 
   const totalPages = Math.ceil(props.total / Math.max(1, optimistic.pageSize));
-
   const clampPage = (n: number) => Math.min(totalPages, Math.max(1, n || 1));
 
   const isFirstPage = optimistic.page <= 1;
@@ -47,17 +77,18 @@ export default function PaginationToolbar(props: Props) {
     const safe = clampPage(n);
     startTransition(() => {
       addOptimistic({ page: safe });
-      props.setPage(safe);
+      setPage(safe);
     });
   };
 
   const applyPageSize = (n: number) => {
     startTransition(() => {
       addOptimistic({ pageSize: n });
-      props.setPageSize(n);
-      // Optionally reset to first page when size changes:
+      setPageSize(n);
+
+      // Optional: keep this commented unless you want it.
       // addOptimistic({ page: 1 });
-      // props.setPage(1);
+      // setPage(1);
     });
   };
 

@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { FieldReviewWithDetails } from "./table-client";
 import ServerFieldReview from "./[id]/server";
 import ReviewsWithMap from "./reviews-with-map";
+import PaginationToolbar from "../parcels/test/features/pagination-toolbar";
 
 type Props = {
   reviewStatuses?: number[];
@@ -61,6 +62,7 @@ export default async function FieldReviewsTableServer({
 
   return (
     <>
+      <PaginationToolbar page={page} pageSize={pageSize} total={total} />
       <ReviewsWithMap reviews={reviews} />
 
       {/* Pagination */}
