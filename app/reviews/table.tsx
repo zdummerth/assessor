@@ -4,24 +4,25 @@ import { createClient } from "@/utils/supabase/server";
 import { FieldReviewWithDetails } from "./table-client";
 import ServerFieldReview from "./[id]/server";
 import ReviewsWithMap from "./reviews-with-map";
-const PAGE_SIZE = 10;
 
 type Props = {
   reviewStatuses?: number[];
   reviewTypes?: number[];
   nbhds?: number[];
   page: number;
+  pageSize: number;
 };
 
 export default async function FieldReviewsTableServer({
   reviewStatuses,
   reviewTypes,
   page,
+  pageSize,
   nbhds,
 }: Props) {
   const supabase = await createClient();
-  const from = (page - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   let q = supabase
     .rpc("get_field_reviews_with_parcel_details", undefined, { count: "exact" })
@@ -56,7 +57,7 @@ export default async function FieldReviewsTableServer({
 
   const reviews = (data ?? []) as FieldReviewWithDetails[];
   const total = count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <>
@@ -68,8 +69,8 @@ export default async function FieldReviewsTableServer({
           Showing{" "}
           {total === 0
             ? "0"
-            : `${(page - 1) * PAGE_SIZE + 1}-${Math.min(
-                page * PAGE_SIZE,
+            : `${(page - 1) * pageSize + 1}-${Math.min(
+                page * pageSize,
                 total
               )}`}{" "}
           of {total} reviews

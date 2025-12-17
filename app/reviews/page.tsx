@@ -1,5 +1,4 @@
 // app/test/field-reviews/page.tsx
-import Link from "next/link";
 import Filters from "./filters";
 
 type SearchParams = {
@@ -7,6 +6,7 @@ type SearchParams = {
   status_id?: string;
   nbhds?: string;
   page?: string;
+  page_size?: string;
   review_statuses?: string;
   review_types?: string;
 };
@@ -53,6 +53,14 @@ export default async function FieldReviewsPage({
       : "1";
   const currentPage = Number(pageParam) > 0 ? Number(pageParam) : 1;
 
+  const pageSizeParam =
+    typeof params?.page_size === "string" && params.page_size.length > 0
+      ? params.page_size
+      : "50";
+
+  const currentPageSize =
+    Number(pageSizeParam) > 0 ? Number(pageSizeParam) : 50;
+
   return (
     <main className="space-y-4 p-4">
       <div className="flex items-center justify-between">
@@ -63,6 +71,7 @@ export default async function FieldReviewsPage({
         typeId={typeId}
         statusId={statusId}
         page={currentPage}
+        pageSize={currentPageSize}
         nbhds={nbhds}
         reviewStatuses={reviewStatuses}
         reviewTypes={reviewTypes}
