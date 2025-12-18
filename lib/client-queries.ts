@@ -184,6 +184,18 @@ export function useNeighborhoods() {
   };
 }
 
+export function useEmployees() {
+  const { data, error, isLoading } = useSWR<string[]>(
+    "/employees/api",
+    fetcher
+  );
+  return {
+    options: Array.isArray(data) ? data : [],
+    isLoading,
+    error,
+  };
+}
+
 export type RatioRow = {
   // minimal shape expected from get_ratios
   sale_id: number;

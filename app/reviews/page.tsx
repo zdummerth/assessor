@@ -9,6 +9,7 @@ type SearchParams = {
   page_size?: string;
   review_statuses?: string;
   review_types?: string;
+  employee_id?: string;
 };
 
 export default async function FieldReviewsPage({
@@ -61,6 +62,11 @@ export default async function FieldReviewsPage({
   const currentPageSize =
     Number(pageSizeParam) > 0 ? Number(pageSizeParam) : 50;
 
+  const employeeId =
+    typeof params?.employee_id === "string" && params.employee_id.length > 0
+      ? Number(params.employee_id)
+      : null;
+
   return (
     <main className="space-y-4 p-4">
       <div className="flex items-center justify-between">
@@ -75,6 +81,7 @@ export default async function FieldReviewsPage({
         nbhds={nbhds}
         reviewStatuses={reviewStatuses}
         reviewTypes={reviewTypes}
+        employeeId={employeeId}
       />
     </main>
   );

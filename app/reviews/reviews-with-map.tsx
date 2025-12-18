@@ -6,6 +6,7 @@ import Link from "next/link";
 import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import type { FieldReviewWithDetails } from "./table-client";
 import BulkStatusDialog from "../parcels/[id]/field-reviews/bulk-status-dialog";
+import BulkAssignmentsDialog from "../parcels/[id]/field-reviews/bulk-assignments-dialog";
 
 import {
   MapContainer,
@@ -334,6 +335,7 @@ export type FieldReviewWithParcelDetailsV2 = {
 
   status_history: any[] | null; // jsonb array
   notes: any[] | null; // jsonb array
+  assignments: any[] | null; // jsonb array
 
   current_land_use: number | null;
   current_structures: any[] | null; // jsonb array of {structure, sections}
@@ -381,6 +383,65 @@ function structureSummary(r: FieldReviewWithParcelDetailsV2) {
   return `${structs.length} structure${structs.length === 1 ? "" : "s"} • ${secCount} section${
     secCount === 1 ? "" : "s"
   }`;
+}
+
+function formatAssigneesInline(r: FieldReviewWithParcelDetailsV2) {
+  const asg = (r.assignments ?? []) as any[];
+  if (!asg.length) return "Unassigned";
+
+  // show unique names, keep order
+  const names: string[] = [];
+  const seen = new Set<string>();
+  for (const a of asg) {
+    const emp = a?.employee;
+    const label =
+      emp?.last_name && emp?.first_name
+        ? `${emp.last_name}, ${emp.first_name}`
+        : emp?.email || `Employee ${a?.employee_id ?? "—"}`;
+    if (!seen.has(label)) {
+      names.push(label);
+      seen.add(label);
+    }
+    if (names.length >= 3) break;
+  }
+
+  const uniqueCount = (() => {
+    const set = new Set<string>();
+    for (const a of asg) {
+      const emp = a?.employee;
+      const label =
+        emp?.last_name && emp?.first_name
+          ? `${emp.last_name}, ${emp.first_name}`
+          : emp?.email || `Employee ${a?.employee_id ?? "—"}`;
+      set.add(label);
+    }
+    return set.size;
+  })();
+
+  return uniqueCount > names.length
+    ? `${names.join(" • ")} • +${uniqueCount - names.length} more`
+    : names.join(" • ");
+}
+
+function assignmentRows(r: FieldReviewWithParcelDetailsV2) {
+  const asg = (r.assignments ?? []) as any[];
+  if (!asg.length) return [];
+
+  // your SQL orders by lower(valid) desc already, but we’ll be safe
+  return asg.map((a) => {
+    const emp = a?.employee ?? {};
+    const name =
+      emp.last_name && emp.first_name
+        ? `${emp.last_name}, ${emp.first_name}`
+        : emp.email || `Employee ${a?.employee_id ?? "—"}`;
+    return {
+      key: String(a?.id ?? `${a?.review_id}-${a?.employee_id}-${a?.valid}`),
+      name,
+      email: emp.email as string | null | undefined,
+      status: emp.status as string | null | undefined,
+      valid: (a?.valid as string | null | undefined) ?? null, // stored as text in json
+    };
+  });
 }
 
 export default function ReviewsWithMap({
@@ -495,6 +556,15 @@ export default function ReviewsWithMap({
               onSuccess={deselectAll}
             />
 
+            <BulkAssignmentsDialog
+              reviewIds={selectedReviewIdsArray}
+              revalidatePath="/test/field-reviews"
+              triggerLabel="Assign Employees"
+              title="Bulk Assign Employees"
+              description="Assign one or more employees to all selected field reviews."
+              onSuccess={deselectAll}
+            />
+
             <button
               type="button"
               className="inline-flex items-center rounded border px-2 py-1 text-[11px] font-medium hover:bg-muted"
@@ -512,7 +582,7 @@ export default function ReviewsWithMap({
           <div className="space-y-2 md:h-[75vh]">
             <div className="h-64 md:h-[75vh]">
               <FieldReviewsMap
-                reviews={reviews as any} // if your map expects a different type, update it similarly
+                reviews={reviews as any}
                 selectedReviewIds={selectedReviewIdsArray}
                 onToggleSelectedFromMap={toggleSelected}
               />
@@ -526,17 +596,21 @@ export default function ReviewsWithMap({
             const isChecked = selectedReviewIds.has(r.field_review_id);
             const isExpanded = expandedIds.has(r.field_review_id);
 
-            const addr = firstLineAddress(r);
-            const notePreview = lastNotePreview(r);
+            const addr = firstLineAddress(r as any);
+            const notePreview = lastNotePreview(r as any);
             const statusCount = (r.status_history ?? []).length;
             const notesCount = (r.notes ?? []).length;
 
-            // Single-line condensed text
+            const assignmentsInline = formatAssigneesInline(r);
+            const asgRows = assignmentRows(r);
+
+            // Single-line condensed text (now includes assignees)
             const condensedLine = [
               addr ? addr : null,
               r.review_type_name ? `${r.review_type_name}` : null,
               r.latest_status_name ? `${r.latest_status_name}` : null,
               r.review_due_date ? `${fmtDate(r.review_due_date)}` : null,
+              assignmentsInline ? `Assignees: ${assignmentsInline}` : null,
             ]
               .filter(Boolean)
               .join(" • ");
@@ -568,13 +642,14 @@ export default function ReviewsWithMap({
                             {r.parcel_id}
                           </div>
 
-                          {/* Condensed single-line view */}
-                          <div className="mt-1 truncate text-[11px] text-muted-foreground">
-                            {condensedLine}
-                          </div>
                           <div className="shrink-0 text-[10px] text-muted-foreground">
                             Review #{r.field_review_id}
                           </div>
+                        </div>
+
+                        {/* Condensed single-line view */}
+                        <div className="mt-1 truncate text-[11px] text-muted-foreground">
+                          {condensedLine}
                         </div>
                       </div>
 
@@ -658,8 +733,59 @@ export default function ReviewsWithMap({
                           )}
                           <span>
                             <span className="uppercase">Structures:</span>{" "}
-                            {structureSummary(r)}
+                            {structureSummary(r as any)}
                           </span>
+                        </div>
+
+                        {/* NEW: Assignments */}
+                        <div className="rounded border bg-background p-2">
+                          <div className="flex items-center justify-between text-[10px] font-medium">
+                            <span>Assignments</span>
+                            <span className="text-muted-foreground">
+                              {asgRows.length}
+                            </span>
+                          </div>
+
+                          {asgRows.length ? (
+                            <div className="mt-2 space-y-1 text-[10px] text-muted-foreground">
+                              {asgRows.slice(0, 6).map((a) => (
+                                <div
+                                  key={a.key}
+                                  className="flex items-baseline justify-between gap-2"
+                                >
+                                  <div className="min-w-0 truncate">
+                                    <span className="text-foreground">
+                                      {a.name}
+                                    </span>
+                                    {a.email ? (
+                                      <span className="text-muted-foreground">
+                                        {" "}
+                                        • {a.email}
+                                      </span>
+                                    ) : null}
+                                    {a.status ? (
+                                      <span className="text-muted-foreground">
+                                        {" "}
+                                        • {a.status}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                  <div className="shrink-0 text-[10px] text-muted-foreground">
+                                    {a.valid ?? "—"}
+                                  </div>
+                                </div>
+                              ))}
+                              {asgRows.length > 6 ? (
+                                <div className="text-[10px]">
+                                  +{asgRows.length - 6} more…
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <div className="mt-1 text-[10px] text-muted-foreground">
+                              Unassigned
+                            </div>
+                          )}
                         </div>
 
                         {/* Status + notes preview */}
@@ -705,6 +831,18 @@ export default function ReviewsWithMap({
                               {notePreview ?? "—"}
                             </div>
                           </div>
+                        </div>
+
+                        <div className="mt-2 flex items-center justify-between">
+                          <Link
+                            href={`/test/field-reviews/${r.field_review_id}`}
+                            className="text-[10px] font-medium text-blue-700 hover:underline"
+                          >
+                            View thread
+                          </Link>
+                          <span className="text-[10px] text-muted-foreground">
+                            Created {fmtShortDateTime(r.review_created_at)}
+                          </span>
                         </div>
                       </div>
                     )}

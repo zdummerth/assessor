@@ -169,6 +169,132 @@ export async function createFieldReviewStatusesBulk(
   }
 }
 
+function toNumber(v: FormDataEntryValue) {
+  if (typeof v === "string") return Number(v);
+  return Number((v as any)?.toString?.() ?? NaN);
+}
+
+function parseYmdDate(s: string): string | null {
+  const t = s.trim();
+  if (!t) return null;
+  // simple guard: YYYY-MM-DD
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(t)) return null;
+  return t;
+}
+
+export async function assignFieldReviewEmployeesBulk(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    // 1) Review IDs (multiple)
+    const reviewIdsRaw = formData.getAll("review_ids");
+    const reviewIds = reviewIdsRaw
+      .map(toNumber)
+      .filter((n) => Number.isFinite(n));
+
+    // 2) Employee IDs (multiple)
+    const employeeIdsRaw = formData.getAll("employee_ids");
+    const employeeIds = employeeIdsRaw
+      .map(toNumber)
+      .filter((n) => Number.isFinite(n));
+
+    // 3) Valid range (optional; defaults handled server-side)
+    const validStartRaw = formData.get("valid_start");
+    const validEndRaw = formData.get("valid_end");
+    const revalidate_path = (formData.get("revalidate_path") as string) || null;
+
+    const valid_start =
+      typeof validStartRaw === "string" ? parseYmdDate(validStartRaw) : null;
+
+    const valid_end =
+      typeof validEndRaw === "string" ? parseYmdDate(validEndRaw) : null;
+
+    // 4) Validation
+    if (reviewIds.length === 0) {
+      return { error: "Missing review_ids", success: "" };
+    }
+    if (employeeIds.length === 0) {
+      return { error: "Missing employee_ids", success: "" };
+    }
+    if (validStartRaw != null && typeof validStartRaw === "string") {
+      // if provided, must be valid
+      if (!valid_start) {
+        return {
+          error: "Invalid valid_start (expected YYYY-MM-DD)",
+          success: "",
+        };
+      }
+    }
+    if (
+      validEndRaw != null &&
+      typeof validEndRaw === "string" &&
+      validEndRaw.trim() !== ""
+    ) {
+      if (!valid_end) {
+        return {
+          error: "Invalid valid_end (expected YYYY-MM-DD)",
+          success: "",
+        };
+      }
+      if (valid_start && valid_end && valid_end <= valid_start) {
+        return { error: "valid_end must be after valid_start", success: "" };
+      }
+    }
+
+    // Build a Postgres daterange literal the RPC can cast to daterange
+    // - If start omitted: let DB default handle it by not passing p_valid
+    // - If end omitted: open-ended range
+    const p_valid = valid_start
+      ? valid_end
+        ? `[${valid_start},${valid_end})`
+        : `[${valid_start},)`
+      : null;
+
+    const supabase = await createClient();
+
+    const rpcArgs: Record<string, any> = {
+      p_review_ids: reviewIds, // bigint[]
+      p_employee_ids: employeeIds, // bigint[]
+    };
+
+    // only pass when user supplied a start date (otherwise let function default)
+    if (p_valid) rpcArgs.p_valid = p_valid; // casts to daterange in PG
+
+    const { data, error } = await supabase.rpc(
+      // @ts-expect-error needs generating
+      "bulk_assign_field_review_employees",
+      rpcArgs
+    );
+
+    if (error) {
+      return {
+        error: error.message || "Failed to assign employees",
+        success: "",
+      };
+    }
+
+    if (revalidate_path) rp(revalidate_path);
+
+    const inserted =
+      typeof data === "number"
+        ? data
+        : Array.isArray(data)
+          ? data.length
+          : null;
+
+    return {
+      error: "",
+      success:
+        inserted != null
+          ? `Assignments created (${inserted})`
+          : "Assignments created",
+    };
+  } catch (e: any) {
+    return { error: e?.message || "Unexpected error", success: "" };
+  }
+}
+
 export async function createFieldReviewWithInitial(
   _prev: ActionState,
   formData: FormData

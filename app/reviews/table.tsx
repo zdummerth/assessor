@@ -11,6 +11,7 @@ type Props = {
   nbhds?: number[];
   page: number;
   pageSize: number;
+  employeeId: number | null;
 };
 
 export default async function FieldReviewsTableServer({
@@ -19,19 +20,26 @@ export default async function FieldReviewsTableServer({
   page,
   pageSize,
   nbhds,
+  employeeId,
 }: Props) {
   const supabase = await createClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
   let q = supabase
-    //@ts-expect-error need to generate types for rpc
-    .rpc("get_field_reviews_with_parcel_details_v2", undefined, {
-      count: "exact",
-    })
+    .rpc(
+      //@ts-expect-error need to generate types for rpc
+      "get_field_reviews_with_parcel_details_v3",
+      {
+        p_employee_id: employeeId,
+      },
+      {
+        count: "exact",
+      }
+    )
     .order("block", { ascending: true })
-    .order("address_street", { ascending: true })
-    .order("address_house_number", { ascending: true })
+    // .order("address_street", { ascending: true })
+    // .order("address_house_number", { ascending: true })
     .order("review_created_at", { ascending: false })
     .range(from, to);
 

@@ -11,6 +11,7 @@ type Props = {
   reviewTypes?: number[];
   page: number;
   pageSize: number;
+  employeeId: number | null;
 };
 
 function FieldReviewsTableSkeleton() {
@@ -52,6 +53,7 @@ export default async function Filters({
   reviewStatuses,
   reviewTypes,
   pageSize,
+  employeeId,
 }: Props) {
   const suspenseKey = `field-reviews-table-${nbhds?.join(",")}-${reviewStatuses?.join(",")}-${reviewTypes?.join(",")}-${page}`;
   return (
@@ -65,6 +67,7 @@ export default async function Filters({
           nbhds={nbhds}
           page={page}
           pageSize={pageSize}
+          employeeId={employeeId}
         />
       </Suspense>
     </>

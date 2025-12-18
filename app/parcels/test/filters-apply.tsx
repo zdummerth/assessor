@@ -26,6 +26,7 @@ import {
   usePropertyClassOptions,
   useReviewStatusOptions,
   useReviewTypeOptions,
+  useEmployees, // ✅ NEW
 } from "@/lib/client-queries";
 
 import {
@@ -44,6 +45,7 @@ type FiltersState = {
   lus: string[];
   review_statuses: string[];
   review_types: string[];
+  employee_id: string | null; // ✅ NEW (single select)
 };
 
 type FiltersDialogProps = {
@@ -54,6 +56,7 @@ type FiltersDialogProps = {
   showLandUses?: boolean;
   showReviewStatuses?: boolean;
   showReviewTypes?: boolean;
+  showEmployee?: boolean; // ✅ NEW
 };
 
 // ---- URL helpers ----
@@ -68,6 +71,12 @@ const getArrayParam = (sp: URLSearchParams | null, key: string): string[] => {
 };
 
 const readURLToState = (sp: URLSearchParams | null): FiltersState => {
+  const employee_id_raw = sp?.get("employee_id");
+  const employee_id =
+    typeof employee_id_raw === "string" && employee_id_raw.trim() !== ""
+      ? employee_id_raw.trim()
+      : null;
+
   return {
     abated: (sp?.get("abated") ?? "") === "1",
     tax_status: getArrayParam(sp, "tax_status"),
@@ -76,6 +85,7 @@ const readURLToState = (sp: URLSearchParams | null): FiltersState => {
     lus: getArrayParam(sp, "lus"),
     review_statuses: getArrayParam(sp, "review_statuses"),
     review_types: getArrayParam(sp, "review_types"),
+    employee_id, // ✅ NEW
   };
 };
 
@@ -89,6 +99,7 @@ const stateToParams = (s: FiltersState): Record<string, string | null> => ({
     ? s.review_statuses.join(",")
     : null,
   review_types: s.review_types.length ? s.review_types.join(",") : null,
+  employee_id: s.employee_id ? s.employee_id : null, // ✅ NEW
   page: "1",
 });
 
@@ -106,9 +117,9 @@ const statesEqual = (a: FiltersState, b: FiltersState) =>
   arraysEqualAsSets(a.nbhds, b.nbhds) &&
   arraysEqualAsSets(a.lus, b.lus) &&
   arraysEqualAsSets(a.review_statuses, b.review_statuses) &&
-  arraysEqualAsSets(a.review_types, b.review_types);
+  arraysEqualAsSets(a.review_types, b.review_types) &&
+  String(a.employee_id ?? "") === String(b.employee_id ?? ""); // ✅ NEW
 
-// Simple group wrapper for badges (used in summary row)
 function BadgeGroup({
   label,
   children,
@@ -141,6 +152,7 @@ export default function FiltersDialog({
   showLandUses = false,
   showReviewStatuses = true,
   showReviewTypes = true,
+  showEmployee = true, // ✅ NEW
 }: FiltersDialogProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -153,6 +165,8 @@ export default function FiltersDialog({
   const { options: propertyClassOptions } = usePropertyClassOptions();
   const { options: reviewStatusOptions } = useReviewStatusOptions();
   const { options: reviewTypeOptions } = useReviewTypeOptions();
+  const { options: employeeOptions, error: employeeOptionsError } =
+    useEmployees(); // ✅ NEW
 
   // Normalize to ComboOption for ComboboxMulti
   const luOptionsAll: ComboOption[] = useMemo(() => {
@@ -214,16 +228,24 @@ export default function FiltersDialog({
     [reviewTypeOptions]
   );
 
-  // Helpers to map ids->labels for badges
+  // ✅ NEW: employees -> ComboOption
+  const empOptions: ComboOption[] = useMemo(() => {
+    const raw = Array.isArray(employeeOptions)
+      ? (employeeOptions as any[])
+      : [];
+    return raw.map((e) => ({
+      value: String(e.id),
+      label: `${e.last_name}, ${e.first_name}${e.email ? ` • ${e.email}` : ""}`,
+    }));
+  }, [employeeOptions]);
+
   const mapLabel = (opts: ComboOption[], value: string) =>
     opts.find((o) => String(o.value) === String(value))?.label ?? value;
 
-  // ---- URL snapshot & dialog-local state ----
   const urlState = useMemo(() => readURLToState(searchParams), [searchParams]);
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<FiltersState>(urlState);
 
-  // Reset dialog state from URL whenever the dialog opens
   useEffect(() => {
     if (open) setState(urlState);
   }, [open, urlState]);
@@ -233,7 +255,6 @@ export default function FiltersDialog({
     [state, urlState]
   );
 
-  // Count active filters (only ones that are visible)
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (showAbated && urlState.abated) count++;
@@ -243,6 +264,7 @@ export default function FiltersDialog({
     if (showLandUses && urlState.lus.length) count++;
     if (showReviewStatuses && urlState.review_statuses.length) count++;
     if (showReviewTypes && urlState.review_types.length) count++;
+    if (showEmployee && !!urlState.employee_id) count++; // ✅ NEW
     return count;
   }, [
     urlState,
@@ -253,6 +275,7 @@ export default function FiltersDialog({
     showLandUses,
     showReviewStatuses,
     showReviewTypes,
+    showEmployee,
   ]);
 
   const applyAll = () => {
@@ -270,9 +293,13 @@ export default function FiltersDialog({
     setOpen(false);
   };
 
-  const resetLocal = () => {
-    setState(urlState);
-  };
+  const resetLocal = () => setState(urlState);
+
+  // single-select UI built from ComboboxMulti (value = [] or [id])
+  const employeeValueArray = useMemo(
+    () => (state.employee_id ? [state.employee_id] : []),
+    [state.employee_id]
+  );
 
   const groupedBadges = (
     <div className="flex flex-wrap items-center gap-2">
@@ -341,6 +368,15 @@ export default function FiltersDialog({
               {mapLabel(rtOptions, id)}
             </Badge>
           ))}
+        </BadgeGroup>
+      )}
+
+      {/* ✅ NEW: Employee (single) */}
+      {showEmployee && urlState.employee_id && (
+        <BadgeGroup label="employee">
+          <Badge variant="secondary" className="text-xs">
+            {mapLabel(empOptions, urlState.employee_id)}
+          </Badge>
         </BadgeGroup>
       )}
     </div>
@@ -519,6 +555,67 @@ export default function FiltersDialog({
                         <p className="text-[11px] text-muted-foreground">
                           Limit results to specific types of field reviews.
                         </p>
+                      </div>
+                    )}
+
+                    {/* ✅ NEW: Employee single-select (implemented using ComboboxMulti) */}
+                    {showEmployee && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <Label className="text-sm" htmlFor="employee-id">
+                            Assigned employee
+                          </Label>
+
+                          {state.employee_id ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setState((s) => ({ ...s, employee_id: null }))
+                              }
+                              className="text-[11px] text-muted-foreground hover:underline"
+                            >
+                              Clear
+                            </button>
+                          ) : null}
+                        </div>
+
+                        <select
+                          id="employee-id"
+                          name="employee_id"
+                          className="w-full rounded border bg-background px-3 py-2 text-sm"
+                          value={state.employee_id ?? ""}
+                          onChange={(e) =>
+                            setState((s) => ({
+                              ...s,
+                              employee_id: e.target.value
+                                ? e.target.value
+                                : null,
+                            }))
+                          }
+                          disabled={!!employeeOptionsError}
+                        >
+                          <option value="">All employees</option>
+                          <option value={0}>Unassigned</option>
+                          {empOptions.map((o) => (
+                            <option
+                              key={String(o.value)}
+                              value={String(o.value)}
+                            >
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+
+                        <p className="text-[11px] text-muted-foreground">
+                          Filters to reviews where this employee has any
+                          assignment record. (Cards still show all assignees.)
+                        </p>
+
+                        {employeeOptionsError ? (
+                          <p className="text-[11px] text-destructive">
+                            Error loading employee options.
+                          </p>
+                        ) : null}
                       </div>
                     )}
                   </div>
