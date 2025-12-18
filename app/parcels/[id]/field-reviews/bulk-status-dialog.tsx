@@ -22,6 +22,7 @@ export default function BulkStatusDialog({
   title = "Bulk Update Status",
   description = "Apply the same status (and optional description) to all selected reviews.",
   disabled,
+  onSuccess,
 }: {
   reviewIds: number[];
   revalidatePath?: string;
@@ -29,6 +30,7 @@ export default function BulkStatusDialog({
   title?: string;
   description?: string;
   disabled?: boolean;
+  onSuccess?: () => void;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -64,7 +66,12 @@ export default function BulkStatusDialog({
             revalidatePath={revalidatePath}
             title={undefined}
             description={undefined}
-            onSuccess={() => setOpen(false)}
+            onSuccess={() => {
+              setOpen(false);
+              if (onSuccess) {
+                onSuccess();
+              }
+            }}
           />
         </div>
       </DialogContent>

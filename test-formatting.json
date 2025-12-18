@@ -1,48 +1,8 @@
-{
-  "parcel": {
-    "id": 10050,
-    "ext": 0,
-    "lot": 5,
-    "block": 1,
-    "parcel_no": "1-5-0",
-    "created_at": "2020-01-01T00:00:00+00:00",
-    "retired_at": null
-  },
-  "as_of_date": "2025-01-01",
-  "assessment": {
-    "id": 1,
-    "year": 2025,
-    "category": "AV",
-    "parcel_id": 10050,
-    "changed_by": "PTAK/ROLL",
-    "bldg_exempt": 0,
-    "land_exempt": 0,
-    "last_changed": "2024-10-13",
-    "app_bldg_exempt": -7600,
-    "app_land_exempt": 21300,
-    "app_total_value": 13700,
-    "bldg_commercial": 0,
-    "land_commercial": 0,
-    "bldg_agriculture": 0,
-    "bldg_residential": 0,
-    "land_agriculture": 0,
-    "land_residential": 0,
-    "new_const_exempt": 0,
-    "reason_for_change": "NL",
-    "date_of_assessment": "2023-03-09T08:48:57+00:00",
-    "app_bldg_commercial": 0,
-    "app_land_commercial": 0,
-    "app_bldg_agriculture": 0,
-    "app_bldg_residential": 0,
-    "app_land_agriculture": 0,
-    "app_land_residential": 0,
-    "app_new_const_exempt": 0,
-    "new_const_commercial": 0,
-    "new_const_agriculture": 0,
-    "new_const_residential": 0,
-    "app_new_const_commercial": 0,
-    "app_new_const_agriculture": 0,
-    "app_new_const_residential": 0
-  },
-  "structures": []
-}
+[
+  {
+    "id": 756,
+    "note": "Check for tornado damage and update condition",
+    "created_at": "2025-12-17T19:25:46.071752+00:00",
+    "created_by": "6836ee40-2dcd-452a-8ed5-fed3973f9bf6"
+  }
+]

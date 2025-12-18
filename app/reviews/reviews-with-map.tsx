@@ -3,7 +3,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import type { FieldReviewWithDetails } from "./table-client";
 import BulkStatusDialog from "../parcels/[id]/field-reviews/bulk-status-dialog";
 
@@ -308,10 +308,85 @@ function FieldReviewsMap({
 
 /* ---------------------- Main Component ---------------------- */
 
+/** Update this type to match get_field_reviews_with_parcel_details_v2() */
+export type FieldReviewWithParcelDetailsV2 = {
+  field_review_id: number;
+  parcel_id: number;
+  block: number | null;
+  lot: number | null;
+  ext: number | null;
+
+  parcel_created_at: string | null;
+  parcel_retired_at: string | null;
+
+  review_created_at: string;
+  review_due_date: string | null;
+  site_visited_at: string | null;
+
+  review_type_id: number | null;
+  review_type_slug: string | null;
+  review_type_name: string | null;
+
+  latest_status_hist_id: number | null;
+  latest_status_set_at: string | null;
+  latest_status_id: number | null;
+  latest_status_name: string | null;
+
+  status_history: any[] | null; // jsonb array
+  notes: any[] | null; // jsonb array
+
+  current_land_use: number | null;
+  current_structures: any[] | null; // jsonb array of {structure, sections}
+
+  address_place_id: string | null;
+  address_line1: string | null;
+  address_city: string | null;
+  address_state: string | null;
+  address_postcode: string | null;
+  address_formatted: string | null;
+  address_lat: number | null;
+  address_lon: number | null;
+
+  assessor_neighborhood_id: number | null;
+  assessor_neighborhood: number | null;
+  cda_neighborhood: string | null;
+  cda_neighborhood_id: number | null;
+};
+
+function firstLineAddress(r: FieldReviewWithParcelDetailsV2) {
+  const a =
+    r.address_line1 ||
+    r.address_formatted ||
+    [r.address_city, r.address_state, r.address_postcode]
+      .filter(Boolean)
+      .join(", ");
+  return a || null;
+}
+
+function lastNotePreview(r: FieldReviewWithParcelDetailsV2) {
+  const notes = (r.notes ?? []) as any[];
+  const n = notes[0]; // your SQL orders desc; if not, swap to last
+  const text = (n?.note ?? "") as string;
+  if (!text) return null;
+  return text.length > 90 ? `${text.slice(0, 90)}…` : text;
+}
+
+function structureSummary(r: FieldReviewWithParcelDetailsV2) {
+  const structs = (r.current_structures ?? []) as any[];
+  if (!structs.length) return "No structures";
+  const secCount = structs.reduce(
+    (acc, x) => acc + ((x?.sections?.length ?? 0) as number),
+    0
+  );
+  return `${structs.length} structure${structs.length === 1 ? "" : "s"} • ${secCount} section${
+    secCount === 1 ? "" : "s"
+  }`;
+}
+
 export default function ReviewsWithMap({
   reviews,
 }: {
-  reviews: FieldReviewWithDetails[];
+  reviews: FieldReviewWithParcelDetailsV2[];
 }) {
   // Multi-select (checkboxes)
   const [selectedReviewIds, setSelectedReviewIds] = useState<Set<number>>(
@@ -342,6 +417,20 @@ export default function ReviewsWithMap({
 
   // Controls map visibility on both mobile and desktop
   const [isMapOpen, setIsMapOpen] = useState(true);
+
+  // Condensed vs expanded per-card
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(
+    () => new Set<number>()
+  );
+
+  const toggleExpanded = (id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   if (!reviews.length) {
     return (
@@ -403,6 +492,7 @@ export default function ReviewsWithMap({
               triggerLabel="Update Statuses"
               title="Bulk Update Field Review Status"
               description="Apply a status update to all selected field reviews."
+              onSuccess={deselectAll}
             />
 
             <button
@@ -422,7 +512,7 @@ export default function ReviewsWithMap({
           <div className="space-y-2 md:h-[75vh]">
             <div className="h-64 md:h-[75vh]">
               <FieldReviewsMap
-                reviews={reviews}
+                reviews={reviews as any} // if your map expects a different type, update it similarly
                 selectedReviewIds={selectedReviewIdsArray}
                 onToggleSelectedFromMap={toggleSelected}
               />
@@ -434,6 +524,22 @@ export default function ReviewsWithMap({
         <div className="space-y-2 md:h-[75vh] md:overflow-y-auto">
           {reviews.map((r) => {
             const isChecked = selectedReviewIds.has(r.field_review_id);
+            const isExpanded = expandedIds.has(r.field_review_id);
+
+            const addr = firstLineAddress(r);
+            const notePreview = lastNotePreview(r);
+            const statusCount = (r.status_history ?? []).length;
+            const notesCount = (r.notes ?? []).length;
+
+            // Single-line condensed text
+            const condensedLine = [
+              addr ? addr : null,
+              r.review_type_name ? `${r.review_type_name}` : null,
+              r.latest_status_name ? `${r.latest_status_name}` : null,
+              r.review_due_date ? `${fmtDate(r.review_due_date)}` : null,
+            ]
+              .filter(Boolean)
+              .join(" • ");
 
             return (
               <div
@@ -454,68 +560,154 @@ export default function ReviewsWithMap({
                   />
 
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <div className="truncate font-semibold text-[11px] text-blue-700">
-                        Parcel {r.parcel_id}
+                    {/* Header row */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-baseline gap-2">
+                          <div className="truncate font-semibold text-[11px] text-blue-700">
+                            {r.parcel_id}
+                          </div>
+
+                          {/* Condensed single-line view */}
+                          <div className="mt-1 truncate text-[11px] text-muted-foreground">
+                            {condensedLine}
+                          </div>
+                          <div className="shrink-0 text-[10px] text-muted-foreground">
+                            Review #{r.field_review_id}
+                          </div>
+                        </div>
                       </div>
-                      <div className="shrink-0 text-[10px] text-muted-foreground">
-                        Review #{r.field_review_id}
-                      </div>
-                    </div>
 
-                    {r.address_line1 || r.address_formatted ? (
-                      <div className="mt-1 truncate text-[11px]">
-                        {r.address_line1 || r.address_formatted}
-                      </div>
-                    ) : null}
-
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
-                      {r.review_type_name && (
-                        <span>
-                          <span className="uppercase">Type:</span>{" "}
-                          {r.review_type_name}
-                        </span>
-                      )}
-                      {r.latest_status_name && (
-                        <span>
-                          <span className="uppercase">Status:</span>{" "}
-                          {r.latest_status_name}
-                        </span>
-                      )}
-                      {r.review_due_date && (
-                        <span>
-                          <span className="uppercase">Due:</span>{" "}
-                          {fmtDate(r.review_due_date)}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
-                      {r.assessor_neighborhood != null && (
-                        <span>
-                          <span className="uppercase">Assessor:</span>{" "}
-                          {r.assessor_neighborhood}
-                        </span>
-                      )}
-                      {r.cda_neighborhood && (
-                        <span>
-                          <span className="uppercase">CDA:</span>{" "}
-                          {r.cda_neighborhood}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-2 flex items-center justify-between">
-                      <Link
-                        href={`/test/field-reviews/${r.field_review_id}`}
-                        className="text-[10px] font-medium text-blue-700 hover:underline"
+                      <button
+                        type="button"
+                        onClick={() => toggleExpanded(r.field_review_id)}
+                        className="shrink-0 inline-flex items-center gap-1 rounded border px-2 py-1 text-[10px] font-medium hover:bg-muted"
+                        aria-expanded={isExpanded}
                       >
-                        View thread
-                      </Link>
-                      <span className="text-[10px] text-muted-foreground">
-                        Created {fmtShortDateTime(r.review_created_at)}
-                      </span>
+                        {isExpanded ? (
+                          <>
+                            <ChevronUp className="h-3 w-3" />
+                            Less
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="h-3 w-3" />
+                            More
+                          </>
+                        )}
+                      </button>
                     </div>
+
+                    {/* Expanded full view */}
+                    {isExpanded && (
+                      <div className="mt-2 space-y-2">
+                        {addr ? (
+                          <div className="text-[11px]">
+                            <span className="text-muted-foreground uppercase">
+                              Address:
+                            </span>{" "}
+                            {addr}
+                          </div>
+                        ) : null}
+
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+                          {r.review_type_name && (
+                            <span>
+                              <span className="uppercase">Type:</span>{" "}
+                              {r.review_type_name}
+                            </span>
+                          )}
+                          {r.latest_status_name && (
+                            <span>
+                              <span className="uppercase">Latest status:</span>{" "}
+                              {r.latest_status_name}
+                            </span>
+                          )}
+                          {r.review_due_date && (
+                            <span>
+                              <span className="uppercase">Due:</span>{" "}
+                              {fmtDate(r.review_due_date)}
+                            </span>
+                          )}
+                          {r.site_visited_at && (
+                            <span>
+                              <span className="uppercase">Visited:</span>{" "}
+                              {fmtDate(r.site_visited_at)}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+                          {r.assessor_neighborhood != null && (
+                            <span>
+                              <span className="uppercase">Assessor:</span>{" "}
+                              {r.assessor_neighborhood}
+                            </span>
+                          )}
+                          {r.cda_neighborhood && (
+                            <span>
+                              <span className="uppercase">CDA:</span>{" "}
+                              {r.cda_neighborhood}
+                            </span>
+                          )}
+                          {r.current_land_use != null && (
+                            <span>
+                              <span className="uppercase">Land use:</span>{" "}
+                              {r.current_land_use}
+                            </span>
+                          )}
+                          <span>
+                            <span className="uppercase">Structures:</span>{" "}
+                            {structureSummary(r)}
+                          </span>
+                        </div>
+
+                        {/* Status + notes preview */}
+                        <div className="grid gap-2 md:grid-cols-2">
+                          <div className="rounded border bg-background p-2">
+                            <div className="flex items-center justify-between text-[10px] font-medium">
+                              <span>Status history</span>
+                              <span className="text-muted-foreground">
+                                {statusCount}
+                              </span>
+                            </div>
+                            <div className="mt-1 space-y-1 text-[10px] text-muted-foreground">
+                              {(r.status_history ?? [])
+                                .slice(0, 3)
+                                .map((s: any) => (
+                                  <div
+                                    key={String(s?.id ?? Math.random())}
+                                    className="truncate"
+                                    title={String(s?.status_name ?? "")}
+                                  >
+                                    {s?.status_name ?? "—"}{" "}
+                                    {s?.created_at
+                                      ? `• ${fmtShortDateTime(s.created_at)}`
+                                      : null}
+                                  </div>
+                                ))}
+                              {statusCount > 3 ? (
+                                <div className="text-[10px]">
+                                  +{statusCount - 3} more…
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          <div className="rounded border bg-background p-2">
+                            <div className="flex items-center justify-between text-[10px] font-medium">
+                              <span>Notes</span>
+                              <span className="text-muted-foreground">
+                                {notesCount}
+                              </span>
+                            </div>
+                            <div className="mt-1 text-[10px] text-muted-foreground">
+                              {notePreview ?? "—"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

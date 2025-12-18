@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { createFieldReviewStatusesBulk } from "./actions";
 import { useReviewStatusOptions } from "@/lib/client-queries";
+import { toast } from "sonner";
 
 const initialState = { error: "", success: "" };
 
@@ -45,6 +46,7 @@ export default function BulkFieldReviewStatusForm({
 
   useEffect(() => {
     if (state.success && onSuccess) {
+      toast.success(state.success);
       onSuccess();
     }
   }, [state.success, onSuccess]);

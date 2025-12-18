@@ -1,9 +1,8 @@
 // app/test/field-reviews/table.tsx
-import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
-import { FieldReviewWithDetails } from "./table-client";
-import ServerFieldReview from "./[id]/server";
-import ReviewsWithMap from "./reviews-with-map";
+import ReviewsWithMap, {
+  FieldReviewWithParcelDetailsV2,
+} from "./reviews-with-map";
 import PaginationToolbar from "../parcels/test/features/pagination-toolbar";
 
 type Props = {
@@ -26,8 +25,13 @@ export default async function FieldReviewsTableServer({
   const to = from + pageSize - 1;
 
   let q = supabase
-    .rpc("get_field_reviews_with_parcel_details", undefined, { count: "exact" })
+    //@ts-expect-error need to generate types for rpc
+    .rpc("get_field_reviews_with_parcel_details_v2", undefined, {
+      count: "exact",
+    })
     .order("block", { ascending: true })
+    .order("address_street", { ascending: true })
+    .order("address_house_number", { ascending: true })
     .order("review_created_at", { ascending: false })
     .range(from, to);
 
@@ -56,7 +60,7 @@ export default async function FieldReviewsTableServer({
     );
   }
 
-  const reviews = (data ?? []) as FieldReviewWithDetails[];
+  const reviews = (data ?? []) as FieldReviewWithParcelDetailsV2[];
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -64,52 +68,6 @@ export default async function FieldReviewsTableServer({
     <>
       <PaginationToolbar page={page} pageSize={pageSize} total={total} />
       <ReviewsWithMap reviews={reviews} />
-
-      {/* Pagination */}
-      <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-        <span>
-          Showing{" "}
-          {total === 0
-            ? "0"
-            : `${(page - 1) * pageSize + 1}-${Math.min(
-                page * pageSize,
-                total
-              )}`}{" "}
-          of {total} reviews
-        </span>
-        <div className="flex gap-1">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-            (pageNum) => {
-              const params = new URLSearchParams();
-              if (pageNum !== 1) params.set("page", String(pageNum));
-              if (nbhds && nbhds.length > 0)
-                params.set("nbhds", nbhds.join(","));
-              if (reviewStatuses && reviewStatuses.length > 0)
-                params.set("review_statuses", reviewStatuses.join(","));
-              if (reviewTypes && reviewTypes.length > 0)
-                params.set("review_types", reviewTypes.join(","));
-
-              const qs = params.toString();
-
-              return (
-                <Link
-                  key={pageNum}
-                  href={
-                    qs ? `/test/field-reviews?${qs}` : "/test/field-reviews"
-                  }
-                  className={`inline-flex h-7 min-w-[1.75rem] items-center justify-center rounded border px-2 text-[11px] ${
-                    pageNum === page
-                      ? "border-blue-600 bg-blue-50 text-blue-700"
-                      : "border-transparent hover:border-muted-foreground/30 hover:bg-muted"
-                  }`}
-                >
-                  {pageNum}
-                </Link>
-              );
-            }
-          )}
-        </div>
-      </div>
     </>
   );
 }

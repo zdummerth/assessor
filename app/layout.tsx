@@ -4,6 +4,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 import Navbar from "@/components/ui/navbar";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "@/components/ui/sonner";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -37,6 +38,7 @@ export default function RootLayout({
               <div className="flex flex-col w-full">{children}</div>
             </div>
           </main>
+          <Toaster />
         </ThemeProvider>
         <Analytics />
       </body>
