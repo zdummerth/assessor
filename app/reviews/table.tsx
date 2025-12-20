@@ -12,6 +12,7 @@ type Props = {
   page: number;
   pageSize: number;
   employeeId: number | null;
+  landUseIds?: number[];
 };
 
 export default async function FieldReviewsTableServer({
@@ -21,6 +22,7 @@ export default async function FieldReviewsTableServer({
   pageSize,
   nbhds,
   employeeId,
+  landUseIds,
 }: Props) {
   const supabase = await createClient();
   const from = (page - 1) * pageSize;
@@ -29,7 +31,7 @@ export default async function FieldReviewsTableServer({
   let q = supabase
     .rpc(
       //@ts-expect-error need to generate types for rpc
-      "get_field_reviews_with_parcel_details_v3",
+      "get_field_reviews_with_parcel_details_v4",
       {
         p_employee_id: employeeId,
       },
@@ -55,6 +57,10 @@ export default async function FieldReviewsTableServer({
     q = q.or(
       `assessor_neighborhood_id.in.(${nbhds.join(",")}),cda_neighborhood_id.in.(${nbhds.join(",")})`
     );
+  }
+
+  if (landUseIds && landUseIds.length > 0) {
+    q = q.in("current_land_use", landUseIds);
   }
 
   const { data, error, count } = await q;

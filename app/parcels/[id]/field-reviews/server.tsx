@@ -248,7 +248,7 @@ export default async function ServerParcelFieldReviews({
               return (
                 <div key={r.id}>
                   {/* Entire card is clickable trigger */}
-                  <ReviewThreadModal
+                  {/* <ReviewThreadModal
                     reviewId={r.id}
                     initialNotes={r.field_review_notes ?? []}
                     initialStatuses={r.field_review_status_history ?? []}
@@ -259,7 +259,6 @@ export default async function ServerParcelFieldReviews({
                         type="button"
                         className="group w-full text-left rounded border bg-white p-3 flex gap-3 cursor-pointer transition hover:border-sky-400 hover:bg-sky-50/60 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                       >
-                        {/* Thumbnail */}
                         <div className="shrink-0">
                           {src ? (
                             <Image
@@ -280,7 +279,6 @@ export default async function ServerParcelFieldReviews({
                           )}
                         </div>
 
-                        {/* Text content */}
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-0.5">
@@ -318,7 +316,7 @@ export default async function ServerParcelFieldReviews({
                         </div>
                       </button>
                     }
-                  />
+                  /> */}
                 </div>
               );
             })}

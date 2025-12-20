@@ -12,6 +12,7 @@ type Props = {
   page: number;
   pageSize: number;
   employeeId: number | null;
+  landUseIds?: number[];
 };
 
 function FieldReviewsTableSkeleton() {
@@ -54,11 +55,12 @@ export default async function Filters({
   reviewTypes,
   pageSize,
   employeeId,
+  landUseIds,
 }: Props) {
-  const suspenseKey = `field-reviews-table-${nbhds?.join(",")}-${reviewStatuses?.join(",")}-${reviewTypes?.join(",")}-${page}`;
+  const suspenseKey = `field-reviews-table-${nbhds?.join(",")}-${reviewStatuses?.join(",")}-${reviewTypes?.join(",")}-${page}-`;
   return (
     <>
-      <FiltersDialog />
+      <FiltersDialog showLandUses />
 
       <Suspense key={suspenseKey} fallback={<FieldReviewsTableSkeleton />}>
         <FieldReviewsTableServer
@@ -68,6 +70,7 @@ export default async function Filters({
           page={page}
           pageSize={pageSize}
           employeeId={employeeId}
+          landUseIds={landUseIds}
         />
       </Suspense>
     </>

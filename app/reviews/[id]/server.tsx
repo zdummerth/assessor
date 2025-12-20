@@ -186,13 +186,14 @@ export default async function ServerFieldReview({
     revalidatePath ?? `/parcels/${String(review.parcel_id)}`;
 
   return (
-    <ReviewThreadModal
-      reviewId={review.id}
-      initialNotes={initialNotes}
-      initialStatuses={initialStatuses}
-      initialImages={initialImages}
-      revalidatePath={resolvedRevalidatePath}
-      title={title}
-    />
+    // <ReviewThreadModal
+    //   reviewId={review.id}
+    //   initialNotes={initialNotes}
+    //   initialStatuses={initialStatuses}
+    //   initialImages={initialImages}
+    //   revalidatePath={resolvedRevalidatePath}
+    //   title={title}
+    // />
+    <div></div>
   );
 }

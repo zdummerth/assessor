@@ -10,6 +10,7 @@ type SearchParams = {
   review_statuses?: string;
   review_types?: string;
   employee_id?: string;
+  lus?: string;
 };
 
 export default async function FieldReviewsPage({
@@ -67,6 +68,11 @@ export default async function FieldReviewsPage({
       ? Number(params.employee_id)
       : null;
 
+  const landUseIds =
+    typeof params?.lus === "string" && params.lus.length > 0
+      ? params.lus.split(",").map((id) => Number(id))
+      : undefined;
+
   return (
     <main className="space-y-4 p-4">
       <div className="flex items-center justify-between">
@@ -82,6 +88,7 @@ export default async function FieldReviewsPage({
         reviewStatuses={reviewStatuses}
         reviewTypes={reviewTypes}
         employeeId={employeeId}
+        landUseIds={landUseIds}
       />
     </main>
   );
