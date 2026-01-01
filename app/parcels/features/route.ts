@@ -1,7 +1,6 @@
 // app/api/find-parcel-features/route.ts
 import { createClient } from "@supabase/supabase-js";
 import { type NextRequest } from "next/server";
-import { parse } from "path";
 
 // Columns returned by get_parcel_value_features_asof
 const NUMERIC_COLS = new Set([
