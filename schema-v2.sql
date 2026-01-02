@@ -513,8 +513,13 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     IF OLD.current_status_id IS DISTINCT FROM NEW.current_status_id THEN
-        INSERT INTO public.review_history_v2 (review_id, status_id, note)
-        VALUES (NEW.id, NEW.current_status_id, 'Status updated automatically');
+        INSERT INTO public.review_history_v2 (review_id, status_id, note, changed_by)
+        VALUES (
+            NEW.id, 
+            NEW.current_status_id, 
+            'Status updated automatically',
+            COALESCE(auth.uid(), '4be94f1c-078e-4810-8b6c-f2800a3c02f8'::uuid)
+        );
     END IF;
     RETURN NEW;
 END;
@@ -576,8 +581,15 @@ BEGIN
     -- Create review for each parcel
     FOREACH v_parcel_id IN ARRAY p_parcel_ids
     LOOP
-        INSERT INTO public.reviews_v2 (kind, title, due_date, current_status_id, data)
-        VALUES (p_kind, p_title, p_due_date, v_default_status_id, p_data || jsonb_build_object('parcel_id', v_parcel_id))
+        INSERT INTO public.reviews_v2 (kind, title, due_date, current_status_id, data, created_by)
+        VALUES (
+            p_kind, 
+            p_title, 
+            p_due_date, 
+            v_default_status_id, 
+            p_data || jsonb_build_object('parcel_id', v_parcel_id),
+            COALESCE(auth.uid(), '4be94f1c-078e-4810-8b6c-f2800a3c02f8'::uuid)
+        )
         RETURNING id INTO v_review_id;
         
         v_review_ids := v_review_ids || v_review_id;
@@ -640,8 +652,13 @@ BEGIN
             
             -- Add note if provided
             IF p_note IS NOT NULL THEN
-                INSERT INTO public.review_history_v2 (review_id, status_id, note)
-                VALUES (v_review_id, v_status_id, p_note);
+                INSERT INTO public.review_history_v2 (review_id, status_id, note, changed_by)
+                VALUES (
+                    v_review_id, 
+                    v_status_id, 
+                    p_note,
+                    COALESCE(auth.uid(), '4be94f1c-078e-4810-8b6c-f2800a3c02f8'::uuid)
+                );
             END IF;
         END IF;
     END LOOP;
