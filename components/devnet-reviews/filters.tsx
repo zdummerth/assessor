@@ -359,117 +359,15 @@ export default function DevnetReviewsFiltersDialog({
               )}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle>Filter Reviews</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              {showReviewKind && (
-                <div>
-                  <label className="text-sm font-medium">Review Type</label>
-                  <ComboboxMulti
-                    options={reviewKindOptions}
-                    value={state.review_kind}
-                    onChange={(newValue) =>
-                      setState({ ...state, review_kind: newValue })
-                    }
-                    placeholder="Select review types..."
-                  />
-                </div>
-              )}
 
-              {showStatuses && (
-                <div>
-                  <label className="text-sm font-medium">Status</label>
-                  <ComboboxMulti
-                    options={statusOptions}
-                    value={state.status_ids}
-                    onChange={(newValue) =>
-                      setState({ ...state, status_ids: newValue })
-                    }
-                    placeholder="Select statuses..."
-                  />
-                </div>
-              )}
-
-              {showAssignedTo && (
-                <div>
-                  <label className="text-sm font-medium">Assigned To</label>
-                  <ComboboxMulti
-                    options={empOptions}
-                    value={assignedToValueArray}
-                    onChange={(newValue) =>
-                      setState({
-                        ...state,
-                        assigned_to_id: newValue[0] || null,
-                      })
-                    }
-                    placeholder="Select employee..."
-                  />
-                </div>
-              )}
-
-              {showDataStatus && (
-                <div>
-                  <label className="text-sm font-medium">Data Status</label>
-                  <ComboboxMulti
-                    options={dataStatusOptions}
-                    value={state.data_status}
-                    onChange={(newValue) =>
-                      setState({ ...state, data_status: newValue })
-                    }
-                    placeholder="Select data statuses..."
-                  />
-                </div>
-              )}
-
-              {showPriority && (
-                <div>
-                  <label className="text-sm font-medium">Priority</label>
-                  <ComboboxMulti
-                    options={priorityOptions}
-                    value={state.priority}
-                    onChange={(newValue) =>
-                      setState({ ...state, priority: newValue })
-                    }
-                    placeholder="Select priorities..."
-                  />
-                </div>
-              )}
-
-              {showEntityType && (
-                <div>
-                  <label className="text-sm font-medium">Entity Type</label>
-                  <ComboboxMulti
-                    options={entityTypeOptions}
-                    value={state.entity_type}
-                    onChange={(newValue) =>
-                      setState({ ...state, entity_type: newValue })
-                    }
-                    placeholder="Select entity types..."
-                  />
-                </div>
-              )}
-
-              {showFieldReview && (
-                <div>
-                  <label className="text-sm font-medium">Field Review</label>
-                  <ComboboxMulti
-                    options={fieldReviewOptions}
-                    value={fieldReviewValueArray}
-                    onChange={(newValue) =>
-                      setState({
-                        ...state,
-                        requires_field_review: newValue[0] || null,
-                      })
-                    }
-                    placeholder="Select field review requirement..."
-                  />
-                </div>
-              )}
-
-              <div className="flex justify-between gap-2 pt-4">
-                <div className="flex gap-2">
+            {/* Fixed Controls Bar */}
+            <div className="flex-shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className="flex items-center justify-between gap-2 p-4">
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -487,9 +385,132 @@ export default function DevnetReviewsFiltersDialog({
                     Clear All
                   </Button>
                 </div>
-                <Button onClick={applyAll} disabled={!isDirty}>
-                  Apply Filters
-                </Button>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {activeFilterCount} filter
+                    {activeFilterCount !== 1 ? "s" : ""} active
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={applyAll} disabled={!isDirty} size="sm">
+                    Apply {isDirty ? "(Modified)" : ""}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Scrollable Filter Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="space-y-4 p-4">
+                {showReviewKind && (
+                  <div>
+                    <label className="text-sm font-medium">Review Type</label>
+                    <ComboboxMulti
+                      options={reviewKindOptions}
+                      value={state.review_kind}
+                      onChange={(newValue) =>
+                        setState({ ...state, review_kind: newValue })
+                      }
+                      placeholder="Select review types..."
+                    />
+                  </div>
+                )}
+
+                {showStatuses && (
+                  <div>
+                    <label className="text-sm font-medium">Status</label>
+                    <ComboboxMulti
+                      options={statusOptions}
+                      value={state.status_ids}
+                      onChange={(newValue) =>
+                        setState({ ...state, status_ids: newValue })
+                      }
+                      placeholder="Select statuses..."
+                    />
+                  </div>
+                )}
+
+                {showAssignedTo && (
+                  <div>
+                    <label className="text-sm font-medium">Assigned To</label>
+                    <ComboboxMulti
+                      options={empOptions}
+                      value={assignedToValueArray}
+                      onChange={(newValue) =>
+                        setState({
+                          ...state,
+                          assigned_to_id: newValue[0] || null,
+                        })
+                      }
+                      placeholder="Select employee..."
+                    />
+                  </div>
+                )}
+
+                {showDataStatus && (
+                  <div>
+                    <label className="text-sm font-medium">Data Status</label>
+                    <ComboboxMulti
+                      options={dataStatusOptions}
+                      value={state.data_status}
+                      onChange={(newValue) =>
+                        setState({ ...state, data_status: newValue })
+                      }
+                      placeholder="Select data statuses..."
+                    />
+                  </div>
+                )}
+
+                {showPriority && (
+                  <div>
+                    <label className="text-sm font-medium">Priority</label>
+                    <ComboboxMulti
+                      options={priorityOptions}
+                      value={state.priority}
+                      onChange={(newValue) =>
+                        setState({ ...state, priority: newValue })
+                      }
+                      placeholder="Select priorities..."
+                    />
+                  </div>
+                )}
+
+                {showEntityType && (
+                  <div>
+                    <label className="text-sm font-medium">Entity Type</label>
+                    <ComboboxMulti
+                      options={entityTypeOptions}
+                      value={state.entity_type}
+                      onChange={(newValue) =>
+                        setState({ ...state, entity_type: newValue })
+                      }
+                      placeholder="Select entity types..."
+                    />
+                  </div>
+                )}
+
+                {showFieldReview && (
+                  <div>
+                    <label className="text-sm font-medium">Field Review</label>
+                    <ComboboxMulti
+                      options={fieldReviewOptions}
+                      value={fieldReviewValueArray}
+                      onChange={(newValue) =>
+                        setState({
+                          ...state,
+                          requires_field_review: newValue[0] || null,
+                        })
+                      }
+                      placeholder="Select field review requirement..."
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </DialogContent>
