@@ -316,4 +316,32 @@ SELECT mass_update_review_status_v2(
 
 -- ============================================================
 -- END EXAMPLE-DB-FUNCTION-CALLS.SQL
+-- ============================================================-- ============================================================
+-- VALUE AND USE MANAGEMENT EXAMPLES
 -- ============================================================
+
+-- Example 11: Schedule value recalculation for a building
+/*
+SELECT schedule_value_recalculation_v2(
+    'building', -- entity type
+    1, -- building ID
+    1, -- assessment cycle ID
+    'immediate', -- trigger type
+    NULL, -- scheduled date
+    '{"square_footage": {"old_value": "2000", "new_value": "2200"}}'
+);
+*/
+
+-- Example 12: Get current parcel values breakdown
+/*
+SELECT * FROM get_parcel_current_values_v2(1);
+*/
+
+-- Example 13: Detect value-triggering changes
+/*
+SELECT detect_value_triggering_changes_v2(
+    'building',
+    '{"square_footage": 2000, "condition_rating": 8}'::jsonb,
+    '{"square_footage": 2200, "condition_rating": 9}'::jsonb
+);
+*/
