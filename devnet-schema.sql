@@ -1010,148 +1010,117 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_kind text;
+    v_status_ids text;
+    v_assigned_to_id bigint;
+    v_data_status text;
+    v_priority text;
+    v_entity_type text;
+    v_requires_field_review boolean;
+    v_search_text text;
+    v_overdue_only boolean;
+    v_created_after date;
+    v_created_before date;
+    v_due_after date;
+    v_due_before date;
+    v_completed_only boolean;
+    v_active_only boolean;
+    status_ids_array bigint[];
 BEGIN
+    -- Extract filter values from JSONB
+    v_kind := p_filters->>'kind';
+    v_status_ids := p_filters->>'status_ids';
+    v_assigned_to_id := (p_filters->>'assigned_to_id')::bigint;
+    v_data_status := p_filters->>'data_status';
+    v_priority := p_filters->>'priority';
+    v_entity_type := p_filters->>'entity_type';
+    v_requires_field_review := (p_filters->>'requires_field_review')::boolean;
+    v_search_text := p_filters->>'search_text';
+    v_overdue_only := COALESCE((p_filters->>'overdue_only')::boolean, false);
+    v_created_after := (p_filters->>'created_after')::date;
+    v_created_before := (p_filters->>'created_before')::date;
+    v_due_after := (p_filters->>'due_after')::date;
+    v_due_before := (p_filters->>'due_before')::date;
+    v_completed_only := COALESCE((p_filters->>'completed_only')::boolean, false);
+    v_active_only := COALESCE((p_filters->>'active_only')::boolean, false);
+
+    -- Convert comma-separated status IDs to array
+    IF v_status_ids IS NOT NULL AND v_status_ids != '' THEN
+        SELECT ARRAY(
+            SELECT trim(unnest(string_to_array(v_status_ids, ',')))::bigint
+        ) INTO status_ids_array;
+    END IF;
+
     RETURN QUERY
-    WITH filtered_reviews AS (
-        SELECT 
-            r.id,
-            r.kind::text,
-            r.title,
-            r.description,
-            r.priority,
-            rs.name as status_name,
-            rs.slug as status_slug,
-            COALESCE(e.first_name || ' ' || e.last_name, '') as assigned_to_name,
-            e.email as assigned_to_email,
-            e.role as assigned_to_role,
-            r.entity_type,
-            r.entity_id,
-            
-            -- Parcel information
-            CASE WHEN r.entity_type = 'devnet_parcel' 
-                 THEN p.parcel_number 
-                 ELSE sp.parcel_number END as parcel_number,
-            CASE WHEN r.entity_type = 'devnet_parcel' 
-                 THEN COALESCE(p.data->>'address', p.data->>'property_address', '')
-                 ELSE COALESCE(sp.data->>'address', sp.data->>'property_address', '') END as parcel_address,
-            CASE WHEN r.entity_type = 'devnet_parcel' 
-                 THEN COALESCE(p.data->>'neighborhood', p.data->>'neighborhood_name', '')
-                 ELSE COALESCE(sp.data->>'neighborhood', sp.data->>'neighborhood_name', '') END as neighborhood_name,
-            
-            -- Sale information
-            CASE WHEN r.entity_type = 'devnet_sale' THEN s.sale_price ELSE NULL END as sale_price,
-            CASE WHEN r.entity_type = 'devnet_sale' THEN s.sale_date ELSE NULL END as sale_date,
-            
-            r.requires_field_review,
-            r.data_status::text,
-            r.due_date,
-            CASE WHEN r.due_date IS NOT NULL 
-                 THEN r.due_date - CURRENT_DATE 
-                 ELSE NULL END as days_until_due,
-            r.created_at,
-            r.updated_at,
-            r.completed_at
-        FROM public.devnet_reviews r
-        LEFT JOIN public.devnet_review_statuses rs ON r.current_status_id = rs.id
-        LEFT JOIN public.devnet_employees e ON r.assigned_to_id = e.id
-        
-        -- Join parcels for direct parcel reviews
-        LEFT JOIN public.devnet_parcels p ON (r.entity_type = 'devnet_parcel' AND r.entity_id = p.id)
-        
-        -- Join sales and related parcels for sale reviews
-        LEFT JOIN public.devnet_sales s ON (r.entity_type = 'devnet_sale' AND r.entity_id = s.id)
-        LEFT JOIN public.devnet_sale_parcels salep ON (r.entity_type = 'devnet_sale' AND s.id = salep.sale_id)
-        LEFT JOIN public.devnet_parcels sp ON salep.parcel_id = sp.id
-        
-        WHERE 1=1
-        -- Filter by review kind
-        AND (NOT p_filters ? 'kind' OR r.kind::text = p_filters->>'kind')
-        
-        -- Filter by status
-        AND (NOT p_filters ? 'status' OR rs.slug = p_filters->>'status')
-        
-        -- Filter by assigned employee
-        AND (NOT p_filters ? 'assigned_to_id' OR r.assigned_to_id = (p_filters->>'assigned_to_id')::bigint)
-        
-        -- Filter by assigned employee name (partial match)
-        AND (NOT p_filters ? 'assigned_to_name' OR 
-             (e.first_name || ' ' || e.last_name) ILIKE '%' || (p_filters->>'assigned_to_name') || '%')
-        
-        -- Filter by priority
-        AND (NOT p_filters ? 'priority' OR r.priority = p_filters->>'priority')
-        
-        -- Filter by parcel number (partial match)
-        AND (NOT p_filters ? 'parcel_number' OR 
-             (p.parcel_number ILIKE '%' || (p_filters->>'parcel_number') || '%' OR
-              sp.parcel_number ILIKE '%' || (p_filters->>'parcel_number') || '%'))
-        
-        -- Filter by address (partial match)
-        AND (NOT p_filters ? 'address' OR 
-             (COALESCE(p.data->>'address', p.data->>'property_address', '') ILIKE '%' || (p_filters->>'address') || '%' OR
-              COALESCE(sp.data->>'address', sp.data->>'property_address', '') ILIKE '%' || (p_filters->>'address') || '%'))
-        
-        -- Filter by neighborhood (partial match)
-        AND (NOT p_filters ? 'neighborhood' OR 
-             (COALESCE(p.data->>'neighborhood', p.data->>'neighborhood_name', '') ILIKE '%' || (p_filters->>'neighborhood') || '%' OR
-              COALESCE(sp.data->>'neighborhood', sp.data->>'neighborhood_name', '') ILIKE '%' || (p_filters->>'neighborhood') || '%'))
-        
-        -- Filter by data status
-        AND (NOT p_filters ? 'data_status' OR r.data_status::text = p_filters->>'data_status')
-        
-        -- Filter by field review requirement
-        AND (NOT p_filters ? 'requires_field_review' OR r.requires_field_review = (p_filters->>'requires_field_review')::boolean)
-        
-        -- Filter by terminal status
-        AND (NOT p_filters ? 'is_terminal' OR rs.is_terminal = (p_filters->>'is_terminal')::boolean)
-        
-        -- Date range filters
-        AND (NOT p_filters ? 'created_after' OR r.created_at >= (p_filters->>'created_after')::timestamptz)
-        AND (NOT p_filters ? 'created_before' OR r.created_at <= (p_filters->>'created_before')::timestamptz)
-        AND (NOT p_filters ? 'due_after' OR r.due_date >= (p_filters->>'due_after')::date)
-        AND (NOT p_filters ? 'due_before' OR r.due_date <= (p_filters->>'due_before')::date)
-        
-        -- Sale price range filters
-        AND (NOT p_filters ? 'min_sale_price' OR 
-             (r.entity_type = 'devnet_sale' AND s.sale_price >= (p_filters->>'min_sale_price')::numeric))
-        AND (NOT p_filters ? 'max_sale_price' OR 
-             (r.entity_type = 'devnet_sale' AND s.sale_price <= (p_filters->>'max_sale_price')::numeric))
-    )
     SELECT 
-        fr.id,
-        fr.kind,
-        fr.title,
-        fr.description,
-        fr.priority,
-        fr.status_name,
-        fr.status_slug,
-        fr.assigned_to_name,
-        fr.assigned_to_email,
-        fr.assigned_to_role,
-        fr.entity_type,
-        fr.entity_id,
-        fr.parcel_number,
-        fr.parcel_address,
-        fr.neighborhood_name,
-        fr.sale_price,
-        fr.sale_date,
-        fr.requires_field_review,
-        fr.data_status,
-        fr.due_date,
-        fr.days_until_due,
-        fr.created_at,
-        fr.updated_at,
-        fr.completed_at
-    FROM filtered_reviews fr
+        r.id,
+        r.kind::text,
+        r.title,
+        r.description,
+        r.priority,
+        rs.name as status_name,
+        rs.slug as status_slug,
+        COALESCE(e.first_name || ' ' || e.last_name, '') as assigned_to_name,
+        e.email as assigned_to_email,
+        e.role as assigned_to_role,
+        r.entity_type,
+        r.entity_id,
+        COALESCE(dp.parcel_number, '') as parcel_number,
+        COALESCE(dp.data->>'address', '') as parcel_address,
+        COALESCE(dnr.neighborhood_name, '') as neighborhood_name,
+        ds.sale_price,
+        ds.sale_date,
+        r.requires_field_review,
+        r.data_status::text,
+        r.due_date,
+        CASE WHEN r.due_date IS NOT NULL 
+             THEN r.due_date - CURRENT_DATE 
+             ELSE NULL END as days_until_due,
+        r.created_at,
+        r.updated_at,
+        r.completed_at
+    FROM public.devnet_reviews r
+    LEFT JOIN public.devnet_review_statuses rs ON r.current_status_id = rs.id
+    LEFT JOIN public.devnet_employees e ON r.assigned_to_id = e.id
+    LEFT JOIN public.devnet_parcels dp ON r.entity_type = 'parcel' AND r.entity_id = dp.id
+    LEFT JOIN public.devnet_sales ds ON r.entity_type = 'sale' AND r.entity_id = ds.id
+    LEFT JOIN public.devnet_neighborhood_report dnr ON r.entity_type = 'neighborhood' AND r.entity_id = dnr.id
+    WHERE 1=1
+        -- Filter by kind
+        AND (v_kind IS NULL OR r.kind::text = v_kind)
+        -- Filter by status IDs
+        AND (status_ids_array IS NULL OR r.current_status_id = ANY(status_ids_array))
+        -- Filter by assigned employee
+        AND (v_assigned_to_id IS NULL OR r.assigned_to_id = v_assigned_to_id)
+        -- Filter by data status
+        AND (v_data_status IS NULL OR r.data_status::text = v_data_status)
+        -- Filter by priority
+        AND (v_priority IS NULL OR r.priority = v_priority)
+        -- Filter by entity type
+        AND (v_entity_type IS NULL OR r.entity_type = v_entity_type)
+        -- Filter by field review requirement
+        AND (v_requires_field_review IS NULL OR r.requires_field_review = v_requires_field_review)
+        -- Text search in title and description
+        AND (v_search_text IS NULL OR 
+             (r.title ILIKE '%' || v_search_text || '%' OR 
+              r.description ILIKE '%' || v_search_text || '%' OR
+              dp.parcel_number ILIKE '%' || v_search_text || '%' OR
+              (dp.data->>'address') ILIKE '%' || v_search_text || '%'))
+        -- Overdue filter
+        AND (NOT v_overdue_only OR (r.due_date IS NOT NULL AND r.due_date < CURRENT_DATE))
+        -- Date range filters
+        AND (v_created_after IS NULL OR r.created_at::date >= v_created_after)
+        AND (v_created_before IS NULL OR r.created_at::date <= v_created_before)
+        AND (v_due_after IS NULL OR r.due_date >= v_due_after)
+        AND (v_due_before IS NULL OR r.due_date <= v_due_before)
+        -- Completion filters
+        AND (NOT v_completed_only OR r.completed_at IS NOT NULL)
+        AND (NOT v_active_only OR r.completed_at IS NULL)
     ORDER BY 
-        CASE fr.priority 
-            WHEN 'urgent' THEN 1 
-            WHEN 'high' THEN 2 
-            WHEN 'medium' THEN 3 
-            WHEN 'low' THEN 4 
-            ELSE 5 
-        END,
-        fr.due_date ASC NULLS LAST,
-        fr.created_at DESC;
+        CASE WHEN v_overdue_only THEN r.due_date END ASC,
+        r.created_at DESC
+    LIMIT 1000;
 END;
 $$;
 
@@ -1436,30 +1405,399 @@ END;
 $$;
 
 -- ============================================================
--- SEED DATA FOR TESTING
+-- COMPREHENSIVE SEED DATA FOR TESTING
 -- ============================================================
 
--- Insert sample employees
-INSERT INTO public.devnet_employees (first_name, last_name, email, role, specialties, can_approve) VALUES
-('John', 'Smith', 'john.smith@example.com', 'appraiser', '{field_work, residential}', false),
-('Sarah', 'Johnson', 'sarah.johnson@example.com', 'supervisor', '{approval, data_entry}', true),
-('Mike', 'Davis', 'mike.davis@example.com', 'appraiser', '{field_work, commercial}', false),
-('Lisa', 'Wilson', 'lisa.wilson@example.com', 'data_entry', '{data_entry, residential}', false),
-('Tom', 'Brown', 'tom.brown@example.com', 'supervisor', '{approval, review}', true)
+-- Generate comprehensive employee data (120 employees)
+INSERT INTO public.devnet_employees (first_name, last_name, email, role, specialties, can_approve) 
+SELECT 
+    CASE (i % 20)
+        WHEN 0 THEN 'John'
+        WHEN 1 THEN 'Sarah' 
+        WHEN 2 THEN 'Mike'
+        WHEN 3 THEN 'Lisa'
+        WHEN 4 THEN 'Tom'
+        WHEN 5 THEN 'Amy'
+        WHEN 6 THEN 'David'
+        WHEN 7 THEN 'Emily'
+        WHEN 8 THEN 'James'
+        WHEN 9 THEN 'Jessica'
+        WHEN 10 THEN 'Robert'
+        WHEN 11 THEN 'Ashley'
+        WHEN 12 THEN 'Michael'
+        WHEN 13 THEN 'Amanda'
+        WHEN 14 THEN 'William'
+        WHEN 15 THEN 'Jennifer'
+        WHEN 16 THEN 'Kevin'
+        WHEN 17 THEN 'Stephanie'
+        WHEN 18 THEN 'Brian'
+        ELSE 'Michelle'
+    END as first_name,
+    CASE (i % 25)
+        WHEN 0 THEN 'Smith'
+        WHEN 1 THEN 'Johnson'
+        WHEN 2 THEN 'Davis'
+        WHEN 3 THEN 'Wilson'
+        WHEN 4 THEN 'Brown'
+        WHEN 5 THEN 'Miller'
+        WHEN 6 THEN 'Moore'
+        WHEN 7 THEN 'Taylor'
+        WHEN 8 THEN 'Anderson'
+        WHEN 9 THEN 'Thomas'
+        WHEN 10 THEN 'Jackson'
+        WHEN 11 THEN 'White'
+        WHEN 12 THEN 'Harris'
+        WHEN 13 THEN 'Martin'
+        WHEN 14 THEN 'Thompson'
+        WHEN 15 THEN 'Garcia'
+        WHEN 16 THEN 'Martinez'
+        WHEN 17 THEN 'Robinson'
+        WHEN 18 THEN 'Clark'
+        WHEN 19 THEN 'Rodriguez'
+        WHEN 20 THEN 'Lewis'
+        WHEN 21 THEN 'Lee'
+        WHEN 22 THEN 'Walker'
+        WHEN 23 THEN 'Hall'
+        ELSE 'Allen'
+    END as last_name,
+    'employee' || i || '@example.com' as email,
+    CASE (i % 4)
+        WHEN 0 THEN 'appraiser'
+        WHEN 1 THEN 'supervisor'
+        WHEN 2 THEN 'data_entry'
+        ELSE 'reviewer'
+    END as role,
+    CASE (i % 6)
+        WHEN 0 THEN '{field_work, residential}'
+        WHEN 1 THEN '{approval, data_entry}'
+        WHEN 2 THEN '{field_work, commercial}'
+        WHEN 3 THEN '{data_entry, residential}'
+        WHEN 4 THEN '{approval, review}'
+        ELSE '{field_work, commercial, residential}'
+    END::text[] as specialties,
+    CASE WHEN (i % 4) = 1 THEN true ELSE false END as can_approve
+FROM generate_series(1, 120) as i
 ON CONFLICT (email) DO NOTHING;
 
--- Sample parcels and sales
-INSERT INTO public.devnet_parcels (parcel_number, start_year, end_year, data, devnet_id) VALUES
-('123-456-789', 2023, 2024, '{"owner": "Test Owner 1", "address": "123 Main St"}', 'DEV001'),
-('987-654-321', 2023, 2024, '{"owner": "Test Owner 2", "address": "456 Oak Ave"}', 'DEV002'),
-('555-123-456', 2023, 2024, '{"owner": "Test Owner 3", "address": "789 Pine Rd"}', 'DEV003')
+-- Generate comprehensive parcel data (150 parcels)
+INSERT INTO public.devnet_parcels (parcel_number, start_year, end_year, data, devnet_id)
+SELECT 
+    lpad((100000 + i)::text, 3, '0') || '-' || 
+    lpad(((i * 7) % 1000 + 100)::text, 3, '0') || '-' || 
+    lpad(((i * 13) % 1000 + 100)::text, 3, '0') as parcel_number,
+    2022 + (i % 3) as start_year,
+    2023 + (i % 3) as end_year,
+    jsonb_build_object(
+        'owner', 'Owner ' || i,
+        'address', (100 + (i * 3) % 900) || ' ' || 
+                  CASE (i % 15)
+                      WHEN 0 THEN 'Main St'
+                      WHEN 1 THEN 'Oak Ave'
+                      WHEN 2 THEN 'Pine Rd'
+                      WHEN 3 THEN 'Elm St'
+                      WHEN 4 THEN 'Maple Dr'
+                      WHEN 5 THEN 'Cedar Ln'
+                      WHEN 6 THEN 'First Ave'
+                      WHEN 7 THEN 'Second St'
+                      WHEN 8 THEN 'Third Ave'
+                      WHEN 9 THEN 'Broadway'
+                      WHEN 10 THEN 'Park Ave'
+                      WHEN 11 THEN 'Central St'
+                      WHEN 12 THEN 'North Rd'
+                      WHEN 13 THEN 'South St'
+                      ELSE 'East Ave'
+                  END,
+        'property_type', CASE (i % 4)
+                           WHEN 0 THEN 'residential'
+                           WHEN 1 THEN 'commercial'
+                           WHEN 2 THEN 'industrial'
+                           ELSE 'mixed_use'
+                       END,
+        'square_feet', 1000 + (i * 50) % 3000,
+        'year_built', 1950 + (i * 3) % 70,
+        'neighborhood', CASE (i % 8)
+                          WHEN 0 THEN 'Downtown'
+                          WHEN 1 THEN 'Midtown'
+                          WHEN 2 THEN 'Uptown'
+                          WHEN 3 THEN 'Eastside'
+                          WHEN 4 THEN 'Westside'
+                          WHEN 5 THEN 'Northside'
+                          WHEN 6 THEN 'Southside'
+                          ELSE 'Suburbs'
+                      END
+    ) as data,
+    'DEV' || lpad(i::text, 4, '0') as devnet_id
+FROM generate_series(1, 150) as i
 ON CONFLICT DO NOTHING;
 
-INSERT INTO public.devnet_sales (sale_price, sale_date, sale_type, data, devnet_id) VALUES
-(250000, '2024-01-15', 'arms_length', '{"buyer": "Jane Doe", "seller": "John Doe"}', 'SALE001'),
-(180000, '2024-02-20', 'arms_length', '{"buyer": "Bob Smith", "seller": "Alice Johnson"}', 'SALE002'),
-(320000, '2024-03-10', 'arms_length', '{"buyer": "Mike Wilson", "seller": "Sarah Davis"}', 'SALE003')
-ON CONFLICT DO NOTHING;
+-- Generate comprehensive neighborhood reports (110 reports)
+INSERT INTO public.devnet_neighborhood_report (neighborhood_name, start_year, end_year, data, devnet_id)
+SELECT 
+    CASE (i % 11)
+        WHEN 0 THEN 'Downtown'
+        WHEN 1 THEN 'Midtown'
+        WHEN 2 THEN 'Uptown'
+        WHEN 3 THEN 'Eastside'
+        WHEN 4 THEN 'Westside'
+        WHEN 5 THEN 'Northside'
+        WHEN 6 THEN 'Southside'
+        WHEN 7 THEN 'Suburbs'
+        WHEN 8 THEN 'Historic District'
+        WHEN 9 THEN 'Waterfront'
+        ELSE 'Industrial Zone'
+    END as neighborhood_name,
+    2020 + (i % 5) as start_year,
+    2021 + (i % 5) as end_year,
+    jsonb_build_object(
+        'median_home_value', 150000 + (i * 5000) % 300000,
+        'population', 500 + (i * 100) % 5000,
+        'crime_rate', 1.0 + (i * 0.1) % 5.0,
+        'school_rating', 6 + (i % 5),
+        'amenities', array[
+            CASE WHEN (i % 4) = 0 THEN 'schools' END,
+            CASE WHEN (i % 3) = 0 THEN 'parks' END,
+            CASE WHEN (i % 5) = 0 THEN 'shopping' END,
+            CASE WHEN (i % 7) = 0 THEN 'transit' END
+        ]::text[],
+        'market_trend', CASE (i % 3)
+                          WHEN 0 THEN 'rising'
+                          WHEN 1 THEN 'stable'
+                          ELSE 'declining'
+                      END
+    ) as data,
+    'NBH' || lpad(i::text, 4, '0') as devnet_id
+FROM generate_series(1, 110) as i;
+
+-- Generate comprehensive sales data (200 sales)
+INSERT INTO public.devnet_sales (sale_price, sale_date, sale_type, sale_status, data, devnet_id)
+SELECT 
+    (100000 + (i * 7919) % 500000)::numeric(12,2) as sale_price,
+    '2022-01-01'::date + (i * 5) % 1095 as sale_date,
+    CASE (i % 5)
+        WHEN 0 THEN 'arms_length'
+        WHEN 1 THEN 'foreclosure'
+        WHEN 2 THEN 'estate'
+        WHEN 3 THEN 'family'
+        ELSE 'auction'
+    END as sale_type,
+    CASE (i % 4)
+        WHEN 0 THEN 'verified'
+        WHEN 1 THEN 'pending'
+        WHEN 2 THEN 'under_review'
+        ELSE 'approved'
+    END as sale_status,
+    jsonb_build_object(
+        'buyer', 'Buyer ' || i,
+        'seller', 'Seller ' || i,
+        'financing', CASE (i % 4)
+                       WHEN 0 THEN 'cash'
+                       WHEN 1 THEN 'conventional'
+                       WHEN 2 THEN 'fha'
+                       ELSE 'va'
+                   END,
+        'days_on_market', 5 + (i * 3) % 180,
+        'listing_price', (110000 + (i * 7919) % 500000)::numeric(12,2),
+        'agent_name', 'Agent ' || ((i % 50) + 1),
+        'property_condition', CASE (i % 5)
+                                WHEN 0 THEN 'excellent'
+                                WHEN 1 THEN 'good'
+                                WHEN 2 THEN 'average'
+                                WHEN 3 THEN 'fair'
+                                ELSE 'poor'
+                            END
+    ) as data,
+    'SALE' || lpad(i::text, 5, '0') as devnet_id
+FROM generate_series(1, 200) as i;
+
+-- Generate sale-parcel relationships (300 relationships, some sales have multiple parcels)
+INSERT INTO public.devnet_sale_parcels (sale_id, parcel_id, data)
+SELECT 
+    (i % 200) + 1 as sale_id,
+    ((i * 7) % 150) + 1 as parcel_id,
+    jsonb_build_object(
+        'parcel_role', CASE (i % 3)
+                         WHEN 0 THEN 'primary'
+                         WHEN 1 THEN 'secondary'
+                         ELSE 'additional'
+                     END,
+        'parcel_percentage', CASE 
+                               WHEN (i % 3) = 0 THEN 100
+                               WHEN (i % 3) = 1 THEN 60
+                               ELSE 40
+                           END
+    ) as data
+FROM generate_series(1, 300) as i
+ON CONFLICT (sale_id, parcel_id) DO NOTHING;
+
+-- Generate comprehensive reviews data (250 reviews)
+INSERT INTO public.devnet_reviews (
+    kind, 
+    current_status_id, 
+    assigned_to_id, 
+    due_date, 
+    entity_type, 
+    entity_id, 
+    data_status, 
+    requires_field_review, 
+    title, 
+    description, 
+    priority, 
+    data,
+    field_data,
+    field_notes,
+    created_at,
+    updated_at
+)
+SELECT 
+    CASE (i % 4)
+        WHEN 0 THEN 'sale_review'::public.devnet_review_kind
+        WHEN 1 THEN 'permit_review'::public.devnet_review_kind
+        WHEN 2 THEN 'appeal_review'::public.devnet_review_kind
+        ELSE 'custom_review'::public.devnet_review_kind
+    END as kind,
+    -- Get appropriate status for each kind
+    (SELECT id FROM public.devnet_review_statuses rs 
+     WHERE rs.review_kind = CASE (i % 4)
+                              WHEN 0 THEN 'sale_review'::public.devnet_review_kind
+                              WHEN 1 THEN 'permit_review'::public.devnet_review_kind
+                              WHEN 2 THEN 'appeal_review'::public.devnet_review_kind
+                              ELSE 'custom_review'::public.devnet_review_kind
+                          END
+     ORDER BY rs.sort_order + (i % 3) 
+     LIMIT 1) as current_status_id,
+    (i % 120) + 1 as assigned_to_id,
+    CURRENT_DATE + (i % 30) as due_date,
+    CASE (i % 4)
+        WHEN 0 THEN 'devnet_sales'
+        WHEN 1 THEN 'devnet_parcels'
+        WHEN 2 THEN 'devnet_parcels'
+        ELSE 'devnet_sales'
+    END as entity_type,
+    CASE (i % 4)
+        WHEN 0 THEN (i % 200) + 1
+        WHEN 1 THEN (i % 150) + 1
+        WHEN 2 THEN (i % 150) + 1
+        ELSE (i % 200) + 1
+    END as entity_id,
+    CASE (i % 6)
+        WHEN 0 THEN 'not_collected'::public.devnet_data_status
+        WHEN 1 THEN 'in_field'::public.devnet_data_status
+        WHEN 2 THEN 'collected'::public.devnet_data_status
+        WHEN 3 THEN 'entered'::public.devnet_data_status
+        WHEN 4 THEN 'copied_to_devnet'::public.devnet_data_status
+        ELSE 'verified'::public.devnet_data_status
+    END as data_status,
+    (i % 3) = 0 as requires_field_review,
+    CASE (i % 4)
+        WHEN 0 THEN 'Sale Review #' || i
+        WHEN 1 THEN 'Permit Review #' || i
+        WHEN 2 THEN 'Appeal Review #' || i
+        ELSE 'Custom Review #' || i
+    END as title,
+    'Review description for item #' || i || '. ' ||
+    CASE (i % 5)
+        WHEN 0 THEN 'Requires urgent attention due to high priority.'
+        WHEN 1 THEN 'Standard review process with normal timeline.'
+        WHEN 2 THEN 'Complex case requiring additional documentation.'
+        WHEN 3 THEN 'Follow-up review from previous inspection.'
+        ELSE 'Routine review as part of regular workflow.'
+    END as description,
+    CASE (i % 4)
+        WHEN 0 THEN 1
+        WHEN 1 THEN 2
+        WHEN 2 THEN 3
+        ELSE 4
+    END as priority,
+    jsonb_build_object(
+        'property_address', (100 + (i * 7) % 900) || ' Test St #' || i,
+        'estimated_value', 150000 + (i * 1000) % 400000,
+        'urgency_level', CASE (i % 3)
+                           WHEN 0 THEN 'low'
+                           WHEN 1 THEN 'medium'
+                           ELSE 'high'
+                       END,
+        'review_type', CASE (i % 4)
+                         WHEN 0 THEN 'initial'
+                         WHEN 1 THEN 'follow_up'
+                         WHEN 2 THEN 'appeal'
+                         ELSE 'special'
+                     END,
+        'documents_required', array[
+            CASE WHEN (i % 5) = 0 THEN 'deed' END,
+            CASE WHEN (i % 4) = 0 THEN 'survey' END,
+            CASE WHEN (i % 3) = 0 THEN 'photos' END,
+            CASE WHEN (i % 7) = 0 THEN 'appraisal' END
+        ]::text[]
+    ) as data,
+    CASE 
+        WHEN (i % 6) >= 2 THEN 
+            jsonb_build_object(
+                'inspection_date', CURRENT_DATE - (i % 30),
+                'inspector_notes', 'Field inspection completed for review #' || i,
+                'photos_taken', 3 + (i % 8),
+                'measurements', jsonb_build_object(
+                    'length', 50 + (i * 3) % 100,
+                    'width', 30 + (i * 2) % 60,
+                    'height', 8 + (i % 4)
+                ),
+                'condition_rating', 1 + (i % 5)
+            )
+        ELSE NULL
+    END as field_data,
+    CASE 
+        WHEN (i % 6) >= 2 THEN 'Field notes for review #' || i || '. Property inspected and documented.'
+        ELSE NULL
+    END as field_notes,
+    CURRENT_TIMESTAMP - (i || ' days')::interval as created_at,
+    CURRENT_TIMESTAMP - (GREATEST(0, i - 5) || ' days')::interval as updated_at
+FROM generate_series(1, 250) as i;
+
+-- Generate review assignments (400 assignments - multiple assignments per review for different statuses)
+INSERT INTO public.devnet_review_assignments (
+    review_id, 
+    status_id, 
+    employee_id, 
+    assigned_by_id, 
+    due_date, 
+    notes,
+    completed_at,
+    completed_by_id,
+    completion_notes,
+    is_active
+)
+SELECT 
+    (i % 250) + 1 as review_id,
+    -- Get a random status for the review kind
+    (SELECT rs.id FROM public.devnet_reviews r 
+     JOIN public.devnet_review_statuses rs ON rs.review_kind = r.kind 
+     WHERE r.id = (i % 250) + 1 
+     ORDER BY rs.sort_order + (i % 3) 
+     LIMIT 1) as status_id,
+    ((i * 7) % 120) + 1 as employee_id,
+    ((i * 11) % 120) + 1 as assigned_by_id,
+    CURRENT_DATE + ((i * 3) % 45) as due_date,
+    'Assignment #' || i || ' - ' ||
+    CASE (i % 4)
+        WHEN 0 THEN 'High priority assignment requiring immediate attention'
+        WHEN 1 THEN 'Standard assignment with normal processing'
+        WHEN 2 THEN 'Complex assignment requiring specialist knowledge'
+        ELSE 'Follow-up assignment from previous work'
+    END as notes,
+    CASE 
+        WHEN (i % 3) = 0 THEN CURRENT_TIMESTAMP - ((i % 10) || ' days')::interval
+        ELSE NULL
+    END as completed_at,
+    CASE 
+        WHEN (i % 3) = 0 THEN ((i * 7) % 120) + 1
+        ELSE NULL
+    END as completed_by_id,
+    CASE 
+        WHEN (i % 3) = 0 THEN 'Assignment completed successfully. All requirements met.'
+        ELSE NULL
+    END as completion_notes,
+    (i % 3) != 0 as is_active
+FROM generate_series(1, 400) as i
+ON CONFLICT (review_id, status_id, employee_id) DO NOTHING;
 
 -- ============================================================
 -- EXAMPLE USAGE QUERIES

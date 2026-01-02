@@ -524,3 +524,129 @@ export function useParcelValueFeatures(options?: {
     isLoading,
   };
 }
+
+// ============================================================
+// DEVNET REVIEWS HOOKS
+// ============================================================
+
+export type DevnetReviewStatus = {
+  id: number;
+  name: string;
+  slug: string;
+  review_kind: string;
+  is_terminal: boolean;
+  sort_order: number;
+};
+
+export type DevnetEmployee = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  status: string;
+};
+
+export type DevnetReview = {
+  id: number;
+  kind: string;
+  title: string;
+  description: string | null;
+  priority: string;
+  status_name: string;
+  status_slug: string;
+  assigned_to_name: string | null;
+  assigned_to_email: string | null;
+  assigned_to_role: string | null;
+  entity_type: string | null;
+  entity_id: number | null;
+  parcel_number: string;
+  parcel_address: string;
+  neighborhood_name: string;
+  sale_price: number | null;
+  sale_date: string | null;
+  requires_field_review: boolean;
+  data_status: string;
+  due_date: string | null;
+  days_until_due: number | null;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+};
+
+export type DevnetReviewsResponse = {
+  data: DevnetReview[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    has_more: boolean;
+  };
+};
+
+export function useDevnetReviewStatuses(reviewKind?: string) {
+  const params = new URLSearchParams();
+  if (reviewKind) params.set("review_kind", reviewKind);
+
+  const url = reviewKind
+    ? `/devnet-reviews/api/review-statuses?${params.toString()}`
+    : `/devnet-reviews/api/review-statuses`;
+
+  const { data, error, isLoading } = useSWR(url, fetcher);
+
+  return {
+    options: data || [],
+    isLoading,
+    error,
+  };
+}
+
+export function useDevnetEmployees() {
+  const { data, error, isLoading } = useSWR(
+    `/devnet-reviews/api/employees`,
+    fetcher
+  );
+
+  return {
+    options: data || [],
+    isLoading,
+    error,
+  };
+}
+
+export function useDevnetReviews(options?: {
+  page?: number;
+  page_size?: number;
+  kind?: string;
+  status_ids?: string[];
+  assigned_to_id?: string;
+  data_status?: string;
+  priority?: number;
+  entity_type?: string;
+  requires_field_review?: boolean;
+}) {
+  const params = new URLSearchParams();
+
+  if (options?.page) params.set("page", String(options.page));
+  if (options?.page_size) params.set("page_size", String(options.page_size));
+  if (options?.kind) params.set("kind", options.kind);
+  if (options?.status_ids?.length)
+    params.set("status_ids", options.status_ids.join(","));
+  if (options?.assigned_to_id)
+    params.set("assigned_to_id", options.assigned_to_id);
+  if (options?.data_status) params.set("data_status", options.data_status);
+  if (options?.priority) params.set("priority", String(options.priority));
+  if (options?.entity_type) params.set("entity_type", options.entity_type);
+  if (options?.requires_field_review !== undefined) {
+    params.set("requires_field_review", String(options.requires_field_review));
+  }
+
+  const url = `/devnet-reviews/api/reviews?${params.toString()}`;
+  const { data, error, isLoading } = useSWR(url, fetcher);
+
+  return {
+    data: data as DevnetReviewsResponse | undefined,
+    isLoading,
+    error,
+  };
+}
