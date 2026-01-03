@@ -547,6 +547,35 @@ export type DevnetEmployee = {
   status: string;
 };
 
+export type DevnetParcel = {
+  id: number;
+  parcel_number: string;
+  start_year: number | null;
+  end_year: number | null;
+  data: any;
+  devnet_id: string | null;
+  sync_date: string;
+};
+
+export type DevnetSale = {
+  id: number;
+  sale_price: number | null;
+  sale_date: string | null;
+  sale_type: string | null;
+  sale_status: string | null;
+  data: any;
+  devnet_id: string | null;
+  sync_date: string;
+};
+
+export type DevnetSaleParcel = {
+  id: number;
+  sale_id: number;
+  parcel_id: number;
+  data: any;
+  created_at: string;
+};
+
 export type DevnetReview = {
   id: number;
   kind: string;
@@ -572,6 +601,10 @@ export type DevnetReview = {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  // Associated data
+  parcel_data: DevnetParcel | DevnetParcel[] | null;
+  sales_data: DevnetSale | DevnetSale[] | null;
+  sale_parcels_data: DevnetSaleParcel[] | null;
 };
 
 export type DevnetReviewsResponse = {

@@ -37,6 +37,14 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const idNum = parseInt(id, 10);
+  if (isNaN(idNum)) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center mt-16">
+        <p className="text-center">Invalid abatement program ID</p>
+      </div>
+    );
+  }
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -48,7 +56,7 @@ export default async function Page({
       abatement_parcels(*, test_parcels(*))
     `
     )
-    .eq("id", id)
+    .eq("id", idNum)
     .single();
 
   if (error) {

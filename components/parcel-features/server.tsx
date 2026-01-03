@@ -9,7 +9,7 @@ export default async function ParcelFeatures(props: {
   const supabase = await createClient();
   const { data, error } = await supabase
     .rpc("get_parcel_features")
-    .eq("parcel_id", id)
+    .eq("parcel_id", Number(id))
     .single();
 
   if (error) {

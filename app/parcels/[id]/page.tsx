@@ -30,7 +30,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { data, error } = await supabase
     .from("test_parcels")
     .select("*, test_parcel_land_uses(*)")
-    .eq("id", params.id)
+    .eq("id", Number(params.id))
     .single();
 
   if (error) {

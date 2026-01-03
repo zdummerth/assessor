@@ -214,7 +214,7 @@ async function SalesTableContent({
   }
 
   //   console.log("SalesTableContent data", { data, count, error });
-  const rows = (data ?? []) as Row[];
+  const rows = (data ?? []) as unknown as Row[];
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / page_size));
 

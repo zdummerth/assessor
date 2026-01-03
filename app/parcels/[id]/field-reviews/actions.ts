@@ -276,11 +276,11 @@ export async function assignFieldReviewEmployeesBulk(
 
     if (revalidate_path) rp(revalidate_path);
 
-    const inserted =
+    const inserted: number | null =
       typeof data === "number"
         ? data
         : Array.isArray(data)
-          ? data.length
+          ? (data as any[]).length
           : null;
 
     return {

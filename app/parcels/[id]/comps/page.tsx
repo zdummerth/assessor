@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import SalesAddressSearch from "@/components/ui/sales/search-by-address";
 import ManualComps from "@/components/parcel-comps-client/manual";
 import ParcelNumber from "@/components/ui/parcel-number-updated";
+import { parse } from "path";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -20,10 +21,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
+  const parcelId = parseInt(params.id, 10);
+  if (isNaN(parcelId)) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center mt-16">
+        <p className="text-center">Invalid parcel ID</p>
+      </div>
+    );
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .rpc("get_parcel_features")
-    .eq("parcel_id", params.id)
+    .eq("parcel_id", parcelId)
     .single();
 
   if (error) {

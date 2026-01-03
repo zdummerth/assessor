@@ -143,7 +143,7 @@ async function StatsServer(props: {
     );
   }
 
-  const rows = (data ?? []) as RatioRow[];
+  const rows = (data ?? []) as unknown as RatioRow[];
 
   return <RatioStatsClient rows={rows} />;
 }

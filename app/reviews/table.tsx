@@ -74,7 +74,7 @@ export default async function FieldReviewsTableServer({
     );
   }
 
-  const reviews = (data ?? []) as FieldReviewWithParcelDetailsV2[];
+  const reviews = (data ?? []) as unknown as FieldReviewWithParcelDetailsV2[];
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 

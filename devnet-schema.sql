@@ -721,22 +721,22 @@ RETURNS boolean
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    review_id bigint;
-    current_status_id bigint;
+    v_review_id bigint;
+    v_current_status_id bigint;
 BEGIN
-    FOREACH review_id IN ARRAY p_review_ids
+    FOREACH v_review_id IN ARRAY p_review_ids
     LOOP
         -- Get current status
-        SELECT devnet_reviews.current_status_id INTO current_status_id
+        SELECT devnet_reviews.current_status_id INTO v_current_status_id
         FROM public.devnet_reviews 
-        WHERE id = review_id;
+        WHERE id = v_review_id;
         
         -- Update assignment
         UPDATE public.devnet_reviews 
         SET 
             assigned_to_id = p_employee_id,
             due_date = COALESCE(p_due_date, due_date)
-        WHERE id = review_id;
+        WHERE id = v_review_id;
         
         -- Create status-specific assignment if status requires it
         INSERT INTO public.devnet_review_assignments (
@@ -747,8 +747,8 @@ BEGIN
             due_date,
             notes
         ) VALUES (
-            review_id,
-            current_status_id,
+            v_review_id,
+            v_current_status_id,
             p_employee_id,
             p_assigned_by_id,
             p_due_date,
@@ -756,8 +756,9 @@ BEGIN
         ) ON CONFLICT (review_id, status_id, employee_id) 
         DO UPDATE SET
             assigned_by_id = EXCLUDED.assigned_by_id,
-            due_date = COALESCE(EXCLUDED.due_date, devnet_review_assignments.due_date),
-            assigned_at = now();
+            due_date = COALESCE(EXCLUDED.due_date, p_due_date),
+            assigned_at = now(),
+            is_active = true;
     END LOOP;
     
     RETURN true;
@@ -1006,7 +1007,13 @@ RETURNS TABLE (
     days_until_due integer,
     created_at timestamptz,
     updated_at timestamptz,
-    completed_at timestamptz
+    completed_at timestamptz,
+    -- Associated parcel data
+    parcel_data jsonb,
+    -- Associated sales data  
+    sales_data jsonb,
+    -- Associated sale-parcel relationships
+    sale_parcels_data jsonb
 )
 LANGUAGE plpgsql
 AS $$
@@ -1079,12 +1086,92 @@ BEGIN
              ELSE NULL END as days_until_due,
         r.created_at,
         r.updated_at,
-        r.completed_at
+        r.completed_at,
+        -- Get all parcels related to this review
+        CASE 
+            WHEN r.entity_type = 'devnet_parcels' THEN 
+                jsonb_build_object(
+                    'id', dp.id,
+                    'parcel_number', dp.parcel_number,
+                    'start_year', dp.start_year,
+                    'end_year', dp.end_year,
+                    'data', dp.data,
+                    'devnet_id', dp.devnet_id,
+                    'sync_date', dp.sync_date
+                )
+            WHEN r.entity_type = 'devnet_sales' THEN (
+                SELECT jsonb_agg(
+                    jsonb_build_object(
+                        'id', related_parcels.id,
+                        'parcel_number', related_parcels.parcel_number,
+                        'start_year', related_parcels.start_year,
+                        'end_year', related_parcels.end_year,
+                        'data', related_parcels.data,
+                        'devnet_id', related_parcels.devnet_id,
+                        'sync_date', related_parcels.sync_date
+                    )
+                )
+                FROM public.devnet_parcels related_parcels
+                INNER JOIN public.devnet_sale_parcels dsp ON related_parcels.id = dsp.parcel_id
+                WHERE dsp.sale_id = r.entity_id
+            )
+            ELSE NULL
+        END as parcel_data,
+        -- Get all sales related to this review
+        CASE 
+            WHEN r.entity_type = 'devnet_sales' THEN 
+                jsonb_build_object(
+                    'id', ds.id,
+                    'sale_price', ds.sale_price,
+                    'sale_date', ds.sale_date,
+                    'sale_type', ds.sale_type,
+                    'sale_status', ds.sale_status,
+                    'data', ds.data,
+                    'devnet_id', ds.devnet_id,
+                    'sync_date', ds.sync_date
+                )
+            WHEN r.entity_type = 'devnet_parcels' THEN (
+                SELECT jsonb_agg(
+                    jsonb_build_object(
+                        'id', related_sales.id,
+                        'sale_price', related_sales.sale_price,
+                        'sale_date', related_sales.sale_date,
+                        'sale_type', related_sales.sale_type,
+                        'sale_status', related_sales.sale_status,
+                        'data', related_sales.data,
+                        'devnet_id', related_sales.devnet_id,
+                        'sync_date', related_sales.sync_date
+                    )
+                )
+                FROM public.devnet_sales related_sales
+                INNER JOIN public.devnet_sale_parcels dsp ON related_sales.id = dsp.sale_id
+                WHERE dsp.parcel_id = r.entity_id
+            )
+            ELSE NULL
+        END as sales_data,
+        -- Get sale-parcel relationships
+        CASE 
+            WHEN r.entity_type IN ('devnet_sales', 'devnet_parcels') THEN (
+                SELECT jsonb_agg(
+                    jsonb_build_object(
+                        'id', dsp.id,
+                        'sale_id', dsp.sale_id,
+                        'parcel_id', dsp.parcel_id,
+                        'data', dsp.data,
+                        'created_at', dsp.created_at
+                    )
+                )
+                FROM public.devnet_sale_parcels dsp
+                WHERE (r.entity_type = 'devnet_sales' AND dsp.sale_id = r.entity_id)
+                   OR (r.entity_type = 'devnet_parcels' AND dsp.parcel_id = r.entity_id)
+            )
+            ELSE NULL
+        END as sale_parcels_data
     FROM public.devnet_reviews r
     LEFT JOIN public.devnet_review_statuses rs ON r.current_status_id = rs.id
     LEFT JOIN public.devnet_employees e ON r.assigned_to_id = e.id
-    LEFT JOIN public.devnet_parcels dp ON r.entity_type = 'parcel' AND r.entity_id = dp.id
-    LEFT JOIN public.devnet_sales ds ON r.entity_type = 'sale' AND r.entity_id = ds.id
+    LEFT JOIN public.devnet_parcels dp ON r.entity_type = 'devnet_parcels' AND r.entity_id = dp.id
+    LEFT JOIN public.devnet_sales ds ON r.entity_type = 'devnet_sales' AND r.entity_id = ds.id
     LEFT JOIN public.devnet_neighborhood_report dnr ON r.entity_type = 'neighborhood' AND r.entity_id = dnr.id
     WHERE 1=1
         -- Filter by kind
@@ -1229,13 +1316,13 @@ RETURNS integer
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    review_id bigint;
-    status_id bigint;
+    v_review_id bigint;
+    v_status_id bigint;
     assignments_created integer := 0;
 BEGIN
-    FOREACH review_id IN ARRAY p_review_ids
+    FOREACH v_review_id IN ARRAY p_review_ids
     LOOP
-        FOREACH status_id IN ARRAY p_status_ids
+        FOREACH v_status_id IN ARRAY p_status_ids
         LOOP
             INSERT INTO public.devnet_review_assignments (
                 review_id,
@@ -1245,8 +1332,8 @@ BEGIN
                 due_date,
                 notes
             ) VALUES (
-                review_id,
-                status_id,
+                v_review_id,
+                v_status_id,
                 p_employee_id,
                 p_assigned_by_id,
                 p_due_date,
@@ -1254,7 +1341,7 @@ BEGIN
             ) ON CONFLICT (review_id, status_id, employee_id) 
             DO UPDATE SET
                 assigned_by_id = EXCLUDED.assigned_by_id,
-                due_date = COALESCE(EXCLUDED.due_date, devnet_review_assignments.due_date),
+                due_date = COALESCE(EXCLUDED.due_date, p_due_date),
                 assigned_at = now(),
                 is_active = true;
             
@@ -1845,6 +1932,11 @@ SELECT mass_create_devnet_reviews('[
     }
 ]'::jsonb);
 
+-- Mass assign reviews to an employee
+SELECT mass_assign_devnet_reviews(
+    ARRAY[1, 2, 3, 4, 5],
+    1
+);
 -- Search reviews with filters
 SELECT * FROM search_devnet_reviews(
     '{"kind": "sale_review", "priority": "high", "neighborhood": "Downtown"}'::jsonb
