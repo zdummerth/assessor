@@ -5,7 +5,7 @@ import * as React from "react";
 import { Suspense } from "react";
 
 import FiltersDialog from "@/app/ratios/stats/filters";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import RatioStatsClient from "./ratio-stats-client";
 
 // shadcn/ui

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import DevnetReviewsTableClient from "./table-client";
 
 interface DevnetReviewsTableServerProps {

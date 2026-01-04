@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import ParcelNumber from "../ui/parcel-number-updated";
 
 export default async function ParcelFeatures(props: {

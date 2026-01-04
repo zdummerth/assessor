@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type FileError,

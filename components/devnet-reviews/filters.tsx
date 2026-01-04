@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { ComboboxMulti, ComboOption } from "@/components/ui/combobox-multi";
 import { Filter, X } from "lucide-react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/cn";
 import {
   useDevnetReviewStatuses,
   useDevnetEmployees,

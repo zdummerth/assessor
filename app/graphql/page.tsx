@@ -1,5 +1,5 @@
-import { createClient } from "@/utils/supabase/server";
-import graphql from "@/utils/supabase/graphql";
+import { createClient } from "@/lib/supabase/server";
+import graphql from "@/lib/supabase/graphql";
 
 const SalesWithStructures: React.FC = async () => {
   const supabase = await createClient();

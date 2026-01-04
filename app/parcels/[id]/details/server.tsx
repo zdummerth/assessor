@@ -1,5 +1,5 @@
 // app/components/ParcelDetails.tsx
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/database-types";
 import { SearchX } from "lucide-react";
 import FormattedDate from "@/components/ui/formatted-date";

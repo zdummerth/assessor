@@ -1,5 +1,5 @@
 // app/components/ServerParcelValues.tsx
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 import ClientParcelValues from "./client";
 

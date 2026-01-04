@@ -1,5 +1,5 @@
 import { SearchX } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import ClientParcelLandUses from "./client";
 import { Tables } from "@/database-types";
 

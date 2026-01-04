@@ -1,5 +1,5 @@
 // app/components/ServerCompsTable.tsx
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import CompsMapClientWrapper from "../ui/maps/comps-map-client-wrapper";
 import CompsCardList from "./client-cards";
 

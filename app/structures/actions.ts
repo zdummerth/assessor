@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath as rp } from "next/cache";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 type ActionState = { error: string; success: string };
 

@@ -2,7 +2,6 @@ import { signInAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import Image from "next/image";
 import stlSeal from "@/public/stl-city-seal.png";
 

@@ -1,6 +1,6 @@
 // app/components/ServerParcelFieldReviews.tsx
 import { SearchX } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import ReviewThreadModal from "@/app/parcels/[id]/field-reviews/thread";
 
 type FileRow = {

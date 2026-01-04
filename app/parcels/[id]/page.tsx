@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import type { Metadata, ResolvingMetadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";

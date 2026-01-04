@@ -1,5 +1,5 @@
 // app/abatements/page.tsx (or wherever your page lives)
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { Tables } from "@/database-types";
 import AbatementsTabs from "./page-tabs";
 

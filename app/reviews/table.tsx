@@ -1,5 +1,5 @@
 // app/test/field-reviews/table.tsx
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import ReviewsWithMap, {
   FieldReviewWithParcelDetailsV2,
 } from "./reviews-with-map";

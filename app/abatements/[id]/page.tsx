@@ -1,6 +1,6 @@
 // app/abatements/[id]/page.tsx
 import type { Metadata, ResolvingMetadata } from "next";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { Tables } from "@/database-types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import ClientScoresLite from "./client";
 import { SearchX } from "lucide-react";
 

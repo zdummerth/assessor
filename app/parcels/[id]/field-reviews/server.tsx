@@ -1,7 +1,7 @@
 // app/components/ServerParcelFieldReviews.tsx
 import Image from "next/image";
 import { SearchX, PlusCircle } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import ReviewThreadModal from "./thread";
 import { FieldReviewCreateDialog } from "./create-dialog";
 import { Tables } from "@/database-types";

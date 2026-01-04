@@ -1,7 +1,7 @@
 "use server";
 
 import React from "react";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import StatsClient from "./client";
 
 // --- Types matching the SQL function return shape

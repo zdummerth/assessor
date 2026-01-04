@@ -1,6 +1,6 @@
 // app/components/SalesWithStructuresCardsServer.tsx
-import { createClient } from "@/utils/supabase/server";
-import graphql from "@/utils/supabase/graphql";
+import { createClient } from "@/lib/supabase/server";
+import graphql from "@/lib/supabase/graphql";
 import ClientSalesWithStructuresCards from "./client";
 
 type GQLEdge<T> = { node: T };

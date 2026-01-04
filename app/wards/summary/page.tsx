@@ -1,5 +1,5 @@
 import wardGroups from "@/public/data/by_ward_groups.json";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 const WardSummaryTable = async () => {
   const supabase = await createClient();

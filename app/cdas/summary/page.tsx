@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import Nav from "@/app/cdas/nav";
 
 const WardSummaryTable = async () => {

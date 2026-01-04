@@ -1,5 +1,5 @@
 import { SearchX } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import ParcelImageGallery from "./client";
 import ParcelImageUploadModal from "@/components/parcel-images/upload-modal";
 

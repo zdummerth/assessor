@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import SalesAddressSearch from "@/components/ui/sales/search-by-address";
 import ManualComps from "@/components/parcel-comps-client/manual";

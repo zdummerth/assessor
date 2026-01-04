@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ChangeEvent } from "react";
 import { AlertTriangle, CheckCircle2, Upload } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import BulkFieldReviewForm from "./create";
 
 type ParcelCsvBulkFieldReviewProps = {

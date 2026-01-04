@@ -1,6 +1,6 @@
 // app/components/ServerParcelStructures.tsx
 import { SearchX } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import ClientParcelStructures from "./client";
 // import ClientParcelStructures from "./client-cards";
 import { Tables } from "@/database-types";

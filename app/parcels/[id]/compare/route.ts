@@ -1,7 +1,6 @@
 // app/test/parcels/compare/route.ts
 import { createClient } from "@supabase/supabase-js";
 import { type NextRequest } from "next/server";
-import type { NextApiRequest, NextApiResponse } from "next";
 
 export async function GET(request: NextRequest) {
   try {

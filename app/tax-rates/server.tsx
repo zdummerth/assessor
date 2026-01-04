@@ -1,5 +1,5 @@
 // app/taxes/by-year/page.tsx
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { Tables } from "@/database-types";
 import ByYearClient from "./client";
 

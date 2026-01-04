@@ -1,6 +1,6 @@
 import Image from "next/image";
 import stlSeal from "@/public/stl-city-seal.png";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import Nav from "@/app/wards/nav";
 
 const WardsList: React.FC = async () => {

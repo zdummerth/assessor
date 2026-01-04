@@ -34,7 +34,7 @@ import {
   Building,
 } from "lucide-react";
 import { useDevnetReviews, DevnetReview } from "@/lib/client-queries";
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/cn";
 import {
   MassStatusUpdateForm,
   MassAssignmentForm,
