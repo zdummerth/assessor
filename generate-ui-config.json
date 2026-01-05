@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "global": {
+    "useInsertUpdateTypes": true,
+    "autoDetectEnums": true,
+    "skipGeneratedFields": true
+  },
+  "tables": {
+    "devnet_reviews": {
+      "displayName": "Development Reviews",
+      "forms": {
+        "create": {
+          "fields": [
+            {
+              "name": "kind",
+              "type": "select",
+              "label": "Review Type",
+              "required": true,
+              "enumType": "devnet_review_kind"
+            },
+            {
+              "name": "title",
+              "type": "input",
+              "label": "Title",
+              "placeholder": "Enter review title"
+            },
+            {
+              "name": "description",
+              "type": "textarea",
+              "label": "Description",
+              "rows": 4
+            },
+            {
+              "name": "current_status_id",
+              "type": "lookup",
+              "label": "Status",
+              "required": true,
+              "lookup": {
+                "table": "devnet_review_statuses",
+                "valueField": "id",
+                "labelField": "name"
+              }
+            },
+            {
+              "name": "assigned_to_id",
+              "type": "lookup",
+              "label": "Assigned To",
+              "lookup": {
+                "table": "devnet_employees",
+                "valueField": "id",
+                "labelField": "full_name"
+              }
+            },
+            {
+              "name": "entity_type",
+              "type": "select",
+              "label": "Entity Type",
+              "options": [
+                { "value": "parcel", "label": "Parcel" },
+                { "value": "building", "label": "Building" },
+                { "value": "land", "label": "Land" }
+              ]
+            },
+            {
+              "name": "entity_id",
+              "type": "number",
+              "label": "Entity ID",
+              "placeholder": "Enter entity ID"
+            },
+            {
+              "name": "data_status",
+              "type": "select",
+              "label": "Data Status",
+              "enumType": "devnet_data_status"
+            },
+            {
+              "name": "due_date",
+              "type": "date",
+              "label": "Due Date"
+            },
+            {
+              "name": "requires_field_review",
+              "type": "checkbox",
+              "label": "Requires Field Review"
+            }
+          ],
+          "excludeFields": [
+            "id",
+            "created_at",
+            "updated_at",
+            "completed_at",
+            "data",
+            "field_data"
+          ]
+        },
+        "update": {
+          "inheritFrom": "create"
+        }
+      }
+    }
+  }
+}

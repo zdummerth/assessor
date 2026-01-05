@@ -3,10 +3,8 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import ParcelImagePrimary from "@/components/parcel-image-primary/server";
-import ParcelStructures from "@/components/parcel-structures/server";
 import ParcelSales from "@/components/parcel-sales/server";
 import ParcelCompsClient from "@/components/parcel-comps-client/server";
-import ServerParcelFieldReviews from "./field-reviews/server";
 import ParcelDetails from "./details/server";
 import ServerParcelValues from "./values/server";
 
@@ -63,14 +61,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <div className="w-full">
             <ParcelImagePrimary parcel_id={parcel.id} />
           </div>
-
-          <Suspense fallback={<div>Loading field reviews...</div>}>
-            <ServerParcelFieldReviews
-              parcel={parcel}
-              revalidatePath={`/test/parcels/${parcel.id}`}
-              title="Field Reviews"
-            />
-          </Suspense>
         </aside>
 
         {/* Right column */}
@@ -84,9 +74,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
               parcelId={parcel.id}
               className="border rounded p-2"
             />
-          </Suspense>
-          <Suspense fallback={<div>Loading parcel structures...</div>}>
-            <ParcelStructures parcel={parcel} className="border rounded p-2" />
           </Suspense>
 
           <Suspense fallback={<div>Loading parcel sales...</div>}>

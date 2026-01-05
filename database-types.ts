@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       abatement_parcels: {
@@ -158,136 +133,635 @@ export type Database = {
         }
         Relationships: []
       }
-      appeal_complaint_types: {
+      addresses: {
         Row: {
-          complaint_type: string
+          address_line1: string | null
+          address_line2: string | null
+          attribution: string | null
+          attribution_url: string | null
+          category: string | null
+          city: string
+          country: string | null
+          country_code: string | null
+          county: string | null
+          created_at: string
+          created_by: string | null
+          devnet_address: string | null
+          distance: number | null
+          district: string | null
+          footway: string | null
+          formatted: string | null
+          fts_address_line1: unknown
+          geocode_id: string | null
+          hamlet: string | null
+          housenumber: string | null
+          id: number
+          iso3166_2: string | null
+          lat: number | null
+          license: string | null
+          line1: string
+          line2: string | null
+          lon: number | null
+          match_type: string | null
+          name: string | null
+          old_name: string | null
+          place_id: string
+          plus_code: string | null
+          plus_code_short: string | null
+          postcode: string
+          ref: string | null
+          result_type: string | null
+          sourcename: string | null
+          state: string
+          state_code: string | null
+          street: string | null
+          suburb: string | null
+          timezone: string | null
+          timezone_abbreviation: string | null
+          timezone_offset: string | null
+          town: string | null
+          village: string | null
         }
         Insert: {
-          complaint_type: string
+          address_line1?: string | null
+          address_line2?: string | null
+          attribution?: string | null
+          attribution_url?: string | null
+          category?: string | null
+          city: string
+          country?: string | null
+          country_code?: string | null
+          county?: string | null
+          created_at?: string
+          created_by?: string | null
+          devnet_address?: string | null
+          distance?: number | null
+          district?: string | null
+          footway?: string | null
+          formatted?: string | null
+          fts_address_line1?: unknown
+          geocode_id?: string | null
+          hamlet?: string | null
+          housenumber?: string | null
+          id?: number
+          iso3166_2?: string | null
+          lat?: number | null
+          license?: string | null
+          line1: string
+          line2?: string | null
+          lon?: number | null
+          match_type?: string | null
+          name?: string | null
+          old_name?: string | null
+          place_id: string
+          plus_code?: string | null
+          plus_code_short?: string | null
+          postcode: string
+          ref?: string | null
+          result_type?: string | null
+          sourcename?: string | null
+          state: string
+          state_code?: string | null
+          street?: string | null
+          suburb?: string | null
+          timezone?: string | null
+          timezone_abbreviation?: string | null
+          timezone_offset?: string | null
+          town?: string | null
+          village?: string | null
         }
         Update: {
-          complaint_type?: string
+          address_line1?: string | null
+          address_line2?: string | null
+          attribution?: string | null
+          attribution_url?: string | null
+          category?: string | null
+          city?: string
+          country?: string | null
+          country_code?: string | null
+          county?: string | null
+          created_at?: string
+          created_by?: string | null
+          devnet_address?: string | null
+          distance?: number | null
+          district?: string | null
+          footway?: string | null
+          formatted?: string | null
+          fts_address_line1?: unknown
+          geocode_id?: string | null
+          hamlet?: string | null
+          housenumber?: string | null
+          id?: number
+          iso3166_2?: string | null
+          lat?: number | null
+          license?: string | null
+          line1?: string
+          line2?: string | null
+          lon?: number | null
+          match_type?: string | null
+          name?: string | null
+          old_name?: string | null
+          place_id?: string
+          plus_code?: string | null
+          plus_code_short?: string | null
+          postcode?: string
+          ref?: string | null
+          result_type?: string | null
+          sourcename?: string | null
+          state?: string
+          state_code?: string | null
+          street?: string | null
+          suburb?: string | null
+          timezone?: string | null
+          timezone_abbreviation?: string | null
+          timezone_offset?: string | null
+          town?: string | null
+          village?: string | null
         }
         Relationships: []
       }
-      appeal_re_appraisers: {
+      addresses_v2: {
         Row: {
+          city: string | null
+          created_at: string
           id: number
-          name: string
+          latitude: number | null
+          longitude: number | null
+          state: string | null
+          street_address: string
+          zip: string | null
         }
         Insert: {
+          city?: string | null
+          created_at?: string
           id?: number
-          name: string
+          latitude?: number | null
+          longitude?: number | null
+          state?: string | null
+          street_address: string
+          zip?: string | null
         }
         Update: {
+          city?: string | null
+          created_at?: string
           id?: number
-          name?: string
+          latitude?: number | null
+          longitude?: number | null
+          state?: string | null
+          street_address?: string
+          zip?: string | null
         }
         Relationships: []
+      }
+      appeal_decisions: {
+        Row: {
+          appeal_id: number
+          decided_at: string
+          decision_review_id: number
+          decision_type: string
+          id: number
+          result_value_set_id: number | null
+        }
+        Insert: {
+          appeal_id: number
+          decided_at: string
+          decision_review_id: number
+          decision_type: string
+          id?: number
+          result_value_set_id?: number | null
+        }
+        Update: {
+          appeal_id?: number
+          decided_at?: string
+          decision_review_id?: number
+          decision_type?: string
+          id?: number
+          result_value_set_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appeal_decisions_appeal_id_fkey"
+            columns: ["appeal_id"]
+            isOneToOne: false
+            referencedRelation: "appeals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeal_decisions_decision_review_id_fkey"
+            columns: ["decision_review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeal_decisions_result_value_set_id_fkey"
+            columns: ["result_value_set_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_value_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appeal_hearings: {
+        Row: {
+          appeal_id: number
+          created_at: string
+          created_by: string | null
+          hearing_at: string
+          hearing_type: string | null
+          id: number
+          location: string | null
+          outcome_note: string | null
+        }
+        Insert: {
+          appeal_id: number
+          created_at?: string
+          created_by?: string | null
+          hearing_at: string
+          hearing_type?: string | null
+          id?: number
+          location?: string | null
+          outcome_note?: string | null
+        }
+        Update: {
+          appeal_id?: number
+          created_at?: string
+          created_by?: string | null
+          hearing_at?: string
+          hearing_type?: string | null
+          id?: number
+          location?: string | null
+          outcome_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appeal_hearings_appeal_id_fkey"
+            columns: ["appeal_id"]
+            isOneToOne: false
+            referencedRelation: "appeals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appeal_levels: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: number
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      appeal_review_status_history: {
+        Row: {
+          appeal_review_id: number
+          created_at: string
+          created_by: string
+          id: number
+          note: string | null
+          status_id: number
+        }
+        Insert: {
+          appeal_review_id: number
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string | null
+          status_id: number
+        }
+        Update: {
+          appeal_review_id?: number
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string | null
+          status_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appeal_review_status_history_appeal_review_id_fkey"
+            columns: ["appeal_review_id"]
+            isOneToOne: false
+            referencedRelation: "appeal_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeal_review_status_history_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "appeal_review_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appeal_review_statuses: {
+        Row: {
+          created_at: string
+          id: number
+          is_terminal: boolean
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      appeal_reviews: {
+        Row: {
+          appeal_id: number
+          id: number
+          review_id: number
+        }
+        Insert: {
+          appeal_id: number
+          id?: number
+          review_id: number
+        }
+        Update: {
+          appeal_id?: number
+          id?: number
+          review_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appeal_reviews_appeal_id_fkey"
+            columns: ["appeal_id"]
+            isOneToOne: false
+            referencedRelation: "appeals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeal_reviews_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appeal_status_history: {
+        Row: {
+          appeal_id: number
+          created_at: string
+          created_by: string | null
+          id: number
+          note: string | null
+          status_id: number
+        }
+        Insert: {
+          appeal_id: number
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          note?: string | null
+          status_id: number
+        }
+        Update: {
+          appeal_id?: number
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          note?: string | null
+          status_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appeal_status_history_appeal_id_fkey"
+            columns: ["appeal_id"]
+            isOneToOne: false
+            referencedRelation: "appeals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeal_status_history_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "appeal_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       appeal_statuses: {
         Row: {
-          status: string
+          created_at: string
+          created_by: string | null
+          id: number
+          is_terminal: boolean
+          name: string
+          slug: string
         }
         Insert: {
-          status: string
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          is_terminal?: boolean
+          name: string
+          slug: string
         }
         Update: {
-          status?: string
-        }
-        Relationships: []
-      }
-      appeal_types: {
-        Row: {
-          code: number
-          name: string
-        }
-        Insert: {
-          code?: number
-          name: string
-        }
-        Update: {
-          code?: number
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          is_terminal?: boolean
           name?: string
+          slug?: string
         }
         Relationships: []
       }
       appeals: {
         Row: {
-          after_bldg: number | null
-          after_land: number | null
-          after_total: number | null
-          appeal_appraiser: string | null
-          appeal_number: number
-          appeal_type: string | null
-          appraiser_id: number | null
-          before_bldg: number | null
-          before_land: number | null
-          before_total: number | null
-          bldg_difference: number | null
-          complaint_type: string | null
-          filed_ts: string | null
-          hearing_ts: string | null
-          land_difference: number | null
-          parcel_number: string
-          report_date_hearing_status: string | null
-          report_date_sequence: string | null
-          status: string | null
-          total_difference: number | null
-          year: number | null
+          appellant_email: string | null
+          appellant_mailing_address_id: number | null
+          appellant_name: string | null
+          appellant_person_id: number | null
+          appellant_phone: string | null
+          created_at: string
+          created_by: string | null
+          id: number
+          level_id: number | null
+          reason: string | null
+          representative_email: string | null
+          representative_name: string | null
+          representative_phone: string | null
+          requested_total_value: number | null
+          value_set_id: number
         }
         Insert: {
-          after_bldg?: number | null
-          after_land?: number | null
-          after_total?: number | null
-          appeal_appraiser?: string | null
-          appeal_number: number
-          appeal_type?: string | null
-          appraiser_id?: number | null
-          before_bldg?: number | null
-          before_land?: number | null
-          before_total?: number | null
-          bldg_difference?: number | null
-          complaint_type?: string | null
-          filed_ts?: string | null
-          hearing_ts?: string | null
-          land_difference?: number | null
-          parcel_number: string
-          report_date_hearing_status?: string | null
-          report_date_sequence?: string | null
-          status?: string | null
-          total_difference?: number | null
-          year?: number | null
+          appellant_email?: string | null
+          appellant_mailing_address_id?: number | null
+          appellant_name?: string | null
+          appellant_person_id?: number | null
+          appellant_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          level_id?: number | null
+          reason?: string | null
+          representative_email?: string | null
+          representative_name?: string | null
+          representative_phone?: string | null
+          requested_total_value?: number | null
+          value_set_id: number
         }
         Update: {
-          after_bldg?: number | null
-          after_land?: number | null
-          after_total?: number | null
-          appeal_appraiser?: string | null
-          appeal_number?: number
-          appeal_type?: string | null
-          appraiser_id?: number | null
-          before_bldg?: number | null
-          before_land?: number | null
-          before_total?: number | null
-          bldg_difference?: number | null
-          complaint_type?: string | null
-          filed_ts?: string | null
-          hearing_ts?: string | null
-          land_difference?: number | null
-          parcel_number?: string
-          report_date_hearing_status?: string | null
-          report_date_sequence?: string | null
-          status?: string | null
-          total_difference?: number | null
-          year?: number | null
+          appellant_email?: string | null
+          appellant_mailing_address_id?: number | null
+          appellant_name?: string | null
+          appellant_person_id?: number | null
+          appellant_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          level_id?: number | null
+          reason?: string | null
+          representative_email?: string | null
+          representative_name?: string | null
+          representative_phone?: string | null
+          requested_total_value?: number | null
+          value_set_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "parcel_review_appeals_appraiser_id_fkey"
-            columns: ["appraiser_id"]
+            foreignKeyName: "appeals_appellant_mailing_address_id_fkey"
+            columns: ["appellant_mailing_address_id"]
             isOneToOne: false
-            referencedRelation: "appraisers"
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeals_appellant_person_id_fkey"
+            columns: ["appellant_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeals_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "appeal_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appeals_v2: {
+        Row: {
+          appeal_data: Json
+          appeal_level: string
+          appeal_number: string
+          appellant_address: string | null
+          appellant_email: string | null
+          appellant_name: string
+          appellant_phone: string | null
+          created_at: string
+          current_assessment: number | null
+          filed_date: string
+          final_assessment: number | null
+          id: number
+          parcel_id: number
+          reason_for_appeal: string | null
+          requested_assessment: number | null
+          resolution_date: string | null
+          resolution_notes: string | null
+          review_id: number | null
+        }
+        Insert: {
+          appeal_data?: Json
+          appeal_level: string
+          appeal_number: string
+          appellant_address?: string | null
+          appellant_email?: string | null
+          appellant_name: string
+          appellant_phone?: string | null
+          created_at?: string
+          current_assessment?: number | null
+          filed_date?: string
+          final_assessment?: number | null
+          id?: number
+          parcel_id: number
+          reason_for_appeal?: string | null
+          requested_assessment?: number | null
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          review_id?: number | null
+        }
+        Update: {
+          appeal_data?: Json
+          appeal_level?: string
+          appeal_number?: string
+          appellant_address?: string | null
+          appellant_email?: string | null
+          appellant_name?: string
+          appellant_phone?: string | null
+          created_at?: string
+          current_assessment?: number | null
+          filed_date?: string
+          final_assessment?: number | null
+          id?: number
+          parcel_id?: number
+          reason_for_appeal?: string | null
+          requested_assessment?: number | null
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          review_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appeals_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_overview_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeals_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeals_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appeals_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
             referencedColumns: ["id"]
           },
         ]
@@ -316,6 +790,147 @@ export type Database = {
           phone?: string | null
           supervisor?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      assessment_cycles_v2: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string
+          id: number
+          is_active: boolean
+          start_date: string
+          tax_year: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: number
+          is_active?: boolean
+          start_date: string
+          tax_year: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: number
+          is_active?: boolean
+          start_date?: string
+          tax_year?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      assessments: {
+        Row: {
+          app_bldg_agriculture: number | null
+          app_bldg_commercial: number | null
+          app_bldg_exempt: number | null
+          app_bldg_residential: number | null
+          app_land_agriculture: number | null
+          app_land_commercial: number | null
+          app_land_exempt: number | null
+          app_land_residential: number | null
+          app_new_const_agriculture: number | null
+          app_new_const_commercial: number | null
+          app_new_const_exempt: number | null
+          app_new_const_residential: number | null
+          app_total_value: number | null
+          bldg_agriculture: number | null
+          bldg_commercial: number | null
+          bldg_exempt: number | null
+          bldg_residential: number | null
+          category: string | null
+          changed_by: string | null
+          date_of_assessment: string | null
+          id: number
+          land_agriculture: number | null
+          land_commercial: number | null
+          land_exempt: number | null
+          land_residential: number | null
+          last_changed: string | null
+          new_const_agriculture: number | null
+          new_const_commercial: number | null
+          new_const_exempt: number | null
+          new_const_residential: number | null
+          parcel_id: number
+          reason_for_change: string | null
+          year: number
+        }
+        Insert: {
+          app_bldg_agriculture?: number | null
+          app_bldg_commercial?: number | null
+          app_bldg_exempt?: number | null
+          app_bldg_residential?: number | null
+          app_land_agriculture?: number | null
+          app_land_commercial?: number | null
+          app_land_exempt?: number | null
+          app_land_residential?: number | null
+          app_new_const_agriculture?: number | null
+          app_new_const_commercial?: number | null
+          app_new_const_exempt?: number | null
+          app_new_const_residential?: number | null
+          app_total_value?: number | null
+          bldg_agriculture?: number | null
+          bldg_commercial?: number | null
+          bldg_exempt?: number | null
+          bldg_residential?: number | null
+          category?: string | null
+          changed_by?: string | null
+          date_of_assessment?: string | null
+          id?: number
+          land_agriculture?: number | null
+          land_commercial?: number | null
+          land_exempt?: number | null
+          land_residential?: number | null
+          last_changed?: string | null
+          new_const_agriculture?: number | null
+          new_const_commercial?: number | null
+          new_const_exempt?: number | null
+          new_const_residential?: number | null
+          parcel_id: number
+          reason_for_change?: string | null
+          year: number
+        }
+        Update: {
+          app_bldg_agriculture?: number | null
+          app_bldg_commercial?: number | null
+          app_bldg_exempt?: number | null
+          app_bldg_residential?: number | null
+          app_land_agriculture?: number | null
+          app_land_commercial?: number | null
+          app_land_exempt?: number | null
+          app_land_residential?: number | null
+          app_new_const_agriculture?: number | null
+          app_new_const_commercial?: number | null
+          app_new_const_exempt?: number | null
+          app_new_const_residential?: number | null
+          app_total_value?: number | null
+          bldg_agriculture?: number | null
+          bldg_commercial?: number | null
+          bldg_exempt?: number | null
+          bldg_residential?: number | null
+          category?: string | null
+          changed_by?: string | null
+          date_of_assessment?: string | null
+          id?: number
+          land_agriculture?: number | null
+          land_commercial?: number | null
+          land_exempt?: number | null
+          land_residential?: number | null
+          last_changed?: string | null
+          new_const_agriculture?: number | null
+          new_const_commercial?: number | null
+          new_const_exempt?: number | null
+          new_const_residential?: number | null
+          parcel_id?: number
+          reason_for_change?: string | null
+          year?: number
         }
         Relationships: []
       }
@@ -390,6 +1005,434 @@ export type Database = {
           year?: number | null
         }
         Relationships: []
+      }
+      building_current_uses_v2: {
+        Row: {
+          building_id: number
+          created_at: string
+          effective_date: string
+          id: number
+          percentage_allocation: number | null
+          retired_date: string | null
+          updated_at: string
+          use_id: number
+          use_notes: string | null
+        }
+        Insert: {
+          building_id: number
+          created_at?: string
+          effective_date?: string
+          id?: number
+          percentage_allocation?: number | null
+          retired_date?: string | null
+          updated_at?: string
+          use_id: number
+          use_notes?: string | null
+        }
+        Update: {
+          building_id?: number
+          created_at?: string
+          effective_date?: string
+          id?: number
+          percentage_allocation?: number | null
+          retired_date?: string | null
+          updated_at?: string
+          use_id?: number
+          use_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_current_uses_v2_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_current_uses_v2_use_id_fkey"
+            columns: ["use_id"]
+            isOneToOne: false
+            referencedRelation: "property_uses_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      building_snapshots_v2: {
+        Row: {
+          active_values_at_snapshot: Json | null
+          bathrooms: number | null
+          bedrooms: number | null
+          best_use_at_snapshot: string | null
+          building_data: Json
+          building_id: number
+          building_type: string | null
+          condition_rating: number | null
+          created_at: string
+          current_uses_at_snapshot: Json | null
+          finished_area: number | null
+          id: number
+          review_id: number
+          snapshot_date: string
+          square_footage: number | null
+          year_built: number | null
+        }
+        Insert: {
+          active_values_at_snapshot?: Json | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          best_use_at_snapshot?: string | null
+          building_data?: Json
+          building_id: number
+          building_type?: string | null
+          condition_rating?: number | null
+          created_at?: string
+          current_uses_at_snapshot?: Json | null
+          finished_area?: number | null
+          id?: number
+          review_id: number
+          snapshot_date?: string
+          square_footage?: number | null
+          year_built?: number | null
+        }
+        Update: {
+          active_values_at_snapshot?: Json | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          best_use_at_snapshot?: string | null
+          building_data?: Json
+          building_id?: number
+          building_type?: string | null
+          condition_rating?: number | null
+          created_at?: string
+          current_uses_at_snapshot?: Json | null
+          finished_area?: number | null
+          id?: number
+          review_id?: number
+          snapshot_date?: string
+          square_footage?: number | null
+          year_built?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_snapshots_v2_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_snapshots_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_snapshots_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      building_value_components_v2: {
+        Row: {
+          building_value_id: number
+          calculation_notes: string | null
+          component_data: Json
+          component_id: number
+          component_value: number
+          created_at: string
+          id: number
+          percentage_of_total: number | null
+        }
+        Insert: {
+          building_value_id: number
+          calculation_notes?: string | null
+          component_data?: Json
+          component_id: number
+          component_value: number
+          created_at?: string
+          id?: number
+          percentage_of_total?: number | null
+        }
+        Update: {
+          building_value_id?: number
+          calculation_notes?: string | null
+          component_data?: Json
+          component_id?: number
+          component_value?: number
+          created_at?: string
+          id?: number
+          percentage_of_total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_value_components_v2_building_value_id_fkey"
+            columns: ["building_value_id"]
+            isOneToOne: false
+            referencedRelation: "building_values_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_value_components_v2_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "value_components_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      building_values_v2: {
+        Row: {
+          activated_at: string | null
+          approval_notes: string | null
+          approved_at: string | null
+          approved_by: number | null
+          assessment_cycle_id: number
+          best_use_id: number | null
+          building_id: number
+          calculation_completed_at: string | null
+          calculation_metadata: Json
+          calculation_trigger: string
+          created_at: string
+          created_by: string
+          current_use_id: number | null
+          id: number
+          is_active: boolean
+          method_id: number
+          scheduled_calculation_date: string
+          status: string
+          total_value: number | null
+          triggered_by_changes: Json
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          approval_notes?: string | null
+          approved_at?: string | null
+          approved_by?: number | null
+          assessment_cycle_id: number
+          best_use_id?: number | null
+          building_id: number
+          calculation_completed_at?: string | null
+          calculation_metadata?: Json
+          calculation_trigger?: string
+          created_at?: string
+          created_by?: string
+          current_use_id?: number | null
+          id?: number
+          is_active?: boolean
+          method_id: number
+          scheduled_calculation_date: string
+          status?: string
+          total_value?: number | null
+          triggered_by_changes?: Json
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          approval_notes?: string | null
+          approved_at?: string | null
+          approved_by?: number | null
+          assessment_cycle_id?: number
+          best_use_id?: number | null
+          building_id?: number
+          calculation_completed_at?: string | null
+          calculation_metadata?: Json
+          calculation_trigger?: string
+          created_at?: string
+          created_by?: string
+          current_use_id?: number | null
+          id?: number
+          is_active?: boolean
+          method_id?: number
+          scheduled_calculation_date?: string
+          status?: string
+          total_value?: number | null
+          triggered_by_changes?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_values_v2_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employees_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_values_v2_assessment_cycle_id_fkey"
+            columns: ["assessment_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_cycles_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_values_v2_best_use_id_fkey"
+            columns: ["best_use_id"]
+            isOneToOne: false
+            referencedRelation: "property_uses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_values_v2_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_values_v2_current_use_id_fkey"
+            columns: ["current_use_id"]
+            isOneToOne: false
+            referencedRelation: "property_uses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_values_v2_method_id_fkey"
+            columns: ["method_id"]
+            isOneToOne: false
+            referencedRelation: "valuation_methods_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buildings_v2: {
+        Row: {
+          basement_area: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          best_use_id: number | null
+          best_use_reason: string | null
+          best_use_updated_at: string | null
+          building_data: Json
+          building_type: string | null
+          condition_rating: number | null
+          cooling_type: string | null
+          created_at: string
+          current_review_id: number | null
+          deck_area: number | null
+          effective_date: string
+          exterior_material: string | null
+          finished_area: number | null
+          foundation_type: string | null
+          garage_area: number | null
+          half_baths: number | null
+          heating_type: string | null
+          id: number
+          occupancy_type: string | null
+          parcel_id: number
+          porch_area: number | null
+          retired_at: string | null
+          roof_type: string | null
+          square_footage: number | null
+          stories: number | null
+          unfinished_area: number | null
+          year_built: number | null
+        }
+        Insert: {
+          basement_area?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          best_use_id?: number | null
+          best_use_reason?: string | null
+          best_use_updated_at?: string | null
+          building_data?: Json
+          building_type?: string | null
+          condition_rating?: number | null
+          cooling_type?: string | null
+          created_at?: string
+          current_review_id?: number | null
+          deck_area?: number | null
+          effective_date?: string
+          exterior_material?: string | null
+          finished_area?: number | null
+          foundation_type?: string | null
+          garage_area?: number | null
+          half_baths?: number | null
+          heating_type?: string | null
+          id?: number
+          occupancy_type?: string | null
+          parcel_id: number
+          porch_area?: number | null
+          retired_at?: string | null
+          roof_type?: string | null
+          square_footage?: number | null
+          stories?: number | null
+          unfinished_area?: number | null
+          year_built?: number | null
+        }
+        Update: {
+          basement_area?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          best_use_id?: number | null
+          best_use_reason?: string | null
+          best_use_updated_at?: string | null
+          building_data?: Json
+          building_type?: string | null
+          condition_rating?: number | null
+          cooling_type?: string | null
+          created_at?: string
+          current_review_id?: number | null
+          deck_area?: number | null
+          effective_date?: string
+          exterior_material?: string | null
+          finished_area?: number | null
+          foundation_type?: string | null
+          garage_area?: number | null
+          half_baths?: number | null
+          heating_type?: string | null
+          id?: number
+          occupancy_type?: string | null
+          parcel_id?: number
+          porch_area?: number | null
+          retired_at?: string | null
+          roof_type?: string | null
+          square_footage?: number | null
+          stories?: number | null
+          unfinished_area?: number | null
+          year_built?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buildings_v2_best_use_id_fkey"
+            columns: ["best_use_id"]
+            isOneToOne: false
+            referencedRelation: "property_uses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buildings_v2_current_review_id_fkey"
+            columns: ["current_review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buildings_v2_current_review_id_fkey"
+            columns: ["current_review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buildings_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_overview_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buildings_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels_v2"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cda_codes: {
         Row: {
@@ -556,6 +1599,33 @@ export type Database = {
         }
         Relationships: []
       }
+      construction_materials: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           code: string | null
@@ -590,6 +1660,540 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      devnet_employees: {
+        Row: {
+          can_approve: boolean
+          created_at: string
+          email: string | null
+          first_name: string
+          id: number
+          last_name: string
+          role: string | null
+          specialties: string[] | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          can_approve?: boolean
+          created_at?: string
+          email?: string | null
+          first_name: string
+          id?: number
+          last_name: string
+          role?: string | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          can_approve?: boolean
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          id?: number
+          last_name?: string
+          role?: string | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      devnet_neighborhood_report: {
+        Row: {
+          created_at: string
+          data: Json
+          devnet_id: string | null
+          end_year: number | null
+          id: number
+          neighborhood_name: string
+          start_year: number | null
+          sync_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          devnet_id?: string | null
+          end_year?: number | null
+          id?: number
+          neighborhood_name: string
+          start_year?: number | null
+          sync_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          devnet_id?: string | null
+          end_year?: number | null
+          id?: number
+          neighborhood_name?: string
+          start_year?: number | null
+          sync_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      devnet_parcels: {
+        Row: {
+          created_at: string
+          data: Json
+          devnet_id: string | null
+          end_year: number | null
+          id: number
+          parcel_number: string
+          start_year: number | null
+          sync_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          devnet_id?: string | null
+          end_year?: number | null
+          id?: number
+          parcel_number: string
+          start_year?: number | null
+          sync_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          devnet_id?: string | null
+          end_year?: number | null
+          id?: number
+          parcel_number?: string
+          start_year?: number | null
+          sync_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      devnet_review_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by_id: number | null
+          completed_at: string | null
+          completed_by_id: number | null
+          completion_notes: string | null
+          due_date: string | null
+          employee_id: number
+          id: number
+          is_active: boolean | null
+          notes: string | null
+          review_id: number
+          status_id: number
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by_id?: number | null
+          completed_at?: string | null
+          completed_by_id?: number | null
+          completion_notes?: string | null
+          due_date?: string | null
+          employee_id: number
+          id?: number
+          is_active?: boolean | null
+          notes?: string | null
+          review_id: number
+          status_id: number
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by_id?: number | null
+          completed_at?: string | null
+          completed_by_id?: number | null
+          completion_notes?: string | null
+          due_date?: string | null
+          employee_id?: number
+          id?: number
+          is_active?: boolean | null
+          notes?: string | null
+          review_id?: number
+          status_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devnet_review_assignments_assigned_by_id_fkey"
+            columns: ["assigned_by_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_assignments_completed_by_id_fkey"
+            columns: ["completed_by_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_assignments_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_assignments_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_review_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devnet_review_history: {
+        Row: {
+          change_reason: string | null
+          changed_at: string
+          changed_by_id: number | null
+          from_data_status:
+            | Database["public"]["Enums"]["devnet_data_status"]
+            | null
+          from_employee_id: number | null
+          from_status_id: number | null
+          id: number
+          notes: string | null
+          review_id: number
+          to_data_status:
+            | Database["public"]["Enums"]["devnet_data_status"]
+            | null
+          to_employee_id: number | null
+          to_status_id: number
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_at?: string
+          changed_by_id?: number | null
+          from_data_status?:
+            | Database["public"]["Enums"]["devnet_data_status"]
+            | null
+          from_employee_id?: number | null
+          from_status_id?: number | null
+          id?: number
+          notes?: string | null
+          review_id: number
+          to_data_status?:
+            | Database["public"]["Enums"]["devnet_data_status"]
+            | null
+          to_employee_id?: number | null
+          to_status_id: number
+        }
+        Update: {
+          change_reason?: string | null
+          changed_at?: string
+          changed_by_id?: number | null
+          from_data_status?:
+            | Database["public"]["Enums"]["devnet_data_status"]
+            | null
+          from_employee_id?: number | null
+          from_status_id?: number | null
+          id?: number
+          notes?: string | null
+          review_id?: number
+          to_data_status?:
+            | Database["public"]["Enums"]["devnet_data_status"]
+            | null
+          to_employee_id?: number | null
+          to_status_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devnet_review_history_changed_by_id_fkey"
+            columns: ["changed_by_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_history_from_employee_id_fkey"
+            columns: ["from_employee_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_history_from_status_id_fkey"
+            columns: ["from_status_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_review_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_history_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_history_to_employee_id_fkey"
+            columns: ["to_employee_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_review_history_to_status_id_fkey"
+            columns: ["to_status_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_review_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devnet_review_statuses: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          is_terminal: boolean
+          name: string
+          needs_approval: boolean
+          preferred_role: string | null
+          required_specialties: string[] | null
+          requires_assignment: boolean
+          review_kind: Database["public"]["Enums"]["devnet_review_kind"]
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_terminal?: boolean
+          name: string
+          needs_approval?: boolean
+          preferred_role?: string | null
+          required_specialties?: string[] | null
+          requires_assignment?: boolean
+          review_kind: Database["public"]["Enums"]["devnet_review_kind"]
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_terminal?: boolean
+          name?: string
+          needs_approval?: boolean
+          preferred_role?: string | null
+          required_specialties?: string[] | null
+          requires_assignment?: boolean
+          review_kind?: Database["public"]["Enums"]["devnet_review_kind"]
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      devnet_reviews: {
+        Row: {
+          assigned_to_id: number | null
+          completed_at: string | null
+          completion_criteria: Json | null
+          copied_to_devnet_at: string | null
+          copied_to_devnet_by_id: number | null
+          created_at: string
+          current_status_id: number
+          data: Json
+          data_collected_at: string | null
+          data_collected_by_id: number | null
+          data_status: Database["public"]["Enums"]["devnet_data_status"] | null
+          data_validation_rules: Json | null
+          description: string | null
+          devnet_copy_confirmed: boolean | null
+          due_date: string | null
+          entity_id: number | null
+          entity_type: string | null
+          field_data: Json | null
+          field_notes: string | null
+          id: number
+          kind: Database["public"]["Enums"]["devnet_review_kind"]
+          priority: string | null
+          required_data_fields: Json | null
+          requires_field_review: boolean | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to_id?: number | null
+          completed_at?: string | null
+          completion_criteria?: Json | null
+          copied_to_devnet_at?: string | null
+          copied_to_devnet_by_id?: number | null
+          created_at?: string
+          current_status_id: number
+          data?: Json
+          data_collected_at?: string | null
+          data_collected_by_id?: number | null
+          data_status?: Database["public"]["Enums"]["devnet_data_status"] | null
+          data_validation_rules?: Json | null
+          description?: string | null
+          devnet_copy_confirmed?: boolean | null
+          due_date?: string | null
+          entity_id?: number | null
+          entity_type?: string | null
+          field_data?: Json | null
+          field_notes?: string | null
+          id?: number
+          kind: Database["public"]["Enums"]["devnet_review_kind"]
+          priority?: string | null
+          required_data_fields?: Json | null
+          requires_field_review?: boolean | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to_id?: number | null
+          completed_at?: string | null
+          completion_criteria?: Json | null
+          copied_to_devnet_at?: string | null
+          copied_to_devnet_by_id?: number | null
+          created_at?: string
+          current_status_id?: number
+          data?: Json
+          data_collected_at?: string | null
+          data_collected_by_id?: number | null
+          data_status?: Database["public"]["Enums"]["devnet_data_status"] | null
+          data_validation_rules?: Json | null
+          description?: string | null
+          devnet_copy_confirmed?: boolean | null
+          due_date?: string | null
+          entity_id?: number | null
+          entity_type?: string | null
+          field_data?: Json | null
+          field_notes?: string | null
+          id?: number
+          kind?: Database["public"]["Enums"]["devnet_review_kind"]
+          priority?: string | null
+          required_data_fields?: Json | null
+          requires_field_review?: boolean | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devnet_reviews_assigned_to_id_fkey"
+            columns: ["assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_reviews_copied_to_devnet_by_id_fkey"
+            columns: ["copied_to_devnet_by_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_reviews_current_status_id_fkey"
+            columns: ["current_status_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_review_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_reviews_data_collected_by_id_fkey"
+            columns: ["data_collected_by_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devnet_sale_parcels: {
+        Row: {
+          created_at: string
+          data: Json
+          id: number
+          parcel_id: number
+          sale_id: number
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: number
+          parcel_id: number
+          sale_id: number
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: number
+          parcel_id?: number
+          sale_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devnet_sale_parcels_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_parcels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devnet_sale_parcels_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "devnet_sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devnet_sales: {
+        Row: {
+          created_at: string
+          data: Json
+          devnet_id: string | null
+          id: number
+          sale_date: string | null
+          sale_price: number | null
+          sale_status: string | null
+          sale_type: string | null
+          sync_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          devnet_id?: string | null
+          id?: number
+          sale_date?: string | null
+          sale_price?: number | null
+          sale_status?: string | null
+          sale_type?: string | null
+          sync_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          devnet_id?: string | null
+          id?: number
+          sale_date?: string | null
+          sale_price?: number | null
+          sale_status?: string | null
+          sale_type?: string | null
+          sync_date?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       employee_position_history: {
         Row: {
@@ -729,233 +2333,41 @@ export type Database = {
         }
         Relationships: []
       }
-      field_review_images: {
+      employees_v2: {
         Row: {
-          caption: string | null
+          can_approve: boolean
           created_at: string
-          created_by: string | null
-          file_id: number
-          height: number
+          email: string | null
+          first_name: string
           id: number
-          review_id: number
-          sort_order: number
-          width: number
+          last_name: string
+          status: string
+          updated_at: string
+          user_id: string | null
         }
         Insert: {
-          caption?: string | null
+          can_approve?: boolean
           created_at?: string
-          created_by?: string | null
-          file_id: number
-          height: number
+          email?: string | null
+          first_name: string
           id?: number
-          review_id: number
-          sort_order?: number
-          width: number
+          last_name: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Update: {
-          caption?: string | null
+          can_approve?: boolean
           created_at?: string
-          created_by?: string | null
-          file_id?: number
-          height?: number
+          email?: string | null
+          first_name?: string
           id?: number
-          review_id?: number
-          sort_order?: number
-          width?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "field_review_images_file_id_fkey"
-            columns: ["file_id"]
-            isOneToOne: false
-            referencedRelation: "files"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "field_review_images_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "field_reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      field_review_notes: {
-        Row: {
-          created_at: string
-          created_by: string
-          id: number
-          note: string
-          review_id: number
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string
-          id?: number
-          note: string
-          review_id: number
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          id?: number
-          note?: string
-          review_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "field_review_notes_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "field_review_notes_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "field_reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      field_review_status_history: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string | null
-          id: number
-          review_id: number
-          status_id: number | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: number
-          review_id: number
-          status_id?: number | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: number
-          review_id?: number
-          status_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "field_review_status_history_status_id_fkey"
-            columns: ["status_id"]
-            isOneToOne: false
-            referencedRelation: "field_review_statuses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "field_review_statuses_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "field_reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      field_review_statuses: {
-        Row: {
-          created_at: string
-          id: number
-          name: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          name?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          name?: string | null
+          last_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
-      }
-      field_review_types: {
-        Row: {
-          active: boolean
-          created_at: string
-          created_by: string
-          default_due_days: number | null
-          description: string | null
-          display_name: string
-          id: number
-          slug: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          created_by?: string
-          default_due_days?: number | null
-          description?: string | null
-          display_name: string
-          id?: number
-          slug: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          created_by?: string
-          default_due_days?: number | null
-          description?: string | null
-          display_name?: string
-          id?: number
-          slug?: string
-        }
-        Relationships: []
-      }
-      field_reviews: {
-        Row: {
-          created_at: string
-          created_by: string
-          due_date: string | null
-          id: number
-          parcel_id: number
-          site_visited_at: string | null
-          type_id: number | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string
-          due_date?: string | null
-          id?: number
-          parcel_id: number
-          site_visited_at?: string | null
-          type_id?: number | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          due_date?: string | null
-          id?: number
-          parcel_id?: number
-          site_visited_at?: string | null
-          type_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "field_reviews_parcel_id_fkey"
-            columns: ["parcel_id"]
-            isOneToOne: false
-            referencedRelation: "test_parcels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "field_reviews_type_id_fkey"
-            columns: ["type_id"]
-            isOneToOne: false
-            referencedRelation: "field_review_types"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       files: {
         Row: {
@@ -1094,6 +2506,257 @@ export type Database = {
         }
         Relationships: []
       }
+      land_components: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+        }
+        Relationships: []
+      }
+      land_current_uses_v2: {
+        Row: {
+          created_at: string
+          effective_date: string
+          id: number
+          land_id: number
+          percentage_allocation: number | null
+          retired_date: string | null
+          updated_at: string
+          use_id: number
+          use_notes: string | null
+        }
+        Insert: {
+          created_at?: string
+          effective_date?: string
+          id?: number
+          land_id: number
+          percentage_allocation?: number | null
+          retired_date?: string | null
+          updated_at?: string
+          use_id: number
+          use_notes?: string | null
+        }
+        Update: {
+          created_at?: string
+          effective_date?: string
+          id?: number
+          land_id?: number
+          percentage_allocation?: number | null
+          retired_date?: string | null
+          updated_at?: string
+          use_id?: number
+          use_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "land_current_uses_v2_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "lands_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_current_uses_v2_use_id_fkey"
+            columns: ["use_id"]
+            isOneToOne: false
+            referencedRelation: "property_uses_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      land_parcel_links: {
+        Row: {
+          created_at: string
+          created_by: string
+          effective_at: string
+          id: number
+          land_id: number
+          parcel_id: number
+          review_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          id?: number
+          land_id: number
+          parcel_id: number
+          review_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          id?: number
+          land_id?: number
+          parcel_id?: number
+          review_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "land_parcel_links_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "lands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_parcel_links_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      land_snapshots: {
+        Row: {
+          area_sqft: number | null
+          created_at: string
+          created_by: string
+          depth_ft: number | null
+          effective_at: string
+          frontage_ft: number | null
+          id: number
+          land_id: number
+          land_use_id: number | null
+          review_id: number | null
+          shape_detail: Json
+        }
+        Insert: {
+          area_sqft?: number | null
+          created_at?: string
+          created_by?: string
+          depth_ft?: number | null
+          effective_at?: string
+          frontage_ft?: number | null
+          id?: number
+          land_id: number
+          land_use_id?: number | null
+          review_id?: number | null
+          shape_detail?: Json
+        }
+        Update: {
+          area_sqft?: number | null
+          created_at?: string
+          created_by?: string
+          depth_ft?: number | null
+          effective_at?: string
+          frontage_ft?: number | null
+          id?: number
+          land_id?: number
+          land_use_id?: number | null
+          review_id?: number | null
+          shape_detail?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "land_snapshots_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "lands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_snapshots_land_use_id_fkey"
+            columns: ["land_use_id"]
+            isOneToOne: false
+            referencedRelation: "land_uses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_snapshots_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      land_snapshots_v2: {
+        Row: {
+          active_values_at_snapshot: Json | null
+          area_sqft: number | null
+          best_use_at_snapshot: string | null
+          created_at: string
+          current_uses_at_snapshot: Json | null
+          depth_ft: number | null
+          frontage_ft: number | null
+          id: number
+          land_data: Json
+          land_id: number
+          land_use: string | null
+          review_id: number
+          snapshot_date: string
+          topography: string | null
+        }
+        Insert: {
+          active_values_at_snapshot?: Json | null
+          area_sqft?: number | null
+          best_use_at_snapshot?: string | null
+          created_at?: string
+          current_uses_at_snapshot?: Json | null
+          depth_ft?: number | null
+          frontage_ft?: number | null
+          id?: number
+          land_data?: Json
+          land_id: number
+          land_use?: string | null
+          review_id: number
+          snapshot_date?: string
+          topography?: string | null
+        }
+        Update: {
+          active_values_at_snapshot?: Json | null
+          area_sqft?: number | null
+          best_use_at_snapshot?: string | null
+          created_at?: string
+          current_uses_at_snapshot?: Json | null
+          depth_ft?: number | null
+          frontage_ft?: number | null
+          id?: number
+          land_data?: Json
+          land_id?: number
+          land_use?: string | null
+          review_id?: number
+          snapshot_date?: string
+          topography?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "land_snapshots_v2_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "lands_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_snapshots_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_snapshots_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       land_use_codes: {
         Row: {
           code: number
@@ -1108,6 +2771,430 @@ export type Database = {
           name?: string | null
         }
         Relationships: []
+      }
+      land_use_histories: {
+        Row: {
+          created_at: string
+          created_by: string
+          effective_at: string
+          id: number
+          land_id: number
+          land_use_id: number
+          review_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          id?: number
+          land_id: number
+          land_use_id: number
+          review_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          id?: number
+          land_id?: number
+          land_use_id?: number
+          review_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "land_use_histories_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "lands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_use_histories_land_use_id_fkey"
+            columns: ["land_use_id"]
+            isOneToOne: false
+            referencedRelation: "land_uses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_use_histories_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      land_uses: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      land_value_components_v2: {
+        Row: {
+          calculation_notes: string | null
+          component_data: Json
+          component_id: number
+          component_value: number
+          created_at: string
+          id: number
+          land_value_id: number
+          percentage_of_total: number | null
+        }
+        Insert: {
+          calculation_notes?: string | null
+          component_data?: Json
+          component_id: number
+          component_value: number
+          created_at?: string
+          id?: number
+          land_value_id: number
+          percentage_of_total?: number | null
+        }
+        Update: {
+          calculation_notes?: string | null
+          component_data?: Json
+          component_id?: number
+          component_value?: number
+          created_at?: string
+          id?: number
+          land_value_id?: number
+          percentage_of_total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "land_value_components_v2_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "value_components_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_value_components_v2_land_value_id_fkey"
+            columns: ["land_value_id"]
+            isOneToOne: false
+            referencedRelation: "land_values_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      land_values_v2: {
+        Row: {
+          activated_at: string | null
+          approval_notes: string | null
+          approved_at: string | null
+          approved_by: number | null
+          assessment_cycle_id: number
+          best_use_id: number | null
+          calculation_completed_at: string | null
+          calculation_metadata: Json
+          calculation_trigger: string
+          created_at: string
+          created_by: string
+          current_use_id: number | null
+          id: number
+          is_active: boolean
+          land_id: number
+          method_id: number
+          scheduled_calculation_date: string
+          status: string
+          total_value: number | null
+          triggered_by_changes: Json
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          approval_notes?: string | null
+          approved_at?: string | null
+          approved_by?: number | null
+          assessment_cycle_id: number
+          best_use_id?: number | null
+          calculation_completed_at?: string | null
+          calculation_metadata?: Json
+          calculation_trigger?: string
+          created_at?: string
+          created_by?: string
+          current_use_id?: number | null
+          id?: number
+          is_active?: boolean
+          land_id: number
+          method_id: number
+          scheduled_calculation_date: string
+          status?: string
+          total_value?: number | null
+          triggered_by_changes?: Json
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          approval_notes?: string | null
+          approved_at?: string | null
+          approved_by?: number | null
+          assessment_cycle_id?: number
+          best_use_id?: number | null
+          calculation_completed_at?: string | null
+          calculation_metadata?: Json
+          calculation_trigger?: string
+          created_at?: string
+          created_by?: string
+          current_use_id?: number | null
+          id?: number
+          is_active?: boolean
+          land_id?: number
+          method_id?: number
+          scheduled_calculation_date?: string
+          status?: string
+          total_value?: number | null
+          triggered_by_changes?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "land_values_v2_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employees_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_values_v2_assessment_cycle_id_fkey"
+            columns: ["assessment_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_cycles_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_values_v2_best_use_id_fkey"
+            columns: ["best_use_id"]
+            isOneToOne: false
+            referencedRelation: "property_uses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_values_v2_current_use_id_fkey"
+            columns: ["current_use_id"]
+            isOneToOne: false
+            referencedRelation: "property_uses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_values_v2_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "lands_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_values_v2_method_id_fkey"
+            columns: ["method_id"]
+            isOneToOne: false
+            referencedRelation: "valuation_methods_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      land_versions: {
+        Row: {
+          area_sqft: number | null
+          created_at: string
+          created_by: string
+          data: Json
+          effective_at: string
+          id: number
+          land_id: number
+          review_id: number
+        }
+        Insert: {
+          area_sqft?: number | null
+          created_at?: string
+          created_by?: string
+          data: Json
+          effective_at?: string
+          id?: number
+          land_id: number
+          review_id: number
+        }
+        Update: {
+          area_sqft?: number | null
+          created_at?: string
+          created_by?: string
+          data?: Json
+          effective_at?: string
+          id?: number
+          land_id?: number
+          review_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "land_versions_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "lands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "land_versions_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lands: {
+        Row: {
+          created_at: string
+          id: number
+          retired_at: string | null
+          review_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          retired_at?: string | null
+          review_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          retired_at?: string | null
+          review_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lands_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lands_v2: {
+        Row: {
+          access_type: string | null
+          area_sqft: number | null
+          best_use_id: number | null
+          best_use_reason: string | null
+          best_use_updated_at: string | null
+          created_at: string
+          current_review_id: number | null
+          depth_ft: number | null
+          effective_date: string
+          flood_zone: string | null
+          frontage_ft: number | null
+          id: number
+          land_data: Json
+          land_use: string | null
+          parcel_id: number
+          retired_at: string | null
+          topography: string | null
+          utilities: string[] | null
+          wetlands: boolean | null
+          zoning: string | null
+        }
+        Insert: {
+          access_type?: string | null
+          area_sqft?: number | null
+          best_use_id?: number | null
+          best_use_reason?: string | null
+          best_use_updated_at?: string | null
+          created_at?: string
+          current_review_id?: number | null
+          depth_ft?: number | null
+          effective_date?: string
+          flood_zone?: string | null
+          frontage_ft?: number | null
+          id?: number
+          land_data?: Json
+          land_use?: string | null
+          parcel_id: number
+          retired_at?: string | null
+          topography?: string | null
+          utilities?: string[] | null
+          wetlands?: boolean | null
+          zoning?: string | null
+        }
+        Update: {
+          access_type?: string | null
+          area_sqft?: number | null
+          best_use_id?: number | null
+          best_use_reason?: string | null
+          best_use_updated_at?: string | null
+          created_at?: string
+          current_review_id?: number | null
+          depth_ft?: number | null
+          effective_date?: string
+          flood_zone?: string | null
+          frontage_ft?: number | null
+          id?: number
+          land_data?: Json
+          land_use?: string | null
+          parcel_id?: number
+          retired_at?: string | null
+          topography?: string | null
+          utilities?: string[] | null
+          wetlands?: boolean | null
+          zoning?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lands_v2_best_use_id_fkey"
+            columns: ["best_use_id"]
+            isOneToOne: false
+            referencedRelation: "property_uses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lands_v2_current_review_id_fkey"
+            columns: ["current_review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lands_v2_current_review_id_fkey"
+            columns: ["current_review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lands_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_overview_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lands_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels_v2"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       list: {
         Row: {
@@ -1372,6 +3459,27 @@ export type Database = {
           },
         ]
       }
+      neighborhoods_v2: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       owner_address: {
         Row: {
           address_1: string | null
@@ -1425,6 +3533,126 @@ export type Database = {
         }
         Relationships: []
       }
+      parcel_addresses: {
+        Row: {
+          address_id: number
+          created_at: string
+          created_by: string
+          effective_date: string
+          end_date: string | null
+          id: number
+          parcel_id: number
+        }
+        Insert: {
+          address_id: number
+          created_at?: string
+          created_by?: string
+          effective_date?: string
+          end_date?: string | null
+          id?: number
+          parcel_id: number
+        }
+        Update: {
+          address_id?: number
+          created_at?: string
+          created_by?: string
+          effective_date?: string
+          end_date?: string | null
+          id?: number
+          parcel_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_addresses_address_id_fkey"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_addresses_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcel_attribute_definitions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: number
+          name: string
+          slug: string
+          value_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: number
+          name: string
+          slug: string
+          value_type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: number
+          name?: string
+          slug?: string
+          value_type?: string
+        }
+        Relationships: []
+      }
+      parcel_neighborhoods: {
+        Row: {
+          created_at: string
+          created_by: string
+          effective_date: string
+          end_date: string | null
+          id: number
+          neighborhood_id: number
+          parcel_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          effective_date: string
+          end_date?: string | null
+          id?: number
+          neighborhood_id: number
+          parcel_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          effective_date?: string
+          end_date?: string | null
+          id?: number
+          neighborhood_id?: number
+          parcel_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_neighborhoods_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_neighborhoods_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parcel_property_classes: {
         Row: {
           created_at: string
@@ -1463,6 +3691,215 @@ export type Database = {
             columns: ["property_class_id"]
             isOneToOne: false
             referencedRelation: "property_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcel_review_status_history: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+          note: string | null
+          parcel_review_id: number
+          status_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string | null
+          parcel_review_id: number
+          status_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string | null
+          parcel_review_id?: number
+          status_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_review_status_history_parcel_review_id_fkey"
+            columns: ["parcel_review_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_review_status_history_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_review_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcel_review_statuses: {
+        Row: {
+          created_at: string
+          id: number
+          is_terminal: boolean
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      parcel_reviews: {
+        Row: {
+          id: number
+          parcel_id: number
+          review_id: number
+        }
+        Insert: {
+          id?: number
+          parcel_id: number
+          review_id: number
+        }
+        Update: {
+          id?: number
+          parcel_id?: number
+          review_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_reviews_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcel_snapshots_v2: {
+        Row: {
+          block: number | null
+          created_at: string
+          created_by: string | null
+          ext: number | null
+          id: number
+          lot: number | null
+          neighborhood_id: number | null
+          owner_address_id: number | null
+          owner_name: string | null
+          parcel_data: Json
+          parcel_id: number
+          parcel_number: string | null
+          property_class: string | null
+          review_id: number
+          site_address_id: number | null
+          snapshot_date: string
+          tax_status_id: number | null
+        }
+        Insert: {
+          block?: number | null
+          created_at?: string
+          created_by?: string | null
+          ext?: number | null
+          id?: number
+          lot?: number | null
+          neighborhood_id?: number | null
+          owner_address_id?: number | null
+          owner_name?: string | null
+          parcel_data?: Json
+          parcel_id: number
+          parcel_number?: string | null
+          property_class?: string | null
+          review_id: number
+          site_address_id?: number | null
+          snapshot_date?: string
+          tax_status_id?: number | null
+        }
+        Update: {
+          block?: number | null
+          created_at?: string
+          created_by?: string | null
+          ext?: number | null
+          id?: number
+          lot?: number | null
+          neighborhood_id?: number | null
+          owner_address_id?: number | null
+          owner_name?: string | null
+          parcel_data?: Json
+          parcel_id?: number
+          parcel_number?: string | null
+          property_class?: string | null
+          review_id?: number
+          site_address_id?: number | null
+          snapshot_date?: string
+          tax_status_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_snapshots_v2_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_snapshots_v2_owner_address_id_fkey"
+            columns: ["owner_address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_snapshots_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_overview_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_snapshots_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_snapshots_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_snapshots_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_snapshots_v2_site_address_id_fkey"
+            columns: ["site_address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_snapshots_v2_tax_status_id_fkey"
+            columns: ["tax_status_id"]
+            isOneToOne: false
+            referencedRelation: "tax_statuses_v2"
             referencedColumns: ["id"]
           },
         ]
@@ -1535,50 +3972,613 @@ export type Database = {
           },
         ]
       }
-      parcel_value_cost: {
+      parcel_value_set_snapshots: {
         Row: {
-          building_value: number | null
-          depreciation_amount: number | null
+          agricultural_improvement_value: number | null
+          agricultural_land_value: number | null
+          commercial_improvement_value: number | null
+          commercial_land_value: number | null
+          created_at: string
+          effective_at: string
           id: number
-          land_value: number | null
-          total_value: number | null
+          residential_improvement_value: number | null
+          residential_land_value: number | null
+          review_id: number
+          total_improvement_value: number
+          total_land_value: number
+          total_value: number
+          value_set_id: number
         }
         Insert: {
-          building_value?: number | null
-          depreciation_amount?: number | null
-          id: number
-          land_value?: number | null
-          total_value?: number | null
+          agricultural_improvement_value?: number | null
+          agricultural_land_value?: number | null
+          commercial_improvement_value?: number | null
+          commercial_land_value?: number | null
+          created_at?: string
+          effective_at?: string
+          id?: number
+          residential_improvement_value?: number | null
+          residential_land_value?: number | null
+          review_id: number
+          total_improvement_value: number
+          total_land_value: number
+          total_value: number
+          value_set_id: number
         }
         Update: {
-          building_value?: number | null
-          depreciation_amount?: number | null
+          agricultural_improvement_value?: number | null
+          agricultural_land_value?: number | null
+          commercial_improvement_value?: number | null
+          commercial_land_value?: number | null
+          created_at?: string
+          effective_at?: string
           id?: number
-          land_value?: number | null
-          total_value?: number | null
+          residential_improvement_value?: number | null
+          residential_land_value?: number | null
+          review_id?: number
+          total_improvement_value?: number
+          total_land_value?: number
+          total_value?: number
+          value_set_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_value_set_snapshots_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_value_set_snapshots_value_set_id_fkey"
+            columns: ["value_set_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_value_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcel_value_sets: {
+        Row: {
+          approach: string
+          created_at: string
+          id: number
+          parcel_id: number
+          review_id: number
+          supersedes_value_set_id: number | null
+          tax_year: number
+          totals: Json
+        }
+        Insert: {
+          approach: string
+          created_at?: string
+          id?: number
+          parcel_id: number
+          review_id: number
+          supersedes_value_set_id?: number | null
+          tax_year: number
+          totals?: Json
+        }
+        Update: {
+          approach?: string
+          created_at?: string
+          id?: number
+          parcel_id?: number
+          review_id?: number
+          supersedes_value_set_id?: number | null
+          tax_year?: number
+          totals?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_value_sets_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcel_value_sets_supersedes_value_set_id_fkey"
+            columns: ["supersedes_value_set_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_value_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcels: {
+        Row: {
+          block: number | null
+          created_at: string
+          ext: number | null
+          id: number
+          lot: number | null
+          retired_at: string | null
+        }
+        Insert: {
+          block?: number | null
+          created_at?: string
+          ext?: number | null
+          id?: number
+          lot?: number | null
+          retired_at?: string | null
+        }
+        Update: {
+          block?: number | null
+          created_at?: string
+          ext?: number | null
+          id?: number
+          lot?: number | null
+          retired_at?: string | null
         }
         Relationships: []
       }
-      parcel_value_model: {
+      parcels_v2: {
         Row: {
+          block: number | null
+          created_at: string
+          current_review_id: number | null
+          default_appraiser_id: number | null
+          ext: number | null
           id: number
-          model_id: number
-          predicted_value: number
-          prediction_date: string | null
+          last_updated_at: string
+          lot: number | null
+          neighborhood_id: number | null
+          owner_address_id: number | null
+          owner_name: string | null
+          parcel_data: Json
+          parcel_number: string | null
+          property_class: string | null
+          site_address_id: number | null
+          tax_status_id: number | null
         }
         Insert: {
-          id: number
-          model_id: number
-          predicted_value: number
-          prediction_date?: string | null
+          block?: number | null
+          created_at?: string
+          current_review_id?: number | null
+          default_appraiser_id?: number | null
+          ext?: number | null
+          id?: number
+          last_updated_at?: string
+          lot?: number | null
+          neighborhood_id?: number | null
+          owner_address_id?: number | null
+          owner_name?: string | null
+          parcel_data?: Json
+          parcel_number?: string | null
+          property_class?: string | null
+          site_address_id?: number | null
+          tax_status_id?: number | null
         }
         Update: {
+          block?: number | null
+          created_at?: string
+          current_review_id?: number | null
+          default_appraiser_id?: number | null
+          ext?: number | null
           id?: number
-          model_id?: number
-          predicted_value?: number
-          prediction_date?: string | null
+          last_updated_at?: string
+          lot?: number | null
+          neighborhood_id?: number | null
+          owner_address_id?: number | null
+          owner_name?: string | null
+          parcel_data?: Json
+          parcel_number?: string | null
+          property_class?: string | null
+          site_address_id?: number | null
+          tax_status_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcels_v2_current_review_id_fkey"
+            columns: ["current_review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcels_v2_current_review_id_fkey"
+            columns: ["current_review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcels_v2_default_appraiser_id_fkey"
+            columns: ["default_appraiser_id"]
+            isOneToOne: false
+            referencedRelation: "employees_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcels_v2_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcels_v2_owner_address_id_fkey"
+            columns: ["owner_address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcels_v2_site_address_id_fkey"
+            columns: ["site_address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parcels_v2_tax_status_id_fkey"
+            columns: ["tax_status_id"]
+            isOneToOne: false
+            referencedRelation: "tax_statuses_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      people: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_name: string
+          id: number
+          kind: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_name: string
+          id?: number
+          kind?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_name?: string
+          id?: number
+          kind?: string
         }
         Relationships: []
+      }
+      permit_parcels: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          parcel_id: number
+          permit_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          parcel_id: number
+          permit_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          parcel_id?: number
+          permit_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permit_parcels_permit_id_fkey"
+            columns: ["permit_id"]
+            isOneToOne: false
+            referencedRelation: "permits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permit_review_status_history: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+          note: string | null
+          permit_review_id: number
+          status_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string | null
+          permit_review_id: number
+          status_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string | null
+          permit_review_id?: number
+          status_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permit_review_status_history_permit_review_id_fkey"
+            columns: ["permit_review_id"]
+            isOneToOne: false
+            referencedRelation: "permit_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permit_review_status_history_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "permit_review_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permit_review_statuses: {
+        Row: {
+          created_at: string
+          id: number
+          is_terminal: boolean
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      permit_reviews: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+          payload: Json | null
+          permit_id: number
+          review_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          payload?: Json | null
+          permit_id: number
+          review_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          payload?: Json | null
+          permit_id?: number
+          review_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permit_reviews_permit_id_fkey"
+            columns: ["permit_id"]
+            isOneToOne: false
+            referencedRelation: "permits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permit_reviews_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permit_types: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      permits: {
+        Row: {
+          closed_date: string | null
+          created_at: string
+          created_by: string | null
+          id: number
+          issued_date: string | null
+          permit_number: string
+          permit_type_id: number | null
+        }
+        Insert: {
+          closed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          issued_date?: string | null
+          permit_number: string
+          permit_type_id?: number | null
+        }
+        Update: {
+          closed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          issued_date?: string | null
+          permit_number?: string
+          permit_type_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permits_permit_type_id_fkey"
+            columns: ["permit_type_id"]
+            isOneToOne: false
+            referencedRelation: "permit_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permits_v2: {
+        Row: {
+          affects_value: boolean | null
+          completed_date: string | null
+          contractor_name: string | null
+          created_at: string
+          estimated_value_impact: number | null
+          id: number
+          issued_date: string | null
+          parcel_id: number
+          permit_data: Json
+          permit_number: string
+          permit_type: string
+          permit_value: number | null
+          review_id: number | null
+          work_description: string | null
+        }
+        Insert: {
+          affects_value?: boolean | null
+          completed_date?: string | null
+          contractor_name?: string | null
+          created_at?: string
+          estimated_value_impact?: number | null
+          id?: number
+          issued_date?: string | null
+          parcel_id: number
+          permit_data?: Json
+          permit_number: string
+          permit_type: string
+          permit_value?: number | null
+          review_id?: number | null
+          work_description?: string | null
+        }
+        Update: {
+          affects_value?: boolean | null
+          completed_date?: string | null
+          contractor_name?: string | null
+          created_at?: string
+          estimated_value_impact?: number | null
+          id?: number
+          issued_date?: string | null
+          parcel_id?: number
+          permit_data?: Json
+          permit_number?: string
+          permit_type?: string
+          permit_value?: number | null
+          review_id?: number | null
+          work_description?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permits_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_overview_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permits_versions: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          effective_at: string
+          id: number
+          issue_date: string
+          permit_id: number
+          permit_number: string
+          permit_type: string
+          property_details: Json
+          review_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          effective_at?: string
+          id?: number
+          issue_date: string
+          permit_id: number
+          permit_number: string
+          permit_type: string
+          property_details?: Json
+          review_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          effective_at?: string
+          id?: number
+          issue_date?: string
+          permit_id?: number
+          permit_number?: string
+          permit_type?: string
+          property_details?: Json
+          review_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permits_versions_permit_id_fkey"
+            columns: ["permit_id"]
+            isOneToOne: false
+            referencedRelation: "permits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_versions_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       positions: {
         Row: {
@@ -1636,6 +4636,192 @@ export type Database = {
         }
         Relationships: []
       }
+      property_uses_v2: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      regression_model_coefficients: {
+        Row: {
+          coefficient: number
+          created_at: string
+          created_by: string | null
+          id: number
+          p_value: number | null
+          run_id: number
+          std_error: number | null
+          t_value: number | null
+          term: string
+        }
+        Insert: {
+          coefficient: number
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          p_value?: number | null
+          run_id: number
+          std_error?: number | null
+          t_value?: number | null
+          term: string
+        }
+        Update: {
+          coefficient?: number
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          p_value?: number | null
+          run_id?: number
+          std_error?: number | null
+          t_value?: number | null
+          term?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regression_model_coefficients_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "regression_model_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      regression_model_runs: {
+        Row: {
+          as_of_date: string
+          created_at: string
+          created_by: string | null
+          id: number
+          metrics: Json | null
+          model_id: number
+          trained_at: string
+          training_filters: Json | null
+        }
+        Insert: {
+          as_of_date: string
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          metrics?: Json | null
+          model_id: number
+          trained_at?: string
+          training_filters?: Json | null
+        }
+        Update: {
+          as_of_date?: string
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          metrics?: Json | null
+          model_id?: number
+          trained_at?: string
+          training_filters?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regression_model_runs_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "regression_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      regression_models: {
+        Row: {
+          algorithm: string | null
+          created_at: string
+          created_by: string | null
+          feature_spec: Json | null
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          algorithm?: string | null
+          created_at?: string
+          created_by?: string | null
+          feature_spec?: Json | null
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          algorithm?: string | null
+          created_at?: string
+          created_by?: string | null
+          feature_spec?: Json | null
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      regression_predictions: {
+        Row: {
+          as_of_date: string
+          created_at: string
+          created_by: string | null
+          extra: Json | null
+          id: number
+          parcel_id: number
+          predicted_total_value: number
+          run_id: number
+        }
+        Insert: {
+          as_of_date: string
+          created_at?: string
+          created_by?: string | null
+          extra?: Json | null
+          id?: number
+          parcel_id: number
+          predicted_total_value: number
+          run_id: number
+        }
+        Update: {
+          as_of_date?: string
+          created_at?: string
+          created_by?: string | null
+          extra?: Json | null
+          id?: number
+          parcel_id?: number
+          predicted_total_value?: number
+          run_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regression_predictions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "regression_model_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_dates: {
         Row: {
           id: number
@@ -1675,62 +4861,688 @@ export type Database = {
         }
         Relationships: []
       }
-      review_types: {
+      review_assignments: {
         Row: {
-          code: string
+          assigned_by: string
           created_at: string
-          description: string | null
+          employee_id: number
           id: number
-          is_active: boolean
-          label: string
-          updated_at: string
+          review_id: number
+          valid: unknown
         }
         Insert: {
-          code: string
+          assigned_by?: string
           created_at?: string
-          description?: string | null
+          employee_id: number
           id?: number
-          is_active?: boolean
-          label: string
-          updated_at?: string
+          review_id: number
+          valid: unknown
         }
         Update: {
-          code?: string
+          assigned_by?: string
           created_at?: string
-          description?: string | null
+          employee_id?: number
           id?: number
-          is_active?: boolean
-          label?: string
-          updated_at?: string
+          review_id?: number
+          valid?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_assignments_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_files: {
+        Row: {
+          caption: string | null
+          created_at: string
+          created_by: string
+          file_id: number
+          review_id: number
+          sort_order: number
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          created_by?: string
+          file_id: number
+          review_id: number
+          sort_order?: number
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          created_by?: string
+          file_id?: number
+          review_id?: number
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_files_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_files_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_history_v2: {
+        Row: {
+          changed_at: string
+          changed_by: string
+          id: number
+          note: string | null
+          review_id: number
+          status_id: number
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string
+          id?: number
+          note?: string | null
+          review_id: number
+          status_id: number
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string
+          id?: number
+          note?: string | null
+          review_id?: number
+          status_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_history_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_history_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_history_v2_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "review_statuses_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_lands: {
+        Row: {
+          land_id: number
+          review_id: number
+        }
+        Insert: {
+          land_id: number
+          review_id: number
+        }
+        Update: {
+          land_id?: number
+          review_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_lands_land_id_fkey"
+            columns: ["land_id"]
+            isOneToOne: false
+            referencedRelation: "lands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_lands_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_notes: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+          note: string
+          review_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          note: string
+          review_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string
+          review_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_notes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_statuses_v2: {
+        Row: {
+          created_at: string
+          id: number
+          is_terminal: boolean
+          name: string
+          needs_approval: boolean
+          review_kind: Database["public"]["Enums"]["review_kind_v2"]
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name: string
+          needs_approval?: boolean
+          review_kind: Database["public"]["Enums"]["review_kind_v2"]
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name?: string
+          needs_approval?: boolean
+          review_kind?: Database["public"]["Enums"]["review_kind_v2"]
+          slug?: string
+          sort_order?: number
         }
         Relationships: []
       }
-      sched_appeals: {
+      reviews: {
         Row: {
-          appeal_number: string
-          appellant_name: string | null
-          created_at: string | null
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string
+          due_date: string | null
           id: number
-          parcel_id: number
-          status: string | null
+          kind: Database["public"]["Enums"]["review_kind"]
+          title: string | null
         }
         Insert: {
-          appeal_number: string
-          appellant_name?: string | null
-          created_at?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          due_date?: string | null
           id?: number
-          parcel_id: number
-          status?: string | null
+          kind: Database["public"]["Enums"]["review_kind"]
+          title?: string | null
         }
         Update: {
-          appeal_number?: string
-          appellant_name?: string | null
-          created_at?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          due_date?: string | null
           id?: number
-          parcel_id?: number
-          status?: string | null
+          kind?: Database["public"]["Enums"]["review_kind"]
+          title?: string | null
         }
         Relationships: []
+      }
+      reviews_v2: {
+        Row: {
+          assigned_to_id: number | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          current_status_id: number | null
+          data: Json
+          due_date: string | null
+          id: number
+          kind: Database["public"]["Enums"]["review_kind_v2"]
+          title: string | null
+        }
+        Insert: {
+          assigned_to_id?: number | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          current_status_id?: number | null
+          data?: Json
+          due_date?: string | null
+          id?: number
+          kind: Database["public"]["Enums"]["review_kind_v2"]
+          title?: string | null
+        }
+        Update: {
+          assigned_to_id?: number | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          current_status_id?: number | null
+          data?: Json
+          due_date?: string | null
+          id?: number
+          kind?: Database["public"]["Enums"]["review_kind_v2"]
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_v2_assigned_to_id_fkey"
+            columns: ["assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "employees_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_v2_current_status_id_fkey"
+            columns: ["current_status_id"]
+            isOneToOne: false
+            referencedRelation: "review_statuses_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_parcels: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+          parcel_id: number
+          sale_version_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          parcel_id: number
+          sale_version_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          parcel_id?: number
+          sale_version_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_parcels_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_parcels_sale_version_id_fkey"
+            columns: ["sale_version_id"]
+            isOneToOne: false
+            referencedRelation: "sales_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_review_status_history: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+          note: string | null
+          sale_review_id: number
+          status_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string | null
+          sale_review_id: number
+          status_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          note?: string | null
+          sale_review_id?: number
+          status_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_review_status_history_sale_review_id_fkey"
+            columns: ["sale_review_id"]
+            isOneToOne: false
+            referencedRelation: "sale_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_review_status_history_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "sale_review_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_review_statuses: {
+        Row: {
+          created_at: string
+          id: number
+          is_terminal: boolean
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_terminal?: boolean
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      sale_reviews: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+          review_id: number | null
+          sale_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          review_id?: number | null
+          sale_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+          review_id?: number | null
+          sale_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_reviews_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_reviews_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_types: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      sales_parcels_v2: {
+        Row: {
+          allocated_price: number | null
+          created_at: string
+          id: number
+          parcel_id: number
+          percentage: number | null
+          sale_id: number
+        }
+        Insert: {
+          allocated_price?: number | null
+          created_at?: string
+          id?: number
+          parcel_id: number
+          percentage?: number | null
+          sale_id: number
+        }
+        Update: {
+          allocated_price?: number | null
+          created_at?: string
+          id?: number
+          parcel_id?: number
+          percentage?: number | null
+          sale_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_parcels_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcel_overview_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_parcels_v2_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "parcels_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_parcels_v2_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_v2: {
+        Row: {
+          building_condition_at_sale: Json | null
+          created_at: string
+          financing_terms: string | null
+          grantee: string | null
+          grantor: string | null
+          id: number
+          is_valid: boolean | null
+          market_conditions: string | null
+          review_id: number | null
+          sale_data: Json
+          sale_date: string
+          sale_price: number
+          sale_type: string
+          validity_reason: string | null
+        }
+        Insert: {
+          building_condition_at_sale?: Json | null
+          created_at?: string
+          financing_terms?: string | null
+          grantee?: string | null
+          grantor?: string | null
+          id?: number
+          is_valid?: boolean | null
+          market_conditions?: string | null
+          review_id?: number | null
+          sale_data?: Json
+          sale_date: string
+          sale_price: number
+          sale_type?: string
+          validity_reason?: string | null
+        }
+        Update: {
+          building_condition_at_sale?: Json | null
+          created_at?: string
+          financing_terms?: string | null
+          grantee?: string | null
+          grantor?: string | null
+          id?: number
+          is_valid?: boolean | null
+          market_conditions?: string | null
+          review_id?: number | null
+          sale_data?: Json
+          sale_date?: string
+          sale_price?: number
+          sale_type?: string
+          validity_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "active_reviews_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_v2_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_versions: {
+        Row: {
+          created_at: string
+          created_by: string
+          effective_at: string
+          grantee: string | null
+          grantor: string | null
+          id: number
+          review_id: number
+          sale_date: string | null
+          sale_id: number
+          sale_price: number
+          sale_type_id: number | null
+          version_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          grantee?: string | null
+          grantor?: string | null
+          id?: number
+          review_id: number
+          sale_date?: string | null
+          sale_id: number
+          sale_price: number
+          sale_type_id?: number | null
+          version_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          grantee?: string | null
+          grantor?: string | null
+          id?: number
+          review_id?: number
+          sale_date?: string | null
+          sale_id?: number
+          sale_price?: number
+          sale_type_id?: number | null
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_versions_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_versions_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_versions_sale_type_id_fkey"
+            columns: ["sale_type_id"]
+            isOneToOne: false
+            referencedRelation: "sale_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sched_hearing_slots: {
         Row: {
@@ -1773,13 +5585,6 @@ export type Database = {
           scheduled_by?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "sched_scheduled_hearings_appeal_id_fkey"
-            columns: ["appeal_id"]
-            isOneToOne: true
-            referencedRelation: "sched_appeals"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "sched_scheduled_hearings_hearing_slot_id_fkey"
             columns: ["hearing_slot_id"]
@@ -1885,6 +5690,375 @@ export type Database = {
         }
         Relationships: []
       }
+      structure_condition_histories: {
+        Row: {
+          condition_id: number
+          created_at: string
+          created_by: string
+          effective_at: string
+          id: number
+          review_id: number | null
+          structure_id: number
+        }
+        Insert: {
+          condition_id: number
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          id?: number
+          review_id?: number | null
+          structure_id: number
+        }
+        Update: {
+          condition_id?: number
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          id?: number
+          review_id?: number | null
+          structure_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "structure_condition_histories_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "structure_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "structure_condition_histories_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      structure_conditions: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: number
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      structure_parcel_links: {
+        Row: {
+          created_at: string
+          created_by: string
+          effective_at: string
+          id: number
+          parcel_id: number
+          review_id: number | null
+          structure_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          id?: number
+          parcel_id: number
+          review_id?: number | null
+          structure_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          id?: number
+          parcel_id?: number
+          review_id?: number | null
+          structure_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "structure_parcel_links_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      structure_section_types: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      structure_section_versions: {
+        Row: {
+          area_sqft: number
+          created_at: string
+          created_by: string
+          details: Json
+          effective_at: string
+          id: number
+          living_area_sqft: number
+          review_id: number | null
+          section_type: number
+          structure_id: number
+        }
+        Insert: {
+          area_sqft: number
+          created_at?: string
+          created_by?: string
+          details?: Json
+          effective_at?: string
+          id?: number
+          living_area_sqft: number
+          review_id?: number | null
+          section_type: number
+          structure_id: number
+        }
+        Update: {
+          area_sqft?: number
+          created_at?: string
+          created_by?: string
+          details?: Json
+          effective_at?: string
+          id?: number
+          living_area_sqft?: number
+          review_id?: number | null
+          section_type?: number
+          structure_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "structure_section_versions_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "structure_section_versions_section_type_fkey"
+            columns: ["section_type"]
+            isOneToOne: false
+            referencedRelation: "structure_section_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      structure_snapshots: {
+        Row: {
+          attached_garage_sqft: number | null
+          attic_livable_sqft: number | null
+          attic_unfinished_sqft: number | null
+          base_material_id: number | null
+          basement_finished_sqft: number | null
+          basement_unfinished_sqft: number | null
+          best_use_id: number | null
+          brick_sqft: number | null
+          category: string | null
+          concrete_sqft: number | null
+          condition_id: number | null
+          created_at: string
+          created_by: string
+          effective_at: string
+          frame_sqft: number | null
+          id: number
+          number_of_bathrooms: number | null
+          number_of_bedrooms: number | null
+          number_of_stories: number | null
+          number_of_units: number | null
+          replacement_cost_new: number | null
+          review_id: number | null
+          sections_detail: Json
+          structure_id: number
+          total_area_sqft: number | null
+          total_livable_sqft: number | null
+          year_built: number | null
+        }
+        Insert: {
+          attached_garage_sqft?: number | null
+          attic_livable_sqft?: number | null
+          attic_unfinished_sqft?: number | null
+          base_material_id?: number | null
+          basement_finished_sqft?: number | null
+          basement_unfinished_sqft?: number | null
+          best_use_id?: number | null
+          brick_sqft?: number | null
+          category?: string | null
+          concrete_sqft?: number | null
+          condition_id?: number | null
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          frame_sqft?: number | null
+          id?: number
+          number_of_bathrooms?: number | null
+          number_of_bedrooms?: number | null
+          number_of_stories?: number | null
+          number_of_units?: number | null
+          replacement_cost_new?: number | null
+          review_id?: number | null
+          sections_detail?: Json
+          structure_id: number
+          total_area_sqft?: number | null
+          total_livable_sqft?: number | null
+          year_built?: number | null
+        }
+        Update: {
+          attached_garage_sqft?: number | null
+          attic_livable_sqft?: number | null
+          attic_unfinished_sqft?: number | null
+          base_material_id?: number | null
+          basement_finished_sqft?: number | null
+          basement_unfinished_sqft?: number | null
+          best_use_id?: number | null
+          brick_sqft?: number | null
+          category?: string | null
+          concrete_sqft?: number | null
+          condition_id?: number | null
+          created_at?: string
+          created_by?: string
+          effective_at?: string
+          frame_sqft?: number | null
+          id?: number
+          number_of_bathrooms?: number | null
+          number_of_bedrooms?: number | null
+          number_of_stories?: number | null
+          number_of_units?: number | null
+          replacement_cost_new?: number | null
+          review_id?: number | null
+          sections_detail?: Json
+          structure_id?: number
+          total_area_sqft?: number | null
+          total_livable_sqft?: number | null
+          year_built?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "structure_snapshots_base_material_id_fkey"
+            columns: ["base_material_id"]
+            isOneToOne: false
+            referencedRelation: "construction_materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "structure_snapshots_best_use_id_fkey"
+            columns: ["best_use_id"]
+            isOneToOne: false
+            referencedRelation: "structure_uses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "structure_snapshots_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "structure_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "structure_snapshots_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      structure_uses: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      structures: {
+        Row: {
+          created_at: string
+          id: number
+          retired_at: string | null
+          review_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          retired_at?: string | null
+          review_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          retired_at?: string | null
+          review_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "structures_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tax_districts: {
         Row: {
           code: string
@@ -1961,6 +6135,30 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      tax_statuses_v2: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
           name?: string
         }
         Relationships: []
@@ -2461,120 +6659,6 @@ export type Database = {
           },
         ]
       }
-      test_parcel_review_items: {
-        Row: {
-          created_at: string
-          details: string | null
-          due_date: string | null
-          file_url: string | null
-          id: number
-          label: string
-          received_at: string | null
-          requested_at: string
-          required: boolean
-          review_id: number
-          status: Database["public"]["Enums"]["review_item_status"]
-          updated_at: string
-          value_json: Json | null
-          value_text: string | null
-        }
-        Insert: {
-          created_at?: string
-          details?: string | null
-          due_date?: string | null
-          file_url?: string | null
-          id?: number
-          label: string
-          received_at?: string | null
-          requested_at?: string
-          required?: boolean
-          review_id: number
-          status?: Database["public"]["Enums"]["review_item_status"]
-          updated_at?: string
-          value_json?: Json | null
-          value_text?: string | null
-        }
-        Update: {
-          created_at?: string
-          details?: string | null
-          due_date?: string | null
-          file_url?: string | null
-          id?: number
-          label?: string
-          received_at?: string | null
-          requested_at?: string
-          required?: boolean
-          review_id?: number
-          status?: Database["public"]["Enums"]["review_item_status"]
-          updated_at?: string
-          value_json?: Json | null
-          value_text?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "test_parcel_review_items_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "test_parcel_reviews"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_parcel_review_items_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "v_test_parcel_reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      test_parcel_reviews: {
-        Row: {
-          created_at: string
-          data_entered: boolean
-          description: string | null
-          due_date: string | null
-          id: number
-          parcel_id: number
-          review_type_id: number | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          data_entered?: boolean
-          description?: string | null
-          due_date?: string | null
-          id?: number
-          parcel_id: number
-          review_type_id?: number | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          data_entered?: boolean
-          description?: string | null
-          due_date?: string | null
-          id?: number
-          parcel_id?: number
-          review_type_id?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "test_parcel_reviews_parcel_id_fkey"
-            columns: ["parcel_id"]
-            isOneToOne: false
-            referencedRelation: "test_parcels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_parcel_reviews_review_type_id_fkey"
-            columns: ["review_type_id"]
-            isOneToOne: false
-            referencedRelation: "review_types"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       test_parcel_sales: {
         Row: {
           parcel_id: number
@@ -3026,6 +7110,155 @@ export type Database = {
         }
         Relationships: []
       }
+      valuation_methods_v2: {
+        Row: {
+          calculation_formula: string | null
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean
+          name: string
+          requires_comparables: boolean
+          requires_cost_data: boolean
+          requires_income_data: boolean
+          updated_at: string
+        }
+        Insert: {
+          calculation_formula?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name: string
+          requires_comparables?: boolean
+          requires_cost_data?: boolean
+          requires_income_data?: boolean
+          updated_at?: string
+        }
+        Update: {
+          calculation_formula?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name?: string
+          requires_comparables?: boolean
+          requires_cost_data?: boolean
+          requires_income_data?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      value_components_v2: {
+        Row: {
+          applies_to: string
+          calculation_method: string | null
+          component_category: string
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to: string
+          calculation_method?: string | null
+          component_category: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string
+          calculation_method?: string | null
+          component_category?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      value_type_allocations_v2: {
+        Row: {
+          allocation_notes: string | null
+          created_at: string
+          custom_value_override: number | null
+          id: number
+          percentage_allocation: number | null
+          updated_at: string
+          value_id: number
+          value_table: string
+          value_type_id: number
+        }
+        Insert: {
+          allocation_notes?: string | null
+          created_at?: string
+          custom_value_override?: number | null
+          id?: number
+          percentage_allocation?: number | null
+          updated_at?: string
+          value_id: number
+          value_table: string
+          value_type_id: number
+        }
+        Update: {
+          allocation_notes?: string | null
+          created_at?: string
+          custom_value_override?: number | null
+          id?: number
+          percentage_allocation?: number | null
+          updated_at?: string
+          value_id?: number
+          value_table?: string
+          value_type_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "value_type_allocations_v2_value_type_id_fkey"
+            columns: ["value_type_id"]
+            isOneToOne: false
+            referencedRelation: "value_types_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      value_types_v2: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean
+          name: string
+          tax_category: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name: string
+          tax_category?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          name?: string
+          tax_category?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wards_detail: {
         Row: {
           avg_appraised_value_2024_commercial: number | null
@@ -3178,6 +7411,20 @@ export type Database = {
       }
     }
     Views: {
+      active_reviews_v2: {
+        Row: {
+          assigned_to: string | null
+          created_at: string | null
+          days_until_due: number | null
+          due_date: string | null
+          id: number | null
+          kind: Database["public"]["Enums"]["review_kind_v2"] | null
+          needs_approval: boolean | null
+          status_name: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       mv_structure_area_totals: {
         Row: {
           finished_area_total: number | null
@@ -3218,38 +7465,70 @@ export type Database = {
           },
         ]
       }
-      v_test_parcel_reviews: {
+      parcel_overview_v2: {
         Row: {
-          created_at: string | null
-          data_entered: boolean | null
-          description: string | null
-          due_date: string | null
+          block: number | null
+          building_count: number | null
+          current_review_kind:
+            | Database["public"]["Enums"]["review_kind_v2"]
+            | null
+          current_review_status: string | null
+          ext: number | null
           id: number | null
-          parcel_id: number | null
-          review_type_code: string | null
-          review_type_id: number | null
-          review_type_label: string | null
-          updated_at: string | null
+          land_count: number | null
+          last_sale_date: string | null
+          lot: number | null
+          neighborhood: string | null
+          owner_name: string | null
+          parcel_number: string | null
+          sale_count: number | null
+          site_address: string | null
+          tax_status: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "test_parcel_reviews_parcel_id_fkey"
-            columns: ["parcel_id"]
-            isOneToOne: false
-            referencedRelation: "test_parcels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_parcel_reviews_review_type_id_fkey"
-            columns: ["review_type_id"]
-            isOneToOne: false
-            referencedRelation: "review_types"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
+      approve_value_calculation_v2: {
+        Args: {
+          p_activate?: boolean
+          p_approval_notes?: string
+          p_approve?: boolean
+          p_entity_type: string
+          p_value_ids: number[]
+        }
+        Returns: undefined
+      }
+      assign_devnet_review: {
+        Args: {
+          p_assigned_by_id?: number
+          p_employee_id: number
+          p_notes?: string
+          p_review_id: number
+        }
+        Returns: boolean
+      }
+      auto_assign_field_reviews: { Args: never; Returns: number }
+      bulk_assign_field_review_employees: {
+        Args: {
+          p_employee_ids: number[]
+          p_review_ids: number[]
+          p_valid?: unknown
+        }
+        Returns: number
+      }
+      bulk_create_field_review_statuses: {
+        Args: {
+          p_description?: string
+          p_review_ids: number[]
+          p_status_id: number
+        }
+        Returns: number
+      }
+      check_review_data_completeness: {
+        Args: { p_review_id: number }
+        Returns: Json
+      }
       compare_parcel_to_comp_sales: {
         Args: { p_comp_sale_ids: number[]; p_subject_parcel_id: number }
         Returns: {
@@ -3290,6 +7569,18 @@ export type Database = {
           subject_total_unfinished_area: number
         }[]
       }
+      create_devnet_review: {
+        Args: {
+          p_assigned_to_id?: number
+          p_data?: Json
+          p_description?: string
+          p_entity_id: number
+          p_entity_type: string
+          p_kind: Database["public"]["Enums"]["devnet_review_kind"]
+          p_title?: string
+        }
+        Returns: number
+      }
       create_field_review: {
         Args: {
           p_due_date: string
@@ -3303,6 +7594,19 @@ export type Database = {
           review_created_at: string
           review_id: number
           status_id: number
+        }[]
+      }
+      create_field_reviews_bulk: {
+        Args: {
+          p_due_date: string
+          p_initial_status_id: number
+          p_note?: string
+          p_parcel_ids: number[]
+          p_type_id: number
+        }
+        Returns: {
+          parcel_id: number
+          review_id: number
         }[]
       }
       create_file_and_field_review_image: {
@@ -3336,6 +7640,14 @@ export type Database = {
       delete_parcel_image: { Args: { p_image_url: string }; Returns: undefined }
       delete_parcel_images: {
         Args: { p_image_urls: string[] }
+        Returns: undefined
+      }
+      detect_value_triggering_changes_v2: {
+        Args: { p_entity_type: string; p_new_data: Json; p_old_data: Json }
+        Returns: Json
+      }
+      enforce_review_editable: {
+        Args: { p_review_id: number }
         Returns: undefined
       }
       find_comps: {
@@ -3377,6 +7689,21 @@ export type Database = {
           total_unfinished_area: number
         }[]
       }
+      get_buildings_as_of_date_v2: {
+        Args: { p_as_of_date: string; p_parcel_id: number }
+        Returns: {
+          bathrooms: number
+          bedrooms: number
+          building_data: Json
+          building_id: number
+          building_type: string
+          condition_rating: number
+          finished_area: number
+          snapshot_date: string
+          square_footage: number
+          year_built: number
+        }[]
+      }
       get_category_sums_asof: {
         Args: { p_as_of_date?: string }
         Returns: {
@@ -3401,6 +7728,94 @@ export type Database = {
           taxable_total: number
         }[]
       }
+      get_complete_parcel_as_of_date_v2: {
+        Args: { p_as_of_date: string; p_parcel_id: number }
+        Returns: Json
+      }
+      get_devnet_filter_options: { Args: never; Returns: Json }
+      get_devnet_review_counts: {
+        Args: { p_filters?: Json }
+        Returns: {
+          kind: string
+          review_count: number
+          status_name: string
+          status_slug: string
+        }[]
+      }
+      get_employee_permissions_v2: {
+        Args: { p_user_id: string }
+        Returns: {
+          can_approve: boolean
+          employee_id: number
+          full_name: string
+        }[]
+      }
+      get_field_reviews_with_parcel_data: {
+        Args: { p_as_of_date?: string }
+        Returns: {
+          address_city: string
+          address_formatted: string
+          address_lat: number
+          address_line1: string
+          address_lon: number
+          address_place_id: string
+          address_postcode: string
+          address_state: string
+          assessor_neighborhood: number
+          assessor_neighborhood_id: number
+          block: number
+          cda_neighborhood: string
+          cda_neighborhood_id: number
+          ext: number
+          field_review_id: number
+          latest_status_hist_id: number
+          latest_status_id: number
+          latest_status_name: string
+          latest_status_set_at: string
+          lot: number
+          notes: Json
+          parcel_created_at: string
+          parcel_id: number
+          parcel_retired_at: string
+          pf_abatement: Json
+          pf_avg_condition: number
+          pf_avg_year_built: number
+          pf_current_value: number
+          pf_date_of_assessment: string
+          pf_district: string
+          pf_house_number: string
+          pf_land_area: number
+          pf_land_to_building_area_ratio: number
+          pf_land_use: string
+          pf_lat: number
+          pf_lon: number
+          pf_neighborhoods_at_as_of: Json
+          pf_postcode: string
+          pf_property_class_id: number
+          pf_property_class_name: string
+          pf_street: string
+          pf_structure_count: number
+          pf_structures: Json
+          pf_tax_status_id: number
+          pf_tax_status_name: string
+          pf_total_finished_area: number
+          pf_total_unfinished_area: number
+          pf_total_units: number
+          pf_value_row_id: number
+          pf_value_year: number
+          pf_values_per_sqft_building_total: number
+          pf_values_per_sqft_finished: number
+          pf_values_per_sqft_land: number
+          pf_values_per_unit: number
+          review_created_at: string
+          review_due_date: string
+          review_type_id: number
+          review_type_name: string
+          review_type_slug: string
+          site_visited_at: string
+          status_history: Json
+        }[]
+      }
       get_field_reviews_with_parcel_details: {
         Args: never
         Returns: {
@@ -3413,8 +7828,10 @@ export type Database = {
           address_postcode: string
           address_state: string
           assessor_neighborhood: number
+          assessor_neighborhood_id: number
           block: number
           cda_neighborhood: string
+          cda_neighborhood_id: number
           ext: number
           field_review_id: number
           latest_status_hist_id: number
@@ -3431,6 +7848,170 @@ export type Database = {
           review_type_name: string
           review_type_slug: string
           site_visited_at: string
+        }[]
+      }
+      get_field_reviews_with_parcel_details_v2: {
+        Args: { p_neighborhood_ids?: number[] }
+        Returns: {
+          address_city: string
+          address_formatted: string
+          address_house_number: string
+          address_lat: number
+          address_line1: string
+          address_lon: number
+          address_place_id: string
+          address_postcode: string
+          address_state: string
+          address_street: string
+          assessor_neighborhood: number
+          assessor_neighborhood_id: number
+          block: number
+          cda_neighborhood: string
+          cda_neighborhood_id: number
+          current_land_use: number
+          current_structures: Json
+          ext: number
+          field_review_id: number
+          latest_status_hist_id: number
+          latest_status_id: number
+          latest_status_name: string
+          latest_status_set_at: string
+          lot: number
+          notes: Json
+          parcel_created_at: string
+          parcel_id: number
+          parcel_retired_at: string
+          review_created_at: string
+          review_due_date: string
+          review_type_id: number
+          review_type_name: string
+          review_type_slug: string
+          site_visited_at: string
+          status_history: Json
+        }[]
+      }
+      get_field_reviews_with_parcel_details_v3: {
+        Args: { p_employee_id?: number; p_neighborhood_ids?: number[] }
+        Returns: {
+          address_city: string
+          address_formatted: string
+          address_lat: number
+          address_line1: string
+          address_lon: number
+          address_place_id: string
+          address_postcode: string
+          address_state: string
+          assessor_neighborhood: number
+          assessor_neighborhood_id: number
+          assignments: Json
+          block: number
+          cda_neighborhood: string
+          cda_neighborhood_id: number
+          current_land_use: number
+          current_structures: Json
+          ext: number
+          field_review_id: number
+          latest_status_hist_id: number
+          latest_status_id: number
+          latest_status_name: string
+          latest_status_set_at: string
+          lot: number
+          notes: Json
+          parcel_created_at: string
+          parcel_id: number
+          parcel_retired_at: string
+          review_created_at: string
+          review_due_date: string
+          review_type_id: number
+          review_type_name: string
+          review_type_slug: string
+          site_visited_at: string
+          status_history: Json
+        }[]
+      }
+      get_field_reviews_with_parcel_details_v4: {
+        Args: { p_employee_id?: number; p_neighborhood_ids?: number[] }
+        Returns: {
+          address_city: string
+          address_formatted: string
+          address_lat: number
+          address_line1: string
+          address_lon: number
+          address_place_id: string
+          address_postcode: string
+          address_state: string
+          assessor_neighborhood: number
+          assessor_neighborhood_id: number
+          assignments: Json
+          block: number
+          cda_neighborhood: string
+          cda_neighborhood_id: number
+          current_land_use: number
+          current_structures: Json
+          ext: number
+          field_review_id: number
+          latest_status_hist_id: number
+          latest_status_id: number
+          latest_status_name: string
+          latest_status_set_at: string
+          lot: number
+          notes: Json
+          parcel_created_at: string
+          parcel_id: number
+          parcel_retired_at: string
+          parcel_sales: Json
+          parcels: Json
+          review_created_at: string
+          review_due_date: string
+          review_sales: Json
+          review_type_id: number
+          review_type_name: string
+          review_type_slug: string
+          site_visited_at: string
+          status_history: Json
+        }[]
+      }
+      get_land_as_of_date_v2: {
+        Args: { p_as_of_date: string; p_parcel_id: number }
+        Returns: {
+          area_sqft: number
+          depth_ft: number
+          frontage_ft: number
+          land_data: Json
+          land_id: number
+          land_use: string
+          snapshot_date: string
+          topography: string
+        }[]
+      }
+      get_parcel_as_of_date_v2: {
+        Args: { p_as_of_date: string; p_parcel_id: number }
+        Returns: {
+          block: number
+          ext: number
+          lot: number
+          neighborhood: string
+          owner_address: string
+          owner_name: string
+          parcel_data: Json
+          parcel_id: number
+          parcel_number: string
+          property_class: string
+          site_address: string
+          snapshot_date: string
+          tax_status: string
+        }[]
+      }
+      get_parcel_current_values_v2: {
+        Args: { p_parcel_id: number }
+        Returns: {
+          approved_date: string
+          calculation_date: string
+          entity_id: number
+          entity_type: string
+          method_name: string
+          total_value: number
+          value_type_name: string
         }[]
       }
       get_parcel_features: {
@@ -3472,6 +8053,43 @@ export type Database = {
           values_per_sqft_finished: number
           values_per_sqft_land: number
           values_per_unit: number
+        }[]
+      }
+      get_parcel_snapshots_asof: {
+        Args: { p_asof_date: string; p_parcel_ids: number[] }
+        Returns: {
+          parcel_id: number
+          snapshot: Json
+        }[]
+      }
+      get_parcel_summary_v2: {
+        Args: { p_parcel_id: number }
+        Returns: {
+          building_count: number
+          current_review_kind: Database["public"]["Enums"]["review_kind_v2"]
+          current_review_status: string
+          land_count: number
+          last_sale_date: string
+          last_sale_price: number
+          owner_name: string
+          parcel_id: number
+          parcel_number: string
+          site_address: string
+        }[]
+      }
+      get_parcel_timeline_v2: {
+        Args: {
+          p_end_date?: string
+          p_parcel_id: number
+          p_start_date?: string
+        }
+        Returns: {
+          changes: Json
+          owner_name: string
+          property_class: string
+          review_id: number
+          snapshot_date: string
+          tax_status: string
         }[]
       }
       get_ratios: {
@@ -4036,6 +8654,110 @@ export type Database = {
         Returns: number
       }
       load_parcel_site_addresses: { Args: never; Returns: undefined }
+      mark_copied_to_devnet: {
+        Args: { p_employee_id: number; p_notes?: string; p_review_id: number }
+        Returns: boolean
+      }
+      mark_data_collected: {
+        Args: {
+          p_employee_id: number
+          p_field_data: Json
+          p_notes?: string
+          p_review_id: number
+        }
+        Returns: boolean
+      }
+      mass_assign_devnet_reviews: {
+        Args: {
+          p_assigned_by_id?: number
+          p_due_date?: string
+          p_employee_id: number
+          p_review_ids: number[]
+        }
+        Returns: boolean
+      }
+      mass_assign_reviews_v2: {
+        Args: { p_employee_id: number; p_review_ids: number[] }
+        Returns: boolean
+      }
+      mass_complete_devnet_assignments: {
+        Args: {
+          p_assignment_ids: number[]
+          p_completed_by_id: number
+          p_completion_notes?: string
+        }
+        Returns: number
+      }
+      mass_create_devnet_assignments: {
+        Args: {
+          p_assigned_by_id?: number
+          p_due_date?: string
+          p_employee_id: number
+          p_notes?: string
+          p_review_ids: number[]
+          p_status_ids: number[]
+        }
+        Returns: number
+      }
+      mass_create_devnet_reviews: {
+        Args: { p_review_configs: Json }
+        Returns: number[]
+      }
+      mass_create_reviews_v2: {
+        Args: {
+          p_data?: Json
+          p_due_date?: string
+          p_kind: Database["public"]["Enums"]["review_kind_v2"]
+          p_parcel_ids: number[]
+          p_title?: string
+        }
+        Returns: number[]
+      }
+      mass_reassign_devnet_reviews: {
+        Args: {
+          p_assigned_by_id?: number
+          p_due_date?: string
+          p_from_employee_id: number
+          p_notes?: string
+          p_review_ids: number[]
+          p_to_employee_id: number
+        }
+        Returns: number
+      }
+      mass_update_assignment_due_dates: {
+        Args: {
+          p_assignment_ids: number[]
+          p_new_due_date: string
+          p_notes?: string
+          p_updated_by_id?: number
+        }
+        Returns: number
+      }
+      mass_update_devnet_review_status: {
+        Args: {
+          p_changed_by_id?: number
+          p_new_status_slug: string
+          p_notes?: string
+          p_review_ids: number[]
+        }
+        Returns: boolean
+      }
+      mass_update_review_status_v2: {
+        Args: { p_note?: string; p_review_ids: number[]; p_status_slug: string }
+        Returns: boolean
+      }
+      publish_review: { Args: { p_review_id: number }; Returns: undefined }
+      schedule_value_recalculation_v2: {
+        Args: {
+          p_assessment_cycle_id: number
+          p_entity_id: number
+          p_entity_type: string
+          p_scheduled_date?: string
+          p_trigger_type?: string
+          p_triggered_by_changes?: Json
+        }
+        Returns: number[]
+      }
       score_sales_with_model_with_coeff: {
         Args: { p_limit?: number; p_parcel_ids?: number[]; p_run_id?: number }
         Returns: {
@@ -4104,6 +8826,487 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      search_devnet_reviews: {
+        Args: { p_filters?: Json }
+        Returns: {
+          assigned_to_email: string
+          assigned_to_name: string
+          assigned_to_role: string
+          completed_at: string
+          created_at: string
+          data_status: string
+          days_until_due: number
+          description: string
+          due_date: string
+          entity_id: number
+          entity_type: string
+          id: number
+          kind: string
+          neighborhood_name: string
+          parcel_address: string
+          parcel_data: Json
+          parcel_number: string
+          priority: string
+          requires_field_review: boolean
+          sale_date: string
+          sale_parcels_data: Json
+          sale_price: number
+          sales_data: Json
+          status_name: string
+          status_slug: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      search_parcel_rollup_asof_v1: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_limit?: number
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          block: number
+          ext: number
+          lot: number
+          neighborhood: Json
+          parcel_id: number
+          property_class: Json
+          structure_snapshot: Json
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v10: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_structure_count?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_max_value_per_livable_sqft?: number
+          p_max_value_per_total_sqft?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_structure_count?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_min_value_per_livable_sqft?: number
+          p_min_value_per_total_sqft?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          address_housenumber: string
+          address_street: string
+          block: number
+          ext: number
+          lot: number
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          property_class: Json
+          structure_count: number
+          structure_snapshot: Json
+          total_structure_livable_sqft: number
+          total_structure_sqft: number
+          total_value: number
+          value_per_livable_sqft: number
+          value_per_total_sqft: number
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v11: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_best_use_ids?: number[]
+          p_condition_ids?: number[]
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_structure_count?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_max_value_per_livable_sqft?: number
+          p_max_value_per_total_sqft?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_structure_count?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_min_value_per_livable_sqft?: number
+          p_min_value_per_total_sqft?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          address_housenumber: string
+          address_street: string
+          best_use_ids: number[]
+          best_use_names: string[]
+          block: number
+          condition_ids: number[]
+          condition_names: string[]
+          ext: number
+          lot: number
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          property_class: Json
+          structure_count: number
+          structure_snapshot: Json
+          total_structure_livable_sqft: number
+          total_structure_sqft: number
+          total_value: number
+          value_per_livable_sqft: number
+          value_per_total_sqft: number
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v12: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_best_use_ids?: number[]
+          p_condition_ids?: number[]
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_structure_count?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_max_value_per_livable_sqft?: number
+          p_max_value_per_total_sqft?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_structure_count?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_min_value_per_livable_sqft?: number
+          p_min_value_per_total_sqft?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          address_housenumber: string
+          address_street: string
+          block: number
+          ext: number
+          lot: number
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          property_class: Json
+          structure_count: number
+          structure_snapshot: Json
+          total_structure_livable_sqft: number
+          total_structure_sqft: number
+          total_value: number
+          value_per_livable_sqft: number
+          value_per_total_sqft: number
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v2: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_limit?: number
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          block: number
+          ext: number
+          lot: number
+          neighborhoods: Json
+          parcel_id: number
+          property_class: Json
+          structure_snapshot: Json
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v3: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_limit?: number
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          block: number
+          ext: number
+          lot: number
+          neighborhoods: Json
+          parcel_id: number
+          property_class: Json
+          structure_snapshot: Json
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v4: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_limit?: number
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          block: number
+          ext: number
+          lot: number
+          neighborhoods: Json
+          parcel_id: number
+          property_class: Json
+          structure_snapshot: Json
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v5: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          block: number
+          ext: number
+          lot: number
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          property_class: Json
+          structure_snapshot: Json
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v6: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          block: number
+          ext: number
+          lot: number
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          property_class: Json
+          structure_snapshot: Json
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v7: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          block: number
+          ext: number
+          lot: number
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          property_class: Json
+          structure_snapshot: Json
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_rollup_asof_v9: {
+        Args: {
+          p_as_of_date?: string
+          p_base_material_ids?: number[]
+          p_condition_ids?: number[]
+          p_max_impr_value?: number
+          p_max_land_value?: number
+          p_max_livable_sqft?: number
+          p_max_stories?: number
+          p_max_total_area_sqft?: number
+          p_max_total_value?: number
+          p_min_impr_value?: number
+          p_min_land_value?: number
+          p_min_livable_sqft?: number
+          p_min_stories?: number
+          p_min_total_area_sqft?: number
+          p_min_total_value?: number
+          p_neighborhood_ids?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_year?: number
+        }
+        Returns: {
+          address: Json
+          address_housenumber: string
+          address_street: string
+          block: number
+          ext: number
+          lot: number
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          property_class: Json
+          structure_count: number
+          structure_snapshot: Json
+          total_structure_livable_sqft: number
+          total_structure_sqft: number
+          total_value: number
+          value_per_livable_sqft: number
+          value_per_total_sqft: number
+          value_snapshot: Json
+        }[]
+      }
+      search_parcel_snapshots_asof: {
+        Args: {
+          p_asof_date: string
+          p_cursor?: Json
+          p_filters?: Json
+          p_limit?: number
+          p_sort_dir?: string
+          p_sort_key?: string
+        }
+        Returns: {
+          parcel_id: number
+          snapshot: Json
+          total_count: number
+        }[]
+      }
       search_parcels_by_prefix: {
         Args: { active?: boolean; prefix: string }
         Returns: {
@@ -4111,6 +9314,36 @@ export type Database = {
           names: string[]
           parcel_number: string
           retired_at: string
+        }[]
+      }
+      search_parcels_v2: {
+        Args: {
+          p_as_of_date?: string
+          p_filters?: Json
+          p_limit?: number
+          p_offset?: number
+          p_sort_by?: string
+          p_sort_direction?: string
+        }
+        Returns: {
+          block: number
+          building_summary: Json
+          current_building_value: number
+          current_land_value: number
+          ext: number
+          lot: number
+          neighborhood_name: string
+          owner_name: string
+          parcel_data: Json
+          parcel_id: number
+          parcel_number: string
+          property_class: string
+          site_address: string
+          tax_status_name: string
+          total_buildings: number
+          total_count: number
+          total_property_value: number
+          value_summary: Json
         }[]
       }
       search_sold_parcels_by_address_prefix: {
@@ -4127,6 +9360,15 @@ export type Database = {
           sale_price: number
           sale_type: string
         }[]
+      }
+      set_review_data_requirements: {
+        Args: {
+          p_completion_criteria?: Json
+          p_required_fields: Json
+          p_review_id: number
+          p_validation_rules?: Json
+        }
+        Returns: boolean
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
@@ -4482,9 +9724,92 @@ export type Database = {
           values_per_unit: number
         }[]
       }
+      testing_get_parcel_features_v6: {
+        Args: {
+          p_abatement_programs?: number[]
+          p_as_of_date?: string
+          p_exclude_retired_parcels?: boolean
+          p_is_abated?: boolean
+          p_land_uses?: number[]
+          p_neighborhoods?: number[]
+          p_parcel_ids?: number[]
+          p_property_class_ids?: number[]
+          p_tax_status_ids?: number[]
+        }
+        Returns: {
+          abatement: Json
+          avg_condition: number
+          avg_year_built: number
+          block: number
+          current_value: number
+          date_of_assessment: string
+          district: string
+          ext: number
+          house_number: string
+          land_area: number
+          land_to_building_area_ratio: number
+          land_use: string
+          lat: number
+          lon: number
+          lot: string
+          neighborhoods_at_as_of: Json
+          parcel_id: number
+          postcode: string
+          property_class_id: number
+          property_class_name: string
+          retired_at: string
+          street: string
+          structure_count: number
+          structures: Json
+          tax_status_id: number
+          tax_status_name: string
+          total_finished_area: number
+          total_unfinished_area: number
+          total_units: number
+          value_row_id: number
+          value_year: number
+          values_per_sqft_building_total: number
+          values_per_sqft_finished: number
+          values_per_sqft_land: number
+          values_per_unit: number
+        }[]
+      }
+      transition_devnet_review_status: {
+        Args: {
+          p_changed_by_id?: number
+          p_new_status_slug: string
+          p_notes?: string
+          p_review_id: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      devnet_data_status:
+        | "not_collected"
+        | "in_field"
+        | "collected"
+        | "entered"
+        | "copied_to_devnet"
+        | "verified"
+      devnet_review_kind:
+        | "sale_review"
+        | "permit_review"
+        | "appeal_review"
+        | "custom_review"
       review_item_status: "requested" | "in_progress" | "received" | "canceled"
+      review_kind: "custom"
+      review_kind_v2:
+        | "sale_review"
+        | "permit_review"
+        | "appeal_review"
+        | "building_review"
+        | "land_review"
+        | "parcel_review"
+        | "building_valuation"
+        | "land_valuation"
+        | "value_calculation"
+        | "use_conversion"
     }
     CompositeTypes: {
       regression_coef: {
@@ -4621,12 +9946,36 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
+      devnet_data_status: [
+        "not_collected",
+        "in_field",
+        "collected",
+        "entered",
+        "copied_to_devnet",
+        "verified",
+      ],
+      devnet_review_kind: [
+        "sale_review",
+        "permit_review",
+        "appeal_review",
+        "custom_review",
+      ],
       review_item_status: ["requested", "in_progress", "received", "canceled"],
+      review_kind: ["custom"],
+      review_kind_v2: [
+        "sale_review",
+        "permit_review",
+        "appeal_review",
+        "building_review",
+        "land_review",
+        "parcel_review",
+        "building_valuation",
+        "land_valuation",
+        "value_calculation",
+        "use_conversion",
+      ],
     },
   },
 } as const
