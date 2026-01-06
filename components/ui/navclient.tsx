@@ -7,10 +7,14 @@ const NavClient = () => {
   const pathname = usePathname();
   const links = [
     { href: "/", label: "Home" },
-    { href: "/parcels/test", label: "Parcels" },
-    { href: "/sales", label: "Sales" },
-    { href: "/ratios/stats", label: "Ratio Stats" },
+    // { href: "/parcels/test", label: "Parcels" },
+    // { href: "/sales", label: "Sales" },
+    // { href: "/ratios/stats", label: "Ratio Stats" },
     { href: "/tax-rates", label: "Tax Rates" },
+    {
+      href: "/search-vin-with-guide-matches",
+      label: "VIN Lookup",
+    },
     {
       href: "/senior-tax-credits/calculator/test",
       label: "Senior Tax Credit Calculator",

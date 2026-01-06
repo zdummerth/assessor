@@ -2450,6 +2450,30 @@ export type Database = {
         }
         Relationships: []
       }
+      guide_2026: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          updated_at: string
+          years: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          updated_at?: string
+          years?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          updated_at?: string
+          years?: string | null
+        }
+        Relationships: []
+      }
       invoice_line_item: {
         Row: {
           amount: number | null
@@ -7259,6 +7283,36 @@ export type Database = {
         }
         Relationships: []
       }
+      vin_lookup_2026: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          model_year: string | null
+          type: string | null
+          updated_at: string
+          vin: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          model_year?: string | null
+          type?: string | null
+          updated_at?: string
+          vin: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          model_year?: string | null
+          type?: string | null
+          updated_at?: string
+          vin?: string
+        }
+        Relationships: []
+      }
       wards_detail: {
         Row: {
           avg_appraised_value_2024_commercial: number | null
@@ -9379,6 +9433,17 @@ export type Database = {
           sale_id: number
           sale_price: number
           sale_type: string
+        }[]
+      }
+      search_vin_with_guide_matches: {
+        Args: { p_max_guide_results?: number; p_vin: string }
+        Returns: {
+          guide_results: Json
+          model_year: string
+          type: string
+          vin: string
+          vin_description: string
+          vin_id: number
         }[]
       }
       set_review_data_requirements: {
