@@ -84,13 +84,20 @@ export function NeighborhoodsPresentation({
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-<th className="px-4 py-2 text-left">Group</th><th className="px-4 py-2 text-left">Id</th><th className="px-4 py-2 text-left">Name</th><th className="px-4 py-2 text-left">Neighborhood</th><th className="px-4 py-2 text-left">Polygon</th>
+                    <th className="px-4 py-2 text-left">Group</th>
+                    <th className="px-4 py-2 text-left">Id</th>
+                    <th className="px-4 py-2 text-left">Name</th>
+                    <th className="px-4 py-2 text-left">Neighborhood</th>
+                    <th className="px-4 py-2 text-left">Polygon</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.map((item, index) => (
                     <tr key={index} className="border-b hover:bg-muted/50">
-<td className="px-4 py-2">{item.group || "-"}</td><td className="px-4 py-2">{item.id || "-"}</td><td className="px-4 py-2">{item.name || "-"}</td><td className="px-4 py-2">{item.neighborhood || "-"}</td><td className="px-4 py-2">{item.polygon || "-"}</td>
+                      <td className="px-4 py-2">{item.group || "-"}</td>
+                      <td className="px-4 py-2">{item.id || "-"}</td>
+                      <td className="px-4 py-2">{item.name || "-"}</td>
+                      <td className="px-4 py-2">{item.neighborhood || "-"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -115,22 +122,30 @@ export function NeighborhoodsPresentation({
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-<div className="flex justify-between py-2 border-b">
-                  <span className="font-medium text-muted-foreground">Group:</span>
-                  <span>{item.group || "-"}</span>
-                </div><div className="flex justify-between py-2 border-b">
-                  <span className="font-medium text-muted-foreground">Id:</span>
-                  <span>{item.id || "-"}</span>
-                </div><div className="flex justify-between py-2 border-b">
-                  <span className="font-medium text-muted-foreground">Name:</span>
-                  <span>{item.name || "-"}</span>
-                </div><div className="flex justify-between py-2 border-b">
-                  <span className="font-medium text-muted-foreground">Neighborhood:</span>
-                  <span>{item.neighborhood || "-"}</span>
-                </div><div className="flex justify-between py-2 border-b">
-                  <span className="font-medium text-muted-foreground">Polygon:</span>
-                  <span>{item.polygon || "-"}</span>
-                </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium text-muted-foreground">
+                      Group:
+                    </span>
+                    <span>{item.group || "-"}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium text-muted-foreground">
+                      Id:
+                    </span>
+                    <span>{item.id || "-"}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium text-muted-foreground">
+                      Name:
+                    </span>
+                    <span>{item.name || "-"}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="font-medium text-muted-foreground">
+                      Neighborhood:
+                    </span>
+                    <span>{item.neighborhood || "-"}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
