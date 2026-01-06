@@ -6,25 +6,18 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
     const pageSize = parseInt(searchParams.get("page_size") || "25");
-
+    
     const supabase = await createClient();
 
-    let query = supabase.from("devnet_reviews").select("*", { count: "exact" });
+    let query = supabase
+      .from("neighborhoods")
+      .select("*", { count: "exact" });
 
-    const completed_at = searchParams.get("completed_at");
-    if (completed_at) {
-      query = query.ilike("completed_at", `%${completed_at}%`);
+    const name = searchParams.get("name");
+    if (name) {
+      query = query.ilike("name", `%${name}%`);
     }
 
-    const copied_to_devnet_at = searchParams.get("copied_to_devnet_at");
-    if (copied_to_devnet_at) {
-      query = query.ilike("copied_to_devnet_at", `%${copied_to_devnet_at}%`);
-    }
-
-    const created_at = searchParams.get("created_at");
-    if (created_at) {
-      query = query.ilike("created_at", `%${created_at}%`);
-    }
 
     const { data, error, count } = await query
       .range((page - 1) * pageSize, page * pageSize - 1)
