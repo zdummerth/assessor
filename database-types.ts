@@ -7501,7 +7501,7 @@ export type Database = {
       }
       assign_devnet_review: {
         Args: {
-          p_assigned_by_id?: number
+          p_assigned_by_employee_id?: number
           p_employee_id: number
           p_notes?: string
           p_review_id: number
@@ -7571,7 +7571,7 @@ export type Database = {
       }
       create_devnet_review: {
         Args: {
-          p_assigned_to_id?: number
+          p_assigned_to_employee_id?: number
           p_data?: Json
           p_description?: string
           p_entity_id: number
@@ -8655,12 +8655,16 @@ export type Database = {
       }
       load_parcel_site_addresses: { Args: never; Returns: undefined }
       mark_copied_to_devnet: {
-        Args: { p_employee_id: number; p_notes?: string; p_review_id: number }
+        Args: {
+          p_copied_by_employee_id: number
+          p_notes?: string
+          p_review_id: number
+        }
         Returns: boolean
       }
       mark_data_collected: {
         Args: {
-          p_employee_id: number
+          p_collected_by_employee_id: number
           p_field_data: Json
           p_notes?: string
           p_review_id: number
@@ -8669,7 +8673,7 @@ export type Database = {
       }
       mass_assign_devnet_reviews: {
         Args: {
-          p_assigned_by_id?: number
+          p_assigned_by_employee_id?: number
           p_due_date?: string
           p_employee_id: number
           p_review_ids: number[]
@@ -8683,14 +8687,14 @@ export type Database = {
       mass_complete_devnet_assignments: {
         Args: {
           p_assignment_ids: number[]
-          p_completed_by_id: number
+          p_completed_by_employee_id: number
           p_completion_notes?: string
         }
         Returns: number
       }
       mass_create_devnet_assignments: {
         Args: {
-          p_assigned_by_id?: number
+          p_assigned_by_employee_id?: number
           p_due_date?: string
           p_employee_id: number
           p_notes?: string
@@ -8715,7 +8719,7 @@ export type Database = {
       }
       mass_reassign_devnet_reviews: {
         Args: {
-          p_assigned_by_id?: number
+          p_assigned_by_employee_id?: number
           p_due_date?: string
           p_from_employee_id: number
           p_notes?: string
@@ -8729,13 +8733,13 @@ export type Database = {
           p_assignment_ids: number[]
           p_new_due_date: string
           p_notes?: string
-          p_updated_by_id?: number
+          p_updated_by_employee_id?: number
         }
         Returns: number
       }
       mass_update_devnet_review_status: {
         Args: {
-          p_changed_by_id?: number
+          p_changed_by_employee_id?: number
           p_new_status_slug: string
           p_notes?: string
           p_review_ids: number[]
@@ -8829,11 +8833,12 @@ export type Database = {
       search_devnet_reviews: {
         Args: {
           p_active_only?: boolean
-          p_assigned_to_id?: number
+          p_assigned_to_devnet_employees_id?: number
           p_completed_only?: boolean
           p_created_after?: string
           p_created_before?: string
           p_data_status?: string
+          p_devnet_review_statuses_ids?: string
           p_due_after?: string
           p_due_before?: string
           p_entity_type?: string
@@ -8842,7 +8847,6 @@ export type Database = {
           p_priority?: string
           p_requires_field_review?: boolean
           p_search_text?: string
-          p_status_ids?: string
         }
         Returns: {
           assigned_to_email: string
@@ -9792,7 +9796,7 @@ export type Database = {
       }
       transition_devnet_review_status: {
         Args: {
-          p_changed_by_id?: number
+          p_changed_by_employee_id?: number
           p_new_status_slug: string
           p_notes?: string
           p_review_id: number

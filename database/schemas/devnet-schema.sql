@@ -413,7 +413,7 @@ CREATE OR REPLACE FUNCTION create_devnet_review(
     p_entity_id bigint,
     p_title text DEFAULT NULL,
     p_description text DEFAULT NULL,
-    p_assigned_to_id bigint DEFAULT NULL,
+    p_assigned_to_employee_id bigint DEFAULT NULL,
     p_data jsonb DEFAULT '{}'::jsonb
 )
 RETURNS bigint
@@ -451,7 +451,7 @@ BEGIN
         p_entity_id,
         p_title,
         p_description,
-        p_assigned_to_id,
+        p_assigned_to_employee_id,
         p_data
     ) RETURNING id INTO v_review_id;
     
@@ -464,7 +464,7 @@ BEGIN
     ) VALUES (
         v_review_id,
         v_default_status_id,
-        p_assigned_to_id,
+        p_assigned_to_employee_id,
         'Review created'
     );
     
@@ -477,7 +477,7 @@ DROP FUNCTION IF EXISTS transition_devnet_review_status(bigint, text, bigint, te
 CREATE OR REPLACE FUNCTION transition_devnet_review_status(
     p_review_id bigint,
     p_new_status_slug text,
-    p_changed_by_id bigint DEFAULT NULL,
+    p_changed_by_employee_id bigint DEFAULT NULL,
     p_notes text DEFAULT NULL
 )
 RETURNS boolean
@@ -526,7 +526,7 @@ BEGIN
         p_review_id,
         v_old_status_id,
         v_new_status_id,
-        p_changed_by_id,
+        p_changed_by_employee_id,
         p_notes,
         'Manual status transition'
     );
@@ -540,7 +540,7 @@ DROP FUNCTION IF EXISTS assign_devnet_review(bigint, bigint, bigint, text);
 CREATE OR REPLACE FUNCTION assign_devnet_review(
     p_review_id bigint,
     p_employee_id bigint,
-    p_assigned_by_id bigint DEFAULT NULL,
+    p_assigned_by_employee_id bigint DEFAULT NULL,
     p_notes text DEFAULT NULL
 )
 RETURNS boolean
@@ -578,7 +578,7 @@ BEGIN
         v_old_employee_id,
         p_employee_id,
         v_current_status_id,
-        p_assigned_by_id,
+        p_assigned_by_employee_id,
         p_notes,
         'Manual assignment'
     );
@@ -667,7 +667,7 @@ DROP FUNCTION IF EXISTS mass_update_devnet_review_status(bigint[], text, bigint,
 CREATE OR REPLACE FUNCTION mass_update_devnet_review_status(
     p_review_ids bigint[],
     p_new_status_slug text,
-    p_changed_by_id bigint DEFAULT NULL,
+    p_changed_by_employee_id bigint DEFAULT NULL,
     p_notes text DEFAULT NULL
 )
 RETURNS boolean
@@ -683,7 +683,7 @@ BEGIN
             PERFORM transition_devnet_review_status(
                 review_id,
                 p_new_status_slug,
-                p_changed_by_id,
+                p_changed_by_employee_id,
                 p_notes
             );
             success_count := success_count + 1;
@@ -698,7 +698,7 @@ BEGIN
             ) VALUES (
                 review_id,
                 (SELECT current_status_id FROM public.devnet_reviews WHERE id = review_id),
-                p_changed_by_id,
+                p_changed_by_employee_id,
                 'Failed to update: ' || SQLERRM,
                 'Mass update error'
             );
@@ -714,7 +714,7 @@ DROP FUNCTION IF EXISTS mass_assign_devnet_reviews(bigint[], bigint, bigint, dat
 CREATE OR REPLACE FUNCTION mass_assign_devnet_reviews(
     p_review_ids bigint[],
     p_employee_id bigint,
-    p_assigned_by_id bigint DEFAULT NULL,
+    p_assigned_by_employee_id bigint DEFAULT NULL,
     p_due_date date DEFAULT NULL
 )
 RETURNS boolean
@@ -750,7 +750,7 @@ BEGIN
             v_review_id,
             v_current_status_id,
             p_employee_id,
-            p_assigned_by_id,
+            p_assigned_by_employee_id,
             p_due_date,
             'Mass assignment'
         ) ON CONFLICT (review_id, status_id, employee_id) 
@@ -902,7 +902,7 @@ DROP FUNCTION IF EXISTS mark_data_collected(bigint, jsonb, bigint, text);
 CREATE OR REPLACE FUNCTION mark_data_collected(
     p_review_id bigint,
     p_field_data jsonb,
-    p_employee_id bigint,
+    p_collected_by_employee_id bigint,
     p_notes text DEFAULT NULL
 )
 RETURNS boolean
@@ -915,7 +915,7 @@ BEGIN
         field_data = p_field_data,
         field_notes = p_notes,
         data_collected_at = now(),
-        data_collected_by_id = p_employee_id,
+        data_collected_by_id = p_collected_by_employee_id,
         updated_at = now()
     WHERE id = p_review_id;
     
@@ -928,7 +928,7 @@ BEGIN
         PERFORM transition_devnet_review_status(
             p_review_id,
             'data-collected',
-            p_employee_id,
+            p_collected_by_employee_id,
             'Data collection completed: ' || COALESCE(p_notes, '')
         );
     END IF;
@@ -941,7 +941,7 @@ $$;
 DROP FUNCTION IF EXISTS mark_copied_to_devnet(bigint, bigint, text);
 CREATE OR REPLACE FUNCTION mark_copied_to_devnet(
     p_review_id bigint,
-    p_employee_id bigint,
+    p_copied_by_employee_id bigint,
     p_notes text DEFAULT NULL
 )
 RETURNS boolean
@@ -951,7 +951,7 @@ BEGIN
     UPDATE public.devnet_reviews
     SET 
         copied_to_devnet_at = now(),
-        copied_to_devnet_by_id = p_employee_id,
+        copied_to_devnet_by_id = p_copied_by_employee_id,
         devnet_copy_confirmed = true,
         updated_at = now()
     WHERE id = p_review_id;
@@ -965,7 +965,7 @@ BEGIN
         PERFORM transition_devnet_review_status(
             p_review_id,
             'copied-to-devnet',
-            p_employee_id,
+            p_copied_by_employee_id,
             'Copied to Devnet: ' || COALESCE(p_notes, '')
         );
     END IF;
@@ -982,8 +982,8 @@ $$;
 DROP FUNCTION IF EXISTS search_devnet_reviews(text, text, bigint, text, text, text, boolean, text, boolean, date, date, date, date, boolean, boolean);
 CREATE OR REPLACE FUNCTION search_devnet_reviews(
     p_kind text DEFAULT NULL,
-    p_status_ids text DEFAULT NULL,
-    p_assigned_to_id bigint DEFAULT NULL,
+    p_devnet_review_statuses_ids text DEFAULT NULL,
+    p_assigned_to_devnet_employees_id bigint DEFAULT NULL,
     p_data_status text DEFAULT NULL,
     p_priority text DEFAULT NULL,
     p_entity_type text DEFAULT NULL,
@@ -1161,7 +1161,7 @@ BEGIN
         -- Filter by status IDs
         AND (status_ids_array IS NULL OR r.current_status_id = ANY(status_ids_array))
         -- Filter by assigned employee
-        AND (p_assigned_to_id IS NULL OR r.assigned_to_id = p_assigned_to_id)
+        AND (p_assigned_to_employee_id IS NULL OR r.assigned_to_id = p_assigned_to_employee_id)
         -- Filter by data status
         AND (p_data_status IS NULL OR r.data_status::text = p_data_status)
         -- Filter by priority
@@ -1290,7 +1290,7 @@ CREATE OR REPLACE FUNCTION mass_create_devnet_assignments(
     p_review_ids bigint[],
     p_status_ids bigint[],
     p_employee_id bigint,
-    p_assigned_by_id bigint DEFAULT NULL,
+    p_assigned_by_employee_id bigint DEFAULT NULL,
     p_due_date date DEFAULT NULL,
     p_notes text DEFAULT NULL
 )
@@ -1317,7 +1317,7 @@ BEGIN
                 v_review_id,
                 v_status_id,
                 p_employee_id,
-                p_assigned_by_id,
+                p_assigned_by_employee_id,
                 p_due_date,
                 p_notes
             ) ON CONFLICT (review_id, status_id, employee_id) 
@@ -1341,7 +1341,7 @@ CREATE OR REPLACE FUNCTION mass_reassign_devnet_reviews(
     p_review_ids bigint[],
     p_from_employee_id bigint,
     p_to_employee_id bigint,
-    p_assigned_by_id bigint DEFAULT NULL,
+    p_assigned_by_employee_id bigint DEFAULT NULL,
     p_due_date date DEFAULT NULL,
     p_notes text DEFAULT 'Mass reassignment'
 )
@@ -1389,7 +1389,7 @@ BEGIN
                 review_id,
                 current_status_id,
                 p_to_employee_id,
-                p_assigned_by_id,
+                p_assigned_by_employee_id,
                 p_due_date,
                 p_notes
             ) ON CONFLICT (review_id, status_id, employee_id) 
@@ -1411,7 +1411,7 @@ $$;
 DROP FUNCTION IF EXISTS mass_complete_devnet_assignments(bigint[], bigint, text);
 CREATE OR REPLACE FUNCTION mass_complete_devnet_assignments(
     p_assignment_ids bigint[],
-    p_completed_by_id bigint,
+    p_completed_by_employee_id bigint,
     p_completion_notes text DEFAULT NULL
 )
 RETURNS integer
@@ -1426,7 +1426,7 @@ BEGIN
         UPDATE public.devnet_review_assignments
         SET 
             completed_at = now(),
-            completed_by_id = p_completed_by_id,
+            completed_by_id = p_completed_by_employee_id,
             completion_notes = p_completion_notes,
             is_active = false
         WHERE id = assignment_id
@@ -1446,7 +1446,7 @@ DROP FUNCTION IF EXISTS mass_update_assignment_due_dates(bigint[], date, bigint,
 CREATE OR REPLACE FUNCTION mass_update_assignment_due_dates(
     p_assignment_ids bigint[],
     p_new_due_date date,
-    p_updated_by_id bigint DEFAULT NULL,
+    p_updated_by_employee_id bigint DEFAULT NULL,
     p_notes text DEFAULT NULL
 )
 RETURNS integer
@@ -1928,7 +1928,7 @@ SELECT * FROM search_devnet_reviews(
 
 -- Search by assigned employee
 SELECT * FROM search_devnet_reviews(
-    p_assigned_to_id := 1,
+    p_assigned_to_employee_id := 1,
     p_search_text := 'in-field'
 ) LIMIT 50;
 
