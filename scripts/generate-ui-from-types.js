@@ -2164,14 +2164,14 @@ ${paramArgs}
 
     const paramInterface = func.parameters
       .map((param) => `  ${param.name}?: ${param.type};`)
-      .join("\\n");
+      .join("\n");
 
     const paramUrlParams = func.parameters
       .map(
         (param) =>
           `  if (params?.${param.name}) urlParams.append("${param.name}", String(params.${param.name}));`
       )
-      .join("\\n");
+      .join("\n");
 
     // Check if any parameter uses Json type
     const usesJsonType = func.parameters.some((param) => param.type === "Json");

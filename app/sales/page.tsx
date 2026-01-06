@@ -17,7 +17,6 @@ import {
 import data from "@/lib/land_use_arrays.json";
 import RawSalesView from "./raw-sales";
 import MultiParcelSalesCards from "./multi-parcel-sales";
-import MultiSelectAutocomplete from "@/components/inputs/multi-select-autocomplete";
 
 // ===============================
 // Land-use sets (codes as numbers)
@@ -414,14 +413,6 @@ function SaleSummaries(props: {
           </div>
         )}
 
-        <MultiSelectAutocomplete
-          label="Land Uses (within selected set)"
-          options={props.setOptions}
-          value={withinSet}
-          onChange={setWithinSet}
-          placeholder="Search land uses…"
-        />
-
         <div className="space-y-1">
           <div className="text-sm">Trim (IQR)</div>
           <div className="inline-flex rounded border p-1">
@@ -577,14 +568,6 @@ function RatioSummaries(props: {
             Results may include outliers or invalid sales.
           </div>
         )}
-
-        <MultiSelectAutocomplete
-          label="Land Uses (within selected set)"
-          options={props.setOptions}
-          value={withinSet}
-          onChange={setWithinSet}
-          placeholder="Search land uses…"
-        />
 
         <div className="space-y-1">
           <div className="text-sm">Trim (IQR)</div>

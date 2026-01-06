@@ -1,7 +1,6 @@
 // /app/test/ratios/_components/RatioSidebar.tsx
 "use client";
 
-import MultiSelectAutocomplete from "@/components/inputs/multi-select-autocomplete";
 import type { TrimChoice } from "@/lib/ratio-stats";
 
 type Props = {
@@ -77,22 +76,6 @@ export default function RatioSidebar({
   return (
     <aside className="rounded-lg border p-3 h-fit lg:sticky lg:top-4 print:hidden">
       <div className="mb-3">
-        <div className="mb-3">
-          <MultiSelectAutocomplete
-            options={landUseOptions}
-            value={selectedLandUses}
-            onChange={setSelectedLandUses}
-            className="w-full"
-            placeholder={
-              luError
-                ? "Failed to load"
-                : luLoading
-                  ? "Loading…"
-                  : "Search land uses…"
-            }
-          />
-        </div>
-
         <label className="flex items-center gap-2 mb-2">
           <span className="w-24 text-sm">Start date</span>
           <input
