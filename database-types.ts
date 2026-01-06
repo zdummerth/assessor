@@ -8827,7 +8827,23 @@ export type Database = {
         }
       }
       search_devnet_reviews: {
-        Args: { p_filters?: Json }
+        Args: {
+          p_active_only?: boolean
+          p_assigned_to_id?: number
+          p_completed_only?: boolean
+          p_created_after?: string
+          p_created_before?: string
+          p_data_status?: string
+          p_due_after?: string
+          p_due_before?: string
+          p_entity_type?: string
+          p_kind?: string
+          p_overdue_only?: boolean
+          p_priority?: string
+          p_requires_field_review?: boolean
+          p_search_text?: string
+          p_status_ids?: string
+        }
         Returns: {
           assigned_to_email: string
           assigned_to_name: string

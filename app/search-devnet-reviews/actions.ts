@@ -11,7 +11,21 @@ export async function executeSearchDevnetReviews(
     const supabase = await createClient();
 
     const params: any = {
-      p_filters: formData.get("p_filters") ? JSON.parse(formData.get("p_filters") as string) : undefined,
+      p_active_only: formData.get("p_active_only") === "true",
+      p_assigned_to_id: formData.get("p_assigned_to_id") ? Number(formData.get("p_assigned_to_id")) : undefined,
+      p_completed_only: formData.get("p_completed_only") === "true",
+      p_created_after: formData.get("p_created_after") || undefined,
+      p_created_before: formData.get("p_created_before") || undefined,
+      p_data_status: formData.get("p_data_status") || undefined,
+      p_due_after: formData.get("p_due_after") || undefined,
+      p_due_before: formData.get("p_due_before") || undefined,
+      p_entity_type: formData.get("p_entity_type") || undefined,
+      p_kind: formData.get("p_kind") || undefined,
+      p_overdue_only: formData.get("p_overdue_only") === "true",
+      p_priority: formData.get("p_priority") || undefined,
+      p_requires_field_review: formData.get("p_requires_field_review") === "true",
+      p_search_text: formData.get("p_search_text") || undefined,
+      p_status_ids: formData.get("p_status_ids") || undefined,
     };
 
     // Add pagination

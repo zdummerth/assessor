@@ -979,9 +979,23 @@ $$;
 -- ============================================================
 
 -- Comprehensive search function for devnet reviews
-DROP FUNCTION IF EXISTS search_devnet_reviews(jsonb);
+DROP FUNCTION IF EXISTS search_devnet_reviews(text, text, bigint, text, text, text, boolean, text, boolean, date, date, date, date, boolean, boolean);
 CREATE OR REPLACE FUNCTION search_devnet_reviews(
-    p_filters jsonb DEFAULT '{}'::jsonb
+    p_kind text DEFAULT NULL,
+    p_status_ids text DEFAULT NULL,
+    p_assigned_to_id bigint DEFAULT NULL,
+    p_data_status text DEFAULT NULL,
+    p_priority text DEFAULT NULL,
+    p_entity_type text DEFAULT NULL,
+    p_requires_field_review boolean DEFAULT NULL,
+    p_search_text text DEFAULT NULL,
+    p_overdue_only boolean DEFAULT false,
+    p_created_after date DEFAULT NULL,
+    p_created_before date DEFAULT NULL,
+    p_due_after date DEFAULT NULL,
+    p_due_before date DEFAULT NULL,
+    p_completed_only boolean DEFAULT false,
+    p_active_only boolean DEFAULT false
 )
 RETURNS TABLE (
     id bigint,
@@ -1018,44 +1032,12 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_kind text;
-    v_status_ids text;
-    v_assigned_to_id bigint;
-    v_data_status text;
-    v_priority text;
-    v_entity_type text;
-    v_requires_field_review boolean;
-    v_search_text text;
-    v_overdue_only boolean;
-    v_created_after date;
-    v_created_before date;
-    v_due_after date;
-    v_due_before date;
-    v_completed_only boolean;
-    v_active_only boolean;
     status_ids_array bigint[];
 BEGIN
-    -- Extract filter values from JSONB
-    v_kind := p_filters->>'kind';
-    v_status_ids := p_filters->>'status_ids';
-    v_assigned_to_id := (p_filters->>'assigned_to_id')::bigint;
-    v_data_status := p_filters->>'data_status';
-    v_priority := p_filters->>'priority';
-    v_entity_type := p_filters->>'entity_type';
-    v_requires_field_review := (p_filters->>'requires_field_review')::boolean;
-    v_search_text := p_filters->>'search_text';
-    v_overdue_only := COALESCE((p_filters->>'overdue_only')::boolean, false);
-    v_created_after := (p_filters->>'created_after')::date;
-    v_created_before := (p_filters->>'created_before')::date;
-    v_due_after := (p_filters->>'due_after')::date;
-    v_due_before := (p_filters->>'due_before')::date;
-    v_completed_only := COALESCE((p_filters->>'completed_only')::boolean, false);
-    v_active_only := COALESCE((p_filters->>'active_only')::boolean, false);
-
     -- Convert comma-separated status IDs to array
-    IF v_status_ids IS NOT NULL AND v_status_ids != '' THEN
+    IF p_status_ids IS NOT NULL AND p_status_ids != '' THEN
         SELECT ARRAY(
-            SELECT trim(unnest(string_to_array(v_status_ids, ',')))::bigint
+            SELECT trim(unnest(string_to_array(p_status_ids, ',')))::bigint
         ) INTO status_ids_array;
     END IF;
 
@@ -1175,37 +1157,37 @@ BEGIN
     LEFT JOIN public.devnet_neighborhood_report dnr ON r.entity_type = 'neighborhood' AND r.entity_id = dnr.id
     WHERE 1=1
         -- Filter by kind
-        AND (v_kind IS NULL OR r.kind::text = v_kind)
+        AND (p_kind IS NULL OR r.kind::text = p_kind)
         -- Filter by status IDs
         AND (status_ids_array IS NULL OR r.current_status_id = ANY(status_ids_array))
         -- Filter by assigned employee
-        AND (v_assigned_to_id IS NULL OR r.assigned_to_id = v_assigned_to_id)
+        AND (p_assigned_to_id IS NULL OR r.assigned_to_id = p_assigned_to_id)
         -- Filter by data status
-        AND (v_data_status IS NULL OR r.data_status::text = v_data_status)
+        AND (p_data_status IS NULL OR r.data_status::text = p_data_status)
         -- Filter by priority
-        AND (v_priority IS NULL OR r.priority = v_priority)
+        AND (p_priority IS NULL OR r.priority = p_priority)
         -- Filter by entity type
-        AND (v_entity_type IS NULL OR r.entity_type = v_entity_type)
+        AND (p_entity_type IS NULL OR r.entity_type = p_entity_type)
         -- Filter by field review requirement
-        AND (v_requires_field_review IS NULL OR r.requires_field_review = v_requires_field_review)
+        AND (p_requires_field_review IS NULL OR r.requires_field_review = p_requires_field_review)
         -- Text search in title and description
-        AND (v_search_text IS NULL OR 
-             (r.title ILIKE '%' || v_search_text || '%' OR 
-              r.description ILIKE '%' || v_search_text || '%' OR
-              dp.parcel_number ILIKE '%' || v_search_text || '%' OR
-              (dp.data->>'address') ILIKE '%' || v_search_text || '%'))
+        AND (p_search_text IS NULL OR 
+             (r.title ILIKE '%' || p_search_text || '%' OR 
+              r.description ILIKE '%' || p_search_text || '%' OR
+              dp.parcel_number ILIKE '%' || p_search_text || '%' OR
+              (dp.data->>'address') ILIKE '%' || p_search_text || '%'))
         -- Overdue filter
-        AND (NOT v_overdue_only OR (r.due_date IS NOT NULL AND r.due_date < CURRENT_DATE))
+        AND (NOT p_overdue_only OR (r.due_date IS NOT NULL AND r.due_date < CURRENT_DATE))
         -- Date range filters
-        AND (v_created_after IS NULL OR r.created_at::date >= v_created_after)
-        AND (v_created_before IS NULL OR r.created_at::date <= v_created_before)
-        AND (v_due_after IS NULL OR r.due_date >= v_due_after)
-        AND (v_due_before IS NULL OR r.due_date <= v_due_before)
+        AND (p_created_after IS NULL OR r.created_at::date >= p_created_after)
+        AND (p_created_before IS NULL OR r.created_at::date <= p_created_before)
+        AND (p_due_after IS NULL OR r.due_date >= p_due_after)
+        AND (p_due_before IS NULL OR r.due_date <= p_due_before)
         -- Completion filters
-        AND (NOT v_completed_only OR r.completed_at IS NOT NULL)
-        AND (NOT v_active_only OR r.completed_at IS NULL)
+        AND (NOT p_completed_only OR r.completed_at IS NOT NULL)
+        AND (NOT p_active_only OR r.completed_at IS NULL)
     ORDER BY 
-        CASE WHEN v_overdue_only THEN r.due_date END ASC,
+        CASE WHEN p_overdue_only THEN r.due_date END ASC,
         r.created_at DESC
     LIMIT 1000;
 END;
@@ -1939,40 +1921,39 @@ SELECT mass_assign_devnet_reviews(
 );
 -- Search reviews with filters
 SELECT * FROM search_devnet_reviews(
-    '{"kind": "sale_review", "priority": "high", "neighborhood": "Downtown"}'::jsonb
+    p_kind := 'sale_review',
+    p_priority := 'high',
+    p_search_text := 'Downtown'
 ) LIMIT 25;
 
 -- Search by assigned employee
 SELECT * FROM search_devnet_reviews(
-    '{"assigned_to_name": "John", "status": "in-field"}'::jsonb
+    p_assigned_to_id := 1,
+    p_search_text := 'in-field'
 ) LIMIT 50;
 
 -- Search by address
 SELECT * FROM search_devnet_reviews(
-    '{"address": "Main St", "requires_field_review": true}'::jsonb
+    p_search_text := 'Main St',
+    p_requires_field_review := true
 ) LIMIT 100;
 
 -- Search by parcel number
 SELECT * FROM search_devnet_reviews(
-    '{"parcel_number": "123-456"}'::jsonb
+    p_search_text := '123-456'
 ) LIMIT 25;
 
 -- Search with date ranges
 SELECT * FROM search_devnet_reviews(
-    '{
-        "created_after": "2024-01-01T00:00:00Z",
-        "due_before": "2024-03-01",
-        "is_terminal": false
-    }'::jsonb
+    p_created_after := '2024-01-01',
+    p_due_before := '2024-03-01',
+    p_active_only := true
 ) LIMIT 50;
 
--- Search sale reviews with price range
+-- Search sale reviews (filters by kind)
 SELECT * FROM search_devnet_reviews(
-    '{
-        "kind": "sale_review",
-        "min_sale_price": 100000,
-        "max_sale_price": 500000
-    }'::jsonb
+    p_kind := 'sale_review',
+    p_entity_type := 'devnet_sales'
 ) LIMIT 25;
 
 -- Get review counts by status
@@ -2031,12 +2012,10 @@ SELECT
     days_until_due,
     created_at
 FROM search_devnet_reviews(
-    '{
-        "neighborhood": "Downtown",
-        "priority": "high",
-        "is_terminal": false,
-        "requires_field_review": true
-    }'::jsonb
+    p_search_text := 'Downtown',
+    p_priority := 'high',
+    p_active_only := true,
+    p_requires_field_review := true
 ) 
 ORDER BY days_until_due ASC NULLS LAST, created_at DESC
 LIMIT 100;
