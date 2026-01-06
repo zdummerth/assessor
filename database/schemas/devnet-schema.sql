@@ -1035,9 +1035,9 @@ DECLARE
     status_ids_array bigint[];
 BEGIN
     -- Convert comma-separated status IDs to array
-    IF p_status_ids IS NOT NULL AND p_status_ids != '' THEN
+    IF p_devnet_review_statuses_ids IS NOT NULL AND p_devnet_review_statuses_ids != '' THEN
         SELECT ARRAY(
-            SELECT trim(unnest(string_to_array(p_status_ids, ',')))::bigint
+            SELECT trim(unnest(string_to_array(p_devnet_review_statuses_ids, ',')))::bigint
         ) INTO status_ids_array;
     END IF;
 
@@ -1161,7 +1161,7 @@ BEGIN
         -- Filter by status IDs
         AND (status_ids_array IS NULL OR r.current_status_id = ANY(status_ids_array))
         -- Filter by assigned employee
-        AND (p_assigned_to_employee_id IS NULL OR r.assigned_to_id = p_assigned_to_employee_id)
+        AND (p_assigned_to_devnet_employees_id IS NULL OR r.assigned_to_id = p_assigned_to_devnet_employees_id)
         -- Filter by data status
         AND (p_data_status IS NULL OR r.data_status::text = p_data_status)
         -- Filter by priority

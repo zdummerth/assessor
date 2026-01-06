@@ -414,6 +414,189 @@ class UIGenerator {
     return fieldConfig?.enumType;
   }
 
+  /**
+   * Maps a database function parameter to the appropriate UI component
+   * based on its type and naming conventions
+   *
+   * @param {Object} param - Parameter object with name and type
+   * @returns {Object} Component configuration with type, props, and imports
+   */
+  getComponentForParameter(param) {
+    const paramName = param.name;
+    const paramType = param.type || param.tsType || "string";
+
+    // Handle date/timestamp types
+    if (
+      paramType.includes("string") &&
+      (paramName.includes("_at") ||
+        paramName.includes("_date") ||
+        paramName.includes("_after") ||
+        paramName.includes("_before"))
+    ) {
+      return {
+        componentType: "date-picker",
+        component: "DatePicker",
+        importPath: "@/components/ui/date-picker",
+        valueTransform: "date",
+        renderCode: (name, label, required) => `          <div>
+            <DatePicker
+              label="${label}"
+              value={formData.${name} ? new Date(formData.${name}) : undefined}
+              onChange={(date) => setFormData(prev => ({ ...prev, ${name}: date?.toISOString() }))}
+              ${required ? "" : "// optional"}
+            />
+          </div>`,
+      };
+    }
+
+    // Handle boolean types - use Switch
+    if (paramType === "boolean") {
+      return {
+        componentType: "switch",
+        component: "Switch",
+        importPath: "@/components/ui/switch",
+        valueTransform: "boolean",
+        renderCode: (
+          name,
+          label,
+          required
+        ) => `          <div className="flex items-center space-x-2">
+            <Switch
+              id="${name}"
+              checked={formData.${name} || false}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ${name}: checked }))}
+            />
+            <Label htmlFor="${name}">${label}</Label>
+          </div>`,
+      };
+    }
+
+    // Handle foreign key relationships (_id or _ids suffix)
+    // Extract table name from parameter name
+    if (paramName.endsWith("_id") || paramName.endsWith("_ids")) {
+      // Remove the p_ prefix if present
+      let cleanName = paramName.replace(/^p_/, "");
+
+      // Handle _ids (plural) - use multi-select
+      if (paramName.endsWith("_ids")) {
+        cleanName = cleanName.replace(/_ids$/, "");
+
+        // Try to extract just the table name (last part before _ids)
+        // e.g., p_devnet_review_statuses_ids -> devnet_review_statuses
+        // e.g., p_employee_ids -> employees (we'll pluralize)
+        let tableName = cleanName;
+
+        return {
+          componentType: "combobox-multi-lookup",
+          component: "ComboboxMultiLookup",
+          importPath: "@/components/ui/combobox-multi-lookup",
+          valueTransform: "array",
+          tableName: tableName,
+          renderCode: (name, label, required) => `          <div>
+            <ComboboxMultiLookup
+              endpoint="/${tableName.replace(/_/g, "-")}/api"
+              value={formData.${name} || []}
+              onChange={(values) => setFormData(prev => ({ ...prev, ${name}: values }))}
+              placeholder="Select ${label.toLowerCase()}..."
+              title="${label}"
+              valueKey="id"
+              labelKey="name"
+              ${required ? "" : "// optional"}
+            />
+          </div>`,
+        };
+      }
+
+      // Handle _id (singular) - use single select combobox
+      cleanName = cleanName.replace(/_id$/, "");
+
+      // Extract the actual table name by taking the last significant word
+      // e.g., p_assigned_to_devnet_employees_id -> employees
+      // Try to find common patterns like "assigned_to_X", "created_by_X", etc.
+      let tableName = cleanName;
+
+      // Pattern matching for common relationship prefixes
+      const relationshipPatterns = [
+        /^assigned_to_(.+)$/,
+        /^created_by_(.+)$/,
+        /^updated_by_(.+)$/,
+        /^approved_by_(.+)$/,
+        /^reviewed_by_(.+)$/,
+        /^owned_by_(.+)$/,
+        /^parent_(.+)$/,
+        /^related_(.+)$/,
+      ];
+
+      for (const pattern of relationshipPatterns) {
+        const match = cleanName.match(pattern);
+        if (match) {
+          tableName = match[1];
+          break;
+        }
+      }
+
+      return {
+        componentType: "combobox-lookup",
+        component: "ComboboxLookup",
+        importPath: "@/components/ui/combobox-lookup",
+        valueTransform: "number",
+        tableName: tableName,
+        renderCode: (name, label, required) => `          <div>
+            <Label htmlFor="${name}">${label}</Label>
+            <ComboboxLookup
+              endpoint="/${tableName.replace(/_/g, "-")}/api"
+              value={formData.${name}?.toString() || ''}
+              onChange={(value) => setFormData(prev => ({ ...prev, ${name}: value ? Number(value) : undefined }))}
+              placeholder="Select ${label.toLowerCase()}..."
+              valueKey="id"
+              labelKey="name"
+              ${required ? "" : "// optional"}
+            />
+          </div>`,
+      };
+    }
+
+    // Handle number types
+    if (paramType === "number") {
+      return {
+        componentType: "input-number",
+        component: "Input",
+        importPath: "@/components/ui/input",
+        valueTransform: "number",
+        renderCode: (name, label, required) => `          <div>
+            <Label htmlFor="${name}">${label}</Label>
+            <Input
+              id="${name}"
+              name="${name}"
+              type="number"
+              value={formData.${name} || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, ${name}: e.target.value ? Number(e.target.value) : undefined }))}
+              ${required ? "required" : ""}
+            />
+          </div>`,
+      };
+    }
+
+    // Default to text input
+    return {
+      componentType: "input-text",
+      component: "Input",
+      importPath: "@/components/ui/input",
+      valueTransform: "string",
+      renderCode: (name, label, required) => `          <div>
+            <Label htmlFor="${name}">${label}</Label>
+            <Input
+              id="${name}"
+              name="${name}"
+              type="text"
+              value={formData.${name} || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, ${name}: e.target.value }))}
+              ${required ? "required" : ""}
+            />
+          </div>`,
+    };
+  }
+
   generate() {
     console.log("\n🚀 Generating UI components...\n");
 
@@ -1086,9 +1269,97 @@ ${displayColumns
 
   generateFiltersComponent(table) {
     const interfaceName = toPascalCase(table.name);
+
+    // Select filterable columns (avoid large objects, binary data, etc.)
     const filterColumns = table.columns
-      .filter((col) => col.type === "string" && !col.name.endsWith("_id"))
-      .slice(0, 3);
+      .filter(
+        (col) =>
+          col.type !== "object" &&
+          !col.name.endsWith("_data") &&
+          !col.isGenerated
+      )
+      .slice(0, 8); // Show up to 8 filter fields
+
+    // Map columns to component configs
+    const componentConfigs = filterColumns.map((col) => ({
+      column: col,
+      config: this.getComponentForParameter({
+        name: col.name,
+        type: col.type,
+        tsType: col.tsType,
+        optional: col.nullable,
+      }),
+    }));
+
+    // Get unique imports needed
+    const imports = new Set();
+    componentConfigs.forEach(({ config }) => {
+      if (config.component !== "Input" && config.component !== "Label") {
+        imports.add(
+          `import { ${config.component} } from "${config.importPath}";`
+        );
+      }
+    });
+
+    // Build form state initialization
+    const formStateInit = filterColumns
+      .map(
+        (col) => `    ${col.name}: searchParams.get("${col.name}") || undefined`
+      )
+      .join(",\n");
+
+    // Build TypeScript interface for form data
+    const formDataInterface = filterColumns
+      .map((col) => {
+        const config = this.getComponentForParameter({
+          name: col.name,
+          type: col.type,
+          tsType: col.tsType,
+        });
+
+        let tsType = "string";
+        if (config.valueTransform === "boolean") {
+          tsType = "boolean";
+        } else if (config.valueTransform === "number") {
+          tsType = "number";
+        } else if (config.valueTransform === "array") {
+          tsType = "string[]";
+        } else if (config.valueTransform === "date") {
+          tsType = "string";
+        }
+
+        return `  ${col.name}?: ${tsType};`;
+      })
+      .join("\n");
+
+    // Build form data extraction for submission
+    const formDataExtraction = filterColumns
+      .map((col) => {
+        const config = this.getComponentForParameter({
+          name: col.name,
+          type: col.type,
+          tsType: col.tsType,
+        });
+
+        if (config.valueTransform === "array") {
+          return `      if (formData.${col.name} && formData.${col.name}.length > 0) {
+        params.set("${col.name}", formData.${col.name}.join(','));
+      }`;
+        } else if (config.valueTransform === "date") {
+          return `      if (formData.${col.name}) {
+        params.set("${col.name}", formData.${col.name});
+      }`;
+        } else if (config.valueTransform === "boolean") {
+          return `      if (formData.${col.name} !== undefined) {
+        params.set("${col.name}", formData.${col.name}.toString());
+      }`;
+        } else {
+          return `      if (formData.${col.name}) {
+        params.set("${col.name}", formData.${col.name}.toString());
+      }`;
+        }
+      })
+      .join("\n");
 
     return `"use client";
 
@@ -1099,26 +1370,34 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Filter, X } from "lucide-react";
 import { useState } from "react";
+${Array.from(imports).join("\n")}
+
+interface FormData {
+${formDataInterface}
+}
 
 export function ${interfaceName}Filters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+${formStateInit}
+  });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
     const params = new URLSearchParams();
 
-    formData.forEach((value, key) => {
-      if (value) params.set(key, value.toString());
-    });
+${formDataExtraction}
 
     router.push(\`?\${params.toString()}\`);
     setOpen(false);
   };
 
   const handleClear = () => {
+    setFormData({
+${filterColumns.map((col) => `      ${col.name}: undefined`).join(",\n")}
+    });
     router.push(window.location.pathname);
     setOpen(false);
   };
@@ -1138,23 +1417,16 @@ export function ${interfaceName}Filters() {
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Filter Records</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-${filterColumns
-  .map(
-    (col) => `          <div>
-            <Label htmlFor="${col.name}">${toTitleCase(col.name)}</Label>
-            <Input
-              id="${col.name}"
-              name="${col.name}"
-              defaultValue={searchParams.get("${col.name}") || ""}
-              placeholder="Filter by ${col.name.replace(/_/g, " ")}..."
-            />
-          </div>`
-  )
+${componentConfigs
+  .map(({ column, config }) => {
+    const label = toTitleCase(column.name);
+    return config.renderCode(column.name, label, !column.nullable);
+  })
   .join("\n")}
 
           <div className="flex gap-2 justify-end">
@@ -1919,6 +2191,71 @@ export default async function ${interfaceName}Page({ searchParams }: ${interface
   generateParametersForm(func) {
     const interfaceName = toPascalCase(func.name);
 
+    // Collect component configs for each parameter
+    const componentConfigs = func.parameters.map((p) => ({
+      param: p,
+      config: this.getComponentForParameter(p),
+    }));
+
+    // Get unique imports needed
+    const imports = new Set();
+    componentConfigs.forEach(({ config }) => {
+      if (config.component !== "Input" && config.component !== "Label") {
+        imports.add(
+          `import { ${config.component} } from "${config.importPath}";`
+        );
+      }
+    });
+
+    // Build form state initialization
+    const formStateInit = func.parameters
+      .map((p) => `    ${p.name}: undefined`)
+      .join(",\n");
+
+    // Build TypeScript interface for form data
+    const formDataInterface = func.parameters
+      .map((p) => {
+        const config = this.getComponentForParameter(p);
+        let tsType = "string";
+
+        if (config.valueTransform === "boolean") {
+          tsType = "boolean";
+        } else if (config.valueTransform === "number") {
+          tsType = "number";
+        } else if (config.valueTransform === "array") {
+          tsType = "string[]";
+        } else if (config.valueTransform === "date") {
+          tsType = "string";
+        }
+
+        return `  ${p.name}?: ${tsType};`;
+      })
+      .join("\n");
+
+    // Build URL param extraction for each parameter type
+    const urlParamExtraction = func.parameters
+      .map((p) => {
+        const config = this.getComponentForParameter(p);
+        if (config.valueTransform === "array") {
+          return `      if (formData.${p.name} && formData.${p.name}.length > 0) {
+        params.set("${p.name}", formData.${p.name}.join(','));
+      }`;
+        } else if (config.valueTransform === "date") {
+          return `      if (formData.${p.name}) {
+        params.set("${p.name}", formData.${p.name});
+      }`;
+        } else if (config.valueTransform === "boolean") {
+          return `      if (formData.${p.name} !== undefined) {
+        params.set("${p.name}", formData.${p.name}.toString());
+      }`;
+        } else {
+          return `      if (formData.${p.name}) {
+        params.set("${p.name}", formData.${p.name}.toString());
+      }`;
+        }
+      })
+      .join("\n");
+
     return `"use client";
 
 import { useRouter } from "next/navigation";
@@ -1927,26 +2264,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+${Array.from(imports).join("\n")}
+
+interface FormData {
+${formDataInterface}
+}
 
 export function ParametersForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+${formStateInit}
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const formData = new FormData(e.currentTarget);
       const params = new URLSearchParams();
       
       // Add form values to URL params
-      ${func.parameters
-        .map(
-          (p) => `      const ${p.name} = formData.get("${p.name}") as string;
-      if (${p.name}) params.set("${p.name}", ${p.name});`
-        )
-        .join("\n")}
+${urlParamExtraction}
 
       // Navigate with search params to trigger server component refresh
       router.push(\`?\${params.toString()}\`);
@@ -1961,18 +2300,11 @@ export function ParametersForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-${func.parameters
-  .map(
-    (p) => `      <div>
-        <Label htmlFor="${p.name}">${toTitleCase(p.name)}</Label>
-        <Input
-          id="${p.name}"
-          name="${p.name}"
-          type="${p.type === "number" ? "number" : p.type === "boolean" ? "checkbox" : "text"}"
-          ${!p.optional ? "required" : ""}
-        />
-      </div>`
-  )
+${componentConfigs
+  .map(({ param, config }) => {
+    const label = toTitleCase(param.name);
+    return config.renderCode(param.name, label, !param.optional);
+  })
   .join("\n")}
       
       <Button type="submit" disabled={isLoading}>

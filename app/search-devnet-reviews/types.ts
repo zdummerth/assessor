@@ -4,11 +4,12 @@ import type { Json } from "@/database-types";
 
 export interface SearchDevnetReviewsParams {
   p_active_only?: boolean;
-  p_assigned_to_id?: number;
+  p_assigned_to_devnet_employees_id?: number;
   p_completed_only?: boolean;
   p_created_after?: string;
   p_created_before?: string;
   p_data_status?: string;
+  p_devnet_review_statuses_ids?: string;
   p_due_after?: string;
   p_due_before?: string;
   p_entity_type?: string;
@@ -17,7 +18,6 @@ export interface SearchDevnetReviewsParams {
   p_priority?: string;
   p_requires_field_review?: boolean;
   p_search_text?: string;
-  p_status_ids?: string;
 }
 
 export interface SearchDevnetReviewsResult {

@@ -6,11 +6,12 @@ import { SearchDevnetReviewsPresentation } from "../search-devnet-reviews-presen
 interface SearchDevnetReviewsClientProps {
   params?: {
   p_active_only?: boolean;
-  p_assigned_to_id?: number;
+  p_assigned_to_devnet_employees_id?: number;
   p_completed_only?: boolean;
   p_created_after?: string;
   p_created_before?: string;
   p_data_status?: string;
+  p_devnet_review_statuses_ids?: string;
   p_due_after?: string;
   p_due_before?: string;
   p_entity_type?: string;
@@ -19,7 +20,6 @@ interface SearchDevnetReviewsClientProps {
   p_priority?: string;
   p_requires_field_review?: boolean;
   p_search_text?: string;
-  p_status_ids?: string;
   };
 }
 
@@ -31,11 +31,12 @@ export function SearchDevnetReviewsClient({
   const urlParams = new URLSearchParams();
 
   if (params?.p_active_only) urlParams.append("p_active_only", String(params.p_active_only));
-  if (params?.p_assigned_to_id) urlParams.append("p_assigned_to_id", String(params.p_assigned_to_id));
+  if (params?.p_assigned_to_devnet_employees_id) urlParams.append("p_assigned_to_devnet_employees_id", String(params.p_assigned_to_devnet_employees_id));
   if (params?.p_completed_only) urlParams.append("p_completed_only", String(params.p_completed_only));
   if (params?.p_created_after) urlParams.append("p_created_after", String(params.p_created_after));
   if (params?.p_created_before) urlParams.append("p_created_before", String(params.p_created_before));
   if (params?.p_data_status) urlParams.append("p_data_status", String(params.p_data_status));
+  if (params?.p_devnet_review_statuses_ids) urlParams.append("p_devnet_review_statuses_ids", String(params.p_devnet_review_statuses_ids));
   if (params?.p_due_after) urlParams.append("p_due_after", String(params.p_due_after));
   if (params?.p_due_before) urlParams.append("p_due_before", String(params.p_due_before));
   if (params?.p_entity_type) urlParams.append("p_entity_type", String(params.p_entity_type));
@@ -44,7 +45,6 @@ export function SearchDevnetReviewsClient({
   if (params?.p_priority) urlParams.append("p_priority", String(params.p_priority));
   if (params?.p_requires_field_review) urlParams.append("p_requires_field_review", String(params.p_requires_field_review));
   if (params?.p_search_text) urlParams.append("p_search_text", String(params.p_search_text));
-  if (params?.p_status_ids) urlParams.append("p_status_ids", String(params.p_status_ids));
 
   const { data, error, isLoading } = useSWR(
     `/search-devnet-reviews/api?${urlParams.toString()}`,

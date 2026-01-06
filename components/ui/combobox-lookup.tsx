@@ -135,6 +135,8 @@ export function ComboboxLookup({
         setInternalValue(newValue || "");
       }
 
+      console.log("ComboboxLookup selected value:", newValue);
+
       // Call onChange callback
       onChange?.(newValue);
     },
@@ -272,84 +274,101 @@ export function ComboboxLookup({
           {required && <span className="text-destructive ml-1">*</span>}
         </Label>
       )}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            id={inputId}
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            disabled={disabled || isLoading}
-            className={cn(
-              "w-full justify-between font-normal",
-              !value && "text-muted-foreground",
-              error && "border-destructive focus-visible:ring-destructive",
-              className
-            )}
-            aria-invalid={error ? "true" : "false"}
-            aria-describedby={
-              error
-                ? `${inputId}-error`
-                : helperText
-                  ? `${inputId}-helper`
-                  : undefined
-            }
-          >
-            <span className="truncate">
-              {selectedOption ? selectedOption.label : placeholder}
-            </span>
-            <div className="flex items-center gap-1">
-              {allowClear && value && !disabled && (
-                <X
-                  className="h-4 w-4 shrink-0 opacity-50 hover:opacity-100"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleChange(undefined);
-                  }}
-                />
+      <div className="relative">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              id={inputId}
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              disabled={disabled || isLoading}
+              className={cn(
+                "w-full justify-between font-normal",
+                !value && "text-muted-foreground",
+                error && "border-destructive focus-visible:ring-destructive",
+                allowClear && value && !disabled && "pr-12",
+                className
               )}
+              aria-invalid={error ? "true" : "false"}
+              aria-describedby={
+                error
+                  ? `${inputId}-error`
+                  : helperText
+                    ? `${inputId}-helper`
+                    : undefined
+              }
+            >
+              <span className="truncate">
+                {selectedOption ? selectedOption.label : placeholder}
+              </span>
               <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-            </div>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+            <Command>
+              <CommandInput placeholder={searchPlaceholder} />
+              <CommandList>
+                <CommandEmpty>{emptyMessage}</CommandEmpty>
+                {Object.entries(groupedOptions).map(
+                  ([groupName, groupOptions]) => (
+                    <CommandGroup
+                      key={groupName}
+                      heading={groupName || undefined}
+                    >
+                      {groupOptions.map((option) => (
+                        <CommandItem
+                          key={option.value}
+                          value={option.label}
+                          onSelect={(currentLabel) => {
+                            // Find the option by label to get its value
+                            const selectedOption = groupOptions.find(
+                              (opt) => opt.label === currentLabel
+                            );
+                            if (selectedOption) {
+                              handleChange(
+                                selectedOption.value === value
+                                  ? undefined
+                                  : selectedOption.value
+                              );
+                            }
+                            setOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              value === option.value
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {option.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )
+                )}
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+        {allowClear && value && !disabled && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="absolute right-8 top-0 h-full px-2 hover:bg-transparent"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleChange(undefined);
+            }}
+          >
+            <X className="h-4 w-4 opacity-50 hover:opacity-100" />
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-          <Command>
-            <CommandInput placeholder={searchPlaceholder} />
-            <CommandList>
-              <CommandEmpty>{emptyMessage}</CommandEmpty>
-              {Object.entries(groupedOptions).map(
-                ([groupName, groupOptions]) => (
-                  <CommandGroup
-                    key={groupName}
-                    heading={groupName || undefined}
-                  >
-                    {groupOptions.map((option) => (
-                      <CommandItem
-                        key={option.value}
-                        value={option.value}
-                        onSelect={(currentValue) => {
-                          handleChange(
-                            currentValue === value ? undefined : currentValue
-                          );
-                          setOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            value === option.value ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {option.label}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+        )}
+      </div>
       {error && (
         <p
           id={`${inputId}-error`}

@@ -5,18 +5,19 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, Table } from "lucide-react";
+import type { DevnetReviewStatuses } from "./types";
 
-interface SearchDevnetReviewsPresentationProps {
-  data: any[];
+interface DevnetReviewStatusesPresentationProps {
+  data: DevnetReviewStatuses[];
   error?: string;
   isLoading?: boolean;
 }
 
-export function SearchDevnetReviewsPresentation({
+export function DevnetReviewStatusesPresentation({
   data,
   error,
   isLoading,
-}: SearchDevnetReviewsPresentationProps) {
+}: DevnetReviewStatusesPresentationProps) {
   const [view, setView] = useState<"table" | "card">("table");
 
   if (isLoading) {
@@ -47,7 +48,7 @@ export function SearchDevnetReviewsPresentation({
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-muted-foreground">No results found</div>
+          <div className="text-muted-foreground">No devnet review statuses found</div>
         </CardContent>
       </Card>
     );
@@ -83,34 +84,20 @@ export function SearchDevnetReviewsPresentation({
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="px-4 py-2 text-left">Assigned To Email</th>
-                    <th className="px-4 py-2 text-left">Assigned To Name</th>
-                    <th className="px-4 py-2 text-left">Assigned To Role</th>
-                    <th className="px-4 py-2 text-left">Completed At</th>
-                    <th className="px-4 py-2 text-left">Created At</th>
+<th className="px-4 py-2 text-left">Created At</th><th className="px-4 py-2 text-left">Description</th><th className="px-4 py-2 text-left">Id</th><th className="px-4 py-2 text-left">Is Terminal</th><th className="px-4 py-2 text-left">Name</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.map((item, index) => (
                     <tr key={index} className="border-b hover:bg-muted/50">
-                      <td className="px-4 py-2">
-                        {item.assigned_to_email || "-"}
-                      </td>
-                      <td className="px-4 py-2">
-                        {item.assigned_to_name || "-"}
-                      </td>
-                      <td className="px-4 py-2">
-                        {item.assigned_to_role || "-"}
-                      </td>
-                      <td className="px-4 py-2">{item.completed_at || "-"}</td>
-                      <td className="px-4 py-2">{item.created_at || "-"}</td>
+<td className="px-4 py-2">{item.created_at || "-"}</td><td className="px-4 py-2">{item.description || "-"}</td><td className="px-4 py-2">{item.id || "-"}</td><td className="px-4 py-2">{item.is_terminal ? "Yes" : "No"}</td><td className="px-4 py-2">{item.name || "-"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             <div className="mt-4 text-sm text-muted-foreground">
-              Showing {data.length} {data.length === 1 ? "result" : "results"}
+              Showing {data.length} {data.length === 1 ? "record" : "records"}
             </div>
           </CardContent>
         </Card>
@@ -122,40 +109,28 @@ export function SearchDevnetReviewsPresentation({
           {data.map((item, index) => (
             <Card key={index}>
               <CardHeader className="pb-3">
-                <div className="text-sm font-semibold">Result #{index + 1}</div>
+                <div className="text-sm font-semibold">
+                  Devnet Review Statuses #{index + 1}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium text-muted-foreground">
-                      Assigned To Email:
-                    </span>
-                    <span>{item.assigned_to_email || "-"}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium text-muted-foreground">
-                      Assigned To Name:
-                    </span>
-                    <span>{item.assigned_to_name || "-"}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium text-muted-foreground">
-                      Assigned To Role:
-                    </span>
-                    <span>{item.assigned_to_role || "-"}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium text-muted-foreground">
-                      Completed At:
-                    </span>
-                    <span>{item.completed_at || "-"}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium text-muted-foreground">
-                      Created At:
-                    </span>
-                    <span>{item.created_at || "-"}</span>
-                  </div>
+<div className="flex justify-between py-2 border-b">
+                  <span className="font-medium text-muted-foreground">Created At:</span>
+                  <span>{item.created_at || "-"}</span>
+                </div><div className="flex justify-between py-2 border-b">
+                  <span className="font-medium text-muted-foreground">Description:</span>
+                  <span>{item.description || "-"}</span>
+                </div><div className="flex justify-between py-2 border-b">
+                  <span className="font-medium text-muted-foreground">Id:</span>
+                  <span>{item.id || "-"}</span>
+                </div><div className="flex justify-between py-2 border-b">
+                  <span className="font-medium text-muted-foreground">Is Terminal:</span>
+                  <span>{item.is_terminal ? "Yes" : "No"}</span>
+                </div><div className="flex justify-between py-2 border-b">
+                  <span className="font-medium text-muted-foreground">Name:</span>
+                  <span>{item.name || "-"}</span>
+                </div>
                 </div>
               </CardContent>
             </Card>

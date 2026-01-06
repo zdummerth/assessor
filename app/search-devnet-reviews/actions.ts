@@ -12,11 +12,12 @@ export async function executeSearchDevnetReviews(
 
     const params: any = {
       p_active_only: formData.get("p_active_only") === "true",
-      p_assigned_to_id: formData.get("p_assigned_to_id") ? Number(formData.get("p_assigned_to_id")) : undefined,
+      p_assigned_to_devnet_employees_id: formData.get("p_assigned_to_devnet_employees_id") ? Number(formData.get("p_assigned_to_devnet_employees_id")) : undefined,
       p_completed_only: formData.get("p_completed_only") === "true",
       p_created_after: formData.get("p_created_after") || undefined,
       p_created_before: formData.get("p_created_before") || undefined,
       p_data_status: formData.get("p_data_status") || undefined,
+      p_devnet_review_statuses_ids: formData.get("p_devnet_review_statuses_ids") || undefined,
       p_due_after: formData.get("p_due_after") || undefined,
       p_due_before: formData.get("p_due_before") || undefined,
       p_entity_type: formData.get("p_entity_type") || undefined,
@@ -25,7 +26,6 @@ export async function executeSearchDevnetReviews(
       p_priority: formData.get("p_priority") || undefined,
       p_requires_field_review: formData.get("p_requires_field_review") === "true",
       p_search_text: formData.get("p_search_text") || undefined,
-      p_status_ids: formData.get("p_status_ids") || undefined,
     };
 
     // Add pagination
