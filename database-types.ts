@@ -8932,6 +8932,15 @@ export type Database = {
           updated_at: string
         }[]
       }
+      search_guide_by_description: {
+        Args: { p_limit?: number; p_search_text: string }
+        Returns: {
+          description: string
+          guide_id: number
+          similarity_score: number
+          years: string
+        }[]
+      }
       search_parcel_rollup_asof_v1: {
         Args: {
           p_as_of_date?: string
@@ -9436,7 +9445,7 @@ export type Database = {
         }[]
       }
       search_vin_with_guide_matches: {
-        Args: { p_max_guide_results?: number; p_vin: string }
+        Args: { p_vin: string }
         Returns: {
           guide_results: Json
           model_year: string
