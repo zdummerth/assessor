@@ -1,4 +1,5 @@
 "use client";
+import { hr } from "date-fns/locale";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -16,6 +17,10 @@ const NavClient = () => {
       label: "VIN Lookup",
     },
     {
+      href: "/search-guide-by-description",
+      label: "Vehicle Description Search",
+    },
+    {
       href: "/senior-tax-credits/calculator/test",
       label: "Senior Tax Credit Calculator",
     },
@@ -31,7 +36,7 @@ const NavClient = () => {
   }
 
   return (
-    <div className="text-sm mt-4 mb-1 lg:m-0 flex gap-5 items-center font-semibold w-full overflow-x-auto">
+    <div className="text-sm mt-4 mb-1 lg:m-0 flex gap-5 items-center font-semibold w-full">
       {links.map(({ href, label }) => (
         <Link
           key={href}

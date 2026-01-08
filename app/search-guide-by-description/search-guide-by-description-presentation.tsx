@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, Table } from "lucide-react";
+import CopyToClipboard from "@/components/copy-to-clipboard";
 
 interface SearchGuideByDescriptionPresentationProps {
   data: any[];
@@ -18,6 +19,18 @@ export function SearchGuideByDescriptionPresentation({
   isLoading,
 }: SearchGuideByDescriptionPresentationProps) {
   const [view, setView] = useState<"table" | "card">("table");
+
+  const getSimilarityBadgeColor = (score: number) => {
+    if (score >= 1.0) return "bg-green-100 text-green-800 border-green-200";
+    if (score >= 0.8) return "bg-blue-100 text-blue-800 border-blue-200";
+    if (score >= 0.6) return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    if (score >= 0.4) return "bg-orange-100 text-orange-800 border-orange-200";
+    return "bg-red-100 text-red-800 border-red-200";
+  };
+
+  const formatVehicleDescription = (item: any) => {
+    return `${item.make} ${item.model}${item.trim ? ` ${item.trim}` : ""}`;
+  };
 
   if (isLoading) {
     return (
@@ -83,21 +96,87 @@ export function SearchGuideByDescriptionPresentation({
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="px-4 py-2 text-left">Description</th>
-                    <th className="px-4 py-2 text-left">Guide Id</th>
-                    <th className="px-4 py-2 text-left">Similarity Score</th>
-                    <th className="px-4 py-2 text-left">Years</th>
+                    <th className="px-4 py-2 text-left">Make/Model/Trim</th>
+                    <th className="px-4 py-2 text-left">Type</th>
+                    <th className="px-4 py-2 text-left">Similarity</th>
+                    <th className="px-4 py-2 text-left">Values</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.map((item, index) => (
                     <tr key={index} className="border-b hover:bg-muted/50">
-                      <td className="px-4 py-2">{item.description || "-"}</td>
-                      <td className="px-4 py-2">{item.guide_id || "-"}</td>
                       <td className="px-4 py-2">
-                        {item.similarity_score || "-"}
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1">
+                            <div className="font-medium">
+                              {item.make} {item.model}
+                            </div>
+                            {item.trim && (
+                              <div className="text-sm text-muted-foreground">
+                                {item.trim}
+                              </div>
+                            )}
+                          </div>
+                          <CopyToClipboard
+                            text={formatVehicleDescription(item)}
+                          />
+                        </div>
                       </td>
-                      <td className="px-4 py-2">{item.years || "-"}</td>
+                      <td className="px-4 py-2">{item.type || "-"}</td>
+                      <td className="px-4 py-2">
+                        {item.similarity_score ? (
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSimilarityBadgeColor(
+                              item.similarity_score
+                            )}`}
+                          >
+                            {(item.similarity_score * 100).toFixed(1)}%
+                          </span>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="px-4 py-2">
+                        {item.values && item.values.length > 0 ? (
+                          <div className="max-h-32 overflow-y-auto">
+                            <table className="w-full text-xs border">
+                              <thead>
+                                <tr className="bg-muted/50">
+                                  <th className="px-2 py-1 text-left border-b">
+                                    Tax Year
+                                  </th>
+                                  <th className="px-2 py-1 text-left border-b">
+                                    Model Year
+                                  </th>
+                                  <th className="px-2 py-1 text-right border-b">
+                                    Value
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {item.values.map((v: any, i: number) => (
+                                  <tr
+                                    key={i}
+                                    className="border-b last:border-b-0"
+                                  >
+                                    <td className="px-2 py-1">
+                                      {v.guide_year}
+                                    </td>
+                                    <td className="px-2 py-1">
+                                      {v.year === 9999 ? "Default" : v.year}
+                                    </td>
+                                    <td className="px-2 py-1 text-right">
+                                      ${v.value.toLocaleString()}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -119,30 +198,85 @@ export function SearchGuideByDescriptionPresentation({
                 <div className="text-sm font-semibold">Result #{index + 1}</div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-1">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium text-muted-foreground">
-                      Description:
-                    </span>
-                    <span>{item.description || "-"}</span>
+                <div className="space-y-2">
+                  <div className="py-2 border-b">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="font-medium text-muted-foreground text-sm">
+                          Vehicle:
+                        </div>
+                        <div className="font-semibold">
+                          {item.make} {item.model}
+                        </div>
+                        {item.trim && (
+                          <div className="text-sm text-muted-foreground">
+                            {item.trim}
+                          </div>
+                        )}
+                      </div>
+                      <CopyToClipboard text={formatVehicleDescription(item)} />
+                    </div>
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span className="font-medium text-muted-foreground">
-                      Guide Id:
+                      Type:
                     </span>
-                    <span>{item.guide_id || "-"}</span>
+                    <span>{item.type || "-"}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span className="font-medium text-muted-foreground">
-                      Similarity Score:
+                      Similarity:
                     </span>
-                    <span>{item.similarity_score || "-"}</span>
+                    {item.similarity_score ? (
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSimilarityBadgeColor(
+                          item.similarity_score
+                        )}`}
+                      >
+                        {(item.similarity_score * 100).toFixed(1)}%
+                      </span>
+                    ) : (
+                      <span>-</span>
+                    )}
                   </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="font-medium text-muted-foreground">
-                      Years:
-                    </span>
-                    <span>{item.years || "-"}</span>
+                  <div className="py-2">
+                    <div className="font-medium text-muted-foreground text-sm mb-2">
+                      Values ({item.values?.length || 0}):
+                    </div>
+                    {item.values && item.values.length > 0 ? (
+                      <div className="max-h-48 overflow-y-auto">
+                        <table className="w-full text-sm border">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="px-2 py-1 text-left border-b">
+                                Tax Year
+                              </th>
+                              <th className="px-2 py-1 text-left border-b">
+                                Model Year
+                              </th>
+                              <th className="px-2 py-1 text-right border-b">
+                                Value
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {item.values.map((v: any, i: number) => (
+                              <tr key={i} className="border-b last:border-b-0">
+                                <td className="px-2 py-1">{v.guide_year}</td>
+                                <td className="px-2 py-1">
+                                  {v.year === 9999 ? "Default" : v.year}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  ${v.value.toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">-</div>
+                    )}
                   </div>
                 </div>
               </CardContent>

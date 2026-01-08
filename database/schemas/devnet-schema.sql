@@ -329,7 +329,7 @@ $$;
 DROP FUNCTION IF EXISTS search_guide_by_description CASCADE;
 CREATE OR REPLACE FUNCTION search_guide_by_description(
     p_search_text text,
-    p_guide_year integer DEFAULT 2026,
+    p_guide_year integer DEFAULT NULL,
     p_limit integer DEFAULT 25
 )
 RETURNS TABLE (
@@ -368,6 +368,16 @@ BEGIN
         WHERE 
             p_search_text IS NOT NULL
             AND trim(p_search_text) != ''
+            -- If guide_year is specified, only include vehicles that have values for that year
+            AND (
+                p_guide_year IS NULL 
+                OR EXISTS (
+                    SELECT 1 
+                    FROM public.guide_vehicle_values gvv 
+                    WHERE gvv.vehicle_id = gv.vehicle_id 
+                        AND gvv.guide_year = p_guide_year
+                )
+            )
         ORDER BY similarity_score DESC
         LIMIT LEAST(p_limit, 100)
     )
@@ -386,11 +396,11 @@ BEGIN
                         'year', gvv.year,
                         'value', gvv.value
                     )
-                    ORDER BY gvv.year DESC
+                    ORDER BY gvv.guide_year DESC, gvv.year DESC
                 )
                 FROM public.guide_vehicle_values gvv
                 WHERE gvv.vehicle_id = vm.vehicle_id
-                    AND gvv.guide_year = p_guide_year
+                    AND (p_guide_year IS NULL OR gvv.guide_year = p_guide_year)
             ),
             '[]'::jsonb
         ) as values

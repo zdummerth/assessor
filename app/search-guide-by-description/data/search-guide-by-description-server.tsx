@@ -36,7 +36,7 @@ export async function SearchGuideByDescriptionServer({
 
   const { data, error } = await supabase.rpc("search_guide_by_description", {
     p_search_text: params.p_search_text,
-    p_limit: params?.p_limit,
+    p_limit: params?.p_limit || 25,
   });
 
   // Handle pagination in-memory if data is returned

@@ -27,14 +27,14 @@ export function ParametersForm() {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Label htmlFor="search">Search Guide Descriptions</Label>
+        <Label htmlFor="search">Search Guide Vehicles</Label>
         <div className="relative mt-2">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             id="search"
             name="search"
             type="text"
-            placeholder="Enter description to search..."
+            placeholder="Search by make, model, or trim..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className="pl-10"
