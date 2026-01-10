@@ -2,7 +2,11 @@ source("utils.r")
 source("supabase-report-transformations/lib.R")
 source("supabase-report-transformations/data-sync/call_api.R")
 
+# ============================================================================
+# 1. LOAD RAW DATA
+# ============================================================================
 
+# VIN lookup data from text files
 folder_path <- "//Hvm-asr-app-01/devnet/Support/PERSONAL PROPERTY/2026 PP VEHICLE IMPORT"
 
 vin_df <- list.files(
@@ -27,6 +31,7 @@ vin_lookup_2026 = vin_df %>%
   ) %>% 
   distinct()
 
+# Guide 2024 data
 guide24 = readxl::read_xlsx("C:/Users/dummerthz/Downloads/2024VS2025_Vehicle Table Comparison.xlsx", sheet = 2)
 guide24 = guide24 %>% 
   rename_with(
@@ -47,6 +52,7 @@ guide24 = guide24 %>%
   ) %>% 
   distinct()
 
+# Guide 2025 data
 guide25 = readxl::read_xlsx("C:/Users/dummerthz/Downloads/2024VS2025_Vehicle Table Comparison.xlsx", sheet = 1) 
 guide25 = guide25 %>% 
   rename_with(
@@ -67,6 +73,7 @@ guide25 = guide25 %>%
   ) %>% 
   distinct()
 
+# Guide 2026 data
 guide26 <- read_tsv(
   "//Hvm-asr-app-01/devnet/Support/PERSONAL PROPERTY/2026 PP VEHICLE IMPORT/2026Guide.txt",
   col_names = FALSE
@@ -91,7 +98,11 @@ guide26 <- read_tsv(
   ) %>% 
   distinct()
 
-# 2️⃣ Pivot all guides to long format with year and value columns
+# ============================================================================
+# 2. PROCESS & NORMALIZE GUIDE DATA
+# ============================================================================
+
+# Pivot all guides to long format with year and value columns
 pivot_guide <- function(df, guide_year) {
   df %>%
     pivot_longer(
@@ -113,7 +124,10 @@ pivot_guide <- function(df, guide_year) {
           value = as.numeric(default_value)
         )
     ) %>%
-    select(type, make, model, trim, year, value) %>%
+    mutate(
+      description = paste(make, model, trim)
+    ) %>%
+    select(type, make, model, trim, description, year, value) %>%
     distinct() %>%
     mutate(guide_year = guide_year)
 }
@@ -122,73 +136,91 @@ guide24_pivoted <- pivot_guide(guide24, 2024)
 guide25_pivoted <- pivot_guide(guide25, 2025)
 guide26_pivoted <- pivot_guide(guide26, 2026)
 
-nas = guide25_pivoted %>% 
-  filter(
-    is.na(trim)
-  )
-
-# 3️⃣ Combine all guides
+# Combine all guides
 all_guides <- bind_rows(
   guide24_pivoted,
   guide25_pivoted,
   guide26_pivoted
 )
 
-# 4️⃣ Sanitize text for Postgres / JSON
+# Sanitize text for Postgres / JSON
 all_guides <- all_guides %>%
   mutate(
-    across(c(type, make, model, trim), ~ iconv(.x, from = "", to = "UTF-8", sub = "")), # remove invalid UTF-8
-    across(c(type, make, model, trim), ~ gsub("[[:cntrl:]]", " ", .x)), # remove control chars
+    across(c(type, make, model, trim), ~ iconv(.x, from = "", to = "UTF-8", sub = "")),
+    across(c(type, make, model, trim), ~ gsub("[[:cntrl:]]", " ", .x)),
     across(c(type, make, model, trim), ~ trimws(.x))
   )
 
-# 5️⃣ Create normalized tables
-# Unique vehicles (no guide year in this table)
+# Create normalized guide tables
+# Table 1: Unique vehicles (no guide year in this table)
 guide_vehicles <- all_guides %>%
-  select(type, make, model, trim) %>%
+  select(type, make, model, trim, description) %>%
   distinct() %>%
   mutate(
     vehicle_id = map_chr(
-      paste(
-        coalesce(type, ""), 
-        coalesce(make, ""), 
-        coalesce(model, ""), 
-        coalesce(trim, ""),
-        sep = "|"
-      ),
+      description,
       ~ digest::digest(.x, algo = "md5", serialize = FALSE)
     )
   ) %>%
-  select(vehicle_id, type, make, model, trim)
+  select(vehicle_id, type, make, model, trim, description)
 
-# Values table with guide_year
+# Table 2: Values by vehicle_id, guide_year, and model year
 guide_vehicle_values <- all_guides %>%
   mutate(
     vehicle_id = map_chr(
-      paste(
-        coalesce(type, ""), 
-        coalesce(make, ""), 
-        coalesce(model, ""), 
-        coalesce(trim, ""),
-        sep = "|"
-      ),
+      description,
       ~ digest::digest(.x, algo = "md5", serialize = FALSE)
     )
   ) %>%
-  select(vehicle_id, guide_year, year, value) %>%
+  group_by(vehicle_id, guide_year, year) %>%
+  summarise(
+    value = min(value),
+    .groups = "drop"
+  ) %>% 
   distinct()
 
-# Insert normalized tables
+# ============================================================================
+# 3. PROCESS ACCOUNT VEHICLES (FROM DEVNET REPORT)
+# ============================================================================
+
+account_vehicles = get_most_recent_file("G:/R-Projects/general/supabase-report-transformations/data/pp_multiple_vehicle_report") %>% 
+  mutate(
+    item_description = iconv(item_description, from = "", to = "UTF-8", sub = ""),
+    item_description = trimws(item_description),
+    model_year = as.numeric(str_sub(item_description, 1, 4)),
+    description = trimws(str_sub(item_description, 5)),
+    account_year = 2026,
+    vehicle_id = map_chr(
+      description,
+      ~ digest::digest(.x, algo = "md5", serialize = FALSE)
+    )
+  ) %>% 
+  select(
+    account_number,
+    vehicle_id,
+    account_year,
+    model_year,
+    description,
+    vin_number,
+    current_value = value
+  ) %>%
+  # Join with guide values to get guide_value
+  left_join(
+    guide_vehicle_values, 
+    join_by(vehicle_id, model_year == year, account_year == guide_year)
+  ) %>% 
+  rename(guide_value = value)
+
+# ============================================================================
+# 4. INSERT DATA TO DATABASE
+# ============================================================================
+
+# Insert guide tables
 insert_batches(guide_vehicles %>% distinct(), 10000, "/guide_vehicles")
 insert_batches(guide_vehicle_values %>% distinct(), 10000, "/guide_vehicle_values")
 
-
-
-
-sv = "2HKRM4H74DH619293"
-sv2 <- "1FTFW3LD0SFC50024"
-
-
+# Insert account vehicles
+insert_batches(account_vehicles %>% distinct(), 10000, "/account_vehicles")
 
 
 
