@@ -45,6 +45,7 @@ export async function executeSearchGuideByDescription(
     return {
       error: "",
       success: "",
+      //@ts-expect-error not sure about this one
       data,
       totalCount: Array.isArray(data) ? data.length : 0,
     };

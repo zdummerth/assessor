@@ -13,21 +13,21 @@ export interface GuideVehicleValue {
   value: number;
 }
 
-// Current database structure (old schema - temporary)
+// New normalized structure
 export interface SearchGuideByDescriptionResult {
-  description: string;
-  guide_id: number;
+  vehicle_id: string;
+  type: string | null;
+  make: string;
+  model: string;
+  trim: string | null;
   similarity_score: number;
-  years: string;
+  values: GuideVehicleValue[];
 }
 
-// New normalized structure (for after schema migration)
+// Old schema structure (deprecated)
 // export interface SearchGuideByDescriptionResult {
-//   vehicle_id: string;
-//   type: string | null;
-//   make: string;
-//   model: string;
-//   trim: string | null;
+//   description: string;
+//   guide_id: number;
 //   similarity_score: number;
-//   values: GuideVehicleValue[];
+//   years: string;
 // }

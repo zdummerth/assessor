@@ -133,6 +133,48 @@ export type Database = {
         }
         Relationships: []
       }
+      account_vehicles: {
+        Row: {
+          account_number: string
+          account_year: number
+          created_at: string
+          current_value: number | null
+          description: string
+          guide_value: number | null
+          id: number
+          model_year: number
+          updated_at: string
+          vehicle_id: string
+          vin_number: string | null
+        }
+        Insert: {
+          account_number: string
+          account_year: number
+          created_at?: string
+          current_value?: number | null
+          description: string
+          guide_value?: number | null
+          id?: number
+          model_year: number
+          updated_at?: string
+          vehicle_id: string
+          vin_number?: string | null
+        }
+        Update: {
+          account_number?: string
+          account_year?: number
+          created_at?: string
+          current_value?: number | null
+          description?: string
+          guide_value?: number | null
+          id?: number
+          model_year?: number
+          updated_at?: string
+          vehicle_id?: string
+          vin_number?: string | null
+        }
+        Relationships: []
+      }
       addresses: {
         Row: {
           address_line1: string | null
@@ -2471,6 +2513,69 @@ export type Database = {
           id?: number
           updated_at?: string
           years?: string | null
+        }
+        Relationships: []
+      }
+      guide_vehicle_values: {
+        Row: {
+          created_at: string
+          guide_year: number
+          id: number
+          updated_at: string
+          value: number
+          vehicle_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          guide_year: number
+          id?: number
+          updated_at?: string
+          value: number
+          vehicle_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          guide_year?: number
+          id?: number
+          updated_at?: string
+          value?: number
+          vehicle_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      guide_vehicles: {
+        Row: {
+          created_at: string
+          description: string
+          make: string
+          model: string
+          trim: string | null
+          type: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          make: string
+          model: string
+          trim?: string | null
+          type?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          make?: string
+          model?: string
+          trim?: string | null
+          type?: string | null
+          updated_at?: string
+          vehicle_id?: string
         }
         Relationships: []
       }
@@ -7579,6 +7684,7 @@ export type Database = {
         }
         Returns: number
       }
+      bytea_to_text: { Args: { data: string }; Returns: string }
       check_review_data_completeness: {
         Args: { p_review_id: number }
         Returns: Json
@@ -7682,6 +7788,18 @@ export type Database = {
           image_id: number
         }[]
       }
+      decode_vin_nhtsa: {
+        Args: {
+          p_limit?: number
+          p_make_threshold?: number
+          p_match_threshold?: number
+          p_model_threshold?: number
+          p_trim_threshold?: number
+          p_vin: string
+          p_year_tolerance?: number
+        }
+        Returns: Json
+      }
       delete_field_review_images_and_files: {
         Args: { p_image_ids: number[] }
         Returns: {
@@ -7741,6 +7859,28 @@ export type Database = {
           subject_parcel_id: number
           total_finished_area: number
           total_unfinished_area: number
+        }[]
+      }
+      get_best_guide_value_for_account_vehicle: {
+        Args: { p_limit?: number }
+        Returns: {
+          account_current_value: number
+          account_description: string
+          account_model_year: number
+          account_number: string
+          account_vehicle_id: number
+          account_year: number
+          guide_description: string
+          guide_value: number
+          guide_year: number
+          is_default_value: boolean
+          make: string
+          model: string
+          similarity_score: number
+          trim: string
+          type: string
+          vehicle_id: string
+          year: number
         }[]
       }
       get_buildings_as_of_date_v2: {
@@ -8703,6 +8843,131 @@ export type Database = {
           sum_nonzero: number
         }[]
       }
+      http: {
+        Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "http_request"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_delete:
+        | {
+            Args: { uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { content: string; content_type: string; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      http_get:
+        | {
+            Args: { uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { data: Json; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      http_head: {
+        Args: { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_header: {
+        Args: { field: string; value: string }
+        Returns: Database["public"]["CompositeTypes"]["http_header"]
+        SetofOptions: {
+          from: "*"
+          to: "http_header"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_list_curlopt: {
+        Args: never
+        Returns: {
+          curlopt: string
+          value: string
+        }[]
+      }
+      http_patch: {
+        Args: { content: string; content_type: string; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_post:
+        | {
+            Args: { content: string; content_type: string; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { data: Json; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      http_put: {
+        Args: { content: string; content_type: string; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_reset_curlopt: { Args: never; Returns: boolean }
+      http_set_curlopt: {
+        Args: { curlopt: string; value: string }
+        Returns: boolean
+      }
       insert_parcel_image: {
         Args: { p_image_url: string; p_parcel_id: number }
         Returns: number
@@ -8933,9 +9198,32 @@ export type Database = {
         }[]
       }
       search_guide_by_description: {
+        Args: { p_guide_year?: number; p_limit?: number; p_search_text: string }
+        Returns: {
+          make: string
+          model: string
+          similarity_score: number
+          trim: string
+          type: string
+          values: Json
+          vehicle_id: string
+        }[]
+      }
+      search_guide_by_description_fts: {
         Args: { p_limit?: number; p_search_text: string }
         Returns: {
           description: string
+          guide_id: number
+          rank_score: number
+          years: string
+        }[]
+      }
+      search_guide_hybrid: {
+        Args: { p_limit?: number; p_search_text: string }
+        Returns: {
+          combined_score: number
+          description: string
+          fts_score: number
           guide_id: number
           similarity_score: number
           years: string
@@ -9445,7 +9733,7 @@ export type Database = {
         }[]
       }
       search_vin_with_guide_matches: {
-        Args: { p_vin: string }
+        Args: { p_guide_year?: number; p_match_limit?: number; p_vin: string }
         Returns: {
           guide_results: Json
           model_year: string
@@ -9868,6 +10156,7 @@ export type Database = {
           values_per_unit: number
         }[]
       }
+      text_to_bytea: { Args: { data: string }; Returns: string }
       transition_devnet_review_status: {
         Args: {
           p_changed_by_employee_id?: number
@@ -9877,6 +10166,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      urlencode:
+        | { Args: { data: Json }; Returns: string }
+        | {
+            Args: { string: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { string: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
     }
     Enums: {
       devnet_data_status:
@@ -9906,6 +10209,23 @@ export type Database = {
         | "use_conversion"
     }
     CompositeTypes: {
+      http_header: {
+        field: string | null
+        value: string | null
+      }
+      http_request: {
+        method: unknown
+        uri: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content_type: string | null
+        content: string | null
+      }
+      http_response: {
+        status: number | null
+        content_type: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content: string | null
+      }
       regression_coef: {
         term: string | null
         coefficient: number | null
