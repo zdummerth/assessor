@@ -25,7 +25,7 @@ export function ParametersForm() {
       <form action={formAction} className="space-y-4">
         <div className="flex gap-2">
           <div>
-            {/* <Label htmlFor="p_vin">VIN</Label> */}
+            <Label htmlFor="p_vin">VIN</Label>
             <Input
               id="p_vin"
               name="p_vin"
