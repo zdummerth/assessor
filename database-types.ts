@@ -7790,6 +7790,7 @@ export type Database = {
       }
       decode_vin_nhtsa: {
         Args: {
+          p_guide_year?: number
           p_limit?: number
           p_make_threshold?: number
           p_match_threshold?: number
@@ -9731,6 +9732,17 @@ export type Database = {
           sale_price: number
           sale_type: string
         }[]
+      }
+      search_vehicle_unified: {
+        Args: {
+          p_guide_year?: number
+          p_match_limit?: number
+          p_search_text: string
+          p_search_type?: string
+          p_similarity_threshold?: number
+          p_year_tolerance?: number
+        }
+        Returns: Json
       }
       search_vin_with_guide_matches: {
         Args: { p_guide_year?: number; p_match_limit?: number; p_vin: string }

@@ -272,6 +272,8 @@ DECLARE
     v_vehicle_type text;
     v_series text;
     v_series2 text;
+    v_trailer_length text;
+    v_trailer_type text;
     v_search_string text;
     v_guide_matches jsonb;
     v_model_year_int integer;
@@ -286,34 +288,40 @@ BEGIN
         -- Parse JSON response
         v_api_result := v_response.content::jsonb->'Results'->0;
         
-        -- Extract vehicle fields from API response
-        v_make := v_api_result->>'Make';
-        v_model := v_api_result->>'Model';
-        v_model_year := v_api_result->>'ModelYear';
-        v_trim := v_api_result->>'Trim';
-        v_displacement := v_api_result->>'DisplacementL';
-        v_body_class := v_api_result->>'BodyClass';
-        v_drive_type := v_api_result->>'DriveType';
-        v_fuel_type := v_api_result->>'FuelTypePrimary';
-        v_vehicle_type := v_api_result->>'VehicleType';
-        v_series := v_api_result->>'Series';
-        v_series2 := v_api_result->>'Series2';
+        -- Extract vehicle fields from API response and replace 'Not Applicable' with empty string
+        v_make := NULLIF(v_api_result->>'Make', 'Not Applicable');
+        v_model := NULLIF(v_api_result->>'Model', 'Not Applicable');
+        v_model_year := NULLIF(v_api_result->>'ModelYear', 'Not Applicable');
+        v_trim := NULLIF(v_api_result->>'Trim', 'Not Applicable');
+        v_displacement := NULLIF(v_api_result->>'DisplacementL', 'Not Applicable');
+        v_body_class := NULLIF(v_api_result->>'BodyClass', 'Not Applicable');
+        v_drive_type := NULLIF(v_api_result->>'DriveType', 'Not Applicable');
+        v_fuel_type := NULLIF(v_api_result->>'FuelTypePrimary', 'Not Applicable');
+        v_vehicle_type := NULLIF(v_api_result->>'VehicleType', 'Not Applicable');
+        v_series := NULLIF(v_api_result->>'Series', 'Not Applicable');
+        v_series2 := NULLIF(v_api_result->>'Series2', 'Not Applicable');
+        v_trailer_length := NULLIF(v_api_result->>'TrailerLength', 'Not Applicable');
+        v_trailer_type := NULLIF(v_api_result->>'TrailerBodyType', 'Not Applicable');
         
         -- Convert model year to integer for tolerance calculations
         v_model_year_int := NULLIF(v_model_year, '')::integer;
         
         -- Build enhanced search string from multiple fields
         v_search_string := TRIM(
+            COALESCE(v_make, '') || ' ' || 
+            COALESCE(v_model, '') || ' ' || 
             COALESCE(v_trim, '') || ' ' || 
             COALESCE(v_displacement, '') || 
             CASE WHEN v_displacement IS NOT NULL AND v_displacement != '' THEN 'L' ELSE '' END || ' ' ||
             COALESCE(v_body_class, '') || ' ' ||
             COALESCE(v_drive_type, '') || ' ' ||
             COALESCE(NULLIF(v_series, ''), '') || ' ' ||
-            COALESCE(NULLIF(v_series2, ''), '')
+            COALESCE(NULLIF(v_series2, ''), '') || ' ' ||
+            COALESCE(v_trailer_length, '') || ' ' ||
+            COALESCE(v_trailer_type, '')
         );
         
-        -- Search for matching guide vehicles using weighted composite scoring
+        -- Search for matching guide vehicles using description similarity
         -- Two-pass strategy: strict then relaxed if no results
         WITH scored_matches AS (
             SELECT 
@@ -323,7 +331,7 @@ BEGIN
                 gv.model,
                 gv.trim,
                 gv.description,
-                -- Individual similarity scores
+                -- Individual similarity scores (for reference only)
                 similarity(LOWER(gv.make), LOWER(COALESCE(v_make, ''))) AS make_similarity,
                 similarity(
                     REPLACE(LOWER(gv.model), '-', ''), 
@@ -331,40 +339,69 @@ BEGIN
                 ) AS model_similarity,
                 similarity(LOWER(gv.trim), LOWER(v_search_string)) AS trim_similarity,
                 word_similarity(LOWER(COALESCE(v_trim, '')), LOWER(gv.trim)) AS word_trim_similarity,
-                -- Weighted composite score (make: 25%, model: 35%, trim: 40%)
-                (
-                    similarity(LOWER(gv.make), LOWER(COALESCE(v_make, ''))) * 0.25 +
-                    similarity(
-                        REPLACE(LOWER(gv.model), '-', ''), 
-                        REPLACE(LOWER(COALESCE(v_model, '')), '-', '')
-                    ) * 0.35 +
-                    similarity(LOWER(gv.trim), LOWER(v_search_string)) * 0.40
-                ) AS composite_score,
-                -- Check if description contains body class or drive type
+                -- Overall description similarity
+                similarity(LOWER(gv.description), LOWER(v_search_string)) AS description_similarity,
+                -- Individual field bonuses for matches in description
                 CASE 
-                    WHEN v_body_class IS NOT NULL AND 
-                         gv.description ILIKE '%' || v_body_class || '%' 
-                    THEN 0.05 
+                    WHEN v_make IS NOT NULL AND gv.description ILIKE '%' || v_make || '%' 
+                    THEN 0.02 
                     ELSE 0 
                 END +
                 CASE 
-                    WHEN v_drive_type IS NOT NULL AND 
-                         gv.description ILIKE '%' || v_drive_type || '%' 
-                    THEN 0.05 
+                    WHEN v_model IS NOT NULL AND gv.description ILIKE '%' || v_model || '%' 
+                    THEN 0.02 
                     ELSE 0 
                 END +
-                -- Bonus if exact year match exists
                 CASE 
-                    WHEN EXISTS (
-                        SELECT 1 
-                        FROM guide_vehicle_values gvv 
-                        WHERE gvv.vehicle_id = gv.vehicle_id 
-                            AND v_model_year_int IS NOT NULL
-                            AND gvv.year::integer = v_model_year_int
-                    )
-                    THEN 0.10
-                    ELSE 0
-                END AS bonus_score,
+                    WHEN v_trim IS NOT NULL AND gv.description ILIKE '%' || v_trim || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_body_class IS NOT NULL AND gv.description ILIKE '%' || v_body_class || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_vehicle_type IS NOT NULL AND gv.description ILIKE '%' || v_vehicle_type || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_drive_type IS NOT NULL AND gv.description ILIKE '%' || v_drive_type || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_fuel_type IS NOT NULL AND gv.description ILIKE '%' || v_fuel_type || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_series IS NOT NULL AND v_series != '' AND gv.description ILIKE '%' || v_series || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_series2 IS NOT NULL AND v_series2 != '' AND gv.description ILIKE '%' || v_series2 || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_trailer_type IS NOT NULL AND gv.description ILIKE '%' || v_trailer_type || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_trailer_length IS NOT NULL AND gv.description ILIKE '%' || v_trailer_length || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END +
+                CASE 
+                    WHEN v_displacement IS NOT NULL AND gv.description ILIKE '%' || v_displacement || '%' 
+                    THEN 0.02 
+                    ELSE 0 
+                END AS field_bonus,
                 -- Count available values for this model year (with tolerance)
                 (
                     SELECT COUNT(*)
@@ -374,43 +411,21 @@ BEGIN
                         AND ABS(gvv.year::integer - v_model_year_int) <= p_year_tolerance
                 ) AS value_count
             FROM guide_vehicles gv
-            WHERE v_make IS NOT NULL 
-                AND v_model IS NOT NULL
-                AND (
-                    -- Strict matching criteria
-                    (
-                        REPLACE(LOWER(gv.make), '-', '') LIKE '%' || REPLACE(LOWER(v_make), '-', '') || '%'
-                        AND similarity(
-                            REPLACE(LOWER(gv.model), '-', ''), 
-                            REPLACE(LOWER(v_model), '-', '')
-                        ) > p_model_threshold
-                        AND similarity(LOWER(gv.trim), LOWER(v_search_string)) > p_trim_threshold
-                    )
-                    OR
-                    -- Relaxed matching if we have good overall similarity
-                    (
-                        similarity(LOWER(gv.make), LOWER(v_make)) > p_make_threshold
-                        AND similarity(
-                            REPLACE(LOWER(gv.model), '-', ''), 
-                            REPLACE(LOWER(v_model), '-', '')
-                        ) > p_make_threshold
-                    )
-                )
         ),
         ranked_matches AS (
             SELECT 
                 sm.*,
-                (sm.composite_score + sm.bonus_score) AS final_score,
+                (sm.description_similarity + sm.field_bonus) AS final_score,
                 CASE 
-                    WHEN (sm.composite_score + sm.bonus_score) >= 0.8 THEN 'high'
-                    WHEN (sm.composite_score + sm.bonus_score) >= 0.6 THEN 'medium'
+                    WHEN (sm.description_similarity + sm.field_bonus) >= 0.4 THEN 'high'
+                    WHEN (sm.description_similarity + sm.field_bonus) >= 0.25 THEN 'medium'
                     ELSE 'low'
                 END AS confidence_level
             FROM scored_matches sm
-            WHERE (sm.composite_score + sm.bonus_score) >= p_match_threshold
+            WHERE (sm.description_similarity + sm.field_bonus) >= p_match_threshold
             ORDER BY 
                 (sm.value_count > 0)::int DESC,  -- Prioritize vehicles with values
-                (sm.composite_score + sm.bonus_score) DESC,
+                (sm.description_similarity + sm.field_bonus) DESC,
                 sm.value_count DESC
             LIMIT p_limit
         )
@@ -423,13 +438,13 @@ BEGIN
                 'trim', rm.trim,
                 'description', rm.description,
                 'match_scores', jsonb_build_object(
-                    'composite_score', ROUND(rm.composite_score::numeric, 3),
                     'final_score', ROUND(rm.final_score::numeric, 3),
+                    'description_similarity', ROUND(rm.description_similarity::numeric, 3),
+                    'field_bonus', ROUND(rm.field_bonus::numeric, 3),
                     'make_similarity', ROUND(rm.make_similarity::numeric, 3),
                     'model_similarity', ROUND(rm.model_similarity::numeric, 3),
                     'trim_similarity', ROUND(rm.trim_similarity::numeric, 3),
                     'word_trim_similarity', ROUND(rm.word_trim_similarity::numeric, 3),
-                    'bonus_score', ROUND(rm.bonus_score::numeric, 3),
                     'confidence_level', rm.confidence_level
                 ),
                 'value_count', rm.value_count,
@@ -604,7 +619,257 @@ END;
 $$;
 
 -- ============================================================
--- GUIDE SIMILARITY SEARCH FUNCTION
+-- UNIFIED VEHICLE SEARCH FUNCTION
+-- ============================================================
+
+-- Unified search function: VIN or description with intelligent fallback
+DROP FUNCTION IF EXISTS search_vehicle_unified CASCADE;
+CREATE OR REPLACE FUNCTION search_vehicle_unified(
+    p_search_text text,
+    p_search_type text DEFAULT 'auto', -- 'auto', 'vin', 'description'
+    p_guide_year integer DEFAULT 2026,
+    p_match_limit integer DEFAULT 10,
+    p_similarity_threshold numeric DEFAULT 0.4,
+    p_year_tolerance integer DEFAULT 1
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_is_vin boolean;
+    v_vin_lookup_count integer;
+    v_result jsonb;
+    v_search_type text;
+BEGIN
+    -- Normalize search text
+    p_search_text := trim(p_search_text);
+    
+    -- Determine search type
+    v_search_type := lower(p_search_type);
+    
+    -- Auto-detect if searching by VIN (17 chars, alphanumeric) or partial VIN (8-16 chars)
+    IF v_search_type = 'auto' THEN
+        v_is_vin := (length(p_search_text) BETWEEN 8 AND 17) 
+                    AND (p_search_text ~ '^[A-HJ-NPR-Z0-9]+$');
+        v_search_type := CASE WHEN v_is_vin THEN 'vin' ELSE 'description' END;
+    END IF;
+    
+    -- VIN SEARCH PATH
+    IF v_search_type = 'vin' THEN
+        -- Step 1: Check vin_lookup_2026 table for matches
+        WITH vin_matches AS (
+            SELECT 
+                v.id,
+                v.vin,
+                v.model_year,
+                v.type,
+                v.description
+            FROM public.vin_lookup_2026 v
+            WHERE 
+                CASE 
+                    WHEN length(p_search_text) >= length(v.vin) THEN
+                        substring(p_search_text, 1, length(v.vin)) LIKE replace(v.vin, '?', '_')
+                    ELSE
+                        p_search_text || repeat('_', length(v.vin) - length(p_search_text)) LIKE replace(v.vin, '?', '_')
+                END
+            LIMIT 100
+        ),
+        guide_matches AS (
+            SELECT 
+                vm.id as vin_id,
+                vm.vin,
+                vm.model_year,
+                vm.type,
+                vm.description as vin_description,
+                jsonb_agg(
+                    jsonb_build_object(
+                        'vehicle_id', gv.vehicle_id,
+                        'type', gv.type,
+                        'make', gv.make,
+                        'model', gv.model,
+                        'trim', gv.trim,
+                        'description', gv.description,
+                        'similarity_score', gv.similarity_score,
+                        'values', gv.values
+                    )
+                    ORDER BY gv.similarity_score DESC
+                ) FILTER (WHERE gv.vehicle_id IS NOT NULL) as matches
+            FROM vin_matches vm
+            LEFT JOIN LATERAL (
+                SELECT 
+                    g.vehicle_id,
+                    g.type,
+                    g.make,
+                    g.model,
+                    g.trim,
+                    g.make || ' ' || g.model || ' ' || COALESCE(g.trim, '') as description,
+                    similarity(
+                        COALESCE(vm.description, ''), 
+                        g.make || ' ' || g.model || ' ' || COALESCE(g.trim, '')
+                    ) as similarity_score,
+                    (
+                        SELECT jsonb_agg(
+                            jsonb_build_object(
+                                'guide_year', gvv.guide_year,
+                                'year', gvv.year,
+                                'value', gvv.value
+                            )
+                            ORDER BY gvv.guide_year DESC, gvv.year DESC
+                        )
+                        FROM public.guide_vehicle_values gvv
+                        WHERE gvv.vehicle_id = g.vehicle_id
+                            AND (p_guide_year IS NULL OR gvv.guide_year = p_guide_year)
+                    ) as values
+                FROM public.guide_vehicles g
+                WHERE similarity(
+                    COALESCE(vm.description, ''), 
+                    g.make || ' ' || g.model || ' ' || COALESCE(g.trim, '')
+                ) > p_similarity_threshold
+                ORDER BY similarity_score DESC
+                LIMIT p_match_limit
+            ) gv ON true
+            GROUP BY vm.id, vm.vin, vm.model_year, vm.type, vm.description
+        )
+        SELECT jsonb_build_object(
+            'search_text', p_search_text,
+            'search_type', 'vin',
+            'source', 'vin_lookup_table',
+            'match_count', COUNT(*),
+            'results', jsonb_agg(
+                jsonb_build_object(
+                    'vin_id', gm.vin_id,
+                    'vin', gm.vin,
+                    'model_year', gm.model_year,
+                    'type', gm.type,
+                    'vin_description', gm.vin_description,
+                    'guide_matches', COALESCE(gm.matches, '[]'::jsonb)
+                )
+            )
+        )
+        INTO v_result
+        FROM guide_matches gm;
+        
+        -- Get count of VIN lookup matches from the result
+        v_vin_lookup_count := COALESCE((v_result->>'match_count')::integer, 0);
+        
+        -- Step 2: If no matches in lookup table, try NHTSA API
+        IF v_vin_lookup_count = 0 AND length(p_search_text) = 17 THEN
+            -- Call NHTSA API (reusing existing decode_vin_nhtsa logic)
+            v_result := decode_vin_nhtsa(
+                p_search_text,
+                p_year_tolerance,
+                p_similarity_threshold,
+                0.1, -- make threshold
+                0.6, -- model threshold
+                0.3, -- trim threshold
+                p_match_limit,
+                p_guide_year
+            );
+            
+            -- Wrap result to match unified format
+            v_result := jsonb_build_object(
+                'search_text', p_search_text,
+                'search_type', 'vin',
+                'source', 'nhtsa_api',
+                'match_count', COALESCE((v_result->>'match_count')::integer, 0),
+                'results', jsonb_build_array(v_result)
+            );
+        END IF;
+        
+        RETURN COALESCE(v_result, jsonb_build_object(
+            'search_text', p_search_text,
+            'search_type', 'vin',
+            'source', 'none',
+            'match_count', 0,
+            'results', '[]'::jsonb,
+            'message', 'No matches found in VIN lookup or NHTSA API'
+        ));
+        
+    -- DESCRIPTION SEARCH PATH
+    ELSE
+        WITH vehicle_matches AS (
+            SELECT 
+                gv.vehicle_id,
+                gv.type,
+                gv.make,
+                gv.model,
+                gv.trim,
+                gv.description,
+                GREATEST(
+                    similarity(p_search_text, gv.description),
+                    similarity(p_search_text, gv.make || ' ' || gv.model),
+                    similarity(p_search_text, gv.make),
+                    similarity(p_search_text, gv.model),
+                    similarity(regexp_replace(p_search_text, '[.-]', '', 'g'), regexp_replace(gv.description, '[.-]', '', 'g')),
+                    similarity(regexp_replace(p_search_text, '[.-]', '', 'g'), regexp_replace(gv.make, '[.-]', '', 'g')),
+                    similarity(regexp_replace(p_search_text, '[.-]', '', 'g'), regexp_replace(gv.model, '[.-]', '', 'g'))
+                ) as similarity_score
+            FROM public.guide_vehicles gv
+            WHERE 
+                p_search_text IS NOT NULL
+                AND (
+                    gv.description % p_search_text
+                    OR gv.make % p_search_text
+                    OR gv.model % p_search_text
+                    OR gv.trim % p_search_text
+                    OR regexp_replace(gv.description, '[.-]', '', 'g') % regexp_replace(p_search_text, '[.-]', '', 'g')
+                    OR regexp_replace(gv.make, '[.-]', '', 'g') % regexp_replace(p_search_text, '[.-]', '', 'g')
+                    OR regexp_replace(gv.model, '[.-]', '', 'g') % regexp_replace(p_search_text, '[.-]', '', 'g')
+                )
+            ORDER BY similarity_score DESC
+            LIMIT LEAST(p_match_limit, 100)
+        )
+        SELECT jsonb_build_object(
+            'search_text', p_search_text,
+            'search_type', 'description',
+            'source', 'guide_vehicles',
+            'match_count', COUNT(*),
+            'results', jsonb_agg(
+                jsonb_build_object(
+                    'vehicle_id', vm.vehicle_id,
+                    'type', vm.type,
+                    'make', vm.make,
+                    'model', vm.model,
+                    'trim', vm.trim,
+                    'description', vm.description,
+                    'similarity_score', vm.similarity_score,
+                    'values', COALESCE(
+                        (
+                            SELECT jsonb_agg(
+                                jsonb_build_object(
+                                    'guide_year', gvv.guide_year,
+                                    'year', gvv.year,
+                                    'value', gvv.value
+                                )
+                                ORDER BY gvv.guide_year DESC, gvv.year DESC
+                            )
+                            FROM public.guide_vehicle_values gvv
+                            WHERE gvv.vehicle_id = vm.vehicle_id
+                                AND (p_guide_year IS NULL OR gvv.guide_year = p_guide_year)
+                        ),
+                        '[]'::jsonb
+                    )
+                )
+                ORDER BY vm.similarity_score DESC
+            )
+        )
+        INTO v_result
+        FROM vehicle_matches vm;
+        
+        RETURN COALESCE(v_result, jsonb_build_object(
+            'search_text', p_search_text,
+            'search_type', 'description',
+            'source', 'guide_vehicles',
+            'match_count', 0,
+            'results', '[]'::jsonb,
+            'message', 'No matches found'
+        ));
+    END IF;
+END;
+$$;
+
+-- ============================================================
+-- GUIDE SIMILARITY SEARCH FUNCTION (Legacy - use search_vehicle_unified)
 -- ============================================================
 
 -- Search guide vehicles by text similarity with all values
