@@ -228,7 +228,14 @@ function VinResultsDisplay({ results }: { results: VinResult[] }) {
                 <h4 className="font-semibold text-sm">
                   Guide Matches ({vinResult.guide_matches.length})
                 </h4>
-                <GuideMatchesTable matches={vinResult.guide_matches} />
+                <GuideMatchesTable
+                  matches={vinResult.guide_matches}
+                  modelYear={
+                    vinResult.model_year
+                      ? parseInt(vinResult.model_year)
+                      : undefined
+                  }
+                />
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -319,6 +326,7 @@ function NhtsaApiResultDisplay({ results }: { results: NhtsaApiResult[] }) {
 
 function GuideMatchesTable({
   matches,
+  modelYear,
 }: {
   matches: Array<{
     vehicle_id: string;
@@ -329,6 +337,7 @@ function GuideMatchesTable({
     similarity_score?: number;
     values?: GuideValue[];
   }>;
+  modelYear?: number;
 }) {
   const [expandedMatches, setExpandedMatches] = useState<Set<string>>(
     new Set()
@@ -341,6 +350,29 @@ function GuideMatchesTable({
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
+  };
+
+  const getDisplayValue = (values?: GuideValue[]) => {
+    if (!values || values.length === 0) return null;
+
+    // If modelYear is provided (VIN search), try to find matching year
+    if (modelYear) {
+      // Find most recent guide year for the model year
+      const matchingYears = values.filter((v) => v.year === modelYear);
+      if (matchingYears.length > 0) {
+        const mostRecentGuide = matchingYears.sort(
+          (a, b) => b.guide_year - a.guide_year
+        )[0];
+        return mostRecentGuide;
+      }
+    }
+
+    // Otherwise, get most recent value (highest model year, then highest guide year)
+    const sorted = [...values].sort((a, b) => {
+      if (b.year !== a.year) return b.year - a.year;
+      return b.guide_year - a.guide_year;
+    });
+    return sorted[0];
   };
 
   const toggleMatch = (vehicleId: string) => {
@@ -363,7 +395,8 @@ function GuideMatchesTable({
             {matches[0]?.similarity_score !== undefined && (
               <TableHead>Score</TableHead>
             )}
-            <TableHead>Values</TableHead>
+            <TableHead>Year</TableHead>
+            <TableHead>Value</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
@@ -392,14 +425,18 @@ function GuideMatchesTable({
                   </TableCell>
                 )}
                 <TableCell>
-                  {match.values && match.values.length > 0 ? (
-                    <span className="text-sm text-muted-foreground">
-                      {match.values.length} year
-                      {match.values.length !== 1 ? "s" : ""}
-                    </span>
-                  ) : (
-                    "—"
-                  )}
+                  {(() => {
+                    const displayValue = getDisplayValue(match.values);
+                    return displayValue ? displayValue.year : "—";
+                  })()}
+                </TableCell>
+                <TableCell>
+                  {(() => {
+                    const displayValue = getDisplayValue(match.values);
+                    return displayValue
+                      ? formatCurrency(displayValue.value)
+                      : "—";
+                  })()}
                 </TableCell>
                 <TableCell>
                   {match.values && match.values.length > 0 && (
@@ -421,7 +458,7 @@ function GuideMatchesTable({
               </TableRow>
               {expandedMatches.has(match.vehicle_id) && match.values && (
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <div className="py-2">
                       <Table>
                         <TableHeader>

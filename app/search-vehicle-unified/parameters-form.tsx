@@ -4,6 +4,13 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { executeSearchVehicleUnified } from "./actions";
 import { SearchVehicleUnifiedPresentation } from "./search-vehicle-unified-presentation";
 import {
@@ -127,15 +134,20 @@ export function ParametersForm() {
                   <Label htmlFor="p_guide_year" className="text-xs">
                     Guide Year
                   </Label>
-                  <Input
+                  <select
                     id="p_guide_year"
                     name="p_guide_year"
-                    type="number"
-                    placeholder="2026"
-                    min="2020"
-                    max="2030"
-                    step="1"
-                  />
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    defaultValue="2026"
+                  >
+                    {Array.from({ length: 11 }, (_, i) => 2020 + i).map(
+                      (year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      )
+                    )}
+                  </select>
                   <p className="text-xs text-muted-foreground mt-1">
                     Default: 2026
                   </p>
