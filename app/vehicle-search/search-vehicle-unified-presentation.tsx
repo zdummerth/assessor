@@ -384,6 +384,18 @@ const NhtsaApiResultDisplay = memo(function NhtsaApiResultDisplay({
       </CardHeader>
       <CardContent className="pt-4">
         <div className="space-y-6">
+          {/* Search Description Used for Matching */}
+          {result.search_description ? (
+            <div>
+              <h4 className="font-semibold text-sm text-foreground mb-2">
+                Search Description
+              </h4>
+              <p className="text-sm bg-muted p-3 rounded font-mono break-words">
+                {result.search_description}
+              </p>
+            </div>
+          ) : null}
+
           {result.extracted_fields ? (
             <div>
               <h4 className="font-semibold text-sm text-foreground mb-3">
@@ -449,7 +461,7 @@ const NhtsaApiResultDisplay = memo(function NhtsaApiResultDisplay({
                   Similar Vehicles in Guide Database
                 </h4>
                 <Badge variant="outline" className="text-xs">
-                  {result.match_count} matches
+                  {result.guide_matches.length} matches
                 </Badge>
               </div>
               <GuideMatchesTable

@@ -49,17 +49,28 @@ export interface DescriptionResult {
 
 export interface NhtsaApiResult {
   vin: string;
-  extracted_fields: any;
+  api_data: Record<string, any>;
+  extracted_fields: {
+    make?: string | null;
+    model?: string | null;
+    model_year?: string | null;
+    trim?: string | null;
+  };
+  search_description: string;
   guide_matches: GuideMatch[];
-  match_count: number;
-  [key: string]: any;
 }
 
 export interface SearchVehicleUnifiedResult {
   search_text: string;
   search_type: "vin" | "description";
-  source: "vin_lookup_table" | "nhtsa_api" | "guide_vehicles" | "none";
+  source:
+    | "vin_lookup_table"
+    | "nhtsa_api"
+    | "guide_vehicles"
+    | "nhtsa_api_error"
+    | "none";
   match_count: number;
   results: VinResult[] | DescriptionResult[] | NhtsaApiResult[];
   message?: string;
+  error?: string;
 }
