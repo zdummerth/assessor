@@ -14,10 +14,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ChevronDown } from "lucide-react";
 import {
   SearchVehicleUnifiedResult,
@@ -72,8 +73,14 @@ function getCachedDisplayValue(
   }
 
   // Otherwise, get most recent value (highest model year, then highest guide year)
+  // Exclude default year (9999) unless it's the only value available
   if (!result) {
-    const sorted = [...values].sort((a, b) => {
+    // First try to get non-default values
+    const nonDefaultValues = values.filter((v) => v.year !== 9999);
+    const sortedValues =
+      nonDefaultValues.length > 0 ? nonDefaultValues : values;
+
+    const sorted = [...sortedValues].sort((a, b) => {
       if (b.year !== a.year) return b.year - a.year;
       return b.guide_year - a.guide_year;
     });
@@ -342,14 +349,38 @@ const NhtsaApiResultDisplay = memo(function NhtsaApiResultDisplay({
   results: NhtsaApiResult[];
 }) {
   const result = results[0]; // NHTSA API returns a single result wrapped in array
+  const [showRawData, setShowRawData] = useState(false);
+
+  // Filter api_data to only show non-empty and non-'Not Applicable' fields
+  const filteredApiData = result.api_data
+    ? Object.entries(result.api_data).filter(
+        ([_, value]) =>
+          value !== "" &&
+          value !== "Not Applicable" &&
+          value !== null &&
+          value !== undefined
+      )
+    : [];
 
   return (
     <Card className="border-2 border-purple-200">
       <CardHeader className="bg-purple-50 border-b">
-        <CardTitle className="text-lg">NHTSA API Result</CardTitle>
-        <p className="text-sm text-muted-foreground mt-1">
-          Vehicle information decoded from VIN via NHTSA API
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg">NHTSA API Result</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Vehicle information decoded from VIN via NHTSA API
+            </p>
+          </div>
+          {filteredApiData.length > 0 && (
+            <button
+              onClick={() => setShowRawData(true)}
+              className="px-3 py-1 text-xs bg-purple-200 text-purple-900 rounded hover:bg-purple-300 transition-colors"
+            >
+              View Raw Data
+            </button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="pt-4">
         <div className="space-y-6">
@@ -421,11 +452,39 @@ const NhtsaApiResultDisplay = memo(function NhtsaApiResultDisplay({
                   {result.match_count} matches
                 </Badge>
               </div>
-              <GuideMatchesTable matches={result.guide_matches} />
+              <GuideMatchesTable
+                matches={result.guide_matches}
+                modelYear={
+                  result.extracted_fields?.model_year
+                    ? parseInt(result.extracted_fields.model_year)
+                    : undefined
+                }
+              />
             </div>
           ) : null}
         </div>
       </CardContent>
+
+      {/* Raw API Data Dialog */}
+      <Dialog open={showRawData} onOpenChange={setShowRawData}>
+        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Raw NHTSA API Data</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 pr-4">
+            {filteredApiData.map(([key, value]) => (
+              <div key={key} className="space-y-1">
+                <dt className="text-xs font-medium text-muted-foreground uppercase break-words">
+                  {key}
+                </dt>
+                <dd className="text-sm font-medium break-words bg-muted p-2 rounded">
+                  {String(value)}
+                </dd>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 });
@@ -463,6 +522,42 @@ const GuideMatchesTable = memo(function GuideMatchesTable({
     (m) => m.similarity_score !== undefined
   );
 
+  // Helper function to get year range from values array
+  const getYearRange = (values: GuideValue[] | undefined): string => {
+    if (!values || values.length === 0) return "—";
+    // Filter out 9999 (default value)
+    const filteredYears = values
+      .filter((v) => v.year !== 9999)
+      .map((v) => v.year)
+      .sort((a, b) => a - b);
+    const uniqueYears = Array.from(new Set(filteredYears));
+    if (uniqueYears.length === 0) {
+      // If all values are 9999, just show the default indicator
+      return "Default";
+    }
+    if (uniqueYears.length === 1) {
+      return uniqueYears[0].toString();
+    }
+    return `${uniqueYears[0]}–${uniqueYears[uniqueYears.length - 1]}`;
+  };
+
+  // Helper function to get color for match score
+  const getScoreColor = (similarity: number): string => {
+    if (similarity === 1 || similarity >= 0.99) return "bg-emerald-500"; // Perfect match
+    if (similarity >= 0.8) return "bg-green-500"; // 80-99%
+    if (similarity >= 0.6) return "bg-yellow-500"; // 60-79%
+    if (similarity >= 0.4) return "bg-orange-500"; // 40-59%
+    return "bg-red-500"; // <40%
+  };
+
+  const getScoreBgColor = (similarity: number): string => {
+    if (similarity === 1 || similarity >= 0.99) return "hover:bg-emerald-50"; // Perfect match
+    if (similarity >= 0.8) return "hover:bg-green-50"; // 80-99%
+    if (similarity >= 0.6) return "hover:bg-yellow-50"; // 60-79%
+    if (similarity >= 0.4) return "hover:bg-orange-50"; // 40-59%
+    return "hover:bg-red-50"; // <40%
+  };
+
   return (
     <div className="border rounded-lg overflow-x-auto bg-white">
       <Table>
@@ -475,7 +570,9 @@ const GuideMatchesTable = memo(function GuideMatchesTable({
                 Match Score
               </TableHead>
             ) : null}
-            <TableHead className="font-semibold text-right">Year</TableHead>
+            <TableHead className="font-semibold text-center">
+              Year Range
+            </TableHead>
             <TableHead className="font-semibold text-right">Value</TableHead>
             <TableHead className="w-10"></TableHead>
           </TableRow>
@@ -513,20 +610,18 @@ const GuideMatchesTable = memo(function GuideMatchesTable({
                   {hasSimilarityScores ? (
                     <TableCell className="text-center">
                       {match.similarity_score !== undefined ? (
-                        <div className="inline-flex items-center gap-1">
-                          <div className="w-8 h-6 bg-gradient-to-r from-red-200 to-green-200 rounded relative">
-                            <div
-                              className="h-full bg-gradient-to-r from-red-500 to-green-500 rounded"
-                              style={{
-                                width: `${similarityPercent}%`,
-                              }}
-                            />
-                          </div>
+                        <div
+                          className={`inline-flex flex-col items-center gap-1 px-3 py-2 rounded-md ${getScoreBgColor(match.similarity_score)}`}
+                          title={`${(match.similarity_score * 100).toFixed(1)}% match`}
+                        >
+                          <div
+                            className={`w-3 h-3 rounded-full ${getScoreColor(match.similarity_score)}`}
+                          />
                           <Badge
                             variant="secondary"
                             className="text-xs font-semibold"
                           >
-                            {similarityPercent}%
+                            {(match.similarity_score * 100).toFixed(1)}%
                           </Badge>
                         </div>
                       ) : (
@@ -534,15 +629,24 @@ const GuideMatchesTable = memo(function GuideMatchesTable({
                       )}
                     </TableCell>
                   ) : null}
-                  <TableCell className="text-right text-sm text-muted-foreground">
-                    {displayValue?.year || "—"}
+                  <TableCell className="text-center text-sm text-muted-foreground">
+                    {getYearRange(match.values)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className="font-semibold text-foreground">
-                      {displayValue
-                        ? getCachedFormattedCurrency(displayValue.value)
-                        : "—"}
-                    </span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="font-semibold text-foreground">
+                        {displayValue
+                          ? getCachedFormattedCurrency(displayValue.value)
+                          : "—"}
+                      </span>
+                      {displayValue ? (
+                        <span className="text-xs text-muted-foreground">
+                          {displayValue.year === 9999
+                            ? "(Default)"
+                            : `(${displayValue.year})`}
+                        </span>
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
                     {match.values && match.values.length > 0 ? (
@@ -596,7 +700,16 @@ const GuideMatchesTable = memo(function GuideMatchesTable({
                                   {val.guide_year}
                                 </TableCell>
                                 <TableCell className="text-xs">
-                                  {val.year}
+                                  {val.year === 9999 ? (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      Default
+                                    </Badge>
+                                  ) : (
+                                    val.year
+                                  )}
                                 </TableCell>
                                 <TableCell className="text-xs text-right font-medium">
                                   {getCachedFormattedCurrency(val.value)}

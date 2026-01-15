@@ -683,7 +683,7 @@ BEGIN
                         'values', gv.values
                     )
                     ORDER BY gv.similarity_score DESC
-                ) FILTER (WHERE gv.vehicle_id IS NOT NULL) as matches
+                ) FILTER (WHERE gv.vehicle_id IS NOT NULL AND gv.values IS NOT NULL) as matches
             FROM vin_matches vm
             LEFT JOIN LATERAL (
                 SELECT 
@@ -708,7 +708,7 @@ BEGIN
                         )
                         FROM public.guide_vehicle_values gvv
                         WHERE gvv.vehicle_id = g.vehicle_id
-                            AND (p_guide_year IS NULL OR gvv.guide_year = p_guide_year)
+                            AND gvv.guide_year = COALESCE(p_guide_year, gvv.guide_year)
                     ) as values
                 FROM public.guide_vehicles g
                 WHERE similarity(
@@ -719,6 +719,19 @@ BEGIN
                 LIMIT p_match_limit
             ) gv ON true
             GROUP BY vm.id, vm.vin, vm.model_year, vm.type, vm.description
+            HAVING jsonb_array_length(jsonb_agg(
+                jsonb_build_object(
+                    'vehicle_id', gv.vehicle_id,
+                    'type', gv.type,
+                    'make', gv.make,
+                    'model', gv.model,
+                    'trim', gv.trim,
+                    'description', gv.description,
+                    'similarity_score', gv.similarity_score,
+                    'values', gv.values
+                )
+                ORDER BY gv.similarity_score DESC
+            ) FILTER (WHERE gv.vehicle_id IS NOT NULL AND gv.values IS NOT NULL)) > 0
         )
         SELECT jsonb_build_object(
             'search_text', p_search_text,
@@ -795,6 +808,7 @@ BEGIN
                     similarity(regexp_replace(p_search_text, '[.-]', '', 'g'), regexp_replace(gv.model, '[.-]', '', 'g'))
                 ) as similarity_score
             FROM public.guide_vehicles gv
+            INNER JOIN public.guide_vehicle_values gvv ON gv.vehicle_id = gvv.vehicle_id
             WHERE 
                 p_search_text IS NOT NULL
                 AND (
@@ -806,6 +820,8 @@ BEGIN
                     OR regexp_replace(gv.make, '[.-]', '', 'g') % regexp_replace(p_search_text, '[.-]', '', 'g')
                     OR regexp_replace(gv.model, '[.-]', '', 'g') % regexp_replace(p_search_text, '[.-]', '', 'g')
                 )
+                AND gvv.guide_year = COALESCE(p_guide_year, gvv.guide_year)
+            GROUP BY gv.vehicle_id, gv.type, gv.make, gv.model, gv.trim, gv.description
             ORDER BY similarity_score DESC
             LIMIT LEAST(p_match_limit, 100)
         )
