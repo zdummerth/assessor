@@ -4,13 +4,6 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { executeSearchVehicleUnified } from "./actions";
 import { SearchVehicleUnifiedPresentation } from "./search-vehicle-unified-presentation";
 import {
@@ -19,7 +12,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export function ParametersForm() {
@@ -35,110 +28,128 @@ export function ParametersForm() {
     "auto"
   );
 
+  const handleSearchTypeChange = useCallback(
+    (type: "auto" | "vin" | "description") => {
+      setSearchType(type);
+    },
+    []
+  );
+
   return (
     <>
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="space-y-6">
+        {/* Primary Search Section */}
         <div className="space-y-4">
-          {/* Search Text Input */}
-          <div className="flex gap-2 items-end">
-            <div className="flex-1 max-w-md">
-              <Label htmlFor="p_search_text">Search Text</Label>
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
+            <div className="flex-1">
+              <Label
+                htmlFor="p_search_text"
+                className="text-sm font-semibold mb-2 block"
+              >
+                Search Text
+              </Label>
               <Input
                 id="p_search_text"
                 name="p_search_text"
-                className="font-mono"
+                className="font-mono text-sm h-10"
                 type="text"
-                placeholder="Enter VIN or vehicle description"
+                placeholder="Enter VIN or vehicle description…"
                 required
+                aria-required="true"
+                aria-describedby={state.error ? "search-error" : undefined}
               />
             </div>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Searching..." : "Search"}
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="gap-2 h-10 px-6"
+              aria-busy={isPending}
+            >
+              {isPending ? (
+                <>
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Searching…
+                </>
+              ) : (
+                "Search"
+              )}
             </Button>
           </div>
 
           {/* Search Type Selection */}
-          <div className="space-y-2">
-            <Label>Search Type</Label>
-            <div className="flex gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="search-type-auto"
-                  name="p_search_type"
-                  value="auto"
-                  checked={searchType === "auto"}
-                  onCheckedChange={(checked) => {
-                    if (checked) setSearchType("auto");
-                  }}
-                />
-                <label
-                  htmlFor="search-type-auto"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Auto-detect
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="search-type-vin"
-                  name="p_search_type"
-                  value="vin"
-                  checked={searchType === "vin"}
-                  onCheckedChange={(checked) => {
-                    if (checked) setSearchType("vin");
-                  }}
-                />
-                <label
-                  htmlFor="search-type-vin"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  VIN Search
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="search-type-description"
-                  name="p_search_type"
-                  value="description"
-                  checked={searchType === "description"}
-                  onCheckedChange={(checked) => {
-                    if (checked) setSearchType("description");
-                  }}
-                />
-                <label
-                  htmlFor="search-type-description"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Description Search
-                </label>
-              </div>
+          <fieldset className="space-y-3 border-b pb-4">
+            <legend className="text-sm font-semibold text-foreground">
+              Search Type
+            </legend>
+            <div className="flex flex-col sm:flex-row gap-6">
+              {(["auto", "vin", "description"] as const).map((type) => (
+                <div key={type} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`search-type-${type}`}
+                    name="p_search_type"
+                    value={type}
+                    checked={searchType === type}
+                    onCheckedChange={() => handleSearchTypeChange(type)}
+                    aria-label={
+                      type === "auto"
+                        ? "Auto-detect search type"
+                        : type === "vin"
+                          ? "VIN Search"
+                          : "Description Search"
+                    }
+                  />
+                  <label
+                    htmlFor={`search-type-${type}`}
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    {type === "auto"
+                      ? "Auto-detect"
+                      : type === "vin"
+                        ? "VIN Search"
+                        : "Description Search"}
+                  </label>
+                </div>
+              ))}
             </div>
             <input type="hidden" name="p_search_type" value={searchType} />
-          </div>
+          </fieldset>
+        </div>
 
-          {/* Advanced Options */}
-          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
-                Advanced Options
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform ${
-                    showAdvanced ? "rotate-180" : ""
-                  }`}
-                />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="p_guide_year" className="text-xs">
+        {/* Advanced Options */}
+        <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-muted-foreground hover:text-foreground h-9"
+              aria-expanded={showAdvanced}
+            >
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  showAdvanced ? "rotate-180" : ""
+                }`}
+                aria-hidden="true"
+              />
+              Advanced Options
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-4 pt-4">
+            <fieldset className="space-y-4">
+              <legend className="text-sm font-semibold text-foreground">
+                Filter Options
+              </legend>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Guide Year */}
+                <div className="space-y-2">
+                  <Label htmlFor="p_guide_year" className="text-sm font-medium">
                     Guide Year
                   </Label>
                   <select
                     id="p_guide_year"
                     name="p_guide_year"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     defaultValue="2026"
+                    aria-describedby="guide-year-help"
                   >
                     {Array.from({ length: 11 }, (_, i) => 2020 + i).map(
                       (year) => (
@@ -148,12 +159,20 @@ export function ParametersForm() {
                       )
                     )}
                   </select>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p
+                    id="guide-year-help"
+                    className="text-xs text-muted-foreground"
+                  >
                     Default: 2026
                   </p>
                 </div>
-                <div>
-                  <Label htmlFor="p_match_limit" className="text-xs">
+
+                {/* Match Limit */}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="p_match_limit"
+                    className="text-sm font-medium"
+                  >
                     Match Limit
                   </Label>
                   <Input
@@ -164,13 +183,23 @@ export function ParametersForm() {
                     min="1"
                     max="100"
                     step="1"
+                    className="h-10"
+                    aria-describedby="match-limit-help"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p
+                    id="match-limit-help"
+                    className="text-xs text-muted-foreground"
+                  >
                     Default: 10
                   </p>
                 </div>
-                <div>
-                  <Label htmlFor="p_similarity_threshold" className="text-xs">
+
+                {/* Similarity Threshold */}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="p_similarity_threshold"
+                    className="text-sm font-medium"
+                  >
                     Similarity Threshold
                   </Label>
                   <Input
@@ -181,13 +210,23 @@ export function ParametersForm() {
                     min="0"
                     max="1"
                     step="0.1"
+                    className="h-10"
+                    aria-describedby="similarity-help"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p
+                    id="similarity-help"
+                    className="text-xs text-muted-foreground"
+                  >
                     Default: 0.4
                   </p>
                 </div>
-                <div>
-                  <Label htmlFor="p_year_tolerance" className="text-xs">
+
+                {/* Year Tolerance */}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="p_year_tolerance"
+                    className="text-sm font-medium"
+                  >
                     Year Tolerance
                   </Label>
                   <Input
@@ -198,29 +237,43 @@ export function ParametersForm() {
                     min="0"
                     max="5"
                     step="1"
+                    className="h-10"
+                    aria-describedby="year-tolerance-help"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Default: 1 (for NHTSA API fallback)
+                  <p
+                    id="year-tolerance-help"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Default: 1
                   </p>
                 </div>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
+            </fieldset>
+          </CollapsibleContent>
+        </Collapsible>
 
-        {state.error && (
-          <div className="text-red-500 text-sm">{state.error}</div>
-        )}
+        {/* Error Message */}
+        {state.error ? (
+          <div
+            id="search-error"
+            className="text-red-600 text-sm p-3 bg-red-50 rounded-md border border-red-200 flex gap-2 items-start"
+            role="alert"
+          >
+            <span className="font-semibold">Error:</span>
+            <span>{state.error}</span>
+          </div>
+        ) : null}
       </form>
 
-      {state.data && (
-        <div className="mt-6">
+      {/* Results Section */}
+      {state.data ? (
+        <div className="mt-8">
           <SearchVehicleUnifiedPresentation
             data={state.data}
             searchText={state.searchText}
           />
         </div>
-      )}
+      ) : null}
     </>
   );
 }

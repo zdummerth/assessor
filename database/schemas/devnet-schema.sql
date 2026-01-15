@@ -436,18 +436,8 @@ BEGIN
                 'make', rm.make,
                 'model', rm.model,
                 'trim', rm.trim,
-                'description', rm.description,
-                'match_scores', jsonb_build_object(
-                    'final_score', ROUND(rm.final_score::numeric, 3),
-                    'description_similarity', ROUND(rm.description_similarity::numeric, 3),
-                    'field_bonus', ROUND(rm.field_bonus::numeric, 3),
-                    'make_similarity', ROUND(rm.make_similarity::numeric, 3),
-                    'model_similarity', ROUND(rm.model_similarity::numeric, 3),
-                    'trim_similarity', ROUND(rm.trim_similarity::numeric, 3),
-                    'word_trim_similarity', ROUND(rm.word_trim_similarity::numeric, 3),
-                    'confidence_level', rm.confidence_level
-                ),
-                'value_count', rm.value_count,
+                'similarity_score', ROUND(rm.final_score::numeric, 3),
+                'description', v_search_string,
                 'values', (
                     SELECT jsonb_agg(
                         jsonb_build_object(
