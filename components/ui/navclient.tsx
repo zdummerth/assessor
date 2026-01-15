@@ -13,12 +13,8 @@ const NavClient = () => {
     // { href: "/ratios/stats", label: "Ratio Stats" },
     { href: "/tax-rates", label: "Tax Rates" },
     {
-      href: "/search-vin-with-guide-matches",
-      label: "VIN Lookup",
-    },
-    {
-      href: "/search-guide-by-description",
-      label: "Vehicle Description Search",
+      href: "/vehicle-search",
+      label: "Vehicle Search",
     },
     {
       href: "/senior-tax-credits/calculator/test",
