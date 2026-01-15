@@ -587,15 +587,20 @@ const GuideMatchesTable = memo(function GuideMatchesTable({
               <React.Fragment key={match.vehicle_id || idx}>
                 <TableRow className="hover:bg-muted/30 border-b">
                   <TableCell className="min-w-[200px]">
-                    <div>
-                      <div className="font-semibold text-foreground break-words">
-                        {match.make} {match.model}
-                      </div>
-                      {match.trim ? (
-                        <div className="text-xs text-muted-foreground break-words">
-                          {match.trim}
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1">
+                        <div className="font-semibold text-foreground break-words">
+                          {match.make} {match.model}
                         </div>
-                      ) : null}
+                        {match.trim ? (
+                          <div className="text-xs text-muted-foreground break-words">
+                            {match.trim}
+                          </div>
+                        ) : null}
+                      </div>
+                      <CopyToClipboard
+                        text={`${match.make} ${match.model}${match.trim ? ` ${match.trim}` : ""}`}
+                      />
                     </div>
                   </TableCell>
                   <TableCell>

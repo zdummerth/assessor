@@ -1,18 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Clipboard, Check } from "lucide-react";
+import { Clipboard } from "lucide-react";
+import { toast } from "sonner";
 
 const CopyToClipboard = ({ text }: { text: string }) => {
-  const [copied, setCopied] = useState(false);
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+      toast.success("Copied to clipboard");
     } catch (err) {
       console.error("Failed to copy!", err);
+      toast.error("Failed to copy");
     }
   };
 
@@ -22,16 +20,7 @@ const CopyToClipboard = ({ text }: { text: string }) => {
       className="flex items-center gap-2 print:hidden"
       title="Copy to Clipboard"
     >
-      {copied ? (
-        <div className="relative">
-          <Check size={14} className="text-green-500" />
-          <span className="absolute left-6 top-0 text-xs text-gray-500">
-            Copied
-          </span>
-        </div>
-      ) : (
-        <Clipboard size={12} className="hover:text-blue-500" />
-      )}
+      <Clipboard size={12} className="hover:text-blue-500" />
     </button>
   );
 };
