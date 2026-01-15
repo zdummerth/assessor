@@ -17,15 +17,13 @@ import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 import { ParametersForm } from "./parameters-form";
 
-export default function SearchVehicleUnifiedPage() {
+export default function SearchVehiclePage() {
   return (
     <Card className="border-2 shadow-lg">
       <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className="text-2xl mb-2">
-              Unified Vehicle Search
-            </CardTitle>
+            <CardTitle className="text-2xl mb-2">Vehicle Search</CardTitle>
             <CardDescription className="text-sm">
               Search by VIN or vehicle description to find matching vehicles
               with guide values
