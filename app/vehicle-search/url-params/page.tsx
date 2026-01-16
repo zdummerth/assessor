@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 import VehicleSearch from "./vehicle-search";
 import VehicleTable from "./vehicle-table";
-import VehiclePagination from "./vehicle-pagination";
+// import VehiclePagination from "./vehicle-pagination";
 import { TableSkeleton } from "./table-skeleton";
 
 export default async function VehicleSearchUrlParamsPage({
@@ -181,7 +181,7 @@ export default async function VehicleSearchUrlParamsPage({
               searchType={searchType}
             />
           </Suspense>
-          <div className="mt-5 flex w-full justify-center">
+          {/* <div className="mt-5 flex w-full justify-center">
             <Suspense fallback={<div className="h-10" />}>
               <VehiclePagination
                 query={query}
@@ -190,7 +190,7 @@ export default async function VehicleSearchUrlParamsPage({
                 searchType={searchType}
               />
             </Suspense>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

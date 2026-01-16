@@ -272,6 +272,7 @@ DECLARE
     v_trailer_length text;
     v_series text;
     v_series_2 text;
+    v_displacement_cc text;
     v_search_string text;
     v_model_year_int integer;
     v_guide_matches jsonb;
@@ -356,6 +357,7 @@ BEGIN
                 v_trailer_length := NULLIF(v_api_result->>'TrailerLength', 'Not Applicable');
                 v_series := NULLIF(v_api_result->>'Series', 'Not Applicable');
                 v_series_2 := NULLIF(v_api_result->>'Series2', 'Not Applicable');
+                v_displacement_cc := NULLIF(v_api_result->>'DisplacementCC', 'Not Applicable');
                 v_model_year_int := NULLIF(v_model_year, '')::integer;
                 
                                 v_search_string := TRIM(
@@ -367,7 +369,8 @@ BEGIN
                                             v_trailer_body_type,
                                             v_trailer_length,
                                             v_series,
-                                            v_series_2
+                                            v_series_2,
+                                            v_displacement_cc
                                         ], ' ', ''
                                     )
                                 );
@@ -401,7 +404,7 @@ BEGIN
                             THEN 0.02 
                             ELSE 0 
                         END as field_bonus,
-                        (SELECT COUNT(*) FROM guide_vehicle_values gvv WHERE gvv.vehicle_id = gv.vehicle_id AND v_model_year_int IS NOT NULL AND ABS(gvv.year::integer - v_model_year_int) <= p_year_tolerance) as value_count
+                        (SELECT COUNT(*) FROM guide_vehicle_values gvv WHERE gvv.vehicle_id = gv.vehicle_id AND gvv.guide_year = p_guide_year AND v_model_year_int IS NOT NULL AND ABS(gvv.year::integer - v_model_year_int) <= p_year_tolerance) as value_count
                     FROM guide_vehicles gv
                 ),
                 ranked_matches AS (
@@ -409,14 +412,15 @@ BEGIN
                         sm.*, (sm.desc_similarity + sm.field_bonus) as final_score
                     FROM scored_matches sm
                     WHERE (sm.desc_similarity + sm.field_bonus) >= p_similarity_threshold
-                    ORDER BY (sm.value_count > 0)::int DESC, (sm.desc_similarity + sm.field_bonus) DESC, sm.value_count DESC
+                        AND sm.value_count > 0
+                    ORDER BY (sm.desc_similarity + sm.field_bonus) DESC, sm.value_count DESC
                     LIMIT p_match_limit
                 )
                 SELECT jsonb_agg(
                     jsonb_build_object(
                         'vehicle_id', rm.vehicle_id, 'type', rm.type, 'make', rm.make, 'model', rm.model, 'trim', rm.trim,
                         'similarity_score', ROUND(rm.final_score::numeric, 3),
-                        'values', (SELECT jsonb_agg(jsonb_build_object('guide_year', gvv.guide_year, 'year', gvv.year, 'value', gvv.value) ORDER BY gvv.guide_year DESC, gvv.year DESC) FROM guide_vehicle_values gvv WHERE gvv.vehicle_id = rm.vehicle_id AND v_model_year_int IS NOT NULL AND ABS(gvv.year::integer - v_model_year_int) <= p_year_tolerance AND (p_guide_year IS NULL OR gvv.guide_year = p_guide_year))
+                        'values', (SELECT jsonb_agg(jsonb_build_object('guide_year', gvv.guide_year, 'year', gvv.year, 'value', gvv.value) ORDER BY gvv.year DESC) FROM guide_vehicle_values gvv WHERE gvv.vehicle_id = rm.vehicle_id AND gvv.guide_year = p_guide_year AND v_model_year_int IS NOT NULL AND ABS(gvv.year::integer - v_model_year_int) <= p_year_tolerance)
                     )
                 ) INTO v_guide_matches FROM ranked_matches rm;
                 

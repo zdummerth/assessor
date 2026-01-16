@@ -46,6 +46,7 @@ interface NhtsaResultCardProps {
 
 export function NhtsaResultCard({ result, index }: NhtsaResultCardProps) {
   const [showRawData, setShowRawData] = useState(false);
+  console.log("NHTSA Result:", result);
 
   // Filter api_data to only show non-empty and non-'Not Applicable' fields
   const filteredApiData = result.api_data
@@ -92,7 +93,7 @@ export function NhtsaResultCard({ result, index }: NhtsaResultCardProps) {
         {result.extracted_fields && (
           <div className="bg-purple-50 p-3 rounded-md border border-purple-200">
             <h4 className="text-sm font-semibold mb-2 text-purple-900">
-              Extracted Vehicle Information
+              NHTSA Vehicle Information
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
               {result.extracted_fields.make && (
@@ -127,59 +128,36 @@ export function NhtsaResultCard({ result, index }: NhtsaResultCardProps) {
                   </span>
                 </div>
               )}
-              {result.extracted_fields.body_class && (
+              {result.api_data?.DisplacementCC && (
                 <div>
-                  <span className="text-gray-600">Body Class:</span>{" "}
+                  <span className="text-gray-600">Displacement CC:</span>{" "}
                   <span className="font-medium">
-                    {result.extracted_fields.body_class}
+                    {result.api_data.DisplacementCC}
                   </span>
                 </div>
               )}
-              {result.extracted_fields.engine_configuration && (
+              {result.api_data?.VehicleType && (
                 <div>
-                  <span className="text-gray-600">Engine:</span>{" "}
+                  <span className="text-gray-600">Vehicle Type:</span>{" "}
                   <span className="font-medium">
-                    {result.extracted_fields.engine_configuration}
+                    {result.api_data.VehicleType}
                   </span>
                 </div>
               )}
-              {result.extracted_fields.engine_cylinders && (
+              {result.api_data?.TrailerBodyType &&
+                result.api_data?.TrailerBodyType !== "Not Applicable" && (
+                  <div>
+                    <span className="text-gray-600">Trailer Body Type:</span>{" "}
+                    <span className="font-medium">
+                      {result.api_data.TrailerBodyType}
+                    </span>
+                  </div>
+                )}
+              {result.api_data?.TrailerLength && (
                 <div>
-                  <span className="text-gray-600">Cylinders:</span>{" "}
+                  <span className="text-gray-600">Trailer Length:</span>{" "}
                   <span className="font-medium">
-                    {result.extracted_fields.engine_cylinders}
-                  </span>
-                </div>
-              )}
-              {result.extracted_fields.displacement && (
-                <div>
-                  <span className="text-gray-600">Displacement:</span>{" "}
-                  <span className="font-medium">
-                    {result.extracted_fields.displacement}
-                  </span>
-                </div>
-              )}
-              {result.extracted_fields.fuel_type && (
-                <div>
-                  <span className="text-gray-600">Fuel Type:</span>{" "}
-                  <span className="font-medium">
-                    {result.extracted_fields.fuel_type}
-                  </span>
-                </div>
-              )}
-              {result.extracted_fields.transmission && (
-                <div>
-                  <span className="text-gray-600">Transmission:</span>{" "}
-                  <span className="font-medium">
-                    {result.extracted_fields.transmission}
-                  </span>
-                </div>
-              )}
-              {result.extracted_fields.drive_type && (
-                <div>
-                  <span className="text-gray-600">Drive Type:</span>{" "}
-                  <span className="font-medium">
-                    {result.extracted_fields.drive_type}
+                    {result.api_data.TrailerLength}
                   </span>
                 </div>
               )}
@@ -192,7 +170,7 @@ export function NhtsaResultCard({ result, index }: NhtsaResultCardProps) {
           <div className="border-t pt-3">
             <h4 className="text-sm font-semibold mb-2">Guide Matches:</h4>
             <div className="grid gap-2">
-              {result.guide_matches.slice(0, 3).map((match, matchIndex) => (
+              {result.guide_matches.map((match, matchIndex) => (
                 <div key={matchIndex} className="bg-gray-50 p-3 rounded-md">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
