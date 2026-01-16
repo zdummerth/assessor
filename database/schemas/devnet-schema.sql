@@ -250,8 +250,7 @@ CREATE OR REPLACE FUNCTION search_vehicle_unified(
     p_search_type text DEFAULT 'auto',
     p_guide_year integer DEFAULT 2026,
     p_match_limit integer DEFAULT 10,
-    p_similarity_threshold numeric DEFAULT 0.1,
-    p_year_tolerance integer DEFAULT 5
+    p_similarity_threshold numeric DEFAULT 0.0
 )
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -404,7 +403,7 @@ BEGIN
                             THEN 0.02 
                             ELSE 0 
                         END as field_bonus,
-                        (SELECT COUNT(*) FROM guide_vehicle_values gvv WHERE gvv.vehicle_id = gv.vehicle_id AND gvv.guide_year = p_guide_year AND v_model_year_int IS NOT NULL AND ABS(gvv.year::integer - v_model_year_int) <= p_year_tolerance) as value_count
+                        (SELECT COUNT(*) FROM guide_vehicle_values gvv WHERE gvv.vehicle_id = gv.vehicle_id AND gvv.guide_year = p_guide_year AND v_model_year_int IS NOT NULL) as value_count
                     FROM guide_vehicles gv
                 ),
                 ranked_matches AS (
@@ -420,7 +419,7 @@ BEGIN
                     jsonb_build_object(
                         'vehicle_id', rm.vehicle_id, 'type', rm.type, 'make', rm.make, 'model', rm.model, 'trim', rm.trim,
                         'similarity_score', ROUND(rm.final_score::numeric, 3),
-                        'values', (SELECT jsonb_agg(jsonb_build_object('guide_year', gvv.guide_year, 'year', gvv.year, 'value', gvv.value) ORDER BY gvv.year DESC) FROM guide_vehicle_values gvv WHERE gvv.vehicle_id = rm.vehicle_id AND gvv.guide_year = p_guide_year AND v_model_year_int IS NOT NULL AND ABS(gvv.year::integer - v_model_year_int) <= p_year_tolerance)
+                        'values', (SELECT jsonb_agg(jsonb_build_object('guide_year', gvv.guide_year, 'year', gvv.year, 'value', gvv.value) ORDER BY gvv.year DESC) FROM guide_vehicle_values gvv WHERE gvv.vehicle_id = rm.vehicle_id AND gvv.guide_year = p_guide_year AND v_model_year_int IS NOT NULL)
                     )
                 ) INTO v_guide_matches FROM ranked_matches rm;
                 

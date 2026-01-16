@@ -7,7 +7,9 @@ const CopyToClipboard = ({ text }: { text: string }) => {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Copied to clipboard");
+      toast.success(`Copied "${text}" to clipboard`, {
+        position: "bottom-center",
+      });
     } catch (err) {
       console.error("Failed to copy!", err);
       toast.error("Failed to copy");

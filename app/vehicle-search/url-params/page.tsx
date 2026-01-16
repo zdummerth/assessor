@@ -175,7 +175,6 @@ export default async function VehicleSearchUrlParamsPage({
           >
             <VehicleTable
               query={query}
-              currentPage={currentPage}
               guideYear={guideYear}
               matchLimit={matchLimit}
               searchType={searchType}

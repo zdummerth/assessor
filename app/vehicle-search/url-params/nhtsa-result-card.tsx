@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import CopyToClipboard from "@/components/copy-to-clipboard";
 
 interface NhtsaResultCardProps {
   result: {
@@ -67,7 +68,10 @@ export function NhtsaResultCard({ result, index }: NhtsaResultCardProps) {
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
           <div className="flex-1">
-            <h3 className="font-semibold text-lg font-mono">{result.vin}</h3>
+            <div className="flex gap-4 items-center">
+              <h3 className="font-semibold text-lg font-mono">{result.vin}</h3>
+              <CopyToClipboard text={result.vin} />
+            </div>
             <p className="text-sm text-gray-600 mt-1">
               {result.search_description}
             </p>
@@ -165,44 +169,7 @@ export function NhtsaResultCard({ result, index }: NhtsaResultCardProps) {
           </div>
         )}
 
-        {/* Guide Matches from NHTSA */}
-        {result.guide_matches && result.guide_matches.length > 0 && (
-          <div className="border-t pt-3">
-            <h4 className="text-sm font-semibold mb-2">Guide Matches:</h4>
-            <div className="grid gap-2">
-              {result.guide_matches.map((match, matchIndex) => (
-                <div key={matchIndex} className="bg-gray-50 p-3 rounded-md">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {match.make} {match.model}
-                        {match.trim && ` ${match.trim}`}
-                      </p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        {match.description}
-                      </p>
-                    </div>
-                    <Badge variant="secondary" className="ml-2">
-                      {(match.similarity_score * 100).toFixed(0)}% match
-                    </Badge>
-                  </div>
-                  {match.values && match.values.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {match.values.map((val, valIndex) => (
-                        <span
-                          key={valIndex}
-                          className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
-                        >
-                          {val.year}: ${val.value.toLocaleString()}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Guide matches are rendered by the parent component (vehicle table) */}
       </div>
 
       {/* Raw API Data Dialog */}
