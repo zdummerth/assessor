@@ -13,7 +13,7 @@ const NavClient = () => {
     // { href: "/ratios/stats", label: "Ratio Stats" },
     { href: "/tax-rates", label: "Tax Rates" },
     {
-      href: "/vehicle-search",
+      href: "/vehicle-search/url-params",
       label: "Vehicle Search",
     },
     {
