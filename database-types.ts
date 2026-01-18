@@ -7788,19 +7788,6 @@ export type Database = {
           image_id: number
         }[]
       }
-      decode_vin_nhtsa: {
-        Args: {
-          p_guide_year?: number
-          p_limit?: number
-          p_make_threshold?: number
-          p_match_threshold?: number
-          p_model_threshold?: number
-          p_trim_threshold?: number
-          p_vin: string
-          p_year_tolerance?: number
-        }
-        Returns: Json
-      }
       delete_field_review_images_and_files: {
         Args: { p_image_ids: number[] }
         Returns: {
@@ -7860,28 +7847,6 @@ export type Database = {
           subject_parcel_id: number
           total_finished_area: number
           total_unfinished_area: number
-        }[]
-      }
-      get_best_guide_value_for_account_vehicle: {
-        Args: { p_limit?: number }
-        Returns: {
-          account_current_value: number
-          account_description: string
-          account_model_year: number
-          account_number: string
-          account_vehicle_id: number
-          account_year: number
-          guide_description: string
-          guide_value: number
-          guide_year: number
-          is_default_value: boolean
-          make: string
-          model: string
-          similarity_score: number
-          trim: string
-          type: string
-          vehicle_id: string
-          year: number
         }[]
       }
       get_buildings_as_of_date_v2: {
@@ -9198,18 +9163,6 @@ export type Database = {
           updated_at: string
         }[]
       }
-      search_guide_by_description: {
-        Args: { p_guide_year?: number; p_limit?: number; p_search_text: string }
-        Returns: {
-          make: string
-          model: string
-          similarity_score: number
-          trim: string
-          type: string
-          values: Json
-          vehicle_id: string
-        }[]
-      }
       search_guide_by_description_fts: {
         Args: { p_limit?: number; p_search_text: string }
         Returns: {
@@ -9740,21 +9693,57 @@ export type Database = {
           p_search_text: string
           p_search_type?: string
           p_similarity_threshold?: number
-          p_year_tolerance?: number
         }
         Returns: Json
       }
-      search_vin_with_guide_matches: {
-        Args: { p_guide_year?: number; p_match_limit?: number; p_vin: string }
-        Returns: {
-          guide_results: Json
-          model_year: string
-          type: string
-          vin: string
-          vin_description: string
-          vin_id: number
-        }[]
-      }
+      search_vehicle_values:
+        | {
+            Args: {
+              p_guide_year?: number
+              p_make?: string
+              p_model?: string
+              p_model_year_max?: number
+              p_model_year_min?: number
+              p_trim?: string
+            }
+            Returns: {
+              description: string
+              guide_year: number
+              make: string
+              model: string
+              trim: string
+              type: string
+              value: number
+              vehicle_created_at: string
+              vehicle_id: string
+              vehicle_updated_at: string
+              year: number
+            }[]
+          }
+        | {
+            Args: {
+              p_guide_year?: number
+              p_make?: string
+              p_model?: string
+              p_model_year_max?: number
+              p_model_year_min?: number
+              p_trim?: string
+              p_type?: string
+            }
+            Returns: {
+              description: string
+              guide_year: number
+              make: string
+              model: string
+              trim: string
+              type: string
+              value: number
+              vehicle_created_at: string
+              vehicle_id: string
+              vehicle_updated_at: string
+              year: number
+            }[]
+          }
       set_review_data_requirements: {
         Args: {
           p_completion_criteria?: Json

@@ -497,6 +497,64 @@ END;
 $$;
 
 -- ============================================================
+-- VEHICLE VALUE SEARCH FUNCTION
+-- ============================================================
+
+-- Search vehicle values with filters for make, model, trim, years
+DROP FUNCTION IF EXISTS search_vehicle_values(text, text, text, integer, integer);
+CREATE OR REPLACE FUNCTION search_vehicle_values(
+    p_type text DEFAULT NULL,
+    p_make text DEFAULT NULL,
+    p_model text DEFAULT NULL,
+    p_trim text DEFAULT NULL,
+    p_model_year_min integer DEFAULT NULL,
+    p_model_year_max integer DEFAULT NULL,
+    p_guide_year integer DEFAULT NULL
+)
+RETURNS TABLE (
+    vehicle_id text,
+    type text,
+    make text,
+    model text,
+    "trim" text,
+    description text,
+    guide_year integer,
+    year integer,
+    value numeric,
+    vehicle_created_at timestamptz,
+    vehicle_updated_at timestamptz
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gv.vehicle_id,
+        gv.type,
+        gv.make,
+        gv.model,
+        gv.trim,
+        gv.description,
+        gvv.guide_year,
+        gvv.year,
+        gvv.value,
+        gv.created_at as vehicle_created_at,
+        gv.updated_at as vehicle_updated_at
+    FROM public.guide_vehicles gv
+    INNER JOIN public.guide_vehicle_values gvv ON gv.vehicle_id = gvv.vehicle_id
+    WHERE 
+        (p_make IS NULL OR gv.make ILIKE '%' || p_make || '%')
+        AND (p_type IS NULL OR gv.type ILIKE '%' || p_type || '%')  
+        AND (p_model IS NULL OR gv.model ILIKE '%' || p_model || '%')
+        AND (p_trim IS NULL OR gv.trim ILIKE '%' || p_trim || '%')
+        AND (p_model_year_min IS NULL OR gvv.year >= p_model_year_min)
+        AND (p_model_year_max IS NULL OR gvv.year <= p_model_year_max)
+        AND (p_guide_year IS NULL OR gvv.guide_year = p_guide_year)
+    ORDER BY gv.make, gv.model, gvv.guide_year DESC, gvv.year DESC;
+END;
+$$;
+
+-- ============================================================
 -- DEVNET REVIEW STATUSES
 -- ============================================================
 
@@ -2230,6 +2288,34 @@ ON CONFLICT (review_id, status_id, employee_id) DO NOTHING;
 -- ============================================================
 
 /*
+-- Vehicle value search examples
+
+-- Search for all Honda Civic values
+SELECT * FROM search_vehicle_values(
+    p_make := 'Honda',
+    p_model := 'Civic'
+);
+
+-- Search for specific year and guide
+SELECT * FROM search_vehicle_values(
+    p_make := 'Toyota',
+    p_model := 'Camry',
+    p_model_year := 2020,
+    p_guide_year := 2024
+);
+
+-- Search by trim
+SELECT * FROM search_vehicle_values(
+    p_make := 'Ford',
+    p_model := 'F-150',
+    p_trim := 'XLT'
+);
+
+-- Search all vehicles for a specific guide year
+SELECT * FROM search_vehicle_values(
+    p_guide_year := 2024
+);
+
 -- Create a new sale review with data requirements
 SELECT create_devnet_review(
     'sale_review',
