@@ -518,9 +518,7 @@ RETURNS TABLE (
     model text,
     "trim" text,
     description text,
-    guide_year integer,
-    year integer,
-    value numeric,
+    values jsonb,
     vehicle_created_at timestamptz,
     vehicle_updated_at timestamptz
 )
@@ -535,9 +533,13 @@ BEGIN
         gv.model,
         gv.trim,
         gv.description,
-        gvv.guide_year,
-        gvv.year,
-        gvv.value,
+        jsonb_agg(
+            jsonb_build_object(
+                'guide_year', gvv.guide_year,
+                'year', gvv.year,
+                'value', gvv.value
+            ) ORDER BY gvv.guide_year DESC, gvv.year DESC
+        ) as values,
         gv.created_at as vehicle_created_at,
         gv.updated_at as vehicle_updated_at
     FROM public.guide_vehicles gv
@@ -550,7 +552,16 @@ BEGIN
         AND (p_model_year_min IS NULL OR gvv.year >= p_model_year_min)
         AND (p_model_year_max IS NULL OR gvv.year <= p_model_year_max)
         AND (p_guide_year IS NULL OR gvv.guide_year = p_guide_year)
-    ORDER BY gv.make, gv.model, gvv.guide_year DESC, gvv.year DESC;
+    GROUP BY 
+        gv.vehicle_id,
+        gv.type,
+        gv.make,
+        gv.model,
+        gv.trim,
+        gv.description,
+        gv.created_at,
+        gv.updated_at
+    ORDER BY gv.make, gv.model;
 END;
 $$;
 

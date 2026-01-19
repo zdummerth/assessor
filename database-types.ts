@@ -9737,16 +9737,14 @@ export type Database = {
         }
         Returns: {
           description: string
-          guide_year: number
           make: string
           model: string
           trim: string
           type: string
-          value: number
+          values: Json
           vehicle_created_at: string
           vehicle_id: string
           vehicle_updated_at: string
-          year: number
         }[]
       }
       set_review_data_requirements: {
