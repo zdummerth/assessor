@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import useSWR from "swr";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -43,8 +43,10 @@ type ComboboxProps = {
   placeholder?: string;
   searchPlaceholder?: string;
   emptyMessage?: string;
+  loadingMessage?: string;
   className?: string;
   disabled?: boolean;
+  onOptionNotFound?: (value: string) => void;
 };
 
 export function Combobox({
@@ -57,8 +59,10 @@ export function Combobox({
   placeholder = "Select option…",
   searchPlaceholder = "Search…",
   emptyMessage = "No results found.",
+  loadingMessage = "Loading…",
   className,
   disabled = false,
+  onOptionNotFound,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -103,6 +107,19 @@ export function Combobox({
     }));
   }, [staticOptions, data, transformData]);
 
+  // Check if current value exists in options
+  React.useEffect(() => {
+    if (!onOptionNotFound || !value || isLoading) return;
+
+    const valueExists = options.some(
+      (option) => String(option.value) === String(value)
+    );
+
+    if (!valueExists && options.length > 0) {
+      onOptionNotFound(value);
+    }
+  }, [value, options, isLoading, onOptionNotFound]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -113,6 +130,7 @@ export function Combobox({
           disabled={disabled || isLoading}
           className={cn("w-full justify-between", className)}
         >
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {value !== "" || value
             ? options.find((option) => String(option.value) === String(value))
                 ?.label
@@ -125,8 +143,9 @@ export function Combobox({
           <CommandInput placeholder={searchPlaceholder} className="h-9" />
           <CommandList>
             {isLoading ? (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                Loading…
+              <div className="py-6 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {loadingMessage}
               </div>
             ) : error ? (
               <div className="py-6 text-center text-sm text-destructive">

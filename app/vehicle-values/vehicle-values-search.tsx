@@ -5,9 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 
+const GUIDE_YEAR_OPTIONS = [
+  {
+    value: "2024",
+    label: "2024",
+  },
+  {
+    value: "2025",
+    label: "2025",
+  },
+  {
+    value: "2026",
+    label: "2026",
+  },
+];
+
 export default function VehicleValuesSearch() {
   const searchParams = useSearchParams();
-  const { push } = useRouter();
+  const { push, replace } = useRouter();
   const pathname = usePathname();
 
   // Get current guide year from URL or current year as default
@@ -38,84 +53,94 @@ export default function VehicleValuesSearch() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Guide Year</Label>
           <Combobox
-            endpoint="/api/guide-years"
-            transformData={(data) => {
-              return data.map((g: any) => ({
-                value: g.guide_year,
-                label: g.guide_year,
-              }));
-            }}
+            options={GUIDE_YEAR_OPTIONS}
             value={guideYear}
             onChange={(value) => handleParamChange("guide_year", value)}
             placeholder="Select guide year…"
           />
         </div>
+
+        {guideYear && (
+          <div className="space-y-2">
+            <Label>Type</Label>
+            <Combobox
+              endpoint="/api/types-by-guide-year"
+              params={{ guide_year: guideYear }}
+              transformData={(data) => {
+                return data.map((g: any) => ({
+                  value: g.type,
+                  label: g.type,
+                }));
+              }}
+              value={vehicleType}
+              onChange={(value) => handleParamChange("type", value)}
+              onOptionNotFound={() => {
+                const params = new URLSearchParams(searchParams);
+                params.delete("type");
+                replace(`${pathname}?${params.toString()}`);
+              }}
+              placeholder="Select vehicle type…"
+            />
+          </div>
+        )}
+
+        {guideYear && vehicleType && (
+          <div className="space-y-2">
+            <Label>Make</Label>
+            <Combobox
+              endpoint="/api/makes-by-guide-year-type"
+              params={{ guide_year: guideYear, type: vehicleType }}
+              transformData={(data) => {
+                return data.map((g: any) => ({
+                  value: g.make,
+                  label: g.make,
+                }));
+              }}
+              value={vehicleMake}
+              onChange={(value) => handleParamChange("make", value)}
+              onOptionNotFound={() => {
+                const params = new URLSearchParams(searchParams);
+                params.delete("make");
+                params.delete("model");
+                replace(`${pathname}?${params.toString()}`);
+              }}
+              placeholder="Select vehicle make…"
+            />
+          </div>
+        )}
+
+        {guideYear && vehicleType && vehicleMake && (
+          <div className="space-y-2">
+            <Label>Model</Label>
+            <Combobox
+              endpoint="/api/models-by-guide-year-type-make"
+              params={{
+                guide_year: guideYear,
+                type: vehicleType,
+                make: vehicleMake,
+              }}
+              transformData={(data) => {
+                return data.map((g: any) => ({
+                  value: g.model,
+                  label: g.model,
+                }));
+              }}
+              value={vehicleModel}
+              onChange={(value) => handleParamChange("model", value)}
+              onOptionNotFound={() => {
+                const params = new URLSearchParams(searchParams);
+                params.delete("model");
+                replace(`${pathname}?${params.toString()}`);
+              }}
+              placeholder="Select vehicle model…"
+            />
+          </div>
+        )}
       </div>
-
-      {guideYear && (
-        <div className="space-y-2">
-          <Label>Type</Label>
-          <Combobox
-            endpoint="/api/types-by-guide-year"
-            params={{ guide_year: guideYear }}
-            transformData={(data) => {
-              return data.map((g: any) => ({
-                value: g.type,
-                label: g.type,
-              }));
-            }}
-            value={vehicleType}
-            onChange={(value) => handleParamChange("type", value)}
-            placeholder="Select vehicle type…"
-          />
-        </div>
-      )}
-
-      {guideYear && vehicleType && (
-        <div className="space-y-2">
-          <Label>Make</Label>
-          <Combobox
-            endpoint="/api/makes-by-guide-year-type"
-            params={{ guide_year: guideYear, type: vehicleType }}
-            transformData={(data) => {
-              return data.map((g: any) => ({
-                value: g.make,
-                label: g.make,
-              }));
-            }}
-            value={vehicleMake}
-            onChange={(value) => handleParamChange("make", value)}
-            placeholder="Select vehicle make…"
-          />
-        </div>
-      )}
-
-      {guideYear && vehicleType && vehicleMake && (
-        <div className="space-y-2">
-          <Label>Model</Label>
-          <Combobox
-            endpoint="/api/models-by-guide-year-type-make"
-            params={{
-              guide_year: guideYear,
-              type: vehicleType,
-              make: vehicleMake,
-            }}
-            transformData={(data) => {
-              return data.map((g: any) => ({
-                value: g.model,
-                label: g.model,
-              }));
-            }}
-            value={vehicleModel}
-            onChange={(value) => handleParamChange("model", value)}
-            placeholder="Select vehicle model…"
-          />
-        </div>
-      )}
 
       <div className="flex gap-2 pt-2">
         <Button type="button" variant="outline" onClick={handleClear}>
