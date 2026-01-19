@@ -14,7 +14,8 @@ import {
 import { Filter, X } from "lucide-react";
 import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
-import { ComboboxLookup } from "@/components/ui/combobox-lookup";
+import { Combobox } from "@/components/ui/combobox";
+import { data } from "autoprefixer";
 
 interface FormData {
   can_approve?: boolean;
@@ -200,7 +201,7 @@ export function DevnetEmployeesFilters() {
           </div>
           <div>
             <Label htmlFor="user_id">User Id</Label>
-            <ComboboxLookup
+            <Combobox
               endpoint="/user/api"
               value={formData.user_id?.toString() || ""}
               onChange={(value) =>
@@ -209,9 +210,13 @@ export function DevnetEmployeesFilters() {
                   user_id: value ? Number(value) : undefined,
                 }))
               }
+              transformData={(data) =>
+                data.map((user: any) => ({
+                  value: user.id,
+                  label: user.name,
+                }))
+              }
               placeholder="Select user id..."
-              valueKey="id"
-              labelKey="name"
               // optional
             />
           </div>

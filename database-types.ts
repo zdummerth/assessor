@@ -7902,6 +7902,35 @@ export type Database = {
           status_slug: string
         }[]
       }
+      get_distinct_guide_years: {
+        Args: never
+        Returns: {
+          guide_year: number
+          vehicle_count: number
+        }[]
+      }
+      get_distinct_makes_by_guide_year_type: {
+        Args: { p_guide_year: number; p_type?: string }
+        Returns: {
+          make: string
+          vehicle_count: number
+        }[]
+      }
+      get_distinct_models_by_guide_year_type_make: {
+        Args: { p_guide_year: number; p_make?: string; p_type?: string }
+        Returns: {
+          has_trim: boolean
+          model: string
+          vehicle_count: number
+        }[]
+      }
+      get_distinct_types_by_guide_year: {
+        Args: { p_guide_year: number }
+        Returns: {
+          type: string
+          vehicle_count: number
+        }[]
+      }
       get_employee_permissions_v2: {
         Args: { p_user_id: string }
         Returns: {
@@ -9696,54 +9725,30 @@ export type Database = {
         }
         Returns: Json
       }
-      search_vehicle_values:
-        | {
-            Args: {
-              p_guide_year?: number
-              p_make?: string
-              p_model?: string
-              p_model_year_max?: number
-              p_model_year_min?: number
-              p_trim?: string
-            }
-            Returns: {
-              description: string
-              guide_year: number
-              make: string
-              model: string
-              trim: string
-              type: string
-              value: number
-              vehicle_created_at: string
-              vehicle_id: string
-              vehicle_updated_at: string
-              year: number
-            }[]
-          }
-        | {
-            Args: {
-              p_guide_year?: number
-              p_make?: string
-              p_model?: string
-              p_model_year_max?: number
-              p_model_year_min?: number
-              p_trim?: string
-              p_type?: string
-            }
-            Returns: {
-              description: string
-              guide_year: number
-              make: string
-              model: string
-              trim: string
-              type: string
-              value: number
-              vehicle_created_at: string
-              vehicle_id: string
-              vehicle_updated_at: string
-              year: number
-            }[]
-          }
+      search_vehicle_values: {
+        Args: {
+          p_guide_year?: number
+          p_make?: string
+          p_model?: string
+          p_model_year_max?: number
+          p_model_year_min?: number
+          p_trim?: string
+          p_type?: string
+        }
+        Returns: {
+          description: string
+          guide_year: number
+          make: string
+          model: string
+          trim: string
+          type: string
+          value: number
+          vehicle_created_at: string
+          vehicle_id: string
+          vehicle_updated_at: string
+          year: number
+        }[]
+      }
       set_review_data_requirements: {
         Args: {
           p_completion_criteria?: Json

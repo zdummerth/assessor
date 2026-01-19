@@ -152,7 +152,7 @@ export function ComboboxMultiLookup({
 
     // Use custom transformer if provided
     if (transformData) {
-      return transformData(data.data);
+      return transformData(data);
     }
 
     // Handle array of data

@@ -555,6 +555,177 @@ END;
 $$;
 
 -- ============================================================
+-- VEHICLE FILTER OPTIONS FUNCTIONS
+-- ============================================================
+
+-- Get distinct vehicle types
+DROP FUNCTION IF EXISTS get_distinct_vehicle_types();
+CREATE OR REPLACE FUNCTION get_distinct_vehicle_types()
+RETURNS TABLE (
+    type text,
+    vehicle_count bigint
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gv.type,
+        COUNT(DISTINCT gv.vehicle_id) as vehicle_count
+    FROM public.guide_vehicles gv
+    WHERE gv.type IS NOT NULL
+    GROUP BY gv.type
+    ORDER BY gv.type;
+END;
+$$;
+
+-- Get distinct vehicle makes
+DROP FUNCTION IF EXISTS get_distinct_vehicle_makes();
+CREATE OR REPLACE FUNCTION get_distinct_vehicle_makes()
+RETURNS TABLE (
+    make text,
+    vehicle_count bigint
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gv.make,
+        COUNT(DISTINCT gv.vehicle_id) as vehicle_count
+    FROM public.guide_vehicles gv
+    GROUP BY gv.make
+    ORDER BY gv.make;
+END;
+$$;
+
+-- Get distinct models by make
+DROP FUNCTION IF EXISTS get_distinct_models_by_make(text);
+CREATE OR REPLACE FUNCTION get_distinct_models_by_make(
+    p_make text
+)
+RETURNS TABLE (
+    model text,
+    vehicle_count bigint,
+    has_trim boolean
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gv.model,
+        COUNT(DISTINCT gv.vehicle_id) as vehicle_count,
+        bool_or(gv.trim IS NOT NULL AND gv.trim != '') as has_trim
+    FROM public.guide_vehicles gv
+    WHERE gv.make = p_make
+    GROUP BY gv.model
+    ORDER BY gv.model;
+END;
+$$;
+
+-- Get distinct guide years
+DROP FUNCTION IF EXISTS get_distinct_guide_years();
+CREATE OR REPLACE FUNCTION get_distinct_guide_years()
+RETURNS TABLE (
+    guide_year integer,
+    vehicle_count bigint
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gvv.guide_year,
+        COUNT(DISTINCT gv.vehicle_id) as vehicle_count
+    FROM guide_vehicles gv
+    JOIN guide_vehicle_values gvv ON gv.vehicle_id = gvv.vehicle_id
+    GROUP BY gvv.guide_year
+    ORDER BY gvv.guide_year DESC;
+END;
+$$;
+
+-- Get distinct types by guide year
+DROP FUNCTION IF EXISTS get_distinct_types_by_guide_year(integer);
+CREATE OR REPLACE FUNCTION get_distinct_types_by_guide_year(
+    p_guide_year integer
+)
+RETURNS TABLE (
+    type text,
+    vehicle_count bigint
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gv.type,
+        COUNT(DISTINCT gv.vehicle_id) as vehicle_count
+    FROM guide_vehicles gv
+    JOIN guide_vehicle_values gvv ON gv.vehicle_id = gvv.vehicle_id
+    WHERE gvv.guide_year = p_guide_year
+    GROUP BY gv.type
+    ORDER BY gv.type;
+END;
+$$;
+
+-- Get distinct makes by guide year and type
+DROP FUNCTION IF EXISTS get_distinct_makes_by_guide_year_type(integer, text);
+CREATE OR REPLACE FUNCTION get_distinct_makes_by_guide_year_type(
+    p_guide_year integer,
+    p_type text DEFAULT NULL
+)
+RETURNS TABLE (
+    make text,
+    vehicle_count bigint
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gv.make,
+        COUNT(DISTINCT gv.vehicle_id) as vehicle_count
+    FROM guide_vehicles gv
+    JOIN guide_vehicle_values gvv ON gv.vehicle_id = gvv.vehicle_id
+    WHERE gvv.guide_year = p_guide_year
+        AND (p_type IS NULL OR gv.type = p_type)
+    GROUP BY gv.make
+    ORDER BY gv.make;
+END;
+$$;
+
+-- Get distinct models by guide year, type, and make
+DROP FUNCTION IF EXISTS get_distinct_models_by_guide_year_type_make(integer, text, text);
+CREATE OR REPLACE FUNCTION get_distinct_models_by_guide_year_type_make(
+    p_guide_year integer,
+    p_type text DEFAULT NULL,
+    p_make text DEFAULT NULL
+)
+RETURNS TABLE (
+    model text,
+    vehicle_count bigint,
+    has_trim boolean
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gv.model,
+        COUNT(DISTINCT gv.vehicle_id) as vehicle_count,
+        bool_or(gv.trim IS NOT NULL AND gv.trim != '') as has_trim
+    FROM guide_vehicles gv
+    JOIN guide_vehicle_values gvv ON gv.vehicle_id = gvv.vehicle_id
+    WHERE gvv.guide_year = p_guide_year
+        AND (p_type IS NULL OR gv.type = p_type)
+        AND (p_make IS NULL OR gv.make = p_make)
+    GROUP BY gv.model
+    ORDER BY gv.model;
+END;
+$$;
+
+-- ============================================================
 -- DEVNET REVIEW STATUSES
 -- ============================================================
 
@@ -2315,6 +2486,21 @@ SELECT * FROM search_vehicle_values(
 SELECT * FROM search_vehicle_values(
     p_guide_year := 2024
 );
+
+-- Vehicle filter options examples
+
+-- Get all distinct vehicle types
+SELECT * FROM get_distinct_vehicle_types();
+
+-- Get all distinct vehicle makes
+SELECT * FROM get_distinct_vehicle_makes();
+
+-- Get distinct models for a specific make
+SELECT * FROM get_distinct_models_by_make('Honda');
+
+-- Get models for Toyota with counts
+SELECT * FROM get_distinct_models_by_make('Toyota')
+ORDER BY vehicle_count DESC;
 
 -- Create a new sale review with data requirements
 SELECT create_devnet_review(

@@ -24,6 +24,7 @@ export default async function VehicleValuesPage({
   searchParams,
 }: {
   searchParams?: Promise<{
+    type?: string;
     make?: string;
     model?: string;
     trim?: string;
@@ -33,6 +34,7 @@ export default async function VehicleValuesPage({
   }>;
 }) {
   const params = await searchParams;
+  const type = params?.type || "";
   const make = params?.make || "";
   const model = params?.model || "";
   const trim = params?.trim || "";
@@ -184,10 +186,11 @@ export default async function VehicleValuesPage({
       </Card>
 
       <Suspense
-        key={`${make}-${model}-${trim}-${modelYear}-${guideYear}-${currentPage}`}
+        key={`${type}-${make}-${model}-${trim}-${modelYear}-${guideYear}-${currentPage}`}
         fallback={<TableSkeleton />}
       >
         <VehicleValuesTable
+          type={type}
           make={make}
           model={model}
           trim={trim}

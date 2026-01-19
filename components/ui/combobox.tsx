@@ -1,137 +1,170 @@
 "use client";
 
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-} from "@headlessui/react";
-import { useState } from "react";
-import { Search as SearchIcon } from "lucide-react";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import * as React from "react";
+import useSWR from "swr";
+import { Check, ChevronsUpDown } from "lucide-react";
 
-type Value = {
-  id: string;
-  name: string;
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
 };
 
-export default function ComboboxComponent({
-  values,
-  urlParam,
-  immediate,
-}: {
-  values: Value[];
-  urlParam: string;
-  immediate?: boolean;
-}) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
-  const [query, setQuery] = useState("");
+export type ComboboxOption = {
+  value: string;
+  label: string;
+};
 
-  function handleFilterChange(values: Value[]) {
-    console.log({ values });
-    const params = new URLSearchParams(searchParams);
-    const ids = values.map((value) => value.id);
+type ComboboxProps = {
+  // Options: provide either static options OR endpoint for fetching
+  options?: ComboboxOption[];
+  endpoint?: string;
+  params?: Record<string, string | number | boolean | undefined>;
+  transformData?: (data: any) => ComboboxOption[];
 
-    if (values.length > 0) {
-      params.set(urlParam, ids.join("+")); // Join multiple values with a "+"
-    } else {
-      params.delete(urlParam); // Remove the parameter if no value is selected
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  searchPlaceholder?: string;
+  emptyMessage?: string;
+  className?: string;
+  disabled?: boolean;
+};
+
+export function Combobox({
+  options: staticOptions,
+  endpoint,
+  params = {},
+  transformData,
+  value,
+  onChange,
+  placeholder = "Select option…",
+  searchPlaceholder = "Search…",
+  emptyMessage = "No results found.",
+  className,
+  disabled = false,
+}: ComboboxProps) {
+  const [open, setOpen] = React.useState(false);
+
+  // Build URL if endpoint is provided
+  const url = React.useMemo(() => {
+    if (!endpoint) return null;
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== "") {
+        queryParams.append(key, String(val));
+      }
+    });
+    const queryString = queryParams.toString();
+    return queryString ? `${endpoint}?${queryString}` : endpoint;
+  }, [endpoint, params]);
+
+  // Fetch data with SWR (only if endpoint is provided)
+  const { data, error, isLoading } = useSWR(
+    disabled || !endpoint ? null : url,
+    fetcher,
+    { dedupingInterval: 60000 }
+  );
+
+  // Determine options from static or fetched data
+  const options: ComboboxOption[] = React.useMemo(() => {
+    // Use static options if provided
+    if (staticOptions) return staticOptions;
+
+    // Otherwise use fetched data
+    if (!data) return [];
+
+    if (transformData) {
+      return transformData(data.data || data);
     }
 
-    setQuery("");
-    params.delete("page"); // Reset the page number when a filter is changed
-    replace(`${pathname}?${params.toString()}`);
-  }
-
-  function getSelectedValues(name: string): Value[] {
-    const param = searchParams.get(name);
-    const ids = param ? param.split("+") : [];
-    const selectedValues = values.filter((value) =>
-      ids.includes(value.id.toString())
-    );
-    return selectedValues;
-  }
-
-  const selectedValues = getSelectedValues(urlParam);
-
-  const clearFilters = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete(urlParam);
-    replace(`${pathname}?${params.toString()}`);
-  };
-
-  const notSelectedValues = values.filter((value) => {
-    const ids = selectedValues.map((value) => value.id);
-    return !ids.includes(value.id);
-  });
-
-  const filteredValues =
-    query === ""
-      ? notSelectedValues.slice(0, 8)
-      : notSelectedValues
-          .filter((value) => {
-            return value.name
-              .toString()
-              .toLowerCase()
-              .includes(query.toLowerCase());
-          })
-          .slice(0, 8);
+    const dataArray = Array.isArray(data)
+      ? data
+      : data.data || data.items || [];
+    return dataArray.map((item: any) => ({
+      value: String(item.value || item.id),
+      label: String(item.label || item.name),
+    }));
+  }, [staticOptions, data, transformData]);
 
   return (
-    <Combobox
-      multiple
-      immediate={immediate}
-      value={selectedValues}
-      onChange={handleFilterChange}
-      onClose={() => setQuery("")}
-    >
-      <div className="flex items-center relative">
-        <SearchIcon size="14" strokeWidth={2} className="absolute left-2" />
-        <ComboboxInput
-          // aria-label="Assignees"
-          onChange={(event) => setQuery(event.target.value)}
-          displayValue={(value: Value) => value.name}
-          className="p-[1px] pl-7 rounded-md border border-foreground w-full text-inherit"
-        />
-      </div>
-      {selectedValues.length > 0 && (
-        <ul className="flex flex-wrap gap-2 mt-4 w-[var(--input-width)] overflow-hidden">
-          {selectedValues.map((value: Value) => (
-            <li
-              className="rounded-full bg-blue-400 py-[1px] px-2 text-sm truncate hover:overflow-visible hover:whitespace-normal"
-              key={value.id}
-            >
-              <button
-                onClick={() => {
-                  handleFilterChange(
-                    selectedValues.filter((v) => v.id !== value.id)
-                  );
-                }}
-              >
-                {value.name}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <ComboboxOptions
-        anchor="top"
-        transition
-        className="origin-bottom border transition duration-200 ease-out empty:invisible data-[closed]:scale-95 data-[closed]:opacity-0 border empty:invisible w-[var(--input-width)] max-h-[250px] bg-accent text-foreground relative z-20"
-      >
-        {filteredValues.map((value) => (
-          <ComboboxOption
-            key={value.id}
-            value={value}
-            className="data-[focus]:bg-blue-500 border-b border-foreground py-2 px-2 text-sm"
-          >
-            {value.name}
-          </ComboboxOption>
-        ))}
-      </ComboboxOptions>
-      {/* <button onClick={clearFilters}>Clear Filters</button> */}
-    </Combobox>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled || isLoading}
+          className={cn("w-full justify-between", className)}
+        >
+          {value !== "" || value
+            ? options.find((option) => String(option.value) === String(value))
+                ?.label
+            : placeholder}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+        <Command>
+          <CommandInput placeholder={searchPlaceholder} className="h-9" />
+          <CommandList>
+            {isLoading ? (
+              <div className="py-6 text-center text-sm text-muted-foreground">
+                Loading…
+              </div>
+            ) : error ? (
+              <div className="py-6 text-center text-sm text-destructive">
+                Failed to load options
+              </div>
+            ) : (
+              <>
+                <CommandEmpty>{emptyMessage}</CommandEmpty>
+                <CommandGroup>
+                  {options.map((option, index) => {
+                    const isSelected = String(value) === String(option.value);
+                    return (
+                      <CommandItem
+                        key={`${option.value}-${index}`}
+                        value={option.value}
+                        onSelect={(selectedValue) => {
+                          onChange(
+                            selectedValue === value ? "" : selectedValue
+                          );
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            isSelected ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {option.label}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

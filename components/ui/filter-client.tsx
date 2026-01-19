@@ -1,5 +1,5 @@
 "use client";
-import ComboboxComponent from "@/components/ui/combobox";
+import { Combobox as ComboboxComponent } from "@/components/ui/combobox";
 import {
   Disclosure,
   DisclosureButton,
@@ -13,29 +13,6 @@ type Value = {
   id: string;
   name: string;
 };
-
-export function NonCodedFilter({
-  urlParam,
-  label,
-  values,
-  immediate,
-}: {
-  urlParam: string;
-  label: string;
-  values: Value[];
-  immediate?: boolean;
-}) {
-  return (
-    <>
-      <h4 className="mb-4">{label}</h4>
-      <ComboboxComponent
-        values={values}
-        urlParam={urlParam}
-        immediate={immediate}
-      />
-    </>
-  );
-}
 
 export function ToggleFilter({
   urlParam,

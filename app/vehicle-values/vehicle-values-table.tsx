@@ -5,6 +5,7 @@ import CopyToClipboard from "@/components/copy-to-clipboard";
 import VehicleValuesPagination from "./vehicle-values-pagination";
 
 interface VehicleValuesTableProps {
+  type?: string;
   make: string;
   model: string;
   trim: string;
@@ -29,6 +30,7 @@ interface VehicleValueResult {
 }
 
 export default async function VehicleValuesTable({
+  type,
   make,
   model,
   trim,
@@ -45,6 +47,7 @@ export default async function VehicleValuesTable({
 
   // Build the RPC parameters
   const params: {
+    p_type?: string;
     p_make?: string;
     p_model?: string;
     p_trim?: string;
@@ -53,6 +56,7 @@ export default async function VehicleValuesTable({
     p_guide_year?: number;
   } = {};
 
+  if (type) params.p_type = type;
   if (make) params.p_make = make;
   if (model) params.p_model = model;
   if (trim) params.p_trim = trim;

@@ -15,7 +15,7 @@ import {
 import { Filter, X } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
-import { ComboboxLookup } from "@/components/ui/combobox-lookup";
+import { Combobox } from "@/components/ui/combobox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { ComboboxMultiLookup } from "@/components/ui/combobox-multi-lookup";
 
@@ -272,7 +272,7 @@ export function ParametersForm() {
             <Label htmlFor="p_assigned_to_devnet_employees_id">
               P Assigned To Devnet Employees Id
             </Label>
-            <ComboboxLookup
+            <Combobox
               endpoint="/devnet-employees/api"
               value={
                 formData.p_assigned_to_devnet_employees_id?.toString() || ""
