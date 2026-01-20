@@ -84,22 +84,18 @@ export default function VehicleSearch({
         (searchParams.get("search_type")?.toString() || defaultSearchType));
 
   const handleSearch = useDebouncedCallback((term: string) => {
-    if (mode === "debounce") {
-      const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams);
 
-      // Reset to page 1 when search changes
-      params.set("page", "1");
+    // Reset to page 1 when search changes
+    params.set("page", "1");
 
-      if (term) {
-        params.set("query", term);
-      } else {
-        params.delete("query");
-      }
-
-      push(`${pathname}?${params.toString()}`);
+    if (term) {
+      params.set("query", term);
     } else {
-      setLocalQuery(term);
+      params.delete("query");
     }
+
+    push(`${pathname}?${params.toString()}`);
   }, delay);
 
   const handleGuideYearChange = (year: string) => {
@@ -168,7 +164,11 @@ export default function VehicleSearch({
             className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
             placeholder={placeholder}
             onChange={(e) => {
-              handleSearch(e.target.value);
+              if (mode === "apply") {
+                setLocalQuery(e.target.value);
+              } else {
+                handleSearch(e.target.value);
+              }
             }}
             value={mode === "apply" ? localQuery : undefined}
             defaultValue={
