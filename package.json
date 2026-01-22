@@ -4,7 +4,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "gen:types": "npx supabase gen types typescript --project-id ptaplfitlcnebqhoovrv --schema public > database-types.ts"
+    "gen:types": "npx supabase gen types typescript --project-id ptaplfitlcnebqhoovrv --schema public > database-types.ts",
+    "gen:route": "node scripts/generate-api-route.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.1",
