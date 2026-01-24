@@ -1,6 +1,6 @@
 # Copilot Instructions — Abstracts Pattern (Assessor)
 
-**Use this playbook for all new features. Keep it in sync with the abstracts implementation. Reference skills in `.claude/skills` (vercel-react-best-practices, web-interface-guidelines).**
+**Use this playbook for all new features. Keep it in sync with the abstracts implementation. Reference skills in `.claude/skills` (vercel-react-best-practices, web-interface-guidelines) and, when needed, the docs in `.github` (shadcn-ui-documentation.md, supabase-cli-documentation.md, postgres-documentation.md, base-ui-combobox.md, combobox-docs.md, nextjs-documentation.md).**
 
 ## Workflow (DB → Types → UI)
 
