@@ -37,21 +37,6 @@ export async function getDeedAbstracts({
   };
 }
 
-export async function getDeedAbstractsCount(): Promise<number> {
-  const supabase = await createClient();
-
-  const { count, error } = await supabase
-    .from("deed_abstracts")
-    .select("*", { count: "exact", head: true });
-
-  if (error) {
-    console.error("Error fetching deed abstracts count:", error);
-    return 0;
-  }
-
-  return count || 0;
-}
-
 export async function getDeedAbstract(
   id: number,
 ): Promise<DeedAbstract | null> {
