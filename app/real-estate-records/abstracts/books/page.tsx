@@ -1,7 +1,7 @@
 import { getBooks } from "@/components/abstracts/actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Printer, FolderOpen } from "lucide-react";
+import { Printer, FolderOpen } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -43,10 +43,7 @@ export default async function BooksPage() {
           </p>
         </div>
         <Link href="/real-estate-records/abstracts/books/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Print New Book
-          </Button>
+          <Button>Print New Book</Button>
         </Link>
       </div>
 
@@ -60,7 +57,6 @@ export default async function BooksPage() {
               <p className="text-gray-500">No books created yet</p>
               <Link href="/real-estate-records/abstracts/books/new">
                 <Button className="mt-4" variant="outline">
-                  <Plus className="mr-2 h-4 w-4" />
                   Print Your First Book
                 </Button>
               </Link>

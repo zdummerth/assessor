@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import BookPrintWizard from "@/components/abstracts/ui/book-print-wizard";
+import { BookAbstractsWizard } from "@/components/abstracts/ui/book-abstracts-wizard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -28,7 +28,7 @@ export default function NewBookPage() {
         </p>
       </div>
 
-      <BookPrintWizard onComplete={handleComplete} />
+      <BookAbstractsWizard onComplete={handleComplete} />
     </div>
   );
 }

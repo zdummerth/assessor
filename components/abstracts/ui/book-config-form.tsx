@@ -52,7 +52,13 @@ export default function BookConfigForm({
         <CardContent className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-600">Total Abstracts:</span>
-            <span className="font-medium">{selectedCount}</span>
+            <span className="font-medium">
+              {selectedCount === -1 ? (
+                <span className="text-green-600">All unassigned abstracts</span>
+              ) : (
+                selectedCount
+              )}
+            </span>
           </div>
         </CardContent>
       </Card>

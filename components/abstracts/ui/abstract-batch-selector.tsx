@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { DeedAbstract } from "../types";
 import { getPrintableAbstracts } from "../actions";
 import { Badge } from "@/components/ui/badge";
 
@@ -43,43 +43,66 @@ const formatDate = (dateString: string | null) => {
 export default function AbstractBatchSelector({
   onNext,
 }: AbstractBatchSelectorProps) {
-  const [abstracts, setAbstracts] = useState<DeedAbstract[]>([]);
   // Lazy state initialization
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
-  const [loading, setLoading] = useState(true);
-  const [batchSize, setBatchSize] = useState(1000);
+  const [selectAllMode, setSelectAllMode] = useState(false);
+  const [batchSize, setBatchSize] = useState(50);
+  const [page, setPage] = useState(1);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  useEffect(() => {
-    loadAbstracts();
-  }, []);
+  // Create SWR key from filter params and page
+  const swrKey = useMemo(
+    () => [
+      "unassigned-abstracts",
+      {
+        limit: batchSize,
+        page,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      },
+    ],
+    [batchSize, page, startDate, endDate],
+  );
 
-  const loadAbstracts = useCallback(async () => {
-    setLoading(true);
-    const result = await getPrintableAbstracts({
-      limit: batchSize,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
-    });
-    setAbstracts(result as DeedAbstract[]);
-    setLoading(false);
-  }, [batchSize, startDate, endDate]);
+  // Use SWR for data fetching with automatic caching and deduplication
+  const {
+    data: result = { data: [], count: 0 },
+    isLoading,
+    mutate,
+  } = useSWR(
+    swrKey,
+    ([_key, params]) =>
+      getPrintableAbstracts(
+        params as Parameters<typeof getPrintableAbstracts>[0],
+      ),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
+
+  const abstracts = result.data || [];
+  const totalCount = result.count || 0;
+  const totalPages = Math.ceil(totalCount / batchSize);
 
   const handleSearch = useCallback(() => {
     setSelectedIds(new Set());
-    loadAbstracts();
-  }, [loadAbstracts]);
+    setSelectAllMode(false);
+    setPage(1);
+    mutate();
+  }, [mutate]);
 
   const toggleSelectAll = useCallback(() => {
-    setSelectedIds((prev) => {
-      if (prev.size === abstracts.length) {
-        return new Set();
-      } else {
-        return new Set(abstracts.map((a) => a.id));
-      }
-    });
-  }, [abstracts]);
+    setSelectAllMode((prev) => !prev);
+    if (!selectAllMode) {
+      // Switching to select all mode
+      setSelectedIds(new Set(abstracts.map((a) => a.id)));
+    } else {
+      // Switching to select current page mode
+      setSelectedIds(new Set());
+    }
+  }, [abstracts, selectAllMode]);
 
   const toggleSelect = useCallback((id: number) => {
     setSelectedIds((prev) => {
@@ -91,16 +114,20 @@ export default function AbstractBatchSelector({
       }
       return newSet;
     });
+    setSelectAllMode(false);
   }, []);
 
   const handleContinue = useCallback(() => {
-    if (selectedIds.size > 0) {
+    if (selectAllMode) {
+      // If selecting all, pass special value to indicate all unassigned abstracts
+      onNext([-1]); // -1 indicates "all abstracts" to the calling component
+    } else if (selectedIds.size > 0) {
       onNext(Array.from(selectedIds));
     }
-  }, [selectedIds, onNext]);
+  }, [selectedIds, selectAllMode, onNext]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Filter Options</CardTitle>
@@ -108,14 +135,17 @@ export default function AbstractBatchSelector({
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="batchSize">Batch Size (Max)</Label>
+              <Label htmlFor="batchSize">Items Per Page</Label>
               <Input
                 id="batchSize"
                 type="number"
-                min={1}
-                max={10000}
+                min={10}
+                max={500}
                 value={batchSize}
-                onChange={(e) => setBatchSize(parseInt(e.target.value) || 1000)}
+                onChange={(e) => {
+                  setBatchSize(parseInt(e.target.value) || 50);
+                  setPage(1);
+                }}
               />
             </div>
             <div className="space-y-2">
@@ -145,27 +175,46 @@ export default function AbstractBatchSelector({
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>
-            Available Abstracts ({abstracts.length})
-            {selectedIds.size > 0 && (
-              <span className="ml-2 text-sm font-normal text-gray-600">
-                — {selectedIds.size} selected
-              </span>
+          <div>
+            <CardTitle>
+              Available Abstracts ({totalCount.toLocaleString()})
+              {selectedIds.size > 0 && (
+                <span className="ml-2 text-sm font-normal text-gray-600">
+                  — {selectedIds.size} selected
+                </span>
+              )}
+            </CardTitle>
+            {selectAllMode && (
+              <p className="text-sm text-green-600 mt-1">
+                ✓ All {totalCount.toLocaleString()} abstracts will be assigned
+              </p>
             )}
-          </CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleSelectAll}
-            disabled={abstracts.length === 0}
-          >
-            {selectedIds.size === abstracts.length
-              ? "Deselect All"
-              : "Select All"}
-          </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleSelectAll}
+              disabled={abstracts.length === 0}
+              className={selectAllMode ? "border-green-500 text-green-600" : ""}
+            >
+              {selectAllMode ? "Clear All" : "Select All"}
+            </Button>
+            {!selectAllMode && abstracts.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedIds(new Set(abstracts.map((a) => a.id)));
+                }}
+              >
+                Select Page
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {isLoading ? (
             <div className="py-12 text-center">
               <div className="animate-pulse text-gray-500">
                 Loading abstracts...
@@ -176,70 +225,108 @@ export default function AbstractBatchSelector({
               No unassigned abstracts found. Try adjusting your filters.
             </div>
           ) : (
-            <div className="max-h-[500px] overflow-y-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={
-                          selectedIds.size === abstracts.length &&
-                          abstracts.length > 0
-                        }
-                        onCheckedChange={toggleSelectAll}
-                      />
-                    </TableHead>
-                    <TableHead>Daily #</TableHead>
-                    <TableHead>Date Filed</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Grantor</TableHead>
-                    <TableHead>Grantee</TableHead>
-                    <TableHead className="text-right">Consideration</TableHead>
-                    <TableHead>Transfer</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {abstracts.map((abstract) => (
-                    <TableRow
-                      key={abstract.id}
-                      className={
-                        selectedIds.has(abstract.id) ? "bg-blue-50" : ""
-                      }
-                    >
-                      <TableCell>
+            <>
+              <div className="max-h-[500px] overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">
                         <Checkbox
-                          checked={selectedIds.has(abstract.id)}
-                          onCheckedChange={() => toggleSelect(abstract.id)}
+                          checked={
+                            selectAllMode ||
+                            (selectedIds.size === abstracts.length &&
+                              abstracts.length > 0)
+                          }
+                          onCheckedChange={toggleSelectAll}
                         />
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {abstract.daily_number || "—"}
-                      </TableCell>
-                      <TableCell>{formatDate(abstract.date_filed)}</TableCell>
-                      <TableCell className="text-sm">
-                        {abstract.type_of_conveyance || "—"}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {abstract.grantor_name || "—"}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {abstract.grantee_name || "—"}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrency(abstract.consideration_amount)}
-                      </TableCell>
-                      <TableCell>
-                        {abstract.is_transfer ? (
-                          <Badge variant="default">Yes</Badge>
-                        ) : (
-                          <Badge variant="outline">No</Badge>
-                        )}
-                      </TableCell>
+                      </TableHead>
+                      <TableHead>Daily #</TableHead>
+                      <TableHead>Date Filed</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Grantor</TableHead>
+                      <TableHead>Grantee</TableHead>
+                      <TableHead className="text-right">
+                        Consideration
+                      </TableHead>
+                      <TableHead>Transfer</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {abstracts.map((abstract) => (
+                      <TableRow
+                        key={abstract.id}
+                        className={
+                          selectAllMode || selectedIds.has(abstract.id)
+                            ? "bg-blue-50"
+                            : ""
+                        }
+                      >
+                        <TableCell>
+                          <Checkbox
+                            checked={
+                              selectAllMode || selectedIds.has(abstract.id)
+                            }
+                            onCheckedChange={() => toggleSelect(abstract.id)}
+                          />
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {abstract.daily_number || "—"}
+                        </TableCell>
+                        <TableCell>{formatDate(abstract.date_filed)}</TableCell>
+                        <TableCell className="text-sm">
+                          {abstract.type_of_conveyance || "—"}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {abstract.grantor_name || "—"}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {abstract.grantee_name || "—"}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(abstract.consideration_amount)}
+                        </TableCell>
+                        <TableCell>
+                          {abstract.is_transfer ? (
+                            <Badge variant="default">Yes</Badge>
+                          ) : (
+                            <Badge variant="outline">No</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                  <div className="text-sm text-gray-600">
+                    Page {page} of {totalPages}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                    >
+                      ← Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={page === totalPages}
+                    >
+                      Next →
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
@@ -247,11 +334,12 @@ export default function AbstractBatchSelector({
       <div className="flex justify-end">
         <Button
           onClick={handleContinue}
-          disabled={selectedIds.size === 0}
+          disabled={selectedIds.size === 0 && !selectAllMode}
           size="lg"
         >
-          Continue with {selectedIds.size} Abstract
-          {selectedIds.size !== 1 ? "s" : ""}
+          {selectAllMode
+            ? `Continue with all ${totalCount.toLocaleString()} Abstracts`
+            : `Continue with ${selectedIds.size} Abstract${selectedIds.size !== 1 ? "s" : ""}`}
         </Button>
       </div>
     </div>

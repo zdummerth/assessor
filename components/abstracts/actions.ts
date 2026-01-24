@@ -537,23 +537,55 @@ export async function removeAbstractsFromBook(
 
 export async function getPrintableAbstracts(params?: {
   limit?: number;
+  page?: number;
   startDate?: string;
   endDate?: string;
 }) {
   const supabase = await createClient();
+  const limit = params?.limit || 1000;
+  const page = params?.page || 1;
+  const rangeStart = (page - 1) * limit;
+  const rangeEnd = rangeStart + limit - 1;
+
+  const { data, error, count } = await supabase.rpc(
+    "get_printable_abstracts",
+    {
+      p_limit: limit,
+      p_start_date: params?.startDate || undefined,
+      p_end_date: params?.endDate || undefined,
+    },
+    { count: "exact" },
+  );
+
+  if (error) {
+    console.error("Error fetching printable abstracts:", error);
+    return { data: [], count: 0 };
+  }
+
+  // Apply client-side pagination to the fetched data
+  const paginatedData = (data || []).slice(rangeStart, rangeEnd + 1);
+
+  return { data: paginatedData, count: count || 0 };
+}
+
+export async function getAllPrintableAbstracts(params?: {
+  startDate?: string;
+  endDate?: string;
+}): Promise<number[]> {
+  const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("get_printable_abstracts", {
-    p_limit: params?.limit || 1000,
+    p_limit: 100000,
     p_start_date: params?.startDate || undefined,
     p_end_date: params?.endDate || undefined,
   });
 
   if (error) {
-    console.error("Error fetching printable abstracts:", error);
+    console.error("Error fetching all printable abstracts:", error);
     return [];
   }
 
-  return data || [];
+  return (data || []).map((item: any) => item.id);
 }
 
 export async function getNextBookNumber(): Promise<string> {

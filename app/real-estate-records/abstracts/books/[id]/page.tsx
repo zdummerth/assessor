@@ -2,19 +2,12 @@ import { getBook, getBookAbstracts } from "@/components/abstracts/actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Printer, Edit, Trash2, FolderOpen } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { ArrowLeft, Printer, FolderOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import CompactPagination from "@/components/ui/compact-pagination";
 import BookEditForm from "@/components/abstracts/ui/book-edit-form";
+import { BookAbstractsTable } from "@/components/abstracts/ui/book-abstracts-table";
+import { BookAbstractsWizard } from "@/components/abstracts/ui/book-abstracts-wizard";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -86,6 +79,7 @@ export default async function BookDetailsPage({
             </p>
           </div>
           <div className="flex gap-2">
+            <BookAbstractsWizard bookId={bookId} />
             <BookEditForm book={book} />
             <Link
               href={`/real-estate-records/abstracts/books/${book.id}/print`}
@@ -194,48 +188,7 @@ export default async function BookDetailsPage({
                 totalPages={totalPages}
                 currentPage={currentPage}
               />
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Daily #</TableHead>
-                    <TableHead>Date Filed</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Grantor</TableHead>
-                    <TableHead>Grantee</TableHead>
-                    <TableHead className="text-right">Consideration</TableHead>
-                    <TableHead>Transfer</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {abstracts.map((abstract: any) => (
-                    <TableRow key={abstract.id}>
-                      <TableCell className="font-mono text-sm">
-                        {abstract.daily_number || "—"}
-                      </TableCell>
-                      <TableCell>{formatDate(abstract.date_filed)}</TableCell>
-                      <TableCell className="text-sm">
-                        {abstract.type_of_conveyance || "—"}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {abstract.grantor_name || "—"}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {abstract.grantee_name || "—"}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrency(abstract.consideration_amount)}
-                      </TableCell>
-                      <TableCell>
-                        {abstract.is_transfer ? (
-                          <Badge variant="default">Yes</Badge>
-                        ) : (
-                          <Badge variant="outline">No</Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <BookAbstractsTable abstracts={abstracts} bookId={bookId} />
             </>
           )}
         </CardContent>
