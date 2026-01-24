@@ -1,0 +1,46 @@
+/* This file is used for formatting and then copy/pasted into style tag in printable abstracts */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  @page :right {
+    margin-top: 0.75in;
+    margin-bottom: 0.75in;
+    margin-left: 1.2in;
+    margin-right: 0.75in;
+
+    @top-left {
+      content: "Page " counter(page) " of " counter(pages);
+    }
+  }
+  @page :left {
+    margin-top: 0.75in;
+    margin-bottom: 0.55in;
+    margin-left: 0.75in;
+    margin-right: 1.2in;
+
+    @top-left {
+      content: "Page " counter(page) " of " counter(pages);
+    }
+  }
+
+  body {
+    background: white;
+    margin: 0;
+    padding: 0;
+    /* font-size: 200px !important; */
+  }
+
+  .print-container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .abstract-wrap {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
