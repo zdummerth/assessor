@@ -2,7 +2,12 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { DeedAbstractFormData, DeedAbstract, ActionState } from "./types";
+import type {
+  DeedAbstractFormData,
+  DeedAbstract,
+  DeedAbstractsResult,
+  ActionState,
+} from "./types";
 
 export async function getDeedAbstracts({
   limit = 20,
@@ -10,23 +15,41 @@ export async function getDeedAbstracts({
 }: {
   limit?: number;
   page?: number;
-}): Promise<DeedAbstract[]> {
+}): Promise<DeedAbstractsResult> {
   const rangeStart = (page - 1) * limit;
   const rangeEnd = rangeStart + limit - 1;
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("deed_abstracts")
-    .select("*")
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(rangeStart, rangeEnd);
 
   if (error) {
     console.error("Error fetching deed abstracts:", error);
-    return [];
+    return { data: [], totalCount: 0, error: error.message };
   }
 
-  return data || [];
+  return {
+    data: data || [],
+    totalCount: count || 0,
+  };
+}
+
+export async function getDeedAbstractsCount(): Promise<number> {
+  const supabase = await createClient();
+
+  const { count, error } = await supabase
+    .from("deed_abstracts")
+    .select("*", { count: "exact", head: true });
+
+  if (error) {
+    console.error("Error fetching deed abstracts count:", error);
+    return 0;
+  }
+
+  return count || 0;
 }
 
 export async function getDeedAbstract(
@@ -290,4 +313,317 @@ export async function unpublishDeedAbstract(id: number): Promise<ActionState> {
     success: true,
     message: "Deed abstract unpublished successfully",
   };
+}
+
+// ============================================================
+// BOOK ACTIONS
+// ============================================================
+
+export async function getBooks() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("get_books_with_stats");
+
+  if (error) {
+    console.error("Error fetching books:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function getBook(id: number) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("deed_abstract_books")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching book:", error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function getBookAbstracts(
+  bookId: number,
+  options?: { limit?: number; page?: number },
+) {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("deed_abstracts")
+    .select("*", { count: "exact" })
+    .eq("book_id", bookId)
+    .order("date_filed", { ascending: true });
+
+  // Apply pagination if options provided
+  if (options?.limit && options?.page) {
+    const rangeStart = (options.page - 1) * options.limit;
+    const rangeEnd = rangeStart + options.limit - 1;
+    query = query.range(rangeStart, rangeEnd);
+  }
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    console.error("Error fetching book abstracts:", error);
+    return { abstracts: [], count: 0 };
+  }
+
+  return { abstracts: data || [], count: count || 0 };
+}
+
+export async function createBook(
+  abstractIds: number[],
+  bookData: { book_title: string; saved_location?: string; notes?: string },
+): Promise<ActionState & { bookId?: number }> {
+  const supabase = await createClient();
+
+  // Get current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return {
+      success: false,
+      message: "You must be logged in to create a book",
+    };
+  }
+
+  // Create the book
+  const { data: book, error: bookError } = await supabase
+    .from("deed_abstract_books")
+    .insert({
+      book_title: bookData.book_title,
+      printed_by_employee_user_id: user.id,
+      saved_location: bookData.saved_location || null,
+      notes: bookData.notes || null,
+    })
+    .select()
+    .single();
+
+  if (bookError || !book) {
+    console.error("Error creating book:", bookError);
+    return {
+      success: false,
+      message: "Failed to create book",
+    };
+  }
+
+  // Assign abstracts to the book
+  const { data: assignResult, error: assignError } = await supabase.rpc(
+    "assign_abstracts_to_book",
+    {
+      p_abstract_ids: abstractIds,
+      p_book_id: book.id,
+    },
+  );
+
+  if (assignError) {
+    console.error("Error assigning abstracts to book:", assignError);
+    // Rollback: delete the book
+    await supabase.from("deed_abstract_books").delete().eq("id", book.id);
+    return {
+      success: false,
+      message: "Failed to assign abstracts to book",
+    };
+  }
+
+  revalidatePath("/real-estate-records/abstracts");
+  revalidatePath("/real-estate-records/abstracts/books");
+
+  return {
+    success: true,
+    message: `Book created successfully with ${assignResult} abstracts`,
+    bookId: book.id,
+  };
+}
+
+export async function updateBook(
+  bookId: number,
+  updateData: { book_title?: string; saved_location?: string; notes?: string },
+): Promise<ActionState> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("deed_abstract_books")
+    .update({
+      ...updateData,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Error updating book:", error);
+    return {
+      success: false,
+      message: "Failed to update book",
+    };
+  }
+
+  revalidatePath("/real-estate-records/abstracts/books");
+  revalidatePath(`/real-estate-records/abstracts/books/${bookId}`);
+
+  return {
+    success: true,
+    message: "Book updated successfully",
+  };
+}
+
+export async function deleteBook(bookId: number): Promise<ActionState> {
+  const supabase = await createClient();
+
+  // Check if book has abstracts
+  const { count, error: countError } = await supabase
+    .from("deed_abstracts")
+    .select("*", { count: "exact", head: true })
+    .eq("book_id", bookId);
+
+  if (countError) {
+    console.error("Error checking book abstracts:", countError);
+    return {
+      success: false,
+      message: "Failed to check book abstracts",
+    };
+  }
+
+  if (count && count > 0) {
+    return {
+      success: false,
+      message: `Cannot delete book with ${count} assigned abstracts. Remove abstracts first.`,
+    };
+  }
+
+  const { error } = await supabase
+    .from("deed_abstract_books")
+    .delete()
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Error deleting book:", error);
+    return {
+      success: false,
+      message: "Failed to delete book",
+    };
+  }
+
+  revalidatePath("/real-estate-records/abstracts/books");
+
+  return {
+    success: true,
+    message: "Book deleted successfully",
+  };
+}
+
+export async function assignAbstractsToBook(
+  abstractIds: number[],
+  bookId: number,
+): Promise<ActionState> {
+  const supabase = await createClient();
+
+  const { data: count, error } = await supabase.rpc(
+    "assign_abstracts_to_book",
+    {
+      p_abstract_ids: abstractIds,
+      p_book_id: bookId,
+    },
+  );
+
+  if (error) {
+    console.error("Error assigning abstracts to book:", error);
+    return {
+      success: false,
+      message: "Failed to assign abstracts to book",
+    };
+  }
+
+  revalidatePath("/real-estate-records/abstracts");
+  revalidatePath("/real-estate-records/abstracts/books");
+  revalidatePath(`/real-estate-records/abstracts/books/${bookId}`);
+
+  return {
+    success: true,
+    message: `${count} abstracts assigned to book successfully`,
+  };
+}
+
+export async function removeAbstractsFromBook(
+  abstractIds: number[],
+): Promise<ActionState> {
+  const supabase = await createClient();
+
+  const { data: count, error } = await supabase.rpc(
+    "remove_abstracts_from_book",
+    {
+      p_abstract_ids: abstractIds,
+    },
+  );
+
+  if (error) {
+    console.error("Error removing abstracts from book:", error);
+    return {
+      success: false,
+      message: "Failed to remove abstracts from book",
+    };
+  }
+
+  revalidatePath("/real-estate-records/abstracts");
+  revalidatePath("/real-estate-records/abstracts/books");
+
+  return {
+    success: true,
+    message: `${count} abstracts removed from book successfully`,
+  };
+}
+
+export async function getPrintableAbstracts(params?: {
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+}) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("get_printable_abstracts", {
+    p_limit: params?.limit || 1000,
+    p_start_date: params?.startDate || undefined,
+    p_end_date: params?.endDate || undefined,
+  });
+
+  if (error) {
+    console.error("Error fetching printable abstracts:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function getNextBookNumber(): Promise<string> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("deed_abstract_books")
+    .select("book_title")
+    .order("id", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data) {
+    return "1";
+  }
+
+  // Try to parse as number and increment
+  const currentNumber = parseInt(data.book_title);
+  if (!isNaN(currentNumber)) {
+    return (currentNumber + 1).toString();
+  }
+
+  // If not a number, return empty for user to fill in
+  return "";
 }

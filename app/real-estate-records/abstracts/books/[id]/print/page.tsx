@@ -1,0 +1,27 @@
+import { getBook, getBookAbstracts } from "../../../actions";
+import { notFound } from "next/navigation";
+import { PrintableAbstracts } from "../../../print/printable-abstracts";
+
+export default async function BookPrintPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const bookId = parseInt(id);
+  const [book, { abstracts }] = await Promise.all([
+    getBook(bookId),
+    getBookAbstracts(bookId), // No pagination - gets all abstracts
+  ]);
+
+  if (!book || abstracts.length === 0) {
+    notFound();
+  }
+
+  return (
+    <PrintableAbstracts
+      deedAbstracts={abstracts}
+      bookTitle={bookId.toString()}
+    />
+  );
+}

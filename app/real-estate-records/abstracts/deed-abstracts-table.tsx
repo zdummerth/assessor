@@ -45,6 +45,7 @@ export function DeedAbstractsTable({ deedAbstracts }: DeedAbstractsTableProps) {
             <TableHead>Consideration</TableHead>
             <TableHead>City Block</TableHead>
             <TableHead>Transfer</TableHead>
+            <TableHead>Book</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -53,7 +54,7 @@ export function DeedAbstractsTable({ deedAbstracts }: DeedAbstractsTableProps) {
           {deedAbstracts.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={10}
+                colSpan={11}
                 className="text-center text-muted-foreground"
               >
                 No deed abstracts found. Create one to get started.
@@ -82,6 +83,15 @@ export function DeedAbstractsTable({ deedAbstracts }: DeedAbstractsTableProps) {
                     <Badge variant="default">Transfer</Badge>
                   ) : (
                     <Badge variant="outline">Non-Transfer</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {deedAbstract.book_id ? (
+                    <Badge variant="secondary">
+                      Book {deedAbstract.book_id}
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">—</span>
                   )}
                 </TableCell>
                 <TableCell>

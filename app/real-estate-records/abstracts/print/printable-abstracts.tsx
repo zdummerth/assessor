@@ -4,10 +4,13 @@ import type { DeedAbstract } from "../types";
 
 type PrintableAbstractsProps = {
   deedAbstracts: DeedAbstract[];
+  bookTitle?: string;
 };
 
-export function PrintableAbstracts({ deedAbstracts }: PrintableAbstractsProps) {
-  const bookTitle = "Book 1875";
+export function PrintableAbstracts({
+  deedAbstracts,
+  bookTitle,
+}: PrintableAbstractsProps) {
   const formatCurrency = (cents: number | null) => {
     if (cents === null) return "—";
     return new Intl.NumberFormat("en-US", {
@@ -83,10 +86,10 @@ export function PrintableAbstracts({ deedAbstracts }: PrintableAbstractsProps) {
             Print Abstracts
           </button>
           <a
-            href="/real-estate-records/abstracts"
+            href={`/real-estate-records/abstracts/books/${bookTitle ? encodeURIComponent(bookTitle) : ""}`}
             className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100"
           >
-            Back to List
+            Back to Book Page
           </a>
         </div>
 

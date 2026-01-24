@@ -1668,8 +1668,50 @@ export type Database = {
         }
         Relationships: []
       }
+      deed_abstract_books: {
+        Row: {
+          book_title: string
+          created_at: string
+          id: number
+          notes: string | null
+          printed_at: string
+          printed_by_employee_user_id: string
+          saved_location: string | null
+          updated_at: string
+        }
+        Insert: {
+          book_title: string
+          created_at?: string
+          id?: number
+          notes?: string | null
+          printed_at?: string
+          printed_by_employee_user_id: string
+          saved_location?: string | null
+          updated_at?: string
+        }
+        Update: {
+          book_title?: string
+          created_at?: string
+          id?: number
+          notes?: string | null
+          printed_at?: string
+          printed_by_employee_user_id?: string
+          saved_location?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deed_abstract_books_printed_by_employee_user_id_fkey"
+            columns: ["printed_by_employee_user_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       deed_abstracts: {
         Row: {
+          book_id: number | null
           city_block: string | null
           consideration_amount: number | null
           created_at: string
@@ -1690,6 +1732,7 @@ export type Database = {
           type_of_conveyance: string | null
         }
         Insert: {
+          book_id?: number | null
           city_block?: string | null
           consideration_amount?: number | null
           created_at?: string
@@ -1710,6 +1753,7 @@ export type Database = {
           type_of_conveyance?: string | null
         }
         Update: {
+          book_id?: number | null
           city_block?: string | null
           consideration_amount?: number | null
           created_at?: string
@@ -1730,6 +1774,13 @@ export type Database = {
           type_of_conveyance?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "deed_abstracts_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "deed_abstract_books"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deed_abstracts_created_by_employee_user_id_fkey"
             columns: ["created_by_employee_user_id"]
@@ -7774,6 +7825,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      assign_abstracts_to_book: {
+        Args: { p_abstract_ids: number[]; p_book_id: number }
+        Returns: number
+      }
       assign_devnet_review: {
         Args: {
           p_assigned_by_employee_id?: number
@@ -7963,6 +8018,25 @@ export type Database = {
           subject_parcel_id: number
           total_finished_area: number
           total_unfinished_area: number
+        }[]
+      }
+      get_book_stats: { Args: { p_book_id: number }; Returns: Json }
+      get_books_with_stats: {
+        Args: never
+        Returns: {
+          abstract_count: number
+          book_title: string
+          created_at: string
+          earliest_date_filed: string
+          id: number
+          latest_date_filed: string
+          notes: string
+          printed_at: string
+          printed_by_employee_name: string
+          printed_by_employee_user_id: string
+          saved_location: string
+          total_consideration: number
+          updated_at: string
         }[]
       }
       get_buildings_as_of_date_v2: {
@@ -8395,6 +8469,29 @@ export type Database = {
           review_id: number
           snapshot_date: string
           tax_status: string
+        }[]
+      }
+      get_printable_abstracts: {
+        Args: { p_end_date?: string; p_limit?: number; p_start_date?: string }
+        Returns: {
+          city_block: string
+          consideration_amount: number
+          created_at: string
+          created_by_employee_user_id: string
+          daily_number: number
+          date_filed: string
+          date_of_deed: string
+          grantee_address: string
+          grantee_name: string
+          grantor_address: string
+          grantor_name: string
+          id: number
+          is_transfer: boolean
+          legal_description: string
+          published_at: string
+          stamps: string
+          title_company: string
+          type_of_conveyance: string
         }[]
       }
       get_ratios: {
@@ -9181,6 +9278,10 @@ export type Database = {
         Returns: boolean
       }
       publish_review: { Args: { p_review_id: number }; Returns: undefined }
+      remove_abstracts_from_book: {
+        Args: { p_abstract_ids: number[] }
+        Returns: number
+      }
       schedule_value_recalculation_v2: {
         Args: {
           p_assessment_cycle_id: number
