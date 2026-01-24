@@ -1,6 +1,6 @@
-import { getBook, getBookAbstracts } from "../../../actions";
+import { getBook, getBookAbstracts } from "@/components/abstracts/actions";
 import { notFound } from "next/navigation";
-import { PrintableAbstracts } from "../../../print/printable-abstracts";
+import { PrintableAbstracts } from "@/components/abstracts/print/printable-abstracts";
 
 export default async function BookPrintPage({
   params,

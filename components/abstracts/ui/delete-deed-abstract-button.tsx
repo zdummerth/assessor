@@ -13,8 +13,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteDeedAbstract } from "./actions";
-import type { DeedAbstract } from "./types";
+import { deleteDeedAbstract } from "../actions";
+import type { DeedAbstract } from "../types";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { BookFormData } from "@/app/real-estate-records/abstracts/types";
+import type { BookFormData } from "../types";
 
 interface BookConfigFormProps {
   selectedCount: number;

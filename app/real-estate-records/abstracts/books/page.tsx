@@ -1,4 +1,4 @@
-import { getBooks } from "../actions";
+import { getBooks } from "@/components/abstracts/actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, Printer, FolderOpen } from "lucide-react";

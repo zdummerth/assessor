@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
-import type { ActionState, DeedAbstract } from "./types";
-import { CONVEYANCE_TYPES } from "./types";
+import type { ActionState, DeedAbstract } from "../types";
+import { CONVEYANCE_TYPES } from "../types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

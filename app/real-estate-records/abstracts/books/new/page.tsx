@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import BookPrintWizard from "@/components/abstracts/book-print-wizard";
+import BookPrintWizard from "@/components/abstracts/ui/book-print-wizard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";

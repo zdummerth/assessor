@@ -4,17 +4,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
-import AbstractBatchSelector from "@/components/abstracts/abstract-batch-selector";
-import BookConfigForm from "@/components/abstracts/book-config-form";
-import type {
-  DeedAbstract,
-  BookFormData,
-} from "@/app/real-estate-records/abstracts/types";
-import {
-  getNextBookNumber,
-  getBookAbstracts,
-} from "@/app/real-estate-records/abstracts/actions";
-import { createClient } from "@/lib/supabase/client";
+import AbstractBatchSelector from "./abstract-batch-selector";
+import BookConfigForm from "./book-config-form";
+import type { DeedAbstract, BookFormData } from "../types";
+import { getNextBookNumber, getBookAbstracts } from "../actions";
+import { createBook } from "../actions";
 
 interface BookPrintWizardProps {
   onComplete: (bookId: number) => void;
@@ -42,10 +36,6 @@ function BookPrintWizard({ onComplete }: BookPrintWizardProps) {
     setLoading(true);
 
     try {
-      // Create the book via server action
-      const { createBook } = await import(
-        "@/app/real-estate-records/abstracts/actions"
-      );
       const result = await createBook(selectedIds, config);
 
       if (!result.success) {

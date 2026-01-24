@@ -1,4 +1,4 @@
-import { getBook, getBookAbstracts } from "../../actions";
+import { getBook, getBookAbstracts } from "@/components/abstracts/actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import AbstractsPagination from "../../abstracts-pagination";
-import BookEditForm from "@/components/abstracts/book-edit-form";
+import CompactPagination from "@/components/ui/compact-pagination";
+import BookEditForm from "@/components/abstracts/ui/book-edit-form";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -190,6 +190,10 @@ export default async function BookDetailsPage({
             </div>
           ) : (
             <>
+              <CompactPagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+              />
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -232,7 +236,6 @@ export default async function BookDetailsPage({
                   ))}
                 </TableBody>
               </Table>
-              <AbstractsPagination totalPages={totalPages} />
             </>
           )}
         </CardContent>

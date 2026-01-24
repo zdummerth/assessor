@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { DeedAbstract } from "../../app/real-estate-records/abstracts/types";
-import { getPrintableAbstracts } from "../../app/real-estate-records/abstracts/actions";
+import type { DeedAbstract } from "../types";
+import { getPrintableAbstracts } from "../actions";
 import { Badge } from "@/components/ui/badge";
 
 interface AbstractBatchSelectorProps {

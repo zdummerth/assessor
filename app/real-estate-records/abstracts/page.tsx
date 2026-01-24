@@ -1,17 +1,11 @@
-import { getDeedAbstracts } from "./actions";
-import { DeedAbstractsTable } from "./deed-abstracts-table";
-import { DeedAbstractDialog } from "./deed-abstract-dialog";
+import { getDeedAbstracts } from "@/components/abstracts/actions";
+import { DeedAbstractsTable } from "@/components/abstracts/ui/deed-abstracts-table";
+import { DeedAbstractDialog } from "@/components/abstracts/ui/deed-abstract-dialog";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Printer, Book } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import AbstractsPagination from "./abstracts-pagination";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import CompactPagination from "@/components/ui/compact-pagination";
 import { Suspense } from "react";
 import Loading from "../loading";
 
@@ -24,8 +18,8 @@ async function ServerFetcher({ limit, page }: { limit: number; page: number }) {
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
   return (
     <>
+      <CompactPagination totalPages={totalPages} currentPage={page} />
       <DeedAbstractsTable deedAbstracts={deedAbstracts} />
-      <AbstractsPagination totalPages={totalPages} />
     </>
   );
 }

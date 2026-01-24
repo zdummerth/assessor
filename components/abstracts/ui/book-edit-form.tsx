@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Edit } from "lucide-react";
-import { updateBook } from "@/app/real-estate-records/abstracts/actions";
+import { updateBook } from "../actions";
 import { useRouter } from "next/navigation";
 
 interface BookEditFormProps {

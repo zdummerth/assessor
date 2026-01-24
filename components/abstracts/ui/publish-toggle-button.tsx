@@ -2,8 +2,8 @@
 
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { publishDeedAbstract, unpublishDeedAbstract } from "./actions";
-import type { DeedAbstract } from "./types";
+import { publishDeedAbstract, unpublishDeedAbstract } from "../actions";
+import type { DeedAbstract } from "../types";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 

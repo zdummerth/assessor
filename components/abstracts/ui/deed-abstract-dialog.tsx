@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DeedAbstractForm } from "./deed-abstract-form";
-import { createDeedAbstract, updateDeedAbstract } from "./actions";
-import type { DeedAbstract } from "./types";
+import { createDeedAbstract, updateDeedAbstract } from "../actions";
+import type { DeedAbstract } from "../types";
 import { Plus, Pencil } from "lucide-react";
 
 type DeedAbstractDialogProps = {

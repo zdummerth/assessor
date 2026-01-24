@@ -1,6 +1,6 @@
 "use client";
 
-import type { DeedAbstract } from "./types";
+import type { DeedAbstract } from "../types";
 import {
   Table,
   TableBody,
