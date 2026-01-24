@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,9 +26,14 @@ export function DeedAbstractDialog({
 }: DeedAbstractDialogProps) {
   const [open, setOpen] = useState(false);
 
-  const action = deedAbstract
-    ? updateDeedAbstract.bind(null, deedAbstract.id)
-    : createDeedAbstract;
+  // Memoize action to prevent recreation on every render
+  const action = useMemo(
+    () =>
+      deedAbstract
+        ? updateDeedAbstract.bind(null, deedAbstract.id)
+        : createDeedAbstract,
+    [deedAbstract],
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

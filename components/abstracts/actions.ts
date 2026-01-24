@@ -2,12 +2,101 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { cache } from "react";
 import type {
   DeedAbstractFormData,
   DeedAbstract,
   DeedAbstractsResult,
   ActionState,
 } from "./types";
+
+// ============================================================
+// HELPER FUNCTIONS
+// ============================================================
+
+/**
+ * Extract and validate deed abstract data from FormData
+ */
+function extractDeedAbstractFormData(formData: FormData): DeedAbstractFormData {
+  return {
+    date_filed: formData.get("date_filed") as string | null,
+    date_of_deed: formData.get("date_of_deed") as string | null,
+    daily_number: formData.get("daily_number")
+      ? parseInt(formData.get("daily_number") as string)
+      : null,
+    type_of_conveyance: formData.get("type_of_conveyance") as string | null,
+    grantor_name: formData.get("grantor_name") as string | null,
+    grantor_address: formData.get("grantor_address") as string | null,
+    grantee_name: formData.get("grantee_name") as string | null,
+    grantee_address: formData.get("grantee_address") as string | null,
+    consideration_amount: formData.get("consideration_amount")
+      ? Math.round(
+          parseFloat(formData.get("consideration_amount") as string) * 100,
+        )
+      : null,
+    stamps: formData.get("stamps") as string | null,
+    city_block: formData.get("city_block") as string | null,
+    legal_description: formData.get("legal_description") as string | null,
+    title_company: formData.get("title_company") as string | null,
+    is_transfer: formData.get("is_transfer") === "on",
+  };
+}
+
+/**
+ * Get authenticated user or return error state
+ */
+async function getAuthenticatedUser(): Promise<
+  { user: { id: string } } | ActionState
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return {
+      success: false,
+      message: "You must be logged in to perform this action",
+    };
+  }
+
+  return { user };
+}
+
+// ============================================================
+// READ OPERATIONS (with React.cache for deduplication)
+// ============================================================
+
+const getDeedAbstractsCached = cache(
+  async ({
+    limit = 20,
+    page = 1,
+  }: {
+    limit?: number;
+    page?: number;
+  }): Promise<DeedAbstractsResult> => {
+    const rangeStart = (page - 1) * limit;
+    const rangeEnd = rangeStart + limit - 1;
+    const supabase = await createClient();
+
+    const { data, error, count } = await supabase
+      .from("deed_abstracts")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(rangeStart, rangeEnd);
+
+    if (error) {
+      console.error("Error fetching deed abstracts:", error);
+      return { data: [], totalCount: 0, error: error.message };
+    }
+
+    return {
+      data: data || [],
+      totalCount: count || 0,
+    };
+  },
+);
 
 export async function getDeedAbstracts({
   limit = 20,
@@ -16,25 +105,7 @@ export async function getDeedAbstracts({
   limit?: number;
   page?: number;
 }): Promise<DeedAbstractsResult> {
-  const rangeStart = (page - 1) * limit;
-  const rangeEnd = rangeStart + limit - 1;
-  const supabase = await createClient();
-
-  const { data, error, count } = await supabase
-    .from("deed_abstracts")
-    .select("*", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range(rangeStart, rangeEnd);
-
-  if (error) {
-    console.error("Error fetching deed abstracts:", error);
-    return { data: [], totalCount: 0, error: error.message };
-  }
-
-  return {
-    data: data || [],
-    totalCount: count || 0,
-  };
+  return getDeedAbstractsCached({ limit, page });
 }
 
 export async function getDeedAbstract(
@@ -60,49 +131,16 @@ export async function createDeedAbstract(
   prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const authResult = await getAuthenticatedUser();
+  if ("success" in authResult) return authResult;
+
   const supabase = await createClient();
-
-  // Get current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return {
-      success: false,
-      message: "You must be logged in to create a deed abstract",
-    };
-  }
-
-  // Extract and validate form data
-  const data: DeedAbstractFormData = {
-    date_filed: formData.get("date_filed") as string | null,
-    date_of_deed: formData.get("date_of_deed") as string | null,
-    daily_number: formData.get("daily_number")
-      ? parseInt(formData.get("daily_number") as string)
-      : null,
-    type_of_conveyance: formData.get("type_of_conveyance") as string | null,
-    grantor_name: formData.get("grantor_name") as string | null,
-    grantor_address: formData.get("grantor_address") as string | null,
-    grantee_name: formData.get("grantee_name") as string | null,
-    grantee_address: formData.get("grantee_address") as string | null,
-    consideration_amount: formData.get("consideration_amount")
-      ? Math.round(
-          parseFloat(formData.get("consideration_amount") as string) * 100,
-        )
-      : null,
-    stamps: formData.get("stamps") as string | null,
-    city_block: formData.get("city_block") as string | null,
-    legal_description: formData.get("legal_description") as string | null,
-    title_company: formData.get("title_company") as string | null,
-    is_transfer: formData.get("is_transfer") === "on",
-  };
+  const data = extractDeedAbstractFormData(formData);
 
   // Insert into database
   const { error } = await supabase.from("deed_abstracts").insert({
     ...data,
-    created_by_employee_user_id: user.id,
+    created_by_employee_user_id: authResult.user.id,
   });
 
   if (error) {
@@ -126,44 +164,11 @@ export async function updateDeedAbstract(
   prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const authResult = await getAuthenticatedUser();
+  if ("success" in authResult) return authResult;
+
   const supabase = await createClient();
-
-  // Get current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return {
-      success: false,
-      message: "You must be logged in to update a deed abstract",
-    };
-  }
-
-  // Extract and validate form data
-  const data: DeedAbstractFormData = {
-    date_filed: formData.get("date_filed") as string | null,
-    date_of_deed: formData.get("date_of_deed") as string | null,
-    daily_number: formData.get("daily_number")
-      ? parseInt(formData.get("daily_number") as string)
-      : null,
-    type_of_conveyance: formData.get("type_of_conveyance") as string | null,
-    grantor_name: formData.get("grantor_name") as string | null,
-    grantor_address: formData.get("grantor_address") as string | null,
-    grantee_name: formData.get("grantee_name") as string | null,
-    grantee_address: formData.get("grantee_address") as string | null,
-    consideration_amount: formData.get("consideration_amount")
-      ? Math.round(
-          parseFloat(formData.get("consideration_amount") as string) * 100,
-        )
-      : null,
-    stamps: formData.get("stamps") as string | null,
-    city_block: formData.get("city_block") as string | null,
-    legal_description: formData.get("legal_description") as string | null,
-    title_company: formData.get("title_company") as string | null,
-    is_transfer: formData.get("is_transfer") === "on",
-  };
+  const data = extractDeedAbstractFormData(formData);
 
   // Update database
   const { error } = await supabase
@@ -188,20 +193,10 @@ export async function updateDeedAbstract(
 }
 
 export async function deleteDeedAbstract(id: number): Promise<ActionState> {
+  const authResult = await getAuthenticatedUser();
+  if ("success" in authResult) return authResult;
+
   const supabase = await createClient();
-
-  // Get current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return {
-      success: false,
-      message: "You must be logged in to delete a deed abstract",
-    };
-  }
 
   // Delete from database (trigger will prevent if published)
   const { error } = await supabase.from("deed_abstracts").delete().eq("id", id);
@@ -225,20 +220,10 @@ export async function deleteDeedAbstract(id: number): Promise<ActionState> {
 }
 
 export async function publishDeedAbstract(id: number): Promise<ActionState> {
+  const authResult = await getAuthenticatedUser();
+  if ("success" in authResult) return authResult;
+
   const supabase = await createClient();
-
-  // Get current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return {
-      success: false,
-      message: "You must be logged in to publish a deed abstract",
-    };
-  }
 
   // Update published_at
   const { error } = await supabase
@@ -263,20 +248,10 @@ export async function publishDeedAbstract(id: number): Promise<ActionState> {
 }
 
 export async function unpublishDeedAbstract(id: number): Promise<ActionState> {
+  const authResult = await getAuthenticatedUser();
+  if ("success" in authResult) return authResult;
+
   const supabase = await createClient();
-
-  // Get current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return {
-      success: false,
-      message: "You must be logged in to unpublish a deed abstract",
-    };
-  }
 
   // Update published_at to null
   const { error } = await supabase
@@ -304,7 +279,7 @@ export async function unpublishDeedAbstract(id: number): Promise<ActionState> {
 // BOOK ACTIONS
 // ============================================================
 
-export async function getBooks() {
+const getBooksCached = cache(async () => {
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("get_books_with_stats");
@@ -315,6 +290,10 @@ export async function getBooks() {
   }
 
   return data || [];
+});
+
+export async function getBooks() {
+  return getBooksCached();
 }
 
 export async function getBook(id: number) {
@@ -367,27 +346,17 @@ export async function createBook(
   abstractIds: number[],
   bookData: { book_title: string; saved_location?: string; notes?: string },
 ): Promise<ActionState & { bookId?: number }> {
+  const authResult = await getAuthenticatedUser();
+  if ("success" in authResult) return authResult;
+
   const supabase = await createClient();
-
-  // Get current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return {
-      success: false,
-      message: "You must be logged in to create a book",
-    };
-  }
 
   // Create the book
   const { data: book, error: bookError } = await supabase
     .from("deed_abstract_books")
     .insert({
       book_title: bookData.book_title,
-      printed_by_employee_user_id: user.id,
+      printed_by_employee_user_id: authResult.user.id,
       saved_location: bookData.saved_location || null,
       notes: bookData.notes || null,
     })
@@ -421,8 +390,8 @@ export async function createBook(
     };
   }
 
-  revalidatePath("/real-estate-records/abstracts");
-  revalidatePath("/real-estate-records/abstracts/books");
+  revalidatePath("/real-estate-records/abstracts", "page");
+  revalidatePath("/real-estate-records/abstracts/books", "page");
 
   return {
     success: true,
@@ -453,8 +422,7 @@ export async function updateBook(
     };
   }
 
-  revalidatePath("/real-estate-records/abstracts/books");
-  revalidatePath(`/real-estate-records/abstracts/books/${bookId}`);
+  revalidatePath("/real-estate-records/abstracts/books", "layout");
 
   return {
     success: true,
@@ -529,9 +497,8 @@ export async function assignAbstractsToBook(
     };
   }
 
-  revalidatePath("/real-estate-records/abstracts");
-  revalidatePath("/real-estate-records/abstracts/books");
-  revalidatePath(`/real-estate-records/abstracts/books/${bookId}`);
+  revalidatePath("/real-estate-records/abstracts", "page");
+  revalidatePath("/real-estate-records/abstracts/books", "layout");
 
   return {
     success: true,
@@ -559,8 +526,8 @@ export async function removeAbstractsFromBook(
     };
   }
 
-  revalidatePath("/real-estate-records/abstracts");
-  revalidatePath("/real-estate-records/abstracts/books");
+  revalidatePath("/real-estate-records/abstracts", "page");
+  revalidatePath("/real-estate-records/abstracts/books", "page");
 
   return {
     success: true,

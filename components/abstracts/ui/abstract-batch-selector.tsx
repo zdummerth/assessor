@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,11 +22,30 @@ interface AbstractBatchSelectorProps {
   onNext: (selectedIds: number[]) => void;
 }
 
+// Hoist formatters outside component to avoid recreation
+const formatCurrency = (cents: number | null) => {
+  if (cents === null) return "—";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(cents / 100);
+};
+
+const formatDate = (dateString: string | null) => {
+  if (!dateString) return "—";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+};
+
 export default function AbstractBatchSelector({
   onNext,
 }: AbstractBatchSelectorProps) {
   const [abstracts, setAbstracts] = useState<DeedAbstract[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  // Lazy state initialization
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
   const [loading, setLoading] = useState(true);
   const [batchSize, setBatchSize] = useState(1000);
   const [startDate, setStartDate] = useState("");
@@ -36,7 +55,7 @@ export default function AbstractBatchSelector({
     loadAbstracts();
   }, []);
 
-  const loadAbstracts = async () => {
+  const loadAbstracts = useCallback(async () => {
     setLoading(true);
     const result = await getPrintableAbstracts({
       limit: batchSize,
@@ -45,53 +64,40 @@ export default function AbstractBatchSelector({
     });
     setAbstracts(result as DeedAbstract[]);
     setLoading(false);
-  };
+  }, [batchSize, startDate, endDate]);
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setSelectedIds(new Set());
     loadAbstracts();
-  };
+  }, [loadAbstracts]);
 
-  const toggleSelectAll = () => {
-    if (selectedIds.size === abstracts.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(abstracts.map((a) => a.id)));
-    }
-  };
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      if (prev.size === abstracts.length) {
+        return new Set();
+      } else {
+        return new Set(abstracts.map((a) => a.id));
+      }
+    });
+  }, [abstracts]);
 
-  const toggleSelect = (id: number) => {
-    const newSet = new Set(selectedIds);
-    if (newSet.has(id)) {
-      newSet.delete(id);
-    } else {
-      newSet.add(id);
-    }
-    setSelectedIds(newSet);
-  };
+  const toggleSelect = useCallback((id: number) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }, []);
 
-  const handleContinue = () => {
+  const handleContinue = useCallback(() => {
     if (selectedIds.size > 0) {
       onNext(Array.from(selectedIds));
     }
-  };
-
-  const formatCurrency = (cents: number | null) => {
-    if (cents === null) return "—";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(cents / 100);
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "—";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  };
+  }, [selectedIds, onNext]);
 
   return (
     <div className="space-y-6">

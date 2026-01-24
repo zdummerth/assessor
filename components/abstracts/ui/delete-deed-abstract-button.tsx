@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -28,7 +28,7 @@ export function DeleteDeedAbstractButton({
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     startTransition(async () => {
       const result = await deleteDeedAbstract(deedAbstract.id);
       if (result.success) {
@@ -38,7 +38,7 @@ export function DeleteDeedAbstractButton({
         toast.error(result.message);
       }
     });
-  };
+  }, [deedAbstract.id]);
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>

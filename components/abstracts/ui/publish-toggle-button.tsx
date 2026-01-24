@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { publishDeedAbstract, unpublishDeedAbstract } from "../actions";
 import type { DeedAbstract } from "../types";
@@ -17,7 +17,7 @@ export function PublishToggleButton({
   const [isPending, startTransition] = useTransition();
   const isPublished = !!deedAbstract.published_at;
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     startTransition(async () => {
       const result = isPublished
         ? await unpublishDeedAbstract(deedAbstract.id)
@@ -29,7 +29,7 @@ export function PublishToggleButton({
         toast.error(result.message);
       }
     });
-  };
+  }, [isPublished, deedAbstract.id]);
 
   return (
     <Button

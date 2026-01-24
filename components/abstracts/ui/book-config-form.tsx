@@ -12,7 +12,7 @@ interface BookConfigFormProps {
   selectedCount: number;
   onNext: (data: BookFormData) => void;
   onBack: () => void;
-  suggestedBookNumber: number;
+  suggestedBookNumber: string;
   loading?: boolean;
 }
 
@@ -24,7 +24,7 @@ export default function BookConfigForm({
   loading = false,
 }: BookConfigFormProps) {
   const [formData, setFormData] = useState<BookFormData>({
-    book_title: suggestedBookNumber.toString(),
+    book_title: suggestedBookNumber,
     saved_location: "",
     notes: "",
   });

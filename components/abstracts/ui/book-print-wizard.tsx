@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
@@ -19,45 +19,47 @@ type WizardStep = "select" | "configure";
 function BookPrintWizard({ onComplete }: BookPrintWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>("select");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [nextBookNumber, setNextBookNumber] = useState<number>(1);
+  const [nextBookNumber, setNextBookNumber] = useState<string>("1");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    //@ts-expect-error check this out
     getNextBookNumber().then(setNextBookNumber);
   }, []);
 
-  const handleSelectNext = (ids: number[]) => {
+  const handleSelectNext = useCallback((ids: number[]) => {
     setSelectedIds(ids);
     setCurrentStep("configure");
-  };
+  }, []);
 
-  const handleConfigureNext = async (config: BookFormData) => {
-    setLoading(true);
+  const handleConfigureNext = useCallback(
+    async (config: BookFormData) => {
+      setLoading(true);
 
-    try {
-      const result = await createBook(selectedIds, config);
+      try {
+        const result = await createBook(selectedIds, config);
 
-      if (!result.success) {
-        alert(result.message);
+        if (!result.success) {
+          alert(result.message);
+          setLoading(false);
+          return;
+        }
+
+        if (result.bookId) {
+          // Navigate to the book details page
+          onComplete(result.bookId);
+        }
+      } catch (error) {
+        console.error("Error creating book:", error);
+        alert("Failed to create book");
         setLoading(false);
-        return;
       }
+    },
+    [selectedIds, onComplete],
+  );
 
-      if (result.bookId) {
-        // Navigate to the book details page
-        onComplete(result.bookId);
-      }
-    } catch (error) {
-      console.error("Error creating book:", error);
-      alert("Failed to create book");
-      setLoading(false);
-    }
-  };
-
-  const handleConfigureBack = () => {
+  const handleConfigureBack = useCallback(() => {
     setCurrentStep("select");
-  };
+  }, []);
 
   const steps = [
     { id: "select", label: "Select Abstracts" },
